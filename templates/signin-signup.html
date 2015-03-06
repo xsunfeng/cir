@@ -1,0 +1,104 @@
+<div id="sign-up-form" class="ui small modal">
+	<div class="header">Sign up</div>
+	<div class="content">
+		<form class="ui form">
+			<div class="ui error message"></div>
+			<div class="field required">
+				<div class="ui icon input">
+					<input type="text" name="email" placeholder="Email"><i class="at icon"></i>
+				</div>
+			</div>
+			<div class="two fields">
+				<div class="field required">
+					<input type="text" name="first-name" placeholder="First Name">
+				</div>
+				<div class="field required">
+					<input type="text" name="last-name" placeholder="Last Name">
+				</div>
+			</div>
+			<div class="field required">
+				<div class="ui icon input">
+					<input type="password" name="password" placeholder="Password"><i class="lock icon"></i>
+				</div>
+			</div>
+			<div class="field">
+				<label>Self introduction</label>
+				<textarea name="description" form="sign-up-form-content" placeholder="ex. your occupation, title, neighborhood info, hobby..."></textarea>
+			</div>
+			<div id="register-btn" class="ui submit primary button">Register</div>
+		</form>	
+	</div>
+</div>
+
+<div id="sign-in-form" class="ui small modal">
+	<div class="header">Sign in</div>
+	<div class="content">
+		<form class="ui form">
+			<div class="ui error message"></div>
+			<div class="field required">
+				<div class="ui icon input">
+					<input type="text" name="email" placeholder="Email"><i class="at icon"></i>
+				</div>
+			</div>
+			<div class="field required">
+				<div class="ui icon input">
+					<input type="password" name="password" placeholder="Password"><i class="lock icon"></i>
+				</div>
+			</div>
+			<div id="sign-in-btn" class="ui submit primary button">Log in</div>
+			<a href="{% url 'password_reset_recover' %}">Forgot password?</a>
+		</form>	
+	</div>
+</div>
+
+<div id="edit-profile-form" class="ui small modal">
+	<div class="header">Edit profile</div>
+	<div class="content">
+		<div class="ui tabular menu">
+			<a class="active item" data-tab="profile">Profile</a>
+			<a class="item" data-tab="password">Change password</a>
+		</div>
+		<div class="ui tab active" data-tab="profile">
+			<form class="ui form">
+				<div class="ui error message"></div>
+				<div id="email-field" class="field">
+					Email
+				</div>
+				<div class="two fields">
+					<div class="field required">
+						<input type="text" name="first-name" placeholder="First Name">
+					</div>
+					<div class="field required">
+						<input type="text" name="last-name" placeholder="Last Name">
+					</div>
+				</div>
+				<div class="field">
+					<label>Self introduction</label>
+					<textarea name="description" placeholder="ex. your occupation, title, neighborhood info, hobby..."></textarea>
+				</div>
+				<div id="edit-profile-submit-btn" class="ui submit primary button">Submit</div>
+			</form>	
+		</div>
+		<div class="ui tab" data-tab="password">
+			<form class="ui form">
+				<div class="ui error message"></div>
+				<div class="field required">
+					<div class="ui icon input">
+						<input type="password" name="old_password" placeholder="Old password"><i class="lock icon"></i>
+					</div>
+				</div>
+				<div class="field required">
+					<div class="ui icon input">
+						<input type="password" name="new_password" placeholder="New password"><i class="lock icon"></i>
+					</div>
+				</div>
+				<div class="field required">
+					<div class="ui icon input">
+						<input type="password" name="confirm_password" placeholder="Confirm password"><i class="lock icon"></i>
+					</div>
+				</div>
+				<div id="edit-profile-submit-btn" class="ui submit primary button">Submit</div>
+			</form>
+		</div>
+	</div>
+</div>

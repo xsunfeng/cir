@@ -1,0 +1,23 @@
+{% extends "base.html" %}{% load i18n %}
+
+{% block header %}
+<div class="ui fixed inverted main menu">
+	<div class="container">
+		<div class="title item">Password recovery</div>
+		<div class="right menu" style="display:inline-block">
+			<a href="/" class="item">Back to homepage</a>
+		</div>
+	</div>
+</div>
+{% endblock %}
+{% block body %}
+<div class="ui grid container">
+	<div class="row">
+		<div class="column">
+			<div class="ui message info">
+				{% blocktrans with ago=timestamp|timesince %}An email was sent to <strong>{{ email }}</strong> just now. Use the link in it to set a new password.{% endblocktrans %}
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

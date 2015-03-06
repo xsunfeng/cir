@@ -1,0 +1,37 @@
+<div class="ui accordion">
+    <div class="active title"><h1 class="ui header"><i class="dropdown icon"></i>Documents for {{ forum_name }}</h1></div>
+    <div class="active content">
+        <div class="ui list">
+        {% for folder in folders %}
+            <div class="item">
+                <span class="ui top aligned avatar image"><i class="ui folder open outline big icon"></i></span>
+                <div class="content">
+                    <div class="header">{{ folder.name }}</div>
+                    {{ folder.instructions }}
+                    <div class="list">
+                    {% for doc in folder.docs %}
+                        <div class="item">
+                            <i class="right triangle icon"></i>
+                            <div class="content">
+                                <a class="header open-doc" data-id="{{ doc.id }}">{{ doc.title }}</a>
+                                <div class="description">{{ doc.description }} ({{ doc.num_sections }} sections)</div>
+                                <div class="ui label"><i class="calendar icon"></i>updated <abbr title="{{ doc.updated_at_full }}">{{ doc.updated_at }}</abbr></div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        {% for root_doc in root_docs %}
+            <div class="item">
+                <span class="ui top aligned avatar image"><i class="ui file text outline big icon"></i></span>
+                <div class="content">
+                    <a class="header open-doc" data-id="{{ root_doc.id }}">{{ root_doc.title }}</a>
+                    <div class="description">{{ root_doc.description }} ({{ root_doc.num_sections }} sections, updated {{ root_doc.updated_at }})</div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+</div>

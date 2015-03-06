@@ -1,0 +1,21 @@
+<h2 class="ui header">{{ title }}</h2>
+{% if sections %}
+<div class="right ui rail">
+    <div class="ui sticky">
+        <div class="header">Content of {{ title }}</div>
+        <div class="ui secondary vertical  menu">{% for section in sections %}
+            <a class="header item jump-to-section" data-id="{{ section.id }}"><i class="right triangle icon"></i>{{ section.title }}</a>
+        {% endfor %}</div>
+    </div>
+</div>
+{% for section in sections %}
+<div class="ui divider"></div>
+{% if section.title %}<h3 class="ui header section-header" data-id="{{ section.id }}">{{ section.title }}</h3>{% endif %}
+<div class="ui label"><i class="calendar icon"></i>updated <abbr title="{{ section.updated_at_full }}">{{ section.updated_at }}</abbr></div>
+<div class="section-content noselect" data-id="{{ section.id }}">{{ section.segmented_text|safe }}</div>
+{% endfor %}
+{% else %}
+<div class="ui info message">
+    No sections in this document.
+</div>
+{% endif %}

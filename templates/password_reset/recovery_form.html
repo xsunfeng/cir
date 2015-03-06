@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load url from future %}
+
+{% block title %}{% trans "Password recovery" %}{% endblock %}
+{% block header %}
+<div class="ui fixed inverted main menu">
+	<div class="container">
+		<div class="title item">Password recovery</div>
+		<div class="right menu" style="display:inline-block">
+			<a href="/" class="item">Back to homepage</a>
+		</div>
+	</div>
+</div>
+{% endblock %}
+{% block body %}
+<div class="ui grid container">
+	<div class="row">
+		<div class="column">
+			<form class="ui form" method="post" action="{{ url }}">
+				{% csrf_token %}
+				{{ form.as_table }}
+				<p><input type="submit" value="{% trans "Recover my password" %}"></p>
+			</form>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

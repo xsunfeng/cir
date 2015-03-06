@@ -1,0 +1,51 @@
+#document-categories,
+#document-pane {
+	background-color: #FFFFFF;
+	border: 1px solid #DDDDDD;
+	font-size: 1.3rem;
+	line-height: 30px;
+	margin: 10px 0px;
+}
+.noselect {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.tk {
+	text-decoration: none;
+}
+.tk.p,
+.tk.q,
+.tk.c {
+	cursor: pointer;
+}
+.tk.p {
+	background-color: rgba(224, 123, 83, 0.2);
+	
+}
+.tk.q {
+	background-color: rgba(217, 92, 92, 0.5);
+}
+.tk.c {
+	background-color: rgba(59, 131, 192, 0.5);
+}
+.tk.highlighted { /* must be put after p, q and c */
+	background-color: #f2c61f;
+}
+#doc-highlight-toolbar,
+#doc-thread-popup {
+	position: absolute;
+	left: -999999px;
+	top: -999999px;
+	z-index: 900;
+}
+.section-content img {
+	max-width: 100%;
+}
+.fixed.ui-dialog {
+	position: fixed!important;
+	z-index: 900;
+}
