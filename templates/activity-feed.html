@@ -1,0 +1,83 @@
+{% if entries %}
+<div class="ui feed">
+{% for entry in entries %}
+	<div class="event">
+		<div class="label">Label</div>
+		<div class="content">
+		{% if entry.is_deleted %}
+			<div class="summary">
+				<a class="user" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a><div class="date">updated <abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div> [deleted]
+			</div>
+		{% elif entry.parent_name %}
+			<div class="summary">
+				<a class="user" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> replied to <a class="user">{{ entry.parent_name }}</a>
+				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+			</div>
+			<div class="extra text">
+				{{ entry.content }}
+			</div>
+			<div class="meta">
+				<a class="feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+				<a class="feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+			</div>
+		{% elif entry.entry_type == 'claim' %}
+			<div class="summary">
+				<a class="user" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> extracted a claim.
+				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+			</div>
+			<div class="meta">
+				<a class="doc-jumpto-claim" data-id="{{ entry.id }}">Review in full screen</a>
+			</div>
+		{% elif entry.entry_type == 'question' %}
+			<div class="summary">
+				<a class="user" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> raised a question.
+				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+			</div>
+			<div class="extra text">
+				{{ entry.content }}
+			</div>
+			<div class="meta">
+				<a class="feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+				<a class="feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+			</div>
+		{% elif entry.entry_type == 'comment' %}
+			<div class="summary">
+				<a class="user" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> commented
+				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+			</div>
+			<div class="extra text">
+				{{ entry.content }}
+			</div>
+			<div class="meta">
+				<a class="feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+				<a class="feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+			</div>
+		{% endif %}
+		</div>
+	</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="ui info message">No activities to show</div>
+{% endif %}
+<div class="feed-forms" style="display:none">
+	<form class="ui form comment" style="display:none">
+		<div class="field">
+			<label><span>Add a comment</span> (Ctrl + Enter to publish)</label>
+			<textarea rows="2"></textarea>
+		</div>
+		<div class="ui primary submit button"><i class="send outline icon"></i>Publish</div>
+		<div class="ui reset button"><i class="refresh icon"></i>Reset</div>
+	</form>
+	<form class="ui form claim" style="display:none">
+		<div class="field">
+			<div style="width: 360px" class="ui attached info message">Please reword the highlighted text to form a coherent and meaningful claim.</div>
+			<textarea></textarea>
+		</div>
+		<div class="ui checkbox nopublish-wrapper">
+			<label>Save for later</label>
+			<input type="checkbox" name="nopublish">
+		</div>
+		<div class="ui primary submit button">Publish</div>
+	</form>
+</div>

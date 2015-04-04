@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.utils import timezone
 
 from cir.models import *
+import claim_views
 
 def api_doc(request):
     response = {}
@@ -72,11 +73,7 @@ def api_highlight(request):
         elif content_type == 'question':
             Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
         elif content_type == 'claim':
-            private = request.REQUEST.get('nopublish')
-            if private == 'true':
-                Claim.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, source_highlight=highlight, published=False)
-            else:
-                Claim.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, source_highlight=highlight, published=True)
+            claim_views._add_claim(request, highlight)
         return HttpResponse(json.dumps(response), mimetype='application/json')
     if action == 'load-doc':
         doc_id = request.REQUEST.get('doc_id')
@@ -103,6 +100,28 @@ def api_annotation(request):
         claims = highlight.claims_of_highlight.all()
         for claim in claims:
             context['entries'].append(claim.getAttr(forum))
-        sorted(context['entries'], key=lambda entry: entry['created_at_full'], reverse=True)
-        response['html'] = render_to_string("entry-thread.html", context)
+        context['entries'] = sorted(context['entries'], key=lambda entry: entry['created_at_full'])
+        response['html'] = render_to_string("activity-feed.html", context)
         return HttpResponse(json.dumps(response), mimetype='application/json')
+    if action == 'create':
+        if not request.user.is_authenticated():
+            return HttpResponse("Please log in first.", status=403)
+        content = request.REQUEST.get('content')
+        # need to know either highlight_id, or claim_id
+        highlight_id = request.REQUEST.get('highlight_id')
+        if not highlight_id:
+            highlight_id = Claim.objects.get(id=request.REQUEST.get('claim_id')).source_highlight.id
+        reply_id = request.REQUEST.get('reply_id', '')
+        now = timezone.now()
+        if len(reply_id) == 0:
+            Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight_id=highlight_id, content_type='comment')
+        else:
+            Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight_id=highlight_id, parent_id=reply_id, content_type='comment')
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+    if action == 'delete':
+        entry_id = request.REQUEST.get('entry_id')
+        post = Post.objects.get(id=entry_id)
+        post.is_deleted = True
+        post.save()
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+

@@ -1,8 +1,6 @@
 from django.conf.urls import patterns, include, url
 import settings
-import user_views
-import forum_views
-import doc_views
+import user_views, forum_views, doc_views, claim_views
 from django.contrib import admin
 admin.autodiscover()
 
@@ -17,6 +15,10 @@ urlpatterns = patterns('',
     url(r'^api_doc/$', doc_views.api_doc),
     url(r'^api_highlight/$', doc_views.api_highlight),
     url(r'^api_annotation/$', doc_views.api_annotation),
+    url(r'^api_claim/$', claim_views.api_claim),
+    url(r'^api_get_claim/$', claim_views.api_get_claim),
+    url(r'^api_claim_activities/$', claim_views.api_claim_activities),
+    url(r'^api_claim_vote/$', claim_views.api_claim_vote),
 
     # include other apps
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

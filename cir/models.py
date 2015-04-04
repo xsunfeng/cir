@@ -9,11 +9,11 @@ class Forum(models.Model):
     full_name = models.CharField(max_length=500) # shown on top page/selection page
     short_name = models.CharField(max_length=500) # used elsewhere
     url = models.CharField(max_length=100) # used in url
-    description = models.TextField(null=True)
+    description = models.TextField(null=True, blank=True)
     access_level = models.CharField(max_length=100, default='open')
-    contextmap = models.TextField(null=True)
-    forum_logo = models.ImageField(upload_to='forum_logos', null=True, default='forum_logos/default.jpg')
-    def __str__(self): # used for admin site
+    contextmap = models.TextField(null=True, blank=True)
+    forum_logo = models.ImageField(upload_to='forum_logos', null=True, blank=True, default='forum_logos/default.jpg')
+    def __unicode__(self): # used for admin site
         return self.full_name
     def getAttr(self):
         attr = {}
@@ -46,15 +46,15 @@ class Role(models.Model):
 
 class UserInfo(models.Model):
     user = models.OneToOneField(User, related_name='info')
-    description = models.TextField(null=True)
-    last_visited_forum = models.ForeignKey(Forum, null=True)
+    description = models.TextField(null=True, blank=True)
+    last_visited_forum = models.ForeignKey(Forum, null=True, blank=True)
 
 class EntryCategory(models.Model):
     CONTENT_CHOICES = (
         ('doc', 'Document'),
         ('post', 'Post'),
     )
-    name = models.CharField(max_length=200, null=True)
+    name = models.CharField(max_length=200, null=True, blank=True)
     category_type = models.CharField(max_length=10, choices=CONTENT_CHOICES)
     forum = models.ForeignKey(Forum)
     visible = models.BooleanField(default=False)
@@ -63,7 +63,7 @@ class EntryCategory(models.Model):
     can_delete = models.BooleanField(default=False)
     can_extract = models.BooleanField(default=False)
     can_prioritize = models.BooleanField(default=False)
-    instructions = models.TextField(null=True)
+    instructions = models.TextField(null=True, blank=True)
     def __str__(self): # used for admin site
         return self.name
     def getAttr(self):
@@ -88,7 +88,7 @@ class Entry(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
-    category = models.ForeignKey(EntryCategory, related_name='entries', null=True)
+    category = models.ForeignKey(EntryCategory, related_name='entries', null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
     def getAttr(self, forum):
         attr = {}
@@ -109,8 +109,8 @@ class Entry(models.Model):
 class Doc(models.Model):
     forum = models.ForeignKey(Forum)
     title = models.TextField()
-    description = models.TextField(null=True)
-    folder = models.ForeignKey(EntryCategory, related_name='doc_entries', null=True)
+    description = models.TextField(null=True, blank=True)
+    folder = models.ForeignKey(EntryCategory, related_name='doc_entries', null=True, blank=True)
     def __str__(self): # used for admin site
         return self.title
     def getAttr(self):
@@ -129,8 +129,8 @@ class Doc(models.Model):
         return attr
 
 class DocSection(Entry):
-    title = models.TextField(null=True)
-    order = models.IntegerField(null=True)
+    title = models.TextField(null=True, blank=True)
+    order = models.IntegerField(null=True, blank=True)
     doc = models.ForeignKey(Doc, related_name='sections')
     def __str__(self): # used for admin site
         return str(self.id) + ' ' + self.title
@@ -161,20 +161,65 @@ class Highlight(models.Model):
             attr['type'] = self.posts_of_highlight.order_by('-updated_at')[0].content_type
         return attr
 
+class ClaimTheme(models.Model):
+	forum = models.ForeignKey(Forum)
+	name = models.CharField(max_length=100)
+	proposer = models.ForeignKey(User)
+	created_at = models.DateTimeField()
+	def getAttr(self):
+	    attr = {}
+	    attr['id'] = self.id
+	    attr['name'] = self.name
+	    return attr
+	def __unicode__(self):
+	       return self.name
+
 class Claim(Entry):
+	# for a Claim, its EntryCategory is not used for now -- for further extension of phases
     published = models.BooleanField(default=True)
+    CATEGORY_CHOICES = (
+        ('pro', 'Pro'),
+        ('con', 'Con'),
+        ('finding', 'Finding'),
+        ('discarded', 'Discarded'),
+    )
+    claim_category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, null=True, blank=True)
+    theme = models.ForeignKey(ClaimTheme, null=True, blank=True)
     # the highlight from which this claim is extracted
-    source_highlight = models.ForeignKey(Highlight, null=True, related_name='claims_of_highlight')
+    source_highlight = models.ForeignKey(Highlight, null=True, blank=True, related_name='claims_of_highlight')
     def getAttr(self, forum):
         attr = super(Claim, self).getAttr(forum)
+        attr['entry_type'] = 'claim'
+        attr['published'] = self.published
+        return attr
+    def getExcerpt(self, forum): # used for claim navigator
+    	attr = {}
+    	attr['id'] = self.id
+    	attr['published'] = self.published
+    	attr['excerpt'] = self.content[:50] + '...'
+        attr['updated_at'] = utils.pretty_date(self.updated_at)
+        attr['updated_at_full'] = self.updated_at
         return attr
 
+class Vote(models.Model):
+	user = models.ForeignKey(User)
+	entry = models.ForeignKey(Entry, related_name='voters')
+	VOTE_CHOICES = (
+	    ('pro', 'Pro'),
+	    ('con', 'Con'),
+	    ('finding', 'Finding'),
+	    ('discarded', 'Discarded'),
+	    ('prioritize', 'Prioritize'),
+	)
+	vote_type = models.CharField(max_length=20, choices=VOTE_CHOICES)
+	created_at = models.DateTimeField()
+
 class Post(Entry): # in discussion
-    title = models.TextField(null=True)
-    target = models.ForeignKey(Entry, related_name='get_comments', null=True) # for comments of a claim
+    title = models.TextField(null=True, blank=True)
+    target = models.ForeignKey(Entry, related_name='get_comments', null=True, blank=True) # for comments of a claim
     # the highlight to which this post is attached
     highlight = models.ForeignKey(Highlight, related_name='posts_of_highlight')
-    parent = models.ForeignKey('self', null=True, related_name='children')
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='children')
     CONTENT_CHOICES = (
         ('question', 'Question'),
         ('comment', 'Comment'),
@@ -182,5 +227,8 @@ class Post(Entry): # in discussion
     content_type = models.CharField(max_length=10, choices=CONTENT_CHOICES)
     def getAttr(self, forum):
         attr = super(Post, self).getAttr(forum)
-        attr['type'] = self.content_type
+        attr['entry_type'] = self.content_type
+        if self.parent:
+        	attr['parent_name'] = self.parent.author.get_full_name()
+        	attr['parent_id'] = self.parent.id
         return attr

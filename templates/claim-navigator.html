@@ -1,0 +1,18 @@
+<div class="ui secondary vertical blue menu" style="width:100%;overflow:auto">
+	<div class="item">
+		{% if category %}Category: <strong>{{ category }}</strong>{% endif %}
+		{% if theme %}Theme: <strong>{{ theme }}</strong>{% endif %}
+		{% if not category and not theme %}<strong>All claims</strong>{% endif %}
+		({{ claims_cnt }})
+	</div>
+	{% if claims %}{% for claim in claims %}
+	<a class="item" data-id="{{ claim.id }}">
+		{% if not claim.published %}
+			<div class="ui label">Unpublished</div>
+		{% endif %}
+			<abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>: {{ claim.excerpt }}
+	</a>
+	{% endfor %}{% else %}
+		No claims available for now.
+	{% endif %}	
+</div>

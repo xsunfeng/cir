@@ -9,5 +9,11 @@
   z-index: 9999;
 }
 .main.tab {
-  padding-top: 50px;
+  padding-top: 3rem;
+}
+abbr {
+  cursor: pointer;
+}
+.hidden {
+  display: none;
 }

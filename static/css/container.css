@@ -138,7 +138,8 @@
 *******************************/
 
 @media only screen and (max-width : 998px) {
-  #cir .fixed .container {
+  #cir .fixed .container,
+  #cir .secondary .container {
     width: auto;
     margin: 0px auto;
     max-width: 9999px;

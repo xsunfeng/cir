@@ -30,7 +30,7 @@
 	background-color: rgba(217, 92, 92, 0.5);
 }
 .tk.c {
-	background-color: rgba(59, 131, 192, 0.5);
+	background-color: rgba(113, 217, 255, 0.5);
 }
 .tk.highlighted { /* must be put after p, q and c */
 	background-color: #f2c61f;
@@ -48,4 +48,15 @@
 .fixed.ui-dialog {
 	position: fixed!important;
 	z-index: 900;
+}
+.comment.form textarea {
+	min-height: inherit;
+	height: inherit;
+}
+#doc-thread-popup .segment {
+	min-width: 400px;
+}
+#doc-thread-content {
+	max-height: 500px;
+	overflow: auto;
 }

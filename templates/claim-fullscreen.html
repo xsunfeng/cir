@@ -1,0 +1,61 @@
+{% if claim %}
+{% if not claim.published %}
+<div class="ui top attached info message">This claim is unpublished and only visible to you</div>
+{% endif %}
+<div class="ui attached segment">
+	<div class="ui vertical segment" style="padding-top:0">
+		<div class="claim-content">{{ claim.content|safe }}</div>
+		<div class="claim-metainfo ui small horizontal divided list">
+			<div class="item">
+				<div class="content">
+					Created by <a class="user" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a>
+				</div>
+			</div>
+			<div class="item">
+				<div class="content">
+					<abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="ui vertical segment ratings">
+		<div class="ui grid">
+			<div class="three wide column"><abbr title="The relevance of this claim towards the issue">Relevance</abbr></div>
+			<div class="five wide column"><div class="ui star rating" data-type="relevance"></div></div>
+			<div class="three wide column"><abbr title="The quality of language expression of this claim">Language</abbr></div>
+			<div class="five wide column"><div class="ui star rating" data-type="relevance"></div></div>
+			<div class="three wide column"><abbr title="The quality of the information provided in this claim">Information</abbr></div>
+			<div class="five wide column"><div class="ui star rating" data-type="relevance"></div></div>
+			<div class="three wide column"><abbr title="The quality of argumentation of this claim">Argumentation</abbr></div>
+			<div class="five wide column"><div class="ui star rating" data-type="relevance"></div></div>
+		</div>
+	</div>
+	<div class="ui vertical segment" style="padding: 0.5em 0">
+		<div class="ui red secondary claim menu" data-id="{{ claim.id }}">
+			<a class="item claim-vote-btn" data-action="prioritize"><i class="thumbs outline up icon"></i><span></span></a>
+			<a class="item claim-vote-btn" data-action="pro"><i class="plus icon"></i><span></span></a>
+			<a class="item claim-vote-btn" data-action="con"><i class="minus icon"></i><span></span></a>
+			<a class="item claim-vote-btn" data-action="finding"><i class="flag outline icon"></i><span></span></a>
+			<a class="item claim-vote-btn" data-action="discarded"><i class="trash outline icon"></i><span></span></a>
+			<div class="right menu">
+				<div class="ui dropdown simple item">
+					Other actions
+					<i class="dropdown icon"></i>
+					<div class="menu">
+						<a class="item claim-reword-btn">Suggest rewording</a>
+						<a class="item claim-merge-btn">Suggest merging</a>
+					</div>
+				</div>
+				<a class="item claim-gotosrc-btn" title="Reveal in Document"><i class="unhide icon"></i></a>
+			</div>
+		</div>
+	</div>
+	<div id="claim-activity-feed" class="ui vertical segment">
+		<div class="ui small active inline loader"></div>Loading activities...
+	</div>
+</div>
+{% else %}
+<div class="ui orange inverted segment">
+	No claims available for now.
+</div>
+{% endif %}

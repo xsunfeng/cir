@@ -1,0 +1,95 @@
+<div class="ui segments">
+	<div class="ui top attached secondary segment" style="padding:0.5em 0">
+		<div class="ui secondary menu">
+			<div class="item">
+				{% if category %}Category: <strong>{{ category|capfirst }}</strong>{% endif %}
+				{% if theme %}Theme: <strong>{{ theme }}</strong>{% endif %}
+				{% if not category and not theme %}<strong>All claims</strong>{% endif %}
+				({{ claims_cnt }})
+			</div>
+			<div class="right menu">
+				<div class="ui dropdown item">
+					Sort by
+					<i class="dropdown icon"></i>
+					<div class="menu">
+						<a class="item">Created at</a>
+						<a class="item">Source document</a>
+					</div>
+				</div>
+				<a id="claim-toggle-filter-btn" class="item">
+					Filter claims
+					<i class="dropdown icon"></i>
+				</a>
+			</div>
+		</div>
+	</div>
+	<div id="claim-filter-pane" class="ui secondary attached segment hidden">
+		<div class="ui form">
+			<div class="field">
+				<label>Category</label>
+				<select class="ui category dropdown">
+					<option value="all">All</option>
+					<option value="pro">Pro</option>
+					<option value="con">Con</option>
+					<option value="finding">Finding</option>
+					<option value="discarded">Discarded</option>
+					<option value="undecided">Undecided</option>
+				</select>
+			</div>
+			<div class="field">
+				<label>Theme</label>
+				<select class="ui theme dropdown">
+					<option value="all">All</option>
+					{% for theme in themes %}<option value="{{ theme.id }}">{{ theme.name }}</option>{% endfor %}
+					<option value="undecided">Undecided</option>
+				</select>
+			</div>
+		</div>
+	</div>
+	{% if claims %}{% for claim in claims %}
+	<div class="ui attached segment">
+		{% if not claim.published %}
+		<div class="ui info message">This claim is unpublished and only visible to you</div>
+		{% endif %}
+		<div class="content">
+			<div class="claim-content">{{ claim.content|safe }}</div>
+			<div class="claim-metainfo ui small horizontal divided list">
+				<div class="item">
+					<div class="content">
+						Created by <a class="user" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a>
+					</div>
+				</div>
+				<div class="item">
+					<div class="content">
+						<abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="ui red small claim menu" data-id="{{ claim.id }}">
+			<a class="item claim-vote-btn" data-action="prioritize"><i class="thumbs outline up icon"></i><span></span></a>
+			<a class="item claim-vote-btn" data-action="pro"><i class="plus icon"></i><span></span></a>
+			<a class="item claim-vote-btn" data-action="con"><i class="minus icon"></i><span></span></a>
+			<a class="item claim-vote-btn" data-action="finding"><i class="flag outline icon"></i><span></span></a>
+			<a class="item claim-vote-btn" data-action="discarded"><i class="trash outline icon"></i><span></span></a>
+			<div class="right menu">
+				<div class="ui dropdown simple item">
+					Other operations
+					<i class="dropdown icon"></i>
+					<div class="menu">
+						<a class="item claim-reword-btn" data-id="{{ claim.id }}">Suggest rewording</a>
+						<a class="item claim-merge-btn" data-id="{{ claim.id }}">Suggest merging</a>
+					</div>
+				</div>
+				<a class="item claim-gotosrc-btn" data-id="{{ claim.id }}" title="Reveal in Document"><i class="unhide icon"></i></a>
+				<a class="item claim-fullscreen-btn" data-id="{{ claim.id }}" title="Show in full screen"><i class="maximize icon"></i></a>
+			</div>
+		</div>
+	</div>
+	{% endfor %}{% else %}
+	<div class="ui orange inverted segment">
+		No claims available for now.
+	</div>
+	{% endif %}
+
+</div>

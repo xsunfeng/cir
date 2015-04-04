@@ -4,16 +4,18 @@ function CirDocument() {
 	this.$content_element = $('#document-pane'); // static; initiate once
 	this.$annotation_element = $('#annotation-pane'); // static; initiate once
 
-	this.$new_comment_form = $('#doc-comment-form');
-	this.$new_claim_form = $('#doc-claim-form');
 	// this.currentFolderId = -1;
 	// this.currentDocId = -1;
 
 	// highlighting
-	this.currHighlight = {};
+	this.currHighlights = {};
+	this.newHighlight = {};
 	this.isDragging = false;
 
-	$('#nopublish-wrapper').checkbox({
+	$('#doc-thread-content').feed('init');
+
+	// element initialization
+	$('.nopublish-wrapper').checkbox({
 		onChecked: function() {
 			$(this).parent().next().text('Save');
 		},
@@ -23,48 +25,57 @@ function CirDocument() {
 	});
 
 	// static listeners
+	this.$content_element.click(function(e) {
+		// remove all popovers
+		$('#doc-thread-popup').removeAttr('style');
+	});
 	$('.doc-anno-btn').click(function(e) {
-		_this.currHighlight.type = this.getAttribute('data-action');
-		if (_this.currHighlight.type == 'comment') {
-			_this.$new_claim_form.hide();
-			_this.$new_comment_form.show().parent().show();
-			_this.$new_comment_form.find('label').text('Add a comment');
-		} else if (_this.currHighlight.type == 'question') {
-			_this.$new_claim_form.hide();
-			_this.$new_comment_form.show().parent().show();
-			_this.$new_comment_form.find('label').text('Raise a question');
-		} else if (_this.currHighlight.type == 'claim') {
-			_this.$new_comment_form.hide();
-			_this.$new_claim_form.show().parent().show();
-			_this.$new_claim_form.find('label.content-type').text('Extract a claim');
-			_this.$new_claim_form.find('textarea').val($.trim(_this.$content_element.find('.tk.highlighted').text()));
+		_this.newHighlight.type = this.getAttribute('data-action');
+		if (_this.newHighlight.type == 'comment') {
+			$('#doc-claim-form').hide();
+			$('#doc-comment-form').show().parent().show();
+			$('#doc-comment-form textarea').focus();
+			$('#doc-comment-form label span').text('Add a comment');
+		} else if (_this.newHighlight.type == 'question') {
+			$('#doc-claim-form').hide();
+			$('#doc-comment-form').show().parent().show();
+			$('#doc-comment-form textarea').focus();
+			$('#doc-comment-form label span').text('Raise a question');
+		} else if (_this.newHighlight.type == 'claim') {
+			$('#doc-comment-form').hide();
+			$('#doc-claim-form').show().parent().show();
+			$('#doc-claim-form textarea').val($.trim(_this.$content_element.find('.tk.highlighted').text())).focus();
 		}
 	});
 	$('.doc-anno-submit').click(function(e) {
 		var content = $(this).parents('form').find('textarea').val();
 		if ($.trim(content).length == 0) {
-			notify('error', 'Content cannot be empty.');
+			notify('error', 'Content must not be empty.');
 			return;
 		}
 		$('#doc-highlight-toolbar .button').addClass('loading');
+		var nopublish = false;
+		if ($(this).parents('form').hasClass('claim')) {
+			nopublish = $(this).parents('form').find('.nopublish-wrapper').checkbox('is checked');
+		}
 		$.ajax({
 			url: '/api_highlight/',
 			type: 'post',
 			data: $.extend({
 				action: 'create',
 				content: content,
-				nopublish: $('#nopublish-wrapper').checkbox('is checked'),
-			}, _this.currHighlight),
+				nopublish: nopublish,
+			}, _this.newHighlight),
 			success: function(xhr) {
 				$('#doc-highlight-toolbar').removeAttr('style');
 				$('#doc-highlight-toolbar textarea').val('');
 				$('#doc-highlight-toolbar .button').removeClass('loading');
 				$('.tk.highlighted').removeClass('highlighted')
 				_this.highlight({
-					type: _this.currHighlight.type,
-					start: _this.currHighlight.start,
-					end: _this.currHighlight.end,
-					context_id: _this.currHighlight.contextId,
+					type: _this.newHighlight.type,
+					start: _this.newHighlight.start,
+					end: _this.newHighlight.end,
+					context_id: _this.newHighlight.contextId,
 					id: xhr.highlight_id
 				});
 			},
@@ -76,6 +87,16 @@ function CirDocument() {
 			}
 		});
 	});
+	$('.doc-thread-btn').click(function(e) {
+		var action = this.getAttribute('data-action');
+		$('#doc-thread-content').feed('switch', {
+			'action': action
+		});
+		if (action == 'claim') {
+			var highlight_id = $('#doc-thread-content').feed('get_id');
+			$('#doc-thread-content .claim.form textarea').val(_this.currHighlights[highlight_id].text).focus();
+		}
+	});
 
 	// dynamic listeners
 	this.$category_element.on('click', '.open-doc', function(e) {
@@ -85,50 +106,52 @@ function CirDocument() {
 	this.$content_element.on('click', '.jump-to-section', function(e) {
 		var section_id = this.getAttribute('data-id');
 		_this._jumpToSection(section_id);
-	});
-	this.$content_element.on('click', '.tk', function(e) {
+	}).on('click', '.tk', function(e) {
+		e.stopPropagation();
 		if ($(this).hasClass('p') || $(this).hasClass('q') || $(this).hasClass('c')) {
 			var highlight_ids = this.getAttribute('data-hl-id').split(' ');
 			for (var i = 0; i < highlight_ids.length; i++) {
-				_this.loadThread(highlight_ids[i], e);
+				$('#doc-thread-content').feed('update', {
+					type:'highlight',
+					id: highlight_ids[i]
+				}, function() {
+					$('#doc-thread-popup').css('left', e.pageX).css('top', e.pageY);
+				});
 			}
 		}
-	});
-	this.$content_element.on('mousedown', '.section-content', function(e) {
+	}).on('mousedown', '.section-content', function(e) {
 		if ($(e.target).is('u.tk')) {
 			var $target = $(this);
 			$(window).mousemove(function(e2) {
 				if ($(e2.target).hasClass('tk')) {
 					_this.isDragging = true;
-					_this.currHighlight.end = e2.target.getAttribute('data-id');
-					var min = Math.min(_this.currHighlight.start, _this.currHighlight.end);
-					var max = Math.max(_this.currHighlight.start, _this.currHighlight.end);
+					_this.newHighlight.end = e2.target.getAttribute('data-id');
+					var min = Math.min(_this.newHighlight.start, _this.newHighlight.end);
+					var max = Math.max(_this.newHighlight.start, _this.newHighlight.end);
 					$target.find('.tk').removeClass('highlighted');
 					for (var i = min; i <= max; i ++) {
 						$target.find('.tk[data-id="' + i + '"]').addClass('highlighted');
 					}
-					_this.currHighlight.contextId = $target.attr('data-id');
+					_this.newHighlight.contextId = $target.attr('data-id');
 				} else {
 					$target.find('.tk').removeClass('highlighted');
 				}
 			});
-			_this.currHighlight.start = e.target.getAttribute('data-id');
-			_this.currHighlight.end = e.target.getAttribute('data-id');
+			_this.newHighlight.start = e.target.getAttribute('data-id');
+			_this.newHighlight.end = e.target.getAttribute('data-id');
 		}
-	});
-
-	this.$content_element.on('mouseup', '.section-content', function(e) {
+	}).on('mouseup', '.section-content', function(e) {
 		$(window).off('mousemove');
 		var wasDragging = _this.isDragging;
 		_this.isDragging = false;
 		if (wasDragging) {
-			var min = Math.min(_this.currHighlight.start, _this.currHighlight.end);
-			var max = Math.max(_this.currHighlight.start, _this.currHighlight.end);
-			_this.currHighlight.start = min;
-			_this.currHighlight.end = max;
+			var min = Math.min(_this.newHighlight.start, _this.newHighlight.end);
+			var max = Math.max(_this.newHighlight.start, _this.newHighlight.end);
+			_this.newHighlight.start = min;
+			_this.newHighlight.end = max;
 			if ($(this).find('.tk.highlighted').length) {
-				_this.$new_claim_form.hide();
-				_this.$new_comment_form.hide().parent().hide();
+				$('#doc-claim-form').hide();
+				$('#doc-comment-form').parent().hide();
 				$('#doc-highlight-toolbar').css('left', e.pageX).css('top', e.pageY);
 			}
 		} else { // just clicking
@@ -147,6 +170,7 @@ function CirDocument() {
 			success: function(xhr) {
 				_this.$category_element.html(xhr.html);
 				_this.$category_element.find('.ui.accordion').accordion();
+				_this.$category_element.find('abbr').popup();
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -164,14 +188,15 @@ function CirDocument() {
 				'doc_id': _this.doc_id
 			},
 			success: function(xhr) {
+				// collapse document category accordion
+				_this.$category_element.find('.ui.accordion').accordion('close', 0);
 				_this.$content_element.html(xhr.html);
 				_this.$content_element.find('.ui.sticky').sticky({
 					context: '#document-pane',
 					offset: 70,
 				});
+				_this.$content_element.find('abbr').popup();
 				_this.reloadHighlights();
-				// collapse document category accordion
-				_this.$category_element.find('.ui.accordion').accordion('close', 0);
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -200,23 +225,7 @@ function CirDocument() {
 			}
 		});
 	};
-	this.loadThread = function(highlight_id, e) {
-		$.ajax({
-			url: '/api_annotation/',
-			type: 'post',
-			data: {
-				action: 'load-thread',
-				highlight_id: highlight_id
-			},
-			success: function(xhr) {
-				$('#doc-thread-popup').html(xhr.html);
-				$('#doc-thread-popup').css('left', e.pageX).css('top', e.pageY);
-			},
-			error: function(xhr) {
 
-			}
-		});
-	};
 	this.highlight = function(highlight) {
 		var $context = _this.$content_element.find('.section-content[data-id="' + highlight.context_id + '"]');
 		var className;
@@ -227,15 +236,19 @@ function CirDocument() {
 		} else if (highlight.type == 'claim') {
 			className = 'c'; // for 'claim'
 		}
+		var text = [];
 		for (var i = highlight.start; i <= highlight.end; i++) {
 			var $token = $context.find('.tk[data-id="' + i + '"]');
-			if (typeof $token.attr('data-hl-id') == 'undefined') {
+			text.push($token.text());
+			if (typeof $token.attr('data-hl-id') == 'undefined') { // new highlight for this word
 				$token.addClass(className).attr('data-hl-id', highlight.id);
 			} else {
-				var curr_id = $token.attr('data-hl-id');
+				var curr_id = $token.attr('data-hl-id'); // append highlight for this word
 				$token.addClass(className).attr('data-hl-id', curr_id + ' ' + highlight.id);
 			}
 		}
+		_this.currHighlights[highlight.id] = highlight;
+		_this.currHighlights[highlight.id].text = text.join('');
 	};
 	this._jumpToSection = function(section_id) {
 		$('body').animate({
