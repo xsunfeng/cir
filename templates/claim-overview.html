@@ -64,9 +64,11 @@
 						<abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>
 					</div>
 				</div>
+				<div class="item flag-tags" data-id="{{ claim.id }}"></div>
+				<div class="item theme-tags" data-id="{{ claim.id }}"></div>
 			</div>
 		</div>
-		<div class="ui red small claim menu" data-id="{{ claim.id }}">
+		<div class="ui red small claim menu" data-id="{{ claim.id }}">{% if claim.published %}
 			<a class="item claim-vote-btn" data-action="prioritize"><i class="thumbs outline up icon"></i><span></span></a>
 			<a class="item claim-vote-btn" data-action="pro"><i class="plus icon"></i><span></span></a>
 			<a class="item claim-vote-btn" data-action="con"><i class="minus icon"></i><span></span></a>
@@ -74,16 +76,33 @@
 			<a class="item claim-vote-btn" data-action="discarded"><i class="trash outline icon"></i><span></span></a>
 			<div class="right menu">
 				<div class="ui dropdown simple item">
-					Other operations
+					Theme
 					<i class="dropdown icon"></i>
-					<div class="menu">
-						<a class="item claim-reword-btn" data-id="{{ claim.id }}">Suggest rewording</a>
-						<a class="item claim-merge-btn" data-id="{{ claim.id }}">Suggest merging</a>
+					<div class="ui menu">
+						{% if themes %}{% for theme in themes %}
+						<a class="item theme-assign-btn" data-id="{{ theme.id }}">{{ theme.name }}</a>
+						{% endfor %}{% endif %}
+						<a class="item theme-suggest-btn">Suggest a new theme ...</a>
 					</div>
 				</div>
-				<a class="item claim-gotosrc-btn" data-id="{{ claim.id }}" title="Reveal in Document"><i class="unhide icon"></i></a>
-				<a class="item claim-fullscreen-btn" data-id="{{ claim.id }}" title="Show in full screen"><i class="maximize icon"></i></a>
+				<div class="ui dropdown simple item">
+					Flag
+					<i class="dropdown icon"></i>
+					<div class="menu">
+						<a class="item claim-flag-reword-btn">Flag as "needs rewording"</a>
+						<a class="item claim-flag-merge-btn">Flag as "needs merging" ...</a>
+					</div>
+				</div>
+				<a class="item claim-gotosrc-btn" title="Reveal in Document"><i class="unhide icon"></i></a>
+				<a class="item claim-fullscreen-btn" title="Show in full screen"><i class="maximize icon"></i></a>
+			</div>{% else %}
+			<a class="item claim-edit-btn"><i class="edit icon"></i>Edit</a>
+			<a class="item claim-publish-btn"><i class="send icon"></i>Publish</a>
+			<div class="right menu">
+				<a class="item claim-gotosrc-btn" title="Reveal in Document"><i class="unhide icon"></i></a>
+				<a class="item claim-fullscreen-btn" title="Show in full screen"><i class="maximize icon"></i></a>
 			</div>
+			{% endif %}
 		</div>
 	</div>
 	{% endfor %}{% else %}

@@ -1,0 +1,74 @@
+<div class="feed-forms">
+	<form class="ui form comment">
+		<div class="field">
+			<label><span>Add a comment</span> (Ctrl + Enter to publish)</label>
+			<textarea rows="2"></textarea>
+		</div>
+		<div class="ui primary submit button"><i class="send outline icon"></i>Publish</div>
+		<div class="ui reset button"><i class="refresh icon"></i>Reset</div>
+	</form>
+</div>
+{% if entries %}
+<h3>Activities (latest first)</h3>
+<div class="ui feed">
+{% for entry in entries %}
+	<div class="event" data-type="{{ entry.entry_type }}">
+		<div class="label">Label</div>
+		<div class="content">
+		{% if entry.is_deleted %}
+			<div class="summary">
+				<a class="user" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a><div class="date">updated <abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div> [deleted]
+			</div>
+		{% elif entry.parent_name %}
+			<div class="summary">
+				<a class="user" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> replied to <a class="user">{{ entry.parent_name }}</a>
+				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+			</div>
+			<div class="extra text">
+				{{ entry.content }}
+			</div>
+			<div class="meta">
+				<a class="feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+				<a class="feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+			</div>
+		{% elif entry.entry_type == 'question' %}
+			<div class="summary">
+				<a class="user" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> raised a question.
+				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+			</div>
+			<div class="extra text">
+				{{ entry.content }}
+			</div>
+			<div class="meta">
+				<a class="feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+				<a class="feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+			</div>
+		{% elif entry.entry_type == 'comment' %}
+			<div class="summary">
+				<a class="user" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> commented
+				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+			</div>
+			<div class="extra text">
+				{{ entry.content }}
+			</div>
+			<div class="meta">
+				<a class="feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+				<a class="feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+			</div>
+		{% elif entry.entry_type == 'flag' and entry.flag_type == 'reword'%}
+			<div class="summary">
+				<a class="user" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> suggested a rewording
+				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
+			</div>{% if entry.reason %}
+			<div class="extra text">
+				Reason: {{ entry.content }}
+			</div>{% endif %}
+		{% endif %}
+		</div>
+	</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="ui info message">No activities to show</div>
+{% endif %}
+

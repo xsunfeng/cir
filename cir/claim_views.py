@@ -32,8 +32,8 @@ def api_get_claim(request):
     context['claims_cnt'] = len(claims)
     if action == 'get-claim':
         display_type = request.REQUEST.get('display_type')
+        context['themes'] = [theme.getAttr() for theme in ClaimTheme.objects.filter(forum=forum)]
         if display_type == 'overview':
-            context['themes'] = [theme.getAttr() for theme in ClaimTheme.objects.filter(forum=forum)]
             for claim in claims:
                 context['claims'].append(claim.getAttr(forum))
             context['claims'] = sorted(context['claims'], key=lambda claim: claim['updated_at_full'], reverse=True)
@@ -79,10 +79,12 @@ def api_claim_activities(request):
         for post in posts:
             context['entries'].append(post.getAttr(forum))
         
-        # TODO add "suggest revision" "suggest merging" "suggest theme"
-
-        context['entries'] = sorted(context['entries'], key=lambda entry: entry['created_at_full'])
-        response['html'] = render_to_string("activity-feed.html", context)
+        # TODO "suggest merging"
+        flags = Flag.objects.filter(entry=claim).all()
+        for flag in flags:
+            context['entries'].append(flag.getAttr())
+        context['entries'] = sorted(context['entries'], key=lambda entry: entry['created_at_full'], reverse=True)
+        response['html'] = render_to_string("activity-feed-claim.html", context)
         return HttpResponse(json.dumps(response), mimetype='application/json')
 
 
@@ -101,14 +103,69 @@ def _get_claim_votes(user, claim):
     ret = {}
     if not user.is_authenticated():
         for vote_type in ['pro', 'con', 'finding', 'discarded', 'prioritize']:
-            votes = claim.voters.filter(vote_type=vote_type).order_by('-created_at')
+            votes = claim.events.filter(vote__vote_type=vote_type).order_by('-created_at')
             ret[vote_type] = [vote.user.get_full_name() for vote in votes]
     else:
         ret['my_votes'] = '|'.join(Vote.objects.filter(entry=claim, user=user).values_list('vote_type', flat=True))
         for vote_type in ['pro', 'con', 'finding', 'discarded', 'prioritize']:
-            votes = claim.voters.filter(vote_type=vote_type).order_by('-created_at')
+            votes = claim.events.filter(vote__vote_type=vote_type).order_by('-created_at')
             ret[vote_type] = [vote.user.get_full_name() for vote in votes if vote.user != user]
     return ret
+
+def api_get_flags(request):
+    response = {}
+    action = request.REQUEST.get('action')
+    if action == 'load_single':
+        claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
+        all_flags = _get_flags(request, claim, 'reword merge theme')
+        response['html'] = render_to_string("claim-tags.html", all_flags)
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+    if action == 'load_all':
+        claims = Claim.objects.all()
+        for claim in claims:
+            response[claim.id] = render_to_string("claim-tags.html", _get_flags(request, claim, 'reword merge theme'))
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def _get_flags(request, claim, action):
+    ret = {}
+    ret['claim_id'] = claim.id
+    if 'reword' in action:
+        reword_people = [flag.user.get_full_name() for flag in claim.events.filter(flag__flag_type='reword')]
+        ret['reword'] = {
+            'reword_people': ', '.join(reword_people),
+            'reword_cnt': len(reword_people),
+        }
+    if 'theme' in action:
+        forum = Forum.objects.get(id=request.session['forum_id'])
+        ret['themes'] = []
+        for theme in ClaimTheme.objects.filter(forum=forum):
+            people = [themeassignment.user.get_full_name() for themeassignment in claim.events.filter(themeassignment__theme=theme)]
+            ret['themes'].append({
+                'theme_name': theme.name,
+                'assignment_people': ', '.join(people),
+                'assignment_cnt': len(people)
+            })
+    return ret
+
+def api_claim_flag(request):
+    response = {}
+    if not request.user.is_authenticated():
+        return HttpResponse("Please log in first.", status=403)
+    action = request.REQUEST.get('action')
+    claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
+    context = {}
+    if 'reword' in action:
+        # TODO add a reason
+        Flag.objects.filter(user=request.user, entry=claim, flag_type='reword').delete()
+        Flag.objects.create(user=request.user, entry=claim, created_at=timezone.now(), flag_type='reword')
+        response['html'] = render_to_string("claim-tags.html", _get_flags(request, claim, 'reword'))
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+    if 'theme' in action:
+        theme = ClaimTheme.objects.get(id=request.REQUEST.get('theme_id'))
+        ThemeAssignment.objects.filter(user=request.user, entry=claim, theme=theme).delete()
+        ThemeAssignment.objects.create(user=request.user, entry=claim, created_at=timezone.now(), theme=theme)
+        response['html'] = render_to_string("claim-tags.html", _get_flags(request, claim, 'theme'))
+        return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_claim_vote(request):
     response = {}

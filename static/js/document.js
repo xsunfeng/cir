@@ -89,6 +89,10 @@ function CirDocument() {
 	});
 	$('.doc-thread-btn').click(function(e) {
 		var action = this.getAttribute('data-action');
+		if (action == 'claim' && $('#doc-thread-content .event[data-type="claim"]').length) {
+			notify('error', 'This highlight is already extracted as a claim');
+			return;
+		}
 		$('#doc-thread-content').feed('switch', {
 			'action': action
 		});

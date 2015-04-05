@@ -19,6 +19,8 @@ urlpatterns = patterns('',
     url(r'^api_get_claim/$', claim_views.api_get_claim),
     url(r'^api_claim_activities/$', claim_views.api_claim_activities),
     url(r'^api_claim_vote/$', claim_views.api_claim_vote),
+    url(r'^api_claim_flag/$', claim_views.api_claim_flag),
+    url(r'^api_get_flags/$', claim_views.api_get_flags),
 
     # include other apps
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

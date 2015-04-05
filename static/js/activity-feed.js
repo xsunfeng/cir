@@ -24,10 +24,6 @@ jQuery.fn.feed = function(action, data, update_callback) {
 						$(el).find('.feed-delete-entry').show();
 					}
 				});
-				if (_this.data('type') == 'claim') {
-					_this.find('.feed-forms .comment.form').show();
-					_this.find('.feed-forms').show();
-				}
 				_this.find('.nopublish-wrapper').checkbox({
 					onChecked: function() {
 						$(this).parent().next().text('Save');
@@ -96,8 +92,10 @@ jQuery.fn.feed = function(action, data, update_callback) {
 					_this.find('.feed-forms .comment.form textarea').val('').removeAttr('css');
 					_this.find('.feed-forms .comment.form span').text('Add a comment').removeAttr('data-reply-id');
 					_this.find('.feed-forms .comment.form .button').removeClass('loading');
-					_this.find('.feed-forms .claim.form').hide();
-					_this.find('.feed-forms').hide();
+					if (_this.data('type') == 'highlight') { // only work for doc view
+						_this.find('.feed-forms .claim.form').hide();
+						_this.find('.feed-forms').hide();
+					}
 				},
 				error: function(xhr) {
 					_this.find('.feed-forms .comment.form .button').removeClass('loading');
@@ -148,7 +146,7 @@ jQuery.fn.feed = function(action, data, update_callback) {
 	} else if (action == 'update') {
 		this.data(data);
 		this.update();
-	} else if (action == 'switch') {
+	} else if (action == 'switch') { // only happens with doc view
 		if (data.action == 'comment') {
 			_this.find('.feed-forms .claim.form').hide();
 			_this.find('.feed-forms .comment.form').show();

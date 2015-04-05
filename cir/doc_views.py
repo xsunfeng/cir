@@ -100,8 +100,8 @@ def api_annotation(request):
         claims = highlight.claims_of_highlight.all()
         for claim in claims:
             context['entries'].append(claim.getAttr(forum))
-        context['entries'] = sorted(context['entries'], key=lambda entry: entry['created_at_full'])
-        response['html'] = render_to_string("activity-feed.html", context)
+        context['entries'] = sorted(context['entries'], key=lambda entry: entry['created_at_full'], reverse=True)
+        response['html'] = render_to_string("activity-feed-doc.html", context)
         return HttpResponse(json.dumps(response), mimetype='application/json')
     if action == 'create':
         if not request.user.is_authenticated():

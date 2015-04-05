@@ -5,6 +5,7 @@
 		{% if not category and not theme %}<strong>All claims</strong>{% endif %}
 		({{ claims_cnt }})
 	</div>
+	<a class="item refresh">Refresh list<i class="refresh icon"></i></a>
 	{% if claims %}{% for claim in claims %}
 	<a class="item" data-id="{{ claim.id }}">
 		{% if not claim.published %}

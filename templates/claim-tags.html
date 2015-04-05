@@ -1,0 +1,14 @@
+<div class="item flag-tags" data-id="{{ claim_id }}">
+{% if reword %}
+	{% if reword.reword_cnt %}<a class="ui orange tag label" title="{{ reword.reword_people }}">Needs rewording<div class="detail">{{ reword.reword_cnt }}</div></a>{% endif %}
+{% endif %}
+</div>
+<div class="item theme-tags" data-id="{{ claim_id }}">
+{% if themes %}
+	{% for theme in themes %}{% if theme.assignment_cnt %}
+		<a class="ui label" title="{{ theme.assignment_people }}">{{ theme.theme_name }}
+			<div class="detail">{{ theme.assignment_cnt }}</div>
+		</a>
+	{% endif %}{% endfor %}
+{% endif %}
+</div>
