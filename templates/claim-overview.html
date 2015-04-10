@@ -47,7 +47,7 @@
 		</div>
 	</div>
 	{% if claims %}{% for claim in claims %}
-	<div class="ui attached segment">
+	<div class="ui attached segment claim" data-id="{{ claim.id }}">
 		{% if not claim.published %}
 		<div class="ui info message">This claim is unpublished and only visible to you</div>
 		{% endif %}
@@ -97,7 +97,7 @@
 				<a class="item claim-fullscreen-btn" title="Show in full screen"><i class="maximize icon"></i></a>
 			</div>{% else %}
 			<a class="item claim-edit-btn"><i class="edit icon"></i>Edit</a>
-			<a class="item claim-publish-btn"><i class="send icon"></i>Publish</a>
+			<a class="item claim-delete-btn"><i class="delete icon"></i>Delete</a>
 			<div class="right menu">
 				<a class="item claim-gotosrc-btn" title="Reveal in Document"><i class="unhide icon"></i></a>
 				<a class="item claim-fullscreen-btn" title="Show in full screen"><i class="maximize icon"></i></a>

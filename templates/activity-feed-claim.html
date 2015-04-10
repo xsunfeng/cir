@@ -1,4 +1,23 @@
 <div class="feed-forms">
+	<form class="ui form reword" style="display:none">
+		<div class="ui info message">
+			<div class="header">
+			When you reword a claim, please:
+			</div>
+			<ul class="list">
+				<li>Here goes claim-rewording instructions.</li>
+				<li>Itemized.</li>
+				<li>Submitting a rewording doesn't mean accepted!</li>
+			</ul>
+		</div>
+		<div class="field">
+			<label><span>Reword this claim</span> (Ctrl + Enter to publish)</label>
+			<textarea class="claim reword editor" rows="6"></textarea>
+		</div>
+		<div class="ui primary submit button"><i class="send outline icon"></i>Submit</div>
+		<div class="ui reset button">Cancel</div>
+		<div class="ui divider"></div>
+	</form>
 	<form class="ui form comment">
 		<div class="field">
 			<label><span>Add a comment</span> (Ctrl + Enter to publish)</label>
@@ -9,7 +28,9 @@
 	</form>
 </div>
 {% if entries %}
-<h3>Activities (latest first)</h3>
+<h4 class="ui horizontal header divider">
+	Activities (latest first)
+</h4>
 <div class="ui feed">
 {% for entry in entries %}
 	<div class="event" data-type="{{ entry.entry_type }}">
@@ -28,8 +49,8 @@
 				{{ entry.content }}
 			</div>
 			<div class="meta">
-				<a class="feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
-				<a class="feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+				<a class="feed-reply-post" data-id="{{ entry.id }}">Reply</a>
+				<a class="feed-delete-post" data-id="{{ entry.id }}" style="display:none">Delete</a>
 			</div>
 		{% elif entry.entry_type == 'question' %}
 			<div class="summary">
@@ -40,8 +61,8 @@
 				{{ entry.content }}
 			</div>
 			<div class="meta">
-				<a class="feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
-				<a class="feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+				<a class="feed-reply-post" data-id="{{ entry.id }}">Reply</a>
+				<a class="feed-delete-post" data-id="{{ entry.id }}" style="display:none">Delete</a>
 			</div>
 		{% elif entry.entry_type == 'comment' %}
 			<div class="summary">
@@ -52,10 +73,10 @@
 				{{ entry.content }}
 			</div>
 			<div class="meta">
-				<a class="feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
-				<a class="feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+				<a class="feed-reply-post" data-id="{{ entry.id }}">Reply</a>
+				<a class="feed-delete-post" data-id="{{ entry.id }}" style="display:none">Delete</a>
 			</div>
-		{% elif entry.entry_type == 'flag' and entry.flag_type == 'reword'%}
+		{% elif entry.entry_type == 'vote' and entry.vote_type == 'reword'%}
 			<div class="summary">
 				<a class="user" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> suggested a rewording
 				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
@@ -63,6 +84,26 @@
 			<div class="extra text">
 				Reason: {{ entry.content }}
 			</div>{% endif %}
+		{% elif entry.entry_type == 'claim' and entry.relation == 'reword' %}
+			<div class="summary">
+				<a class="user" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> reworded this claim.
+				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+			</div>
+			<div class="extra text">
+				{{ entry.content }}
+			</div>
+			{% if not entry.is_adopted %}
+			<div class="ui red improve menu" data-id="{{ entry.id }}" style="display:inline-block">
+				<a class="item claim-vote-btn" data-action="prioritize"><i class="thumbs outline up icon"></i><span></span></a>
+				<a class="item feed-delete-claim" data-id="{{ entry.id }}" style="display:none"><i class="delete icon"></i>Delete</a>
+				<a class="item feed-adopt-claim" data-id="{{ entry.id }}"><i class="checkmark icon"></i>Adopt</a>
+			</div>
+			{% else %}
+			<a class="ui teal tag label">Adopted</a>
+			<div class="ui red improve menu" data-id="{{ entry.id }}" style="display:inline-block">
+				<a class="item claim-vote-btn" data-action="prioritize"><i class="thumbs outline up icon"></i><span></span></a>
+			</div>
+			{% endif %}
 		{% endif %}
 		</div>
 	</div>

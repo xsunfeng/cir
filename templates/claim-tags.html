@@ -1,14 +1,19 @@
 <div class="item flag-tags" data-id="{{ claim_id }}">
 {% if reword %}
-	{% if reword.reword_cnt %}<a class="ui orange tag label" title="{{ reword.reword_people }}">Needs rewording<div class="detail">{{ reword.reword_cnt }}</div></a>{% endif %}
+	{% if reword.reword_cnt %}
+	<div class="ui orange tag label" title="{{ reword.reword_people }}" data-type="reword">Needs rewording
+		<div class="detail">{{ reword.reword_cnt }}</div>
+		{% if reword.i_voted %}<i class="delete icon"></i>{% endif %}
+	</div>{% endif %}
 {% endif %}
 </div>
 <div class="item theme-tags" data-id="{{ claim_id }}">
 {% if themes %}
 	{% for theme in themes %}{% if theme.assignment_cnt %}
-		<a class="ui label" title="{{ theme.assignment_people }}">{{ theme.theme_name }}
+		<div class="ui label" title="{{ theme.assignment_people }}" data-id="{{ theme.id }}">{{ theme.theme_name }}
 			<div class="detail">{{ theme.assignment_cnt }}</div>
-		</a>
+			{% if theme.i_voted %}<i class="delete icon"></i>{% endif %}
+		</div>
 	{% endif %}{% endfor %}
 {% endif %}
 </div>

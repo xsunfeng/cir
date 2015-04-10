@@ -3,6 +3,7 @@
 <div class="ui top attached info message">This claim is unpublished and only visible to you</div>
 {% endif %}
 <div class="ui attached segment">
+	{% if claim.published %}
 	<div class="ui vertical segment" style="padding-top:0">
 		<div class="claim-content">{{ claim.content|safe }}</div>
 		<div class="claim-metainfo ui small horizontal divided list">
@@ -20,7 +21,6 @@
 			<div class="item theme-tags" data-id="{{ claim.id }}"></div>
 		</div>
 	</div>
-	{% if claim.published %}
 	<div class="ui vertical segment ratings">
 		<div class="ui grid">
 			<div class="three wide column"><abbr title="The relevance of this claim towards the issue">Relevance</abbr></div>
@@ -76,13 +76,33 @@
 		<div class="ui small active inline loader"></div>Loading activities...
 	</div>
 	{% else %}
-	<div class="ui vertical segment" style="padding: 0.5em 0">
-		<div class="ui red secondary claim menu" data-id="{{ claim.id }}">
-			<a class="item claim-edit-btn"><i class="edit icon"></i>Edit</a>
+	<div class="ui vertical segment" style="padding-top:0">
+		<form class="ui form comment">
+			<div class="field">
+				<textarea class="claim editor" rows="6">{{ claim.content }}</textarea>
+			</div>
+		</form>
+		<div class="claim-metainfo ui small horizontal divided list">
+			<div class="item">
+				<div class="content">
+					Created by <a class="user" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a>
+				</div>
+			</div>
+			<div class="item">
+				<div class="content">
+					<abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>
+				</div>
+			</div>
+			<div class="item flag-tags" data-id="{{ claim.id }}"></div>
+			<div class="item theme-tags" data-id="{{ claim.id }}"></div>
+		</div>
+		<div class="ui claim menu" data-id="{{ claim.id }}">
 			<a class="item claim-publish-btn"><i class="send icon"></i>Publish</a>
+			<a class="item claim-save-btn"><i class="save icon"></i>Save</a>
+			<a class="item claim-delete-btn"><i class="delete icon"></i>Delete</a>
 			<div class="right menu">
 				<a class="item claim-gotosrc-btn" title="Reveal in Document"><i class="unhide icon"></i></a>
-				<a class="item claim-fullscreen-btn" title="Show in full screen"><i class="maximize icon"></i></a>
+				<a class="item claim-show-in-list-btn" title="Back to list"><i class="arrow left icon"></i></a>
 			</div>
 		</div>
 	</div>

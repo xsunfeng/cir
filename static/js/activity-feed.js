@@ -21,7 +21,7 @@ jQuery.fn.feed = function(action, data, update_callback) {
 				_this.find('abbr').popup();
 				$events.each(function(ind, el) {
 					if ($(el).find('.user').attr('data-id') == sessionStorage.user_id) {
-						$(el).find('.feed-delete-entry').show();
+						$(el).find('.feed-delete-post, .feed-delete-claim').show();
 					}
 				});
 				_this.find('.nopublish-wrapper').checkbox({
@@ -32,6 +32,29 @@ jQuery.fn.feed = function(action, data, update_callback) {
 						$(this).parent().next().text('Publish');
 					}
 				});
+				if (_this.data('type') == 'claim' && window.default_claim.display_type == 'fullscreen') {
+					$('#claim-activity-feed .improve.menu').each(function() {
+						var $menu = $(this);
+						if (window.default_claim.display_type != 'fullscreen') return; // prevent users' fast view switching!
+						var claim_id = this.getAttribute('data-id');
+						$.ajax({
+							url: '/api_claim_vote/',
+							type: 'post',
+							data: {
+								action: 'load_single', // not expecting too many of them
+								claim_id: claim_id,
+							},
+							success: function(xhr) {
+								window.default_claim.updateVotingMenu($menu, xhr.voters);
+							},
+							error: function(xhr) {
+								if (xhr.status == 403) {
+									notify('error', xhr.responseText);
+								}
+							}
+						});
+					});
+				}
 				if (typeof update_callback == 'function') {
 					update_callback();
 				}
@@ -46,7 +69,7 @@ jQuery.fn.feed = function(action, data, update_callback) {
 
 	if (action == 'init') {
 		// listeners
-		this.on('click', '.feed-reply-entry', function(e) {
+		this.on('click', '.feed-reply-post', function(e) {
 			var name = $(this).parents('.event').find('.user').text();
 			var entry_id = this.getAttribute('data-id');
 			_this.find('.feed-forms .claim.form').hide();
@@ -54,7 +77,7 @@ jQuery.fn.feed = function(action, data, update_callback) {
 			_this.find('.feed-forms .comment.form').show();
 			_this.find('.feed-forms').show();
 			_this.find('.feed-forms .comment.form textarea').focus();
-		}).on('click', '.feed-delete-entry', function(e) {
+		}).on('click', '.feed-delete-post', function(e) {
 			var entry_id = this.getAttribute('data-id');
 			$.ajax({
 				url: '/api_annotation/',
@@ -65,6 +88,44 @@ jQuery.fn.feed = function(action, data, update_callback) {
 				},
 				success: function(xhr) {
 					_this.update();
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						notify('error', xhr.responseText);
+					}
+				}
+			});
+		}).on('click', '.feed-delete-claim', function(e) {
+			var id = this.getAttribute('data-id');
+			$.ajax({
+				url: '/api_claim/',
+				type: 'post',
+				data: {
+					action: 'delete',
+					claim_id: id,
+				},
+				success: function(xhr) {
+					_this.update();
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						notify('error', xhr.responseText);
+					}
+				}
+			});
+		}).on('click', '.feed-adopt-claim', function(e) {
+			var new_id = this.getAttribute('data-id');
+			var old_id = window.default_claim.claim_id;
+			$.ajax({
+				url: '/api_claim/',
+				type: 'post',
+				data: {
+					action: 'adopt',
+					new_id: new_id,
+					old_id: old_id,
+				},
+				success: function(xhr) {
+					window.default_claim.updateClaimPane();
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {

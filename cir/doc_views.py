@@ -99,7 +99,7 @@ def api_annotation(request):
             context['entries'].append(post.getAttr(forum))
         claims = highlight.claims_of_highlight.all()
         for claim in claims:
-            context['entries'].append(claim.getAttr(forum))
+            context['entries'].append(claim.versions.get(is_adopted=True).getAttr(forum))
         context['entries'] = sorted(context['entries'], key=lambda entry: entry['created_at_full'], reverse=True)
         response['html'] = render_to_string("activity-feed-doc.html", context)
         return HttpResponse(json.dumps(response), mimetype='application/json')
@@ -116,6 +116,7 @@ def api_annotation(request):
         if len(reply_id) == 0:
             Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight_id=highlight_id, content_type='comment')
         else:
+            # TODO allow replying other types of entities
             Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight_id=highlight_id, parent_id=reply_id, content_type='comment')
         return HttpResponse(json.dumps(response), mimetype='application/json')
     if action == 'delete':

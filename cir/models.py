@@ -85,7 +85,7 @@ class EntryCategory(models.Model):
 class Entry(models.Model):
     forum = models.ForeignKey(Forum)
     author = models.ForeignKey(User)
-    content = models.TextField()
+    content = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
     category = models.ForeignKey(EntryCategory, related_name='entries', null=True, blank=True)
@@ -166,6 +166,7 @@ class ClaimTheme(models.Model):
     name = models.CharField(max_length=100)
     proposer = models.ForeignKey(User)
     created_at = models.DateTimeField()
+    published = models.BooleanField(default=True)
     def getAttr(self):
         attr = {}
         attr['id'] = self.id
@@ -174,7 +175,22 @@ class ClaimTheme(models.Model):
     def __unicode__(self):
            return self.name
 
-class Claim(Entry):
+class ClaimVersion(Entry):
+    claim = models.ForeignKey('Claim', related_name='versions')
+    is_adopted = models.BooleanField(default=True)
+    def getAttr(self, forum):
+        attr = super(ClaimVersion, self).getAttr(forum)
+        attr['entry_type'] = 'claim'
+        attr['is_adopted'] = self.is_adopted
+        return attr
+    def getExcerpt(self, forum):
+    	attr = {} # for efficiency, don't inherit at all
+    	attr['updated_at_full'] = self.updated_at
+    	attr['updated_at'] = utils.pretty_date(self.updated_at)
+        attr['excerpt'] = self.content[:50] + '...'
+        return attr
+
+class Claim(Entry): # TODO: consider not deriving Entry
     # for a Claim, its EntryCategory is not used for now -- for further extension of phases
     published = models.BooleanField(default=True)
     CATEGORY_CHOICES = (
@@ -187,19 +203,17 @@ class Claim(Entry):
     theme = models.ForeignKey(ClaimTheme, null=True, blank=True)
     # the highlight from which this claim is extracted
     source_highlight = models.ForeignKey(Highlight, null=True, blank=True, related_name='claims_of_highlight')
-    new_versions = models.ManyToManyField('self', through='ClaimReference', symmetrical=False, blank=True)
+    def adopted_version(self):
+    	return self.versions.get(is_adopted=True)
     def getAttr(self, forum):
-        attr = super(Claim, self).getAttr(forum)
-        attr['entry_type'] = 'claim'
+    	attr = self.adopted_version().getAttr(forum)
+    	attr['id'] = self.id
         attr['published'] = self.published
         return attr
     def getExcerpt(self, forum): # used for claim navigator
-        attr = {}
+        attr = self.adopted_version().getExcerpt(forum)
         attr['id'] = self.id
         attr['published'] = self.published
-        attr['excerpt'] = self.content[:50] + '...'
-        attr['updated_at'] = utils.pretty_date(self.updated_at)
-        attr['updated_at_full'] = self.updated_at
         return attr
 
 class ClaimReference(models.Model):
@@ -207,10 +221,9 @@ class ClaimReference(models.Model):
         ('reword', 'Reword'),
         ('merge', 'Merge'),
     )
-    is_adopted = models.BooleanField(default=False)
     refer_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
-    from_claim = models.ForeignKey(Claim, related_name='older_claims')
-    to_claim = models.ForeignKey(Claim, related_name='newer_claims')
+    from_claim = models.ForeignKey(Claim, related_name='newer_versions')
+    to_claim = models.ForeignKey(Claim, related_name='older_versions')
 
 class Event(models.Model): # the behavior of a user on an entry
     user = models.ForeignKey(User)
@@ -232,26 +245,22 @@ class Vote(Event):
         ('finding', 'Finding'),
         ('discarded', 'Discarded'),
         ('prioritize', 'Prioritize'),
+        ('reword', 'Needs rewording'),
+        ('merge', 'Needs merging'),
     )
     vote_type = models.CharField(max_length=20, choices=VOTE_CHOICES)
+    reason = models.CharField(max_length=2010, null=True, blank=True)
+    def getAttr(self):
+        attr = super(Vote, self).getAttr()
+        attr['entry_type'] = 'vote'
+        attr['vote_type'] = self.vote_type
+        if self.reason:
+            attr['reason'] = self.reason
+        return attr
 
 class ThemeAssignment(Event):
     theme = models.ForeignKey(ClaimTheme)
 
-class Flag(Event):
-    FLAG_CHOICES = (
-        ('reword', 'Needs rewording'),
-        ('merge', 'Needs merging'),
-    )
-    flag_type = models.CharField(max_length=20, choices=FLAG_CHOICES)
-    reason = models.CharField(max_length=2010, null=True, blank=True)
-    def getAttr(self):
-        attr = super(Flag, self).getAttr()
-        attr['entry_type'] = 'flag'
-        attr['flag_type'] = self.flag_type
-        if self.reason:
-            attr['reason'] = self.reason
-        return attr
 
 class Post(Entry): # in discussion
     title = models.TextField(null=True, blank=True)

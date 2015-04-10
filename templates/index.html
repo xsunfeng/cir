@@ -17,10 +17,11 @@
 <div class="ui fixed inverted main tabular menu">
 	<div class="container">
 		<a href="/" class="title item">{{ forum_name }}</a>
-		{% if not load_error %}
+		{% if load_error %}
+		<div class="item">GeoDeliberator</div>
+		{% else %}
 		<a href="#" class="item active" data-tab="document-tab"><i class="icon file text outline"></i>Read Documents</a>
 		<a href="#" class="item" data-tab="claim-tab"><i class="icon comment outline"></i>Create Claims</a>
-		{% endif %}
 		<div id="header-visitor-wrapper" class="right menu" style="display:inline-block">
 			<div class="item">
 				<div id="login-btn" class="ui button">Log in</div>
@@ -55,6 +56,7 @@
 				</div>
 			</div>
 		</div>
+		{% endif %}
 	</div>
 </div>
 {% endblock %}
@@ -64,7 +66,7 @@
 	{% if load_error %}
 		{% if load_error == '404' %}
 <div class="ui two column centered grid">
-	<div class="column">
+	<div class="column" style="top:50px">
 		<div class="ui error message">
 			<div class="header">Forum does not exist; did you enter the correct address?</div>
 			<p>Click <a href="/">here</a> to return to homepage.</p>
@@ -73,7 +75,7 @@
 </div>
 		{% elif load_error == '403' %}
 <div class="ui two column centered grid">
-	<div class="column">
+	<div class="column" style="top:50px">
 		<div class="ui error message">
 			<div class="header">Sorry, this is a private forum</div>
 			<ul class="list">
@@ -139,7 +141,7 @@
 			</div>
 			<div id="claim-pane"></div>
 		</div>
-		<div id="claim-navigator" class="six wide column" style="position:fixed"></div>
+		<div id="claim-navigator" class="six wide column" style="position:fixed;top:2.5em;bottom:3em;padding:0"></div>
 	</div>
 
 	<div class="ui five steps" style="position:fixed;bottom:0;left:0">

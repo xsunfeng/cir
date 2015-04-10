@@ -1,7 +1,17 @@
 .claim-content {
 	font-size: 1.5em;
 	padding-top: 0;
+    -moz-transition: background-color 0.5s;
+    -webkit-transition: background-color 0.5s;
+    -o-transition: background-color 0.5s;
+    transition: background-color 0.5s;
+}
+.highlight-found {
+	background-color: #f2c61f!important
 }
 .claim-metainfo {
 	margin: 0!important;
+}
+textarea.claim.editor {
+	font-size:1.5em
 }
