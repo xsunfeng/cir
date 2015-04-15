@@ -64,31 +64,31 @@ def logout_view(request):
     return HttpResponse(json.dumps({}), mimetype='application/json')
 
 def change_info(request):
-	user = request.user
-	if not user.is_authenticated():
-		return HttpResponse("Please log in first.", status=403)
-	action = request.REQUEST.get('action')
-	if action == 'get':
-		response = {}
-		response['first_name'] = user.first_name
-		response['last_name'] = user.last_name
-		response['email'] = user.email
-		response['description'] = user.info.description
-		return HttpResponse(json.dumps(response), mimetype='application/json')
-	if action == 'set-pw':
-		old_pw = request.REQUEST.get('old_password')
-		if not user.check_password(old_pw):
-			return HttpResponse("Password incorrect.", status=403)
-		new_pw = request.REQUEST.get('new_password')
-		user.set_password(new_pw)
-		user.save()
-		return HttpResponse(json.dumps({}), mimetype='application/json')
-	if action == 'set-info':
-		response = {}
-		user.first_name = request.REQUEST.get('first-name')
-		user.last_name = request.REQUEST.get('last-name')
-		user.info.description = request.REQUEST.get('description')
-		user.info.save()
-		user.save()
-		response['user_name'] = user.get_full_name()
-		return HttpResponse(json.dumps(response), mimetype='application/json')
+    if not request.user.is_authenticated():
+        return HttpResponse("Please log in first.", status=403)
+    user = request.user
+    action = request.REQUEST.get('action')
+    if action == 'get':
+        response = {}
+        response['first_name'] = user.first_name
+        response['last_name'] = user.last_name
+        response['email'] = user.email
+        response['description'] = user.info.description
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+    if action == 'set-pw':
+        old_pw = request.REQUEST.get('old_password')
+        if not user.check_password(old_pw):
+            return HttpResponse("Password incorrect.", status=403)
+        new_pw = request.REQUEST.get('new_password')
+        user.set_password(new_pw)
+        user.save()
+        return HttpResponse(json.dumps({}), mimetype='application/json')
+    if action == 'set-info':
+        response = {}
+        user.first_name = request.REQUEST.get('first-name')
+        user.last_name = request.REQUEST.get('last-name')
+        user.info.description = request.REQUEST.get('description')
+        user.info.save()
+        user.save()
+        response['user_name'] = user.get_full_name()
+        return HttpResponse(json.dumps(response), mimetype='application/json')

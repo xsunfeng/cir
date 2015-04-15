@@ -1,16 +1,23 @@
-<div class="item flag-tags" data-id="{{ claim_id }}">
+<div class="item reword-flag-tags" data-id="{{ version_id }}">
 {% if reword %}
 	{% if reword.reword_cnt %}
-	<div class="ui orange tag label" title="{{ reword.reword_people }}" data-type="reword">Needs rewording
+	<div class="ui yellow tag reword label" title="{{ reword.reword_people }}" data-type="reword">Needs rewording
 		<div class="detail">{{ reword.reword_cnt }}</div>
 		{% if reword.i_voted %}<i class="delete icon"></i>{% endif %}
 	</div>{% endif %}
 {% endif %}
 </div>
+<div class="item merge-flag-tags" data-id="{{ claim_id }}">
+{% if merge %}
+	<a class="ui yellow tag merge label" title="Suggested merging by {{ merge.merge_person }} -- click to show other claims" data-type="merge" data-ids="{{ merge.entry_ids }}">Needs merging
+		{% if merge.i_voted %}<i class="delete icon"></i>{% endif %}
+	</a>
+{% endif %}
+</div>
 <div class="item theme-tags" data-id="{{ claim_id }}">
 {% if themes %}
 	{% for theme in themes %}{% if theme.assignment_cnt %}
-		<div class="ui label" title="{{ theme.assignment_people }}" data-id="{{ theme.id }}">{{ theme.theme_name }}
+		<div class="ui theme label" title="{{ theme.assignment_people }}" data-id="{{ theme.id }}">{{ theme.theme_name }}
 			<div class="detail">{{ theme.assignment_cnt }}</div>
 			{% if theme.i_voted %}<i class="delete icon"></i>{% endif %}
 		</div>

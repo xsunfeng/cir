@@ -11,6 +11,7 @@ $(document).ready(function() {
 		$('#header-member-wrapper').show();
 		if (sessionStorage.getItem('role') == 'facilitator' || sessionStorage.getItem('role') == 'admin') {
 			$('#header-facilitator-wrapper').show();
+			cir.initFacilitatorBtns();
 		}
 	}
 	cir.initUserBtns();
@@ -252,4 +253,30 @@ var cir = {
 			}
 		});
 	},
+	initFacilitatorBtns: function() {
+		$('.facilitator.menu .item').click(function() {
+			var action = this.getAttribute('data-action');
+			if (action == 'switch_user') {
+				var user_id = this.getAttribute('data-id');
+				var user_name = $(this).text();
+				$.ajax({
+					url: '/api_register_delegator/',
+					type: 'post',
+					data: {
+						user_id: user_id,
+					},
+					success: function() {
+						$('#header-user-name').text(user_name + ' (simulated)');
+						sessionStorage.setItem('user_id', user_id);
+						window.default_claim.updateClaimPane();
+					},
+					error: function(xhr) {
+						if (xhr.status == 403) {
+							notify('error', xhr.responseText);
+						}
+					}
+				});
+			}
+		});
+	}
 }

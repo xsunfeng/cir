@@ -39,9 +39,10 @@ class Role(models.Model):
         ('panelist', 'Panelist'),
         ('expert', 'Subject Matter Expert'),
         ('facilitator', 'Facilitator'),
+        ('analyst', 'Analyst'),
     )
     user = models.ForeignKey(User, related_name="role")
-    forum = models.ForeignKey(Forum)
+    forum = models.ForeignKey(Forum, related_name="members")
     role = models.CharField(max_length=20, choices=ROLE_CHOICES) 
 
 class UserInfo(models.Model):
@@ -85,6 +86,7 @@ class EntryCategory(models.Model):
 class Entry(models.Model):
     forum = models.ForeignKey(Forum)
     author = models.ForeignKey(User)
+    delegator = models.ForeignKey(User, null=True, blank=True, related_name='delegated_entries')
     content = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
@@ -180,17 +182,19 @@ class ClaimVersion(Entry):
     is_adopted = models.BooleanField(default=True)
     def getAttr(self, forum):
         attr = super(ClaimVersion, self).getAttr(forum)
-        attr['entry_type'] = 'claim'
+        attr['version_id'] = attr['id']
+        attr['entry_type'] = 'claim version'
         attr['is_adopted'] = self.is_adopted
         return attr
     def getExcerpt(self, forum):
     	attr = {} # for efficiency, don't inherit at all
+        attr['version_id'] = self.id
     	attr['updated_at_full'] = self.updated_at
     	attr['updated_at'] = utils.pretty_date(self.updated_at)
         attr['excerpt'] = self.content[:50] + '...'
         return attr
 
-class Claim(Entry): # TODO: consider not deriving Entry
+class Claim(Entry):
     # for a Claim, its EntryCategory is not used for now -- for further extension of phases
     published = models.BooleanField(default=True)
     CATEGORY_CHOICES = (
@@ -209,6 +213,11 @@ class Claim(Entry): # TODO: consider not deriving Entry
     	attr = self.adopted_version().getAttr(forum)
     	attr['id'] = self.id
         attr['published'] = self.published
+        attr['entry_type'] = 'claim'
+        if self.newer_versions:
+            attr['is_merged'] = '.'.join([str(claimref.to_claim.id) for claimref in self.newer_versions.all()])
+        if self.older_versions:
+            attr['merge_of'] = '.'.join([str(claimref.from_claim.id) for claimref in self.older_versions.all()])
         return attr
     def getExcerpt(self, forum): # used for claim navigator
         attr = self.adopted_version().getExcerpt(forum)
@@ -216,9 +225,8 @@ class Claim(Entry): # TODO: consider not deriving Entry
         attr['published'] = self.published
         return attr
 
-class ClaimReference(models.Model):
+class ClaimReference(models.Model): # only for merging relationship!
     TYPE_CHOICES = (
-        ('reword', 'Reword'),
         ('merge', 'Merge'),
     )
     refer_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
@@ -227,6 +235,7 @@ class ClaimReference(models.Model):
 
 class Event(models.Model): # the behavior of a user on an entry
     user = models.ForeignKey(User)
+    delegator = models.ForeignKey(User, null=True, blank=True, related_name='delegated_events')
     entry = models.ForeignKey(Entry, related_name='events')
     created_at = models.DateTimeField()
     def getAttr(self):
@@ -245,6 +254,7 @@ class Vote(Event):
         ('finding', 'Finding'),
         ('discarded', 'Discarded'),
         ('prioritize', 'Prioritize'),
+        ('like', 'Like a version'),
         ('reword', 'Needs rewording'),
         ('merge', 'Needs merging'),
     )
@@ -261,12 +271,11 @@ class Vote(Event):
 class ThemeAssignment(Event):
     theme = models.ForeignKey(ClaimTheme)
 
-
 class Post(Entry): # in discussion
     title = models.TextField(null=True, blank=True)
     target = models.ForeignKey(Entry, related_name='get_comments', null=True, blank=True) # for comments of a claim
     # the highlight to which this post is attached
-    highlight = models.ForeignKey(Highlight, related_name='posts_of_highlight')
+    highlight = models.ForeignKey(Highlight, related_name='posts_of_highlight', null=True, blank=True)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children')
     CONTENT_CHOICES = (
         ('question', 'Question'),

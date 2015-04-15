@@ -68,10 +68,20 @@ def api_highlight(request):
         response['highlight_id'] = highlight.id
         # then create the content
         now = timezone.now()
+        if 'actual_user_id' in request.session:
+            actual_author = User.objects.get(id=request.session['actual_user_id'])
+        else:
+            actual_author = None
         if content_type == 'comment':
-            Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
+            if actual_author:
+                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
+            else:
+                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
         elif content_type == 'question':
-            Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
+            if actual_author:
+                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
+            else:
+                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
         elif content_type == 'claim':
             claim_views._add_claim(request, highlight)
         return HttpResponse(json.dumps(response), mimetype='application/json')
@@ -99,25 +109,40 @@ def api_annotation(request):
             context['entries'].append(post.getAttr(forum))
         claims = highlight.claims_of_highlight.all()
         for claim in claims:
-            context['entries'].append(claim.versions.get(is_adopted=True).getAttr(forum))
+            context['entries'].append(claim.getAttr(forum))
         context['entries'] = sorted(context['entries'], key=lambda entry: entry['created_at_full'], reverse=True)
         response['html'] = render_to_string("activity-feed-doc.html", context)
         return HttpResponse(json.dumps(response), mimetype='application/json')
     if action == 'create':
         if not request.user.is_authenticated():
             return HttpResponse("Please log in first.", status=403)
+        if 'actual_user_id' in request.session:
+            actual_author = User.objects.get(id=request.session['actual_user_id'])
+        else:
+            actual_author = None
         content = request.REQUEST.get('content')
         # need to know either highlight_id, or claim_id
         highlight_id = request.REQUEST.get('highlight_id')
+        target = None
         if not highlight_id:
-            highlight_id = Claim.objects.get(id=request.REQUEST.get('claim_id')).source_highlight.id
+            claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
+            if claim.source_highlight: # merged claim doesn't have one
+                highlight_id = Claim.objects.get(id=request.REQUEST.get('claim_id')).source_highlight.id
+            else:
+                target = claim
         reply_id = request.REQUEST.get('reply_id', '')
         now = timezone.now()
         if len(reply_id) == 0:
-            Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight_id=highlight_id, content_type='comment')
+            if actual_author:
+                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, target=target, highlight_id=highlight_id, content_type='comment')
+            else:
+                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, target=target, highlight_id=highlight_id, content_type='comment')
         else:
             # TODO allow replying other types of entities
-            Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight_id=highlight_id, parent_id=reply_id, content_type='comment')
+            if actual_author:
+                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, target=target, highlight_id=highlight_id, parent_id=reply_id, content_type='comment')
+            else:
+                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, target=target, highlight_id=highlight_id, parent_id=reply_id, content_type='comment')
         return HttpResponse(json.dumps(response), mimetype='application/json')
     if action == 'delete':
         entry_id = request.REQUEST.get('entry_id')

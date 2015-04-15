@@ -4,6 +4,8 @@ from models import *
 
 class ForumAdmin(admin.ModelAdmin):
     pass
+class RoleAdmin(admin.ModelAdmin):
+    pass
 class DocAdmin(admin.ModelAdmin):
     pass
 class DocSectionAdmin(admin.ModelAdmin):
@@ -20,6 +22,7 @@ class ClaimAdmin(admin.ModelAdmin):
     claim_content.short_description = 'Content'
     list_display = (author_name, claim_content, 'claim_category', 'theme')
 admin.site.register(Forum, ForumAdmin)
+admin.site.register(Role, RoleAdmin)
 admin.site.register(Doc, DocAdmin)
 admin.site.register(DocSection, DocSectionAdmin)
 admin.site.register(ClaimTheme, ClaimThemeAdmin)

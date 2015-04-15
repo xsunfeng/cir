@@ -1,5 +1,5 @@
 <div class="ui segments">
-	<div class="ui top attached secondary segment" style="padding:0.5em 0">
+	<div class="ui top attached secondary filter segment" style="padding:0.5em 0">
 		<div class="ui secondary menu">
 			<div class="item">
 				{% if category %}Category: <strong>{{ category|capfirst }}</strong>{% endif %}
@@ -21,6 +21,19 @@
 					<i class="dropdown icon"></i>
 				</a>
 			</div>
+		</div>
+	</div>
+	<div class="ui top attached secondary merging segment" style="padding:0.5em 0;display:none;border-top:1px solid #d4d4d5">
+		<div class="ui secondary menu">
+			<a id="claim-label-merge" class="item merge control" title="Suggest that the flagged claims can be merged.">
+				Suggest a merging (<span class="merge count"></span>)
+			</a>
+			<a id="claim-perform-merge" class="item merge control" title="Compose a new claim, merging the flagged ones.">
+				Perform a merging (<span class="merge count"></span>)
+			</a>
+			<a id="claim-clear-selection" class="item merge control" title="De-select all claims.">
+				De-select all (<span class="merge count"></span>)
+			</a>
 		</div>
 	</div>
 	<div id="claim-filter-pane" class="ui secondary attached segment hidden">
@@ -48,27 +61,35 @@
 	</div>
 	{% if claims %}{% for claim in claims %}
 	<div class="ui attached segment claim" data-id="{{ claim.id }}">
+		<a class="ui right teal corner merge label" title="Flagged as to be merged -- click to remove flag" style="display:none">
+	    	<i class="plus square outline icon"></i>
+	    </a>
 		{% if not claim.published %}
 		<div class="ui info message">This claim is unpublished and only visible to you</div>
 		{% endif %}
 		<div class="content">
 			<div class="claim-content">{{ claim.content|safe }}</div>
-			<div class="claim-metainfo ui small horizontal divided list">
+			<div class="claim-metainfo ui small horizontal list">
 				<div class="item">
 					<div class="content">
-						Created by <a class="user" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a>
+						<a class="user" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a> <abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>
 					</div>
 				</div>
-				<div class="item">
-					<div class="content">
-						<abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>
-					</div>
-				</div>
-				<div class="item flag-tags" data-id="{{ claim.id }}"></div>
+				{% if claim.published %}
+				{% if claim.is_merged %}
+				<a class="ui merged label" data-ids="{{ claim.is_merged }}" data-action="view-newer" title="This claim has been merged -- click to view newer version(s).">Is merged</a>
+				{% endif %}
+				{% if claim.merge_of %}
+				<a class="ui merged green label" data-ids="{{ claim.merge_of }}" data-action="view-older" title="This claim was created by merging several claims -- click to view older version(s).">Merged version</a>
+				{% endif %}
+				<div class="item reword-flag-tags" data-id="{{ claim.version_id }}"></div>
+				<div class="item merge-flag-tags" data-id="{{ claim.id }}"></div>
 				<div class="item theme-tags" data-id="{{ claim.id }}"></div>
+				{% endif %}
 			</div>
 		</div>
-		<div class="ui red small claim menu" data-id="{{ claim.id }}">{% if claim.published %}
+		<div class="ui red small claim menu" data-id="{{ claim.id }}">
+		{% if claim.published %}
 			<a class="item claim-vote-btn" data-action="prioritize"><i class="thumbs outline up icon"></i><span></span></a>
 			<a class="item claim-vote-btn" data-action="pro"><i class="plus icon"></i><span></span></a>
 			<a class="item claim-vote-btn" data-action="con"><i class="minus icon"></i><span></span></a>
@@ -88,21 +109,22 @@
 				<div class="ui dropdown simple item">
 					Flag
 					<i class="dropdown icon"></i>
-					<div class="menu">
+					<div class="menu" data-id="{{ claim.version_id }}">
 						<a class="item claim-flag-reword-btn">Flag as "needs rewording"</a>
-						<a class="item claim-flag-merge-btn">Flag as "needs merging" ...</a>
+						<a class="item claim-flag-merge-btn">Flag as "needs merging" / Merge claims</a>
 					</div>
 				</div>
 				<a class="item claim-gotosrc-btn" title="Reveal in Document"><i class="unhide icon"></i></a>
 				<a class="item claim-fullscreen-btn" title="Show in full screen"><i class="maximize icon"></i></a>
-			</div>{% else %}
+			</div>
+		{% else %}
 			<a class="item claim-edit-btn"><i class="edit icon"></i>Edit</a>
 			<a class="item claim-delete-btn"><i class="delete icon"></i>Delete</a>
 			<div class="right menu">
 				<a class="item claim-gotosrc-btn" title="Reveal in Document"><i class="unhide icon"></i></a>
 				<a class="item claim-fullscreen-btn" title="Show in full screen"><i class="maximize icon"></i></a>
 			</div>
-			{% endif %}
+		{% endif %}
 		</div>
 	</div>
 	{% endfor %}{% else %}

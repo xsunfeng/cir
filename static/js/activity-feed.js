@@ -33,19 +33,20 @@ jQuery.fn.feed = function(action, data, update_callback) {
 					}
 				});
 				if (_this.data('type') == 'claim' && window.default_claim.display_type == 'fullscreen') {
+					// load votes on alternative versions
 					$('#claim-activity-feed .improve.menu').each(function() {
 						var $menu = $(this);
 						if (window.default_claim.display_type != 'fullscreen') return; // prevent users' fast view switching!
-						var claim_id = this.getAttribute('data-id');
+						var version_id = this.getAttribute('data-id');
 						$.ajax({
 							url: '/api_claim_vote/',
 							type: 'post',
 							data: {
-								action: 'load_single', // not expecting too many of them
-								claim_id: claim_id,
+								action: 'load version', // not expecting too many of them
+								version_id: version_id,
 							},
 							success: function(xhr) {
-								window.default_claim.updateVotingMenu($menu, xhr.voters);
+								_this.updateVotingMenu($menu, xhr.voters);
 							},
 							error: function(xhr) {
 								if (xhr.status == 403) {
@@ -66,6 +67,40 @@ jQuery.fn.feed = function(action, data, update_callback) {
 			},
 		});
 	}
+
+	this.updateVotingMenu = function($menu, vote_data) {
+		$menu.find('.feed-like-claim-version').each(function() {
+			var vote_type = this.getAttribute('data-action');
+			var voter_names = vote_data[vote_type];
+			var my_votes = vote_data['my_votes'] ? vote_data['my_votes'] : '';
+			var i_voted = my_votes.indexOf(vote_type) > -1;
+			var voter_cnt = voter_names.length; // doesn't include myself
+			if (voter_cnt == 0 && ! i_voted) { // nobody voted at all
+				$(this).removeClass('active');
+				if (vote_type == 'like') {
+					var title = 'Like this version';
+				}
+			} else {
+				if (i_voted) {
+					voter_cnt ++;
+					$(this).addClass('active');
+					voter_names.unshift('You');
+				} else {
+					$(this).removeClass('active');
+				}
+				if (vote_type == 'like') {
+					var title = voter_names.join(', ') + ' like this version';
+				}
+			}
+			$(this).popup({content: title});
+			if (voter_cnt > 0) {
+				$(this).find('span').text(voter_cnt);
+			} else {
+				$(this).find('span').text('');
+			}
+			$(this).removeClass('disabled');
+		});
+	};
 
 	if (action == 'init') {
 		// listeners
@@ -96,13 +131,13 @@ jQuery.fn.feed = function(action, data, update_callback) {
 				}
 			});
 		}).on('click', '.feed-delete-claim', function(e) {
-			var id = this.getAttribute('data-id');
+			var id = $(this).parent().attr('data-id');
 			$.ajax({
 				url: '/api_claim/',
 				type: 'post',
 				data: {
-					action: 'delete',
-					claim_id: id,
+					action: 'delete version',
+					version_id: id,
 				},
 				success: function(xhr) {
 					_this.update();
@@ -113,19 +148,20 @@ jQuery.fn.feed = function(action, data, update_callback) {
 					}
 				}
 			});
-		}).on('click', '.feed-adopt-claim', function(e) {
-			var new_id = this.getAttribute('data-id');
-			var old_id = window.default_claim.claim_id;
+		}).on('click', '.feed-like-claim-version', function(e) {
+			var _that = this;
+			var $menu = $(this).parent()
+			var id = $menu.attr('data-id');
 			$.ajax({
-				url: '/api_claim/',
+				url: '/api_claim_vote/',
 				type: 'post',
 				data: {
-					action: 'adopt',
-					new_id: new_id,
-					old_id: old_id,
+					action: 'like version',
+					version_id: id,
+					unvote: $(_that).hasClass('active'),
 				},
 				success: function(xhr) {
-					window.default_claim.updateClaimPane();
+					_this.updateVotingMenu($menu, xhr.voters);
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
