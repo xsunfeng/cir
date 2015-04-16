@@ -1,6 +1,6 @@
 # Django settings for cir project.
 import os
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -16,7 +16,7 @@ DATABASES = {
         # The following settings are not used with sqlite3:
         'USER': 'postgres',
         'PASSWORD': 'asdf1234',
-        'HOST': '127.0.0.1',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'HOST': '130.203.136.141',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                      # Set to empty string for default.
     }
 }
@@ -26,7 +26,11 @@ PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 POSTGIS_VERSION = (2, 0, 3)
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1', 
+    'localhost', 
+    '.ist.psu.edu',
+]
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -53,7 +57,7 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = os.path.join(PROJECT_PATH, 'media/').replace('\\','/')
+MEDIA_ROOT = os.path.join(PROJECT_PATH, 'media/')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -64,8 +68,7 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = '../cir-static/'
-
+STATIC_ROOT = os.path.join(PROJECT_PATH, '../cir-static/')
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = '/static/'
@@ -82,49 +85,38 @@ STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
 PIPELINE_EMBED_MAX_IMAGE_SIZE = 120000
 PIPELINE_EMBED_PATH = r'[/]?static/embed/'
 PIPELINE_CSS = {
-    'cir': {
+    'cir_global': {
         'source_filenames': (
-          'css/widget.css',
-          'css/claims.css',
-          'css/parallel.css',
+          'css/container.css',
+        ),
+        'output_filename': 'css/cir_global.css',
+    },
+    'cir_forum': {
+        'source_filenames': (
+          'css/document.css',
+          'css/claim.css',
           'css/page_body.css',
         ),
-        'output_filename': 'css/cir.css',
-        'variant': 'datauri',
-    },
-    'cir_libs': {
-        'source_filenames': (
-            'lib/jquery-layout-1.4.0/jquery.layout.css',
-            'lib/jquery-ui-1.11.2.custom/jquery-ui.css',
-            'lib/bootstrap-notify/css/bootstrap-notify.css',
-            'lib/DataTables-1.10.2/css/jquery.dataTables.css', 
-            'lib/jcm/jquery.contextMenu.css',
-            'lib/jQuery-Tags-Input/jquery.tagsinput.css',
-            'lib/bootstrap-multiselect/dist/css/bootstrap-multiselect.css',
-        ),
-        'output_filename': 'css/cir_libs.css',
+        'output_filename': 'css/cir_forum.css',
     },
 }
 
 PIPELINE_JS = {
-    'cir': {
+    'cir_global': {
         'source_filenames': (
-            'js/d3.legend.js',
-            'js/dispatcher.js', 
-            'js/layout.js', 
-            'js/citationbar.js',
-            'js/utils.js',
-            'js/layout_utils.js',
-            'js/posts.js',
-            'js/documents.js',
-            'js/forum_intro.js',
-            'js/claims.js',
-            'js/codes.js',
-            'js/parallel.js',
-            'js/content-visual.js',
-            'js/claim-comments.js',
+            'js/header.js',
+            'js/utils.js', 
         ),
-        'output_filename': 'js/cir.js',
+        'output_filename': 'js/cir_global.js',
+    },
+    'cir_forum': {
+        'source_filenames': (
+            'js/layout.js',
+            'js/document.js', 
+            'js/claim.js', 
+            'js/activity-feed.js', 
+        ),
+        'output_filename': 'js/cir_forum.js',
     }
 }
 
@@ -133,6 +125,7 @@ PIPELINE_JS = {
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'pipeline.finders.PipelineFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
@@ -183,6 +176,7 @@ INSTALLED_APPS = (
     'south',
     'cir',
     'password_reset',
+    'pipeline',
 )
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
@@ -200,16 +194,24 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugFalse'
         }
     },
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
     },
     'loggers': {
         'django.request': {
-            'handlers': ['mail_admins'],
+            'handlers': ['console'],
             'level': 'ERROR',
             'propagate': True,
         },

@@ -1,17 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load compressed %}
 {% block extralib %}
-<script src="{% static 'js/layout.js' %}"></script>
-<script src="{% static 'js/document.js' %}"></script>
-<script src="{% static 'js/claim.js' %}"></script>
-<script src="{% static 'js/activity-feed.js' %}"></script>
+{% compressed_js 'cir_forum' %}
 {% endblock %}
 {% block delaylib %}
 {% endblock %}
 {% block extracss %}
-<link href="{% static 'css/document.css' %}" rel="stylesheet" type="text/css" />
-<link href="{% static 'css/claim.css' %}" rel="stylesheet" type="text/css" />
-<link href="{% static 'css/page_body.css' %}" rel="stylesheet" type="text/css" />
+{% compressed_css 'cir_forum' %}
 {% endblock %}
 {% block header %}
 <div class="ui fixed inverted main tabular menu">

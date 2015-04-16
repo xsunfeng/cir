@@ -97,6 +97,8 @@ class Entry(models.Model):
     updated_at = models.DateTimeField()
     category = models.ForeignKey(EntryCategory, related_name='entries', null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
+    def __unicode__(self):
+    	return self.content
     def getAttr(self, forum):
         attr = {}
         try:
@@ -212,6 +214,8 @@ class Claim(Entry):
     theme = models.ForeignKey(ClaimTheme, null=True, blank=True)
     # the highlight from which this claim is extracted
     source_highlight = models.ForeignKey(Highlight, null=True, blank=True, related_name='claims_of_highlight')
+    def __unicode__(self):
+    	return self.adopted_version().content
     def adopted_version(self):
     	return self.versions.get(is_adopted=True)
     def getAttr(self, forum):

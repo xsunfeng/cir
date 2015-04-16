@@ -1,9 +1,11 @@
 from django.conf.urls import patterns, include, url
+from django.contrib import admin
+from django.conf.urls.defaults import handler500
+
 import settings
 import user_views, forum_views, doc_views, claim_views
-from django.contrib import admin
-admin.autodiscover()
 
+admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', forum_views.home),
@@ -32,6 +34,7 @@ urlpatterns = patterns('',
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/statement/?$', forum_views.enter_statement),
 )
 
-if settings.DEBUG:
-	urlpatterns += patterns('', (r'^media/(?P<path>.*)$', 'django.views.static.serve', {
+urlpatterns += patterns('', (r'^media/(?P<path>.*)$', 'django.views.static.serve', {
 	        'document_root': settings.MEDIA_ROOT}))
+
+handler500 = forum_views.handler500

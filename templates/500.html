@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block header %}
+<div class="ui fixed inverted main menu">
+	<div class="container">
+		<div class="title item">GeoDeliberator -- Error</div>
+	</div>
+</div>
+{% endblock %}
+{% block body %}
+<div class="ui grid container">
+	<div class="row">
+		<div class="column">
+			<div class="ui warning message">
+				<p>Sorry -- there's something wrong with the server.</p>
+				<p>The administrators have been notified of this error -- they'll come to it as soon as they can!</p>
+				<p>-- the GeoDeliberator team</p>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="column">
+			<img src="https://d13yacurqjgara.cloudfront.net/users/34790/screenshots/1638786/uh_oh_1x.png" alt="" />
+		</div>
+	</div>
+</div>
+{% endblock %}

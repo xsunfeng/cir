@@ -1,7 +1,8 @@
 import json
 
-from django.shortcuts import render
+from django.shortcuts import render, render_to_response
 from django.http import HttpResponse
+from django.template import RequestContext
 
 from cir.models import *
 
@@ -51,7 +52,6 @@ def enter_forum(request, forum_url): # access /forum_name
         return render(request, 'index.html', context)
     request.session['forum_id'] = forum.id
     request.session['role'] = VISITOR_ROLE
-
     context = {}
     context['forum_name'] = forum.full_name
     context['panelists'] = []
@@ -92,3 +92,8 @@ def register_delegator(request):
         response['role'] = Role.objects.get(user_id=user_id, forum_id=request.session['forum_id']).role
         request.session['actual_user_id'] = user_id
     return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def handler500(request):
+    response = render_to_response('500.html', {}, context_instance=RequestContext(request))
+    response.status_code = 500
+    return response
