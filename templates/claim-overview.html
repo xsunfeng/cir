@@ -36,7 +36,7 @@
 			</a>
 		</div>
 	</div>
-	<div id="claim-filter-pane" class="ui secondary attached segment hidden">
+	<div id="claim-filter-pane" class="ui secondary attached segment hidden" style="z-index:1000;">
 		<div class="ui form">
 			<div class="field">
 				<label>Category</label>
@@ -60,7 +60,13 @@
 		</div>
 	</div>
 	{% if claims %}{% for claim in claims %}
+	{% if claim.is_merged %}
+	<div class="ui attached claim segment accordion" data-id="{{ claim.id }}" style="opacity:0.6">
+		<div class="title"><i class="dropdown icon"></i>This claim has been merged -- click to show.</div>
+		<div class="content">
+	{% else %}
 	<div class="ui attached segment claim" data-id="{{ claim.id }}">
+	{% endif %}
 		<a class="ui right teal corner merge label" title="Flagged as to be merged -- click to remove flag" style="display:none">
 	    	<i class="plus square outline icon"></i>
 	    </a>
@@ -76,6 +82,15 @@
 					</div>
 				</div>
 				{% if claim.published %}
+				{% if claim.category == 'pro' %}
+				<a class="ui teal label">Pro</a>
+				{% elif claim.category == 'con' %}
+				<a class="ui red label">Con</a>
+				{% elif claim.category == 'finding' %}
+				<a class="ui blue label">Key Finding</a>
+				{% elif claim.category == 'discarded' %}
+				<a class="ui label">Discarded</a>
+				{% endif %}
 				{% if claim.is_merged %}
 				<a class="ui merged label" data-ids="{{ claim.is_merged }}" data-action="view-newer" title="This claim has been merged -- click to view newer version(s).">Is merged</a>
 				{% endif %}
@@ -127,6 +142,7 @@
 		{% endif %}
 		</div>
 	</div>
+	{% if claim.is_merged %}</div>{% endif %}
 	{% endfor %}{% else %}
 	<div class="ui orange inverted segment">
 		No claims available for now.

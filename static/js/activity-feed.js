@@ -20,9 +20,16 @@ jQuery.fn.feed = function(action, data, update_callback) {
 				var $events = _this.find('.event');
 				_this.find('abbr').popup();
 				$events.each(function(ind, el) {
-					if ($(el).find('.user').attr('data-id') == sessionStorage.user_id) {
-						$(el).find('.feed-delete-post, .feed-delete-claim').show();
+					if (sessionStorage.simulated_user_id) {
+						if ($(el).find('.user').attr('data-id') == sessionStorage.simulated_user_id) {
+							$(el).find('.feed-delete-post, .feed-delete-claim').show();
+						}
+					} else {
+						if ($(el).find('.user').attr('data-id') == sessionStorage.user_id) {
+							$(el).find('.feed-delete-post, .feed-delete-claim').show();
+						}
 					}
+
 				});
 				_this.find('.nopublish-wrapper').checkbox({
 					onChecked: function() {

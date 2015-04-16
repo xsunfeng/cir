@@ -265,9 +265,19 @@ var cir = {
 					data: {
 						user_id: user_id,
 					},
-					success: function() {
-						$('#header-user-name').text(user_name + ' (simulated)');
-						sessionStorage.setItem('user_id', user_id);
+					success: function(xhr) {
+						if (user_name.indexOf(sessionStorage['user_name']) > -1) {
+							// switched back!
+							$('#header-user-name').text(user_name);
+							delete sessionStorage['simulated_user_name'];
+							delete sessionStorage['simulated_user_id'];
+							delete sessionStorage['simulated_user_role'];
+						} else {
+							$('#header-user-name').text(user_name + ' (simulated)');
+							sessionStorage['simulated_user_name'] = user_name;
+							sessionStorage['simulated_user_id'] = user_id;
+							sessionStorage['simulated_user_role'] = xhr.role;
+						}
 						window.default_claim.updateClaimPane();
 					},
 					error: function(xhr) {

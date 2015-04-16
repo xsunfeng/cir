@@ -82,6 +82,13 @@ def enter_statement(request):
     return render(request, 'index.html')
 
 def register_delegator(request):
+    response = {}
     user_id = request.REQUEST.get('user_id')
-    request.session['actual_user_id'] = user_id
-    return HttpResponse()
+    if user_id == request.user.id:
+        # switch back
+        if 'actual_user_id' in request.session:
+            del request.session['actual_user_id']
+    else:
+        response['role'] = Role.objects.get(user_id=user_id, forum_id=request.session['forum_id']).role
+        request.session['actual_user_id'] = user_id
+    return HttpResponse(json.dumps(response), mimetype='application/json')

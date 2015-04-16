@@ -30,12 +30,13 @@ def api_get_claim(request):
         else:
             claims = claims.filter(theme_id=theme)
     context['claims'] = []
-    context['claims_cnt'] = len(claims)
+    context['claims_cnt'] = 0
     if action == 'get-claim':
         display_type = request.REQUEST.get('display_type')
         context['themes'] = [theme.getAttr() for theme in ClaimTheme.objects.filter(forum=forum)]
         if display_type == 'overview':
             for claim in claims:
+                context['claims_cnt'] += 1
                 context['claims'].append(claim.getAttr(forum))
             context['claims'] = sorted(context['claims'], key=lambda c: c['updated_at_full'], reverse=True)
             response['html'] = render_to_string("claim-overview.html", context)
@@ -105,6 +106,15 @@ def api_claim(request):
         for claim_id in claim_ids:
             oldClaim = Claim.objects.get(id=claim_id)
             ClaimReference.objects.create(refer_type='merge', from_claim=oldClaim, to_claim=newClaim)
+            newClaim.theme = oldClaim.theme
+            newClaim.claim_category = oldClaim.claim_category
+        newClaim.save()
+    elif action == 'change category':
+        claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
+        category = request.REQUEST.get('type')
+        if category in ['pro', 'con', 'finding', 'discarded']:
+            claim.claim_category = category
+            claim.save()
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_claim_activities(request):

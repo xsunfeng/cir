@@ -332,6 +332,7 @@ function CirClaim() {
 				$('#claim-merge-editor').modal('hide');
 				$('#claim-merge-editor .claim-content').text('');
 				$('#claim-merge-editor input').val('');
+				$('#claim-merge-editor textarea').val('');
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -343,6 +344,7 @@ function CirClaim() {
 		$('#claim-merge-editor').modal('hide');
 		$('#claim-merge-editor .claim-content').text('');
 		$('#claim-merge-editor input').val('');
+		$('#claim-merge-editor textarea').val('');
 	});
 	$('#claim-navigator').on('click', '.claim.item', function() {
 		var claim_id = this.getAttribute('data-id');
@@ -362,10 +364,15 @@ function CirClaim() {
 
 	this.highlightClaims = function(claim_ids) {
 		$('#claim-pane .claim.segment .claim-content').removeClass('highlight-found');
+		$('#claim-pane .claim.segment.accordion').removeClass('highlight-found');
 		$('#claim-navigator .item').removeClass('highlight-found');
 		for (var i = 0; i < claim_ids.length; i++) {
 			if (this.display_type == 'overview') {
-				$('#claim-pane .claim.segment[data-id="' + claim_ids[i] + '"] .claim-content').addClass('highlight-found');
+				if ($('#claim-pane .claim.segment[data-id="' + claim_ids[i] + '"]').hasClass('accordion')) {
+					$('#claim-pane .claim.segment[data-id="' + claim_ids[i] + '"]').addClass('highlight-found');
+				} else {
+					$('#claim-pane .claim.segment[data-id="' + claim_ids[i] + '"] .claim-content').addClass('highlight-found');
+				}
 			}
 			$('#claim-navigator .item[data-id="' + claim_ids[i] + '"]').addClass('highlight-found');
 		}
@@ -388,26 +395,47 @@ function CirClaim() {
 		});
 	};
 	this.vote = function(claim_id, type, unvote, callback) {
-		$.ajax({
-			url: '/api_claim_vote/',
-			type: 'post',
-			data: {
-				action: 'vote',
-				claim_id: claim_id,
-				type: type,
-				unvote: unvote
-			},
-			success: function(xhr) {
-				if (typeof callback == 'function') {
-					callback(xhr.voters); // update voting menu
+		if (sessionStorage['role'] == 'facilitator') {
+			// change category
+			$.ajax({
+				url: '/api_claim/',
+				type: 'post',
+				data: {
+					action: 'change category',
+					claim_id: claim_id,
+					type: type,
+				},
+				success: function(xhr) {
+					notify('success', 'The claim has been categorized.');
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						notify('error', xhr.responseText);
+					}
 				}
-			},
-			error: function(xhr) {
-				if (xhr.status == 403) {
-					notify('error', xhr.responseText);
+			});
+		} else {
+			$.ajax({
+				url: '/api_claim_vote/',
+				type: 'post',
+				data: {
+					action: 'vote',
+					claim_id: claim_id,
+					type: type,
+					unvote: unvote
+				},
+				success: function(xhr) {
+					if (typeof callback == 'function') {
+						callback(xhr.voters); // update voting menu
+					}
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						notify('error', xhr.responseText);
+					}
 				}
-			}
-		})
+			});
+		}
 	};
 	this._setDisplayType = function(display_type) {
 		$('.item.claim-view-btn').removeClass('active');
@@ -437,10 +465,17 @@ function CirClaim() {
 				var $claim_wrapper = $('#claim-pane .claim.segment[data-id="' + claim_id + '"]');
 				if ($claim_wrapper.length) {
 					window.scrollTo(0, $claim_wrapper.position().top - 20); // navbar width
-					$claim_wrapper.find('.claim-content').addClass('highlight-found');
-					setTimeout(function() {
-						$claim_wrapper.find('.claim-content').removeClass('highlight-found');
-					}, 1000);
+					if ($claim_wrapper.hasClass('accordion')) {
+						$claim_wrapper.addClass('highlight-found');
+						setTimeout(function() {
+							$claim_wrapper.removeClass('highlight-found');
+						}, 1000);
+					} else {
+						$claim_wrapper.find('.claim-content').addClass('highlight-found');
+						setTimeout(function() {
+							$claim_wrapper.find('.claim-content').removeClass('highlight-found');
+						}, 1000);
+					}
 				}
 			}
 		}
@@ -517,6 +552,7 @@ function CirClaim() {
 					if ('theme' in _this) $('#claim-pane .ui.theme.dropdown').dropdown('set selected', _this.theme)
 					$('#claim-pane .merge.corner.label').popup();
 					$('#claim-pane .merge.control').popup();
+					$('#claim-pane .ui.accordion').accordion({'close nested': false});
 				}
 				// initialize menu/button popups
 				$('#claim-pane .menu .item').popup();

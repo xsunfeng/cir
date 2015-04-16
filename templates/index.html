@@ -58,6 +58,7 @@
 							{% for user in panelists %}
 							<a class="item" data-action="switch_user" data-id="{{ user.id }}">{{ user.name }}</a>
 							{% endfor %}
+							<a class="item" data-action="switch_user" data-id="{{ user_id }}">{{ user_name }}</a>
 						</div>
 					</div>
 				</div>
@@ -158,7 +159,7 @@
 					<div class="claim-content"></div>
 					<textarea class="claim editor" rows="6"></textarea>
 					<div class="ui primary button">Submit</div>
-					<div class="ui close button">Close</div>
+					<div class="ui close button">Discard</div>
 				</form>
 			</div>
 		</div>
