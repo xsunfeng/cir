@@ -285,6 +285,7 @@ class Post(Entry): # in discussion
     # the highlight to which this post is attached
     highlight = models.ForeignKey(Highlight, related_name='posts_of_highlight', null=True, blank=True)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children')
+    collective = models.BooleanField(default=False)
     CONTENT_CHOICES = (
         ('question', 'Question'),
         ('comment', 'Comment'),
@@ -293,6 +294,7 @@ class Post(Entry): # in discussion
     def getAttr(self, forum):
         attr = super(Post, self).getAttr(forum)
         attr['entry_type'] = self.content_type
+        attr['collective'] = self.collective
         if self.parent:
             attr['parent_name'] = self.parent.author.get_full_name()
             attr['parent_id'] = self.parent.id

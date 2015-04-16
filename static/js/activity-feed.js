@@ -29,7 +29,6 @@ jQuery.fn.feed = function(action, data, update_callback) {
 							$(el).find('.feed-delete-post, .feed-delete-claim').show();
 						}
 					}
-
 				});
 				_this.find('.nopublish-wrapper').checkbox({
 					onChecked: function() {
@@ -62,6 +61,10 @@ jQuery.fn.feed = function(action, data, update_callback) {
 							}
 						});
 					});
+				}
+				_this.find('.collective-wrapper').checkbox();
+				if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (! sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
+					_this.find('.collective-wrapper').show();
 				}
 				if (typeof update_callback == 'function') {
 					update_callback();
@@ -189,7 +192,8 @@ jQuery.fn.feed = function(action, data, update_callback) {
 				data: $.extend({
 					action: 'create',
 					content: content,
-					reply_id: _this.find('.feed-forms .comment.form span').attr('data-reply-id')
+					reply_id: _this.find('.feed-forms .comment.form span').attr('data-reply-id'),
+					collective: _this.find('.collective-wrapper').checkbox('is checked'),
 				}, _this.data()),
 				success: function(xhr) {
 					_this.update();
@@ -206,6 +210,9 @@ jQuery.fn.feed = function(action, data, update_callback) {
 					if (xhr.status == 403) {
 						notify('error', xhr.responseText);
 					}
+				},
+				complete: function() {
+					_this.find('.collective-wrapper').checkbox('uncheck');
 				}
 			});
 		}).on('click', '.claim.form div.submit', function(e) {

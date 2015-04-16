@@ -6,26 +6,18 @@
 	{% if claim.published %}
 	<div class="ui vertical segment" style="padding-top:0">
 		<div class="claim-content">{{ claim.content|safe }}</div>
-		<div class="claim-metainfo ui small horizontal divided list">
-			<div class="item">
-				<div class="content">
-					Created by <a class="user" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a>
-				</div>
-			</div>
-			<div class="item">
-				<div class="content">
-					<abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>
-				</div>
-			</div>
+		<div class="claim-metainfo">
+			Created by <a class="user" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a>
+			<abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>
 			{% if claim.is_merged %}
 			<a class="ui merged label" data-ids="{{ claim.is_merged }}" data-action="view-newer" title="This claim has been merged -- click to view newer version(s).">Is merged</a>
 			{% endif %}
 			{% if claim.merge_of %}
 			<a class="ui merged green label" data-ids="{{ claim.merge_of }}" data-action="view-older" title="This claim was created by merging several claims -- click to view older version(s).">Merged version</a>
 			{% endif %}
-			<div class="item reword-flag-tags" data-id="{{ claim.version_id }}"></div>
-			<div class="item merge-flag-tags" data-id="{{ claim.id }}"></div>
-			<div class="item theme-tags" data-id="{{ claim.id }}"></div>
+			<div class="reword-flag-tags" data-id="{{ claim.version_id }}"></div>
+			<div class="merge-flag-tags" data-id="{{ claim.id }}"></div>
+			<div class="theme-tags" data-id="{{ claim.id }}"></div>
 		</div>
 	</div>
 	<div class="ui vertical segment ratings" style="display:none">

@@ -61,7 +61,7 @@
 	</div>
 	{% if claims %}{% for claim in claims %}
 	{% if claim.is_merged %}
-	<div class="ui attached claim segment accordion" data-id="{{ claim.id }}" style="opacity:0.6">
+	<div class="ui attached claim segment accordion" data-id="{{ claim.id }}">
 		<div class="title"><i class="dropdown icon"></i>This claim has been merged -- click to show.</div>
 		<div class="content">
 	{% else %}
@@ -75,12 +75,8 @@
 		{% endif %}
 		<div class="content">
 			<div class="claim-content">{{ claim.content|safe }}</div>
-			<div class="claim-metainfo ui small horizontal list">
-				<div class="item">
-					<div class="content">
-						<a class="user" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a> <abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>
-					</div>
-				</div>
+			<div class="claim-metainfo">
+				<a class="user" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a> <abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>
 				{% if claim.published %}
 				{% if claim.category == 'pro' %}
 				<a class="ui teal label">Pro</a>
@@ -97,9 +93,9 @@
 				{% if claim.merge_of %}
 				<a class="ui merged green label" data-ids="{{ claim.merge_of }}" data-action="view-older" title="This claim was created by merging several claims -- click to view older version(s).">Merged version</a>
 				{% endif %}
-				<div class="item reword-flag-tags" data-id="{{ claim.version_id }}"></div>
-				<div class="item merge-flag-tags" data-id="{{ claim.id }}"></div>
-				<div class="item theme-tags" data-id="{{ claim.id }}"></div>
+				<div class="reword-flag-tags" data-id="{{ claim.version_id }}"></div>
+				<div class="merge-flag-tags" data-id="{{ claim.id }}"></div>
+				<div class="theme-tags" data-id="{{ claim.id }}"></div>
 				{% endif %}
 			</div>
 		</div>

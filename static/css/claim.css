@@ -6,12 +6,39 @@
     -o-transition: background-color 0.5s;
     transition: background-color 0.5s;
 }
+.claim.segment.accordion {
+    -moz-transition: background-color 0.5s;
+    -webkit-transition: background-color 0.5s;
+    -o-transition: background-color 0.5s;
+    transition: background-color 0.5s;
+}
 .highlight-found {
-	background-color: #f2c61f!important
+	background-color: #f2c61f!important;
 }
 .claim-metainfo {
-	margin: 0!important;
+	margin: 10px 0;
+}
+.claim-metainfo > * {
+	display: inline-block;
 }
 textarea.claim.editor {
-	font-size:1.5em
+	font-size:1.5em;
+}
+.user.facilitator {
+	background-color: #5bbd72!important;
+	color: #fff!important;
+	border-radius: .2857rem;
+	padding: 0 0.3rem;
+}
+.user.facilitator:after {
+	content: ' (facilitator)';
+}
+.claim.segment.accordion {
+	opacity: 0.6;
+}
+.claim.segment.accordion .title {
+	margin: -0.6rem 0;	
+}
+.event[data-type="comment"] > .collective.content {
+	
 }

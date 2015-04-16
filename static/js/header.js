@@ -1,4 +1,5 @@
 $(document).ready(function() {
+	sessionStorage.clear();
 	sessionStorage.setItem('user_id', $('#header-user-name').attr('data-id'));
 	sessionStorage.setItem('user_name', $('#header-user-name').text());
 	if ($('#header-user-name').attr('data-role')) {

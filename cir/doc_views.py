@@ -123,6 +123,11 @@ def api_annotation(request):
         content = request.REQUEST.get('content')
         # need to know either highlight_id, or claim_id
         highlight_id = request.REQUEST.get('highlight_id')
+        collective = request.REQUEST.get('collective')
+        if collective == 'true':
+            collective = True
+        else:
+            collective = False
         target = None
         if not highlight_id:
             claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
@@ -134,15 +139,15 @@ def api_annotation(request):
         now = timezone.now()
         if len(reply_id) == 0:
             if actual_author:
-                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, target=target, highlight_id=highlight_id, content_type='comment')
+                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, target=target, highlight_id=highlight_id, collective=collective, content_type='comment')
             else:
-                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, target=target, highlight_id=highlight_id, content_type='comment')
+                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, target=target, highlight_id=highlight_id, collective=collective, content_type='comment')
         else:
             # TODO allow replying other types of entities
             if actual_author:
-                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, target=target, highlight_id=highlight_id, parent_id=reply_id, content_type='comment')
+                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, target=target, highlight_id=highlight_id, parent_id=reply_id, collective=collective, content_type='comment')
             else:
-                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, target=target, highlight_id=highlight_id, parent_id=reply_id, content_type='comment')
+                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, target=target, highlight_id=highlight_id, parent_id=reply_id, collective=collective, content_type='comment')
         return HttpResponse(json.dumps(response), mimetype='application/json')
     if action == 'delete':
         entry_id = request.REQUEST.get('entry_id')
