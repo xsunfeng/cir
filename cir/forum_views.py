@@ -61,9 +61,12 @@ def enter_forum(request, forum_url): # access /forum_name
             'id': panelist.user.id,
             'name': panelist.user.get_full_name()
         })
-    if request.user.is_authenticated(): 
-        request.user.info.last_visited_forum = forum
-        request.user.info.save()
+    if request.user.is_authenticated():
+        try:
+            request.user.info.last_visited_forum = forum
+            request.user.info.save()
+        except: # no userinfo found
+            UserInfo.objects.create(user=request.user, last_visited_forum`=forum)
         try:
             request.session['role'] = Role.objects.get(user=request.user, forum=forum).role
         except:
