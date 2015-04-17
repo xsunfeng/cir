@@ -62,9 +62,9 @@ jQuery.fn.feed = function(action, data, update_callback) {
 						});
 					});
 				}
-				_this.find('.collective-wrapper').checkbox();
+				_this.find('.ui.checkbox').checkbox();
 				if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (! sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
-					_this.find('.collective-wrapper').show();
+					_this.find('.facilitator-only').show();
 				}
 				if (typeof update_callback == 'function') {
 					update_callback();
@@ -193,7 +193,7 @@ jQuery.fn.feed = function(action, data, update_callback) {
 					action: 'create',
 					content: content,
 					reply_id: _this.find('.feed-forms .comment.form span').attr('data-reply-id'),
-					collective: _this.find('.collective-wrapper').checkbox('is checked'),
+					collective: _this.find('.ui.checkbox').checkbox('is checked'),
 				}, _this.data()),
 				success: function(xhr) {
 					_this.update();

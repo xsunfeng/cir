@@ -3,6 +3,7 @@ import json
 from django.shortcuts import render, render_to_response
 from django.http import HttpResponse
 from django.template import RequestContext
+from django.db.models import Q
 
 from cir.models import *
 
@@ -55,7 +56,7 @@ def enter_forum(request, forum_url): # access /forum_name
     context = {}
     context['forum_name'] = forum.full_name
     context['panelists'] = []
-    for panelist in forum.members.filter(role='panelist'):
+    for panelist in forum.members.filter(Q(role='panelist') | Q(role='facilitator')):
         context['panelists'].append({
             'id': panelist.user.id,
             'name': panelist.user.get_full_name()

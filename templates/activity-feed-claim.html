@@ -8,11 +8,13 @@
 				<li>Here goes claim-rewording instructions.</li>
 				<li>Itemized.</li>
 				<li>Submitting a rewording doesn't mean accepted!</li>
+				<li>If you are doing a collective one, be sure to take care of suggestions and conclusions in previous discussions!</li>
 			</ul>
 		</div>
 		<div class="field">
 			<label><span>Reword this claim</span> (Ctrl + Enter to publish)</label>
 			<textarea class="claim reword editor" rows="6"></textarea>
+			<input type="hidden" name="collective">
 		</div>
 		<div class="ui primary submit button"><i class="send outline icon"></i>Submit</div>
 		<div class="ui reset button">Cancel</div>
@@ -25,7 +27,7 @@
 		</div>
 		<div class="ui primary submit button"><i class="send outline icon"></i>Publish</div>
 		<div class="ui reset button"><i class="refresh icon"></i>Reset</div>
-		<div class="ui checkbox collective-wrapper" style="display:none">
+		<div class="ui checkbox facilitator-only" style="display:none">
 			<label>Collective</label>
 			<input type="checkbox" name="collective">
 		</div>
@@ -38,8 +40,14 @@
 <div class="ui feed">
 {% for entry in entries %}
 	<div class="event" data-type="{{ entry.entry_type }}">
-		<div class="label">Label</div>
-		<div class="content">
+		<div class="user-initial {{ entry.author_role }}{% if entry.collective %} collective{% endif %}">
+			{% if entry.author_role == 'facilitator' %}F
+			{% elif entry.collective %}C
+			{% elif entry.author_role == 'admin' %}A
+			{% else %}{{ entry.author_initial }}
+			{% endif %}
+		</div>
+		<div class="activity-content content">
 		{% if entry.is_deleted %}
 			<div class="summary">
 				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a><div class="date">updated <abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div> [deleted]
@@ -70,9 +78,12 @@
 			</div>
 		{% elif entry.entry_type == 'comment' %}
 			<div class="summary">
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> commented
+			{% if entry.collective %}
+				The panel reached a conclusion on this claim:
+			{% else %}
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> commented:
+			{% endif %}
 				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
-				{% if entry.collective %}<div class="ui red label">Collective</div>{% endif %}
 			</div>
 			<div class="extra text">
 				{{ entry.content }}
@@ -83,12 +94,21 @@
 			</div>
 		{% elif entry.entry_type == 'vote' and entry.vote_type == 'reword' %}
 			<div class="summary">
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> suggested that this claim can be reworded 
+			{% if entry.collective %}
+				The panel agree that this claim should be reworded.
+			{% else %}
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> suggested that this claim can be reworded.
+			{% endif %}
 				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
 			</div>{% if entry.reason %}
 			<div class="extra text">
-				Reason: {{ entry.content }}
+				Reason: {{ entry.reason }}
 			</div>{% endif %}
+			{% if entry.collective %}
+			<div class="meta">
+				<a class="feed-reword-claim">Reword the claim</a>
+			</div>
+			{% endif %}
 		{% elif entry.entry_type == 'vote' and entry.vote_type == 'merge' %}
 			<div class="summary">
 				<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> suggested that this claim can be merged. Please click on the "Needs merging" label to see details.
@@ -99,16 +119,22 @@
 			</div>{% endif %}
 		{% elif entry.entry_type == 'claim version' %}
 			<div class="summary">
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a>'s reworded version of this claim
+			{% if entry.collective %}
+				The panel generated an improved version of this claim (written by <a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a>):
+			{% else %}
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a>'s version of this claim:
+			{% endif %}
 				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
 			</div>
 			<div class="extra text">
 				{{ entry.content }}
 			</div>
+			{% if not entry.collective %}
 			<div class="ui red improve menu" data-id="{{ entry.version_id }}" style="display:inline-block">
 				<a class="item feed-delete-claim" style="display:none"><i class="delete icon"></i>Delete</a>
 				<a class="item feed-like-claim-version" data-action="like"><i class="thumbs outline up icon"></i>Like<span></span></a>
 			</div>
+			{% endif %}
 		{% elif entry.entry_type == 'claim old version' %}
 			<div class="summary">
 				<a class="user {{ entry.author_role }}" data-id="{{ entry.new_claim_author_id }}">{{ entry.new_claim_author_name }}</a> has created <a class="merged label" data-ids="{{ entry.is_merged }}">a new claim</a>, which merged this claim and <a class="merged label" data-ids="{{ entry.other_old_claims }}">these claims</a>.

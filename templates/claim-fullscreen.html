@@ -5,6 +5,7 @@
 <div class="ui attached segment">
 	{% if claim.published %}
 	<div class="ui vertical segment" style="padding-top:0">
+		{% if claim.collective %}<a class="ui teal right ribbon label">Collective</a>{% endif %}
 		<div class="claim-content">{{ claim.content|safe }}</div>
 		<div class="claim-metainfo">
 			Created by <a class="user" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a>
@@ -54,7 +55,8 @@
 					Flag
 					<i class="dropdown icon"></i>
 					<div class="menu" data-id="{{ claim.version_id }}">
-						<a class="item claim-flag-reword-btn">Flag as "needs rewording"</a>
+						<a class="item claim-flag-reword-btn" data-collective="false">Flag as "needs rewording"</a>
+						<a class="item claim-flag-reword-btn facilitator-only" data-collective="true" style="display:none">Flag as "needs rewording" (collective)</a>
 						<a class="item claim-flag-merge-btn">Flag as "needs merging" ...</a>
 					</div>
 				</div>

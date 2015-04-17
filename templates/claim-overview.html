@@ -74,7 +74,10 @@
 		<div class="ui info message">This claim is unpublished and only visible to you</div>
 		{% endif %}
 		<div class="content">
-			<div class="claim-content">{{ claim.content|safe }}</div>
+			{% if claim.collective %}<a class="ui teal right ribbon label">Collective</a>{% endif %}
+			<div class="claim-content">
+				{{ claim.content|safe }}
+			</div>
 			<div class="claim-metainfo">
 				<a class="user" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a> <abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>
 				{% if claim.published %}

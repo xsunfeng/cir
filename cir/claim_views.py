@@ -51,6 +51,7 @@ def api_get_claim(request):
             response['html'] = render_to_string("claim-fullscreen.html", context)
     if action == 'navigator':
         for claim in claims:
+            context['claims_cnt'] += 1
             context['claims'].append(claim.getExcerpt(forum))
         context['claims'] = sorted(context['claims'], key=lambda c: c['updated_at_full'], reverse=True)
         response['html'] = render_to_string("claim-navigator.html", context)
@@ -84,13 +85,24 @@ def api_claim(request):
     elif action == 'reword':
         claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
         content = request.REQUEST.get('content')
+        collective = request.REQUEST.get('collective')
         now = timezone.now()
+        new_version = ClaimVersion(forum_id=request.session['forum_id'], content=content, created_at=now, updated_at=now, is_adopted=False, claim=claim)
+        if collective == 'true':
+            new_version.collective = True
+            # automatically adopt
+            current_version = claim.adopted_version()
+            current_version.is_adopted = False
+            current_version.save()
+            new_version.is_adopted = True
+            claim.updated_at = now
+            claim.save()
         if actual_author:
-            ClaimVersion.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, is_adopted=False, claim=claim)
+            new_version.author = actual_author
+            new_version.delegator = request.user
         else:
-            ClaimVersion.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, is_adopted=False, claim=claim)
-    elif action == 'adopt':
-        pass # TODO
+            new_version.author = request.user
+        new_version.save()
     elif action == 'merge':
         now = timezone.now()
         content = request.REQUEST.get('content')
@@ -143,7 +155,7 @@ def api_claim_activities(request):
             context['entries'].append(flag.getAttr())
         # performed rewording
         for version in claim.versions.all():
-            if not version.is_adopted:
+            if not version.is_adopted: # skip the adopted one
                 version_info = version.getAttr(forum)
                 context['entries'].append(version_info)
         # performed merging
@@ -261,19 +273,19 @@ def _get_flags(request, entry, action):
         actual_author = None
     if 'reword' == action:
         context['version_id'] = entry.id
-        reword_people = [vote.user.get_full_name() for vote in entry.events.filter(vote__vote_type='reword')]
+        reword_people = [vote.user.get_full_name() for vote in entry.events.filter(vote__vote_type='reword', collective=False)] # ignore collective ones
         context['reword'] = {
             'reword_people': ', '.join(reword_people),
             'reword_cnt': len(reword_people),
         }
         if actual_author:
-            context['reword']['i_voted'] = actual_author in [vote.user for vote in entry.events.filter(vote__vote_type='reword')]
+            context['reword']['i_voted'] = actual_author in [vote.user for vote in entry.events.filter(vote__vote_type='reword', collective=False)] # ignore collective ones
         else:
-            context['reword']['i_voted'] = request.user in [vote.user for vote in entry.events.filter(vote__vote_type='reword')]
+            context['reword']['i_voted'] = request.user in [vote.user for vote in entry.events.filter(vote__vote_type='reword', collective=False)] # ignore collective ones
     if 'merge' == action:
         context['claim_id'] = entry.id
         # must assert that entry has been suggested for merging for only once.
-        merged_by = [vote.user.get_full_name() for vote in entry.events.filter(vote__vote_type='merge')]
+        merged_by = [vote.user.get_full_name() for vote in entry.events.filter(vote__vote_type='merge', collective=False)] # ignore collective ones
         if len(merged_by):
             vote = entry.events.get(vote__vote_type='merge')
             entry_ids = Vote.objects.filter(user=vote.user, created_at=vote.created_at).values_list('entry__id', flat=True)
@@ -320,14 +332,22 @@ def api_claim_flag(request):
         now = timezone.now()
         if flag_type == 'reword':
             claim_version = ClaimVersion.objects.get(id=request.REQUEST.get('version_id'))
-            if actual_author:
-                Vote.objects.filter(user=actual_author, entry=claim_version, vote_type=flag_type).delete()
-                if deflag == 'false':
-                    Vote.objects.create(user=actual_author, delegator=request.user, entry=claim_version, created_at=now, vote_type='reword')
+            collective = request.REQUEST.get('collective')
+            reason = request.REQUEST.get('reason')
+            if collective == 'true': # impossible to deflag
+                if actual_author:
+                    Vote.objects.create(user=actual_author, delegator=request.user, entry=claim_version, created_at=now, vote_type='reword', reason=reason, collective=True)
+                else:
+                    Vote.objects.create(user=request.user, entry=claim_version, created_at=now, vote_type='reword', reason=reason, collective=True)
             else:
-                Vote.objects.filter(user=request.user, entry=claim_version, vote_type=flag_type).delete()
-                if deflag == 'false':
-                    Vote.objects.create(user=request.user, entry=claim_version, created_at=now, vote_type='reword')
+                if actual_author:
+                    Vote.objects.filter(user=actual_author, entry=claim_version, vote_type=flag_type).delete()
+                    if deflag == 'false':
+                        Vote.objects.create(user=actual_author, delegator=request.user, entry=claim_version, created_at=now, vote_type='reword', reason=reason)
+                else:
+                    Vote.objects.filter(user=request.user, entry=claim_version, vote_type=flag_type).delete()
+                    if deflag == 'false':
+                        Vote.objects.create(user=request.user, entry=claim_version, created_at=now, vote_type='reword', reason=reason)
             response['html'] = render_to_string("claim-tags.html", _get_flags(request, claim_version, 'reword'))
         elif flag_type == 'merge':
             if deflag == 'false':

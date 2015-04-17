@@ -17,3 +17,36 @@ abbr {
 .hidden {
   display: none;
 }
+a.user {
+  cursor: pointer;
+}
+.user-initial {
+  width: 2em;
+  height: 2em;
+  line-height: 2em;
+  text-align: center;
+  border-radius: 500rem;
+  font-size: 1.5em;
+  color: #fff; 
+  display: inline-block;
+}
+.user-initial.facilitator {
+  background-color: #5bbd72;
+  border-color: #5bbd72;
+}
+.user-initial.admin {
+  background-color: #00b5ad;
+  border-color: #00b5ad;
+}
+.user-initial.panelist {
+  background-color: #3b83c0;
+  border-color: #3b83c0;
+}
+.user-initial.collective {
+  background-color: #d95c5c!important;
+  border-color: #d95c5c!important;
+}
+.ui.feed > .event > .content.activity-content {
+  display: inline-block;
+  margin-left: 1em;
+}

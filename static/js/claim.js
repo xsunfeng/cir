@@ -11,11 +11,17 @@ function CirClaim() {
 			_this.updateVotingMenu($menu, vote_data);
 		});
 	}).on('click', '.claim-reword-btn', function() {
+		$('#claim-pane .reword.form input[name="collective"]').val('false');
 		$('#claim-pane .claim.reword.editor')
 		.val($.trim($('#claim-pane .claim-content').text()));
 		$('#claim-pane .reword.form').transition('slide down', '500ms');
 	}).on('click', '.reword.form .submit.button', function() {
 		var content = $('#claim-pane .claim.reword.editor').val();
+		if ($.trim(content).length == 0) {
+			notify('error', 'Content must not be empty.');
+			return;
+		}
+		var collective = $('#claim-pane .reword.form input[name="collective"]').val();
 		$.ajax({
 			url: '/api_claim/',
 			type: 'post',
@@ -23,14 +29,20 @@ function CirClaim() {
 				action: 'reword',
 				content: content,
 				claim_id: _this.claim_id,
+				collective: collective,
 			},
 			success: function(xhr) {
-				$('#claim-activity-feed').feed('update', {
-					'type': 'claim',
-					'id': _this.claim_id,
-				});
-				$('#claim-pane .claim.reword.editor').val('');
-				$('#claim-pane .reword.form').transition('slide down', '500ms');
+				if (collective == 'true') {
+					// the new version is adopted!
+					_this.updateClaimPane();
+				} else {
+					$('#claim-activity-feed').feed('update', {
+						'type': 'claim',
+						'id': _this.claim_id,
+					});
+					$('#claim-pane .claim.reword.editor').val('');
+					$('#claim-pane .reword.form').transition('slide down', '500ms');
+				}
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -47,22 +59,9 @@ function CirClaim() {
 
 	}).on('click', '.claim-flag-reword-btn', function() {
 		var version_id = $(this).parent().attr('data-id');
-		// TODO: prompt for a reason!
-		_this.flag({
-			version_id: version_id,
-			action: 'flag',
-			flag_type: 'reword',
-			deflag: false
-		}, function(xhr) {
-			if (_this.display_type == 'fullscreen') {
-				$('#claim-activity-feed').feed('update', {
-					'type': 'claim',
-					'id': _this.claim_id,
-				});
-			}
-			$('#claim-pane .reword-flag-tags[data-id="' + version_id + '"]').html($(xhr.html).filter('.reword-flag-tags').html());
-			$('#claim-pane .reword-flag-tags[data-id="' + version_id + '"] div.ui.label').popup();
-		});
+		$('#claim-reason-editor input[name="version_id"]').val(version_id);
+		$('#claim-reason-editor input[name="collective"]').val(this.getAttribute('data-collective'));
+		$('#claim-reason-editor').modal('show');
 	}).on('click', '.claim-flag-merge-btn', function() {
 		if (_this.display_type != 'overview') {
 			notify('warning', 'Please switch to Overview and try again.');
@@ -310,8 +309,41 @@ function CirClaim() {
 		} else { // when action == 'view-older' or no action at all
 			_this.highlightClaims(claim_ids);
 		}
+	}).on('click', '.feed-reword-claim', function() {
+		$('#claim-pane .reword.form input[name="collective"]').val('true');
+		$('#claim-pane .claim.reword.editor')
+		.val($.trim($('#claim-pane .claim-content').text()));
+		$('#claim-pane .reword.form').transition('slide down', '500ms');
 	});
 
+	$('#claim-reason-editor').on('click', '.primary.button', function() {
+		var reason = $('#claim-reason-editor textarea.reason.editor').val();
+		var collective = $('#claim-reason-editor input[name="collective"]').val();
+		var version_id = $('#claim-reason-editor input[name="version_id"]').val();
+		if ($.trim(reason).length == 0 && collective == 'true') {
+			notify('error', 'You must input a reason for a collective decision.');
+			return;
+		}
+		_this.flag({
+			version_id: version_id,
+			action: 'flag',
+			flag_type: 'reword',
+			deflag: false,
+			reason: reason,
+			collective: collective
+		}, function(xhr) {
+			$('#claim-reason-editor').modal('hide');
+			$('#claim-reason-editor textarea').val('');
+			if (_this.display_type == 'fullscreen') {
+				$('#claim-activity-feed').feed('update', {
+					'type': 'claim',
+					'id': _this.claim_id,
+				});
+			}
+			$('#claim-pane .reword-flag-tags[data-id="' + version_id + '"]').html($(xhr.html).filter('.reword-flag-tags').html());
+			$('#claim-pane .reword-flag-tags[data-id="' + version_id + '"] div.ui.label').popup();
+		});
+	});
 	$('#claim-merge-editor').on('click', '.primary.button', function() {
 		if ($.trim($('#claim-merge-editor textarea').val()).length == 0) {
 			notify('error', 'Content must not be empty.');
@@ -558,6 +590,9 @@ function CirClaim() {
 				$('#claim-pane .menu .item').popup();
 				$('#claim-pane abbr').popup();
 				$('#claim-pane .merged.label').popup();
+				if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (! sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
+					$('#claim-pane .facilitator-only').show();
+				}
 				_this.loadVotes();
 				_this.loadFlags();
 				if (typeof callback == 'function') {

@@ -128,26 +128,31 @@ def api_annotation(request):
             collective = True
         else:
             collective = False
-        target = None
+        target_entry = None
         if not highlight_id:
             claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
             if claim.source_highlight: # merged claim doesn't have one
                 highlight_id = Claim.objects.get(id=request.REQUEST.get('claim_id')).source_highlight.id
             else:
-                target = claim
+                target_entry = claim
         reply_id = request.REQUEST.get('reply_id', '')
         now = timezone.now()
+        # TODO reply_id must be a post; need to inherit target_claim & target_event
+        post = Post(forum_id=request.session['forum_id'], content=content, created_at=now, updated_at=now, target_entry=target_entry, highlight_id=highlight_id, collective=collective, content_type='comment')
         if len(reply_id) == 0:
             if actual_author:
-                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, target=target, highlight_id=highlight_id, collective=collective, content_type='comment')
+                post.author = actual_author
+                post.delegator = request.user
             else:
-                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, target=target, highlight_id=highlight_id, collective=collective, content_type='comment')
+                post.author = request.user
         else:
-            # TODO allow replying other types of entities
+            post.parent_id = reply_id
             if actual_author:
-                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, target=target, highlight_id=highlight_id, parent_id=reply_id, collective=collective, content_type='comment')
+                post.author = actual_author
+                post.delegator = request.user
             else:
-                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, target=target, highlight_id=highlight_id, parent_id=reply_id, collective=collective, content_type='comment')
+                post.author = request.user
+        post.save()
         return HttpResponse(json.dumps(response), mimetype='application/json')
     if action == 'delete':
         entry_id = request.REQUEST.get('entry_id')

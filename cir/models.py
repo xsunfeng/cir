@@ -97,6 +97,7 @@ class Entry(models.Model):
     updated_at = models.DateTimeField()
     category = models.ForeignKey(EntryCategory, related_name='entries', null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
+    collective = models.BooleanField(default=False)
     def __unicode__(self):
     	return self.content
     def getAttr(self, forum):
@@ -108,11 +109,16 @@ class Entry(models.Model):
         attr['id'] = self.id
         attr['author_id'] = self.author.id
         attr['author_name'] = self.author.get_full_name()
+        try:
+			attr['author_initial'] = str.upper(str(self.author.first_name[0]) + str(self.author.last_name[0]))
+        except:
+        	attr['author_initial'] = ''
         attr['content'] = self.content
         attr['created_at_full'] = self.created_at # for sorting
         attr['updated_at'] = utils.pretty_date(self.updated_at)
         attr['updated_at_full'] = self.updated_at
         attr['is_deleted'] = self.is_deleted
+        attr['collective'] = self.collective
         return attr
 
 class Doc(models.Model):
@@ -250,13 +256,19 @@ class Event(models.Model): # the behavior of a user on an entry
     delegator = models.ForeignKey(User, null=True, blank=True, related_name='delegated_events')
     entry = models.ForeignKey(Entry, related_name='events')
     created_at = models.DateTimeField()
+    collective = models.BooleanField(default=False)
     def getAttr(self):
         attr = {}
         attr['id'] = self.id
         attr['user_id'] = self.user.id
         attr['user_name'] = self.user.get_full_name()
+        try:
+        	attr['author_initial'] = str.upper(str(self.user.first_name[0]) + str(self.user.last_name[0]))
+        except:
+        	attr['author_initial'] = ''
         attr['created_at_full'] = self.created_at # for sorting
         attr['created_at'] = utils.pretty_date(self.created_at)
+        attr['collective'] = self.collective
         return attr
 
 class Vote(Event):
@@ -285,11 +297,11 @@ class ThemeAssignment(Event):
 
 class Post(Entry): # in discussion
     title = models.TextField(null=True, blank=True)
-    target = models.ForeignKey(Entry, related_name='get_comments', null=True, blank=True) # for comments of a claim
+    target_entry = models.ForeignKey(Entry, related_name='get_comments', null=True, blank=True) # for comments of a claim
+    target_event = models.ForeignKey(Event, related_name='get_comments', null=True, blank=True) # for comments of an event
     # the highlight to which this post is attached
     highlight = models.ForeignKey(Highlight, related_name='posts_of_highlight', null=True, blank=True)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children')
-    collective = models.BooleanField(default=False)
     CONTENT_CHOICES = (
         ('question', 'Question'),
         ('comment', 'Comment'),
@@ -298,7 +310,6 @@ class Post(Entry): # in discussion
     def getAttr(self, forum):
         attr = super(Post, self).getAttr(forum)
         attr['entry_type'] = self.content_type
-        attr['collective'] = self.collective
         if self.parent:
             attr['parent_name'] = self.parent.author.get_full_name()
             attr['parent_id'] = self.parent.id
