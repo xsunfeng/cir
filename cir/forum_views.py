@@ -66,7 +66,7 @@ def enter_forum(request, forum_url): # access /forum_name
             request.user.info.last_visited_forum = forum
             request.user.info.save()
         except: # no userinfo found
-            UserInfo.objects.create(user=request.user, last_visited_forum`=forum)
+            UserInfo.objects.create(user=request.user, last_visited_forum=forum)
         try:
             request.session['role'] = Role.objects.get(user=request.user, forum=forum).role
         except:
