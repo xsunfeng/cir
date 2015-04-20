@@ -116,6 +116,7 @@ PIPELINE_JS = {
             'js/document.js', 
             'js/claim.js', 
             'js/activity-feed.js', 
+            'js/utils.js',
         ),
         'output_filename': 'js/cir_forum.js',
     }
