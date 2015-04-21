@@ -7,6 +7,8 @@ from django.utils import timezone
 from cir.models import *
 from cir.utils import pretty_date
 
+VISITOR_ROLE = 'visitor'
+
 def api_get_claim(request):
     response = {}
     action = request.REQUEST.get('action')
@@ -148,11 +150,11 @@ def api_claim_activities(request):
         # suggested rewording
         reword_flags = Vote.objects.filter(entry=claim.adopted_version()).filter(vote_type='reword')
         for flag in reword_flags:
-            context['entries'].append(flag.getAttr())
+            context['entries'].append(flag.getAttr(forum))
         # suggested merging
         merge_flags = Vote.objects.filter(entry=claim).filter(vote_type='merge')
         for flag in merge_flags:
-            context['entries'].append(flag.getAttr())
+            context['entries'].append(flag.getAttr(forum))
         # performed rewording
         for version in claim.versions.all():
             if not version.is_adopted: # skip the adopted one
@@ -161,7 +163,17 @@ def api_claim_activities(request):
         # performed merging
         for newer_claim in claim.newer_versions.all():
             new_claim = newer_claim.to_claim
+            try:
+                author_role = Role.objects.get(user=new_claim.author, forum=forum).role
+            except:
+                author_role = VISITOR_ROLE
+            try:
+                author_initial = str.upper(str(new_claim.author.first_name[0]) + str(new_claim.author.last_name[0]))
+            except:
+                author_initial = ''
             entry = {
+                'author_role': author_role,
+                'author_initial': author_initial,
                 'new_claim_author_id': new_claim.author.id,
                 'new_claim_author_name': new_claim.author.get_full_name(),
                 'entry_type': 'claim old version',
