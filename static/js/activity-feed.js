@@ -2,6 +2,9 @@ jQuery.fn.feed = function(action, data, update_callback) {
 	var _this = this;
 
 	this.update = function() {
+		if (_this.updater) {
+			_this.updater.abort();
+		}
 		if (this.data('type') == 'highlight') { // load activity feed on a highlight
 			this.data('highlight_id', this.data('id'));
 			var url = '/api_annotation/';
@@ -9,7 +12,7 @@ jQuery.fn.feed = function(action, data, update_callback) {
 			this.data('claim_id', this.data('id'));
 			var url = '/api_claim_activities/';
 		}
-		$.ajax({
+		_this.updater = $.ajax({
 			url: url,
 			type: 'post',
 			data: $.extend({

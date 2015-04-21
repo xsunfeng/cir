@@ -8,7 +8,7 @@ function CirClaim() {
 		var $menu = $(_that).parent();
 		var claim_id = $menu.attr('data-id');
 		_this.vote(claim_id, action, $(_that).hasClass('active'), function(vote_data) {
-			_this.updateVotingMenu($menu, vote_data);
+			_this._updateVotingMenu($menu, vote_data);
 		});
 	}).on('click', '.claim-reword-btn', function() {
 		$('#claim-pane .reword.form input[name="collective"]').val('false');
@@ -520,6 +520,12 @@ function CirClaim() {
 		$('#claim-pane > .segment').addClass('loading'); // for fullscreen view
 		$('#claim-pane > .segments').css('opacity', '0.5'); // for overview
 		$('#claim-navigator a.item').removeClass('active');
+		if (_this.flagLoader) {
+			_this.flagLoader.abort();
+		}
+		if (_this.voteLoader) {
+			_this.voteLoader.abort();
+		}
 		$.ajax({
 			url: '/api_get_claim/',
 			type: 'post',
@@ -611,7 +617,7 @@ function CirClaim() {
 		// TODO load ratings of claim _this.claim_id
 	};
 	this.loadFlags = function() {
-		$.ajax({
+		_this.flagLoader = $.ajax({
 			url: '/api_get_flags/',
 			type: 'post',
 			data: {
@@ -653,7 +659,7 @@ function CirClaim() {
 	};
 	this.loadVotes = function() {
 		$('.claim.menu .claim-vote-btn').addClass('disabled');
-		$.ajax({
+		_this.voteLoader = $.ajax({
 			url: '/api_claim_vote/',
 			type: 'post',
 			data: {
@@ -662,12 +668,11 @@ function CirClaim() {
 			},
 			success: function(xhr) {
 				if (_this.display_type == 'fullscreen') {
-					_this.updateVotingMenu($('#claim-pane .claim.menu'), xhr['voters']);
+					_this._updateVotingMenu($('#claim-pane .claim.menu'), xhr['voters']);
 				} else if (_this.display_type == 'overview') {
 					$('#claim-pane .claim.menu').each(function() {
-						if (_this.display_type != 'overview') return; // prevent users' fast view switching!
 						var claim_id = this.getAttribute('data-id');
-						_this.updateVotingMenu($(this), xhr[claim_id]);
+						_this._updateVotingMenu($(this), xhr[claim_id]);
 					});
 				}
 			},
@@ -678,7 +683,7 @@ function CirClaim() {
 			}
 		});
 	};
-	this.updateVotingMenu = function($menu, vote_data) {
+	this._updateVotingMenu = function($menu, vote_data) {
 		$menu.find('.claim-vote-btn').each(function() {
 			var vote_type = this.getAttribute('data-action');
 			var voter_names = vote_data[vote_type];
