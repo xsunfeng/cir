@@ -257,11 +257,15 @@ class Event(models.Model): # the behavior of a user on an entry
     entry = models.ForeignKey(Entry, related_name='events')
     created_at = models.DateTimeField()
     collective = models.BooleanField(default=False)
-    def getAttr(self):
+    def getAttr(self, forum):
         attr = {}
         attr['id'] = self.id
         attr['user_id'] = self.user.id
         attr['user_name'] = self.user.get_full_name()
+        try:
+            attr['author_role'] = Role.objects.get(user=self.user, forum=forum).role
+        except:
+            attr['author_role'] = VISITOR_ROLE
         try:
         	attr['author_initial'] = str.upper(str(self.user.first_name[0]) + str(self.user.last_name[0]))
         except:
@@ -284,8 +288,8 @@ class Vote(Event):
     )
     vote_type = models.CharField(max_length=20, choices=VOTE_CHOICES)
     reason = models.CharField(max_length=2010, null=True, blank=True)
-    def getAttr(self):
-        attr = super(Vote, self).getAttr()
+    def getAttr(self, forum):
+        attr = super(Vote, self).getAttr(forum)
         attr['entry_type'] = 'vote'
         attr['vote_type'] = self.vote_type
         if self.reason:

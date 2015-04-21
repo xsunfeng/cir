@@ -40,12 +40,14 @@
 <div class="ui feed">
 {% for entry in entries %}
 	<div class="event" data-type="{{ entry.entry_type }}">
-		<div class="user-initial {{ entry.author_role }}{% if entry.collective %} collective{% endif %}">
+		<div class="user-initial">
+			<div class="{{ entry.author_role }}{% if entry.collective %} collective{% endif %}">
 			{% if entry.author_role == 'facilitator' %}F
 			{% elif entry.collective %}C
 			{% elif entry.author_role == 'admin' %}A
 			{% else %}{{ entry.author_initial }}
 			{% endif %}
+			</div>
 		</div>
 		<div class="activity-content content">
 		{% if entry.is_deleted %}

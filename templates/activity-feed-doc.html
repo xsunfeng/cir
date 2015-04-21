@@ -23,15 +23,24 @@
 <div class="ui feed">
 {% for entry in entries %}
 	<div class="event" data-type="{{ entry.entry_type }}">
-		<div class="label">Label</div>
-		<div class="content">
+		<div class="user-initial">
+			<div class="{{ entry.author_role }}{% if entry.collective %} collective{% endif %}">
+				{% if entry.author_role == 'facilitator' %}F
+				{% elif entry.collective %}C
+				{% elif entry.author_role == 'admin' %}A
+				{% else %}{{ entry.author_initial }}
+				{% endif %}
+			</div>
+
+		</div>
+		<div class="activity-content content">
 		{% if entry.is_deleted %}
 			<div class="summary">
-				<a class="user" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a><div class="date">updated <abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div> [deleted]
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a><div class="date">updated <abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div> [deleted]
 			</div>
 		{% elif entry.parent_name %}
 			<div class="summary">
-				<a class="user" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> replied to <a class="user">{{ entry.parent_name }}</a>
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> replied to <a class="user">{{ entry.parent_name }}</a>
 				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
 			</div>
 			<div class="extra text">
@@ -43,7 +52,7 @@
 			</div>
 		{% elif entry.entry_type == 'claim' %}
 			<div class="summary">
-				<a class="user" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> extracted a claim.
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> extracted a claim from the highlighted text.
 				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
 			</div>
 			<div class="meta">
@@ -51,7 +60,7 @@
 			</div>
 		{% elif entry.entry_type == 'question' %}
 			<div class="summary">
-				<a class="user" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> raised a question.
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> raised a question on the highlighted text.
 				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
 			</div>
 			<div class="extra text">
@@ -63,7 +72,7 @@
 			</div>
 		{% elif entry.entry_type == 'comment' %}
 			<div class="summary">
-				<a class="user" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> commented
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> commented on the highlighted text.
 				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
 			</div>
 			<div class="extra text">

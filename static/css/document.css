@@ -41,6 +41,7 @@
 	left: -999999px;
 	top: -999999px;
 	z-index: 900;
+	width: 450px;
 }
 .section-content img {
 	max-width: 100%;
@@ -54,7 +55,7 @@
 	height: inherit;
 }
 #doc-thread-popup .segment {
-	min-width: 400px;
+	min-width: 450px;
 }
 #doc-thread-content {
 	max-height: 500px;
