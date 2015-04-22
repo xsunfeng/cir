@@ -1,6 +1,6 @@
 # Django settings for cir project.
 import os
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -16,7 +16,7 @@ DATABASES = {
         # The following settings are not used with sqlite3:
         'USER': 'postgres',
         'PASSWORD': 'asdf1234',
-        'HOST': '130.203.136.141',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'HOST': '127.0.0.1',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                      # Set to empty string for default.
     }
 }

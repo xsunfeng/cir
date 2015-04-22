@@ -54,3 +54,6 @@ a.user {
   background-color: #d95c5c!important;
   border-color: #d95c5c!important;
 }
+.ui.inverted.menu .dropdown .menu .item {
+  padding: 5px 10px!important;
+}

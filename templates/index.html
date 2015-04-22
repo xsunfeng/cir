@@ -44,19 +44,10 @@
 				<i class="icon dashboard"></i>
 				<i class="icon dropdown" tabindex="0"></i>
 				<div class="facilitator menu" tabindex="-1">
-					<a href="#" class="item" data-action="overview">Overview</a>
-					<a href="#" class="item" data-action="rounds">Rounds</a>
-					<a href="#" class="item" data-action="users">Users</a>
-					<a href="#" class="item" data-action="layout">Layout</a>
-					<a href="#" class="item" data-action="log">Access Log</a>
-					<div class="ui dropdown item">Switch User<i class="dropdown icon"></i>
-						<div class="menu">
-							{% for user in panelists %}
-							<a class="item" data-action="switch_user" data-id="{{ user.id }}">{{ user.name }}</a>
-							{% endfor %}
-							<a class="item" data-action="switch_user" data-id="{{ user_id }}">{{ user_name }}</a>
-						</div>
-					</div>
+					{% for user in panelists %}
+					<a class="item" data-action="switch_user" data-id="{{ user.id }}">{{ user.name }}</a>
+					{% endfor %}
+					<a class="item" data-action="switch_user" data-id="{{ user_id }}">{{ user_name }}</a>
 				</div>
 			</div>
 		</div>

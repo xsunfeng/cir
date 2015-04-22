@@ -1,2 +1,3 @@
 **/*.pyc
+cir/migrations/*
 **/.DS_STORE
