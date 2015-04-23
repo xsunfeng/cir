@@ -39,6 +39,6 @@ textarea.claim.editor {
 .claim.segment.accordion .title {
 	margin: -0.6rem 0;	
 }
-.event[data-type="comment"] > .collective.content {
-	
+.ui.improve.menu {
+	margin: 0;
 }

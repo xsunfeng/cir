@@ -188,7 +188,7 @@ def api_claim_activities(request):
             attribute = claim.getAttr(forum)
             attribute['entry_type'] = 'claim new version'
             context['entries'].append(attribute)
-        context['entries'] = sorted(context['entries'], key=lambda entry: entry['created_at_full'], reverse=True)
+        context['entries'] = sorted(context['entries'], key=lambda entry: entry['created_at_full'])
         response['html'] = render_to_string("activity-feed-claim.html", context)
         return HttpResponse(json.dumps(response), mimetype='application/json')
 

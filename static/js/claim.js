@@ -410,24 +410,30 @@ function CirClaim() {
 		}
 	};
 	this.flag = function(data, callback) {
-		$.ajax({
-			url: '/api_claim_flag/',
-			type: 'post',
-			data: data,
-			success: function(xhr) {
-				if (typeof callback == 'function') {
-					callback(xhr);
+		// if you are (or pretend to be) a facilitator
+		if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (! sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
+			// TODO change actual flag
+		} else {
+			$.ajax({
+				url: '/api_claim_flag/',
+				type: 'post',
+				data: data,
+				success: function(xhr) {
+					if (typeof callback == 'function') {
+						callback(xhr);
+					}
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						notify('error', xhr.responseText);
+					}
 				}
-			},
-			error: function(xhr) {
-				if (xhr.status == 403) {
-					notify('error', xhr.responseText);
-				}
-			}
-		});
+			});
+		}
 	};
 	this.vote = function(claim_id, type, unvote, callback) {
-		if (sessionStorage['role'] == 'facilitator') {
+		// if you are (or pretend to be) a facilitator
+		if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (! sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
 			// change category
 			$.ajax({
 				url: '/api_claim/',
