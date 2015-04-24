@@ -8,8 +8,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
         <title>Geodeliberator</title>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.11.8/semantic.min.css" rel="stylesheet" type="text/css" class="ui" />
+        <link rel="stylesheet" type="text/css" href={% static 'css/token-input.css"' %} />
+        <link rel="stylesheet" type="text/css" href={% static 'css/token-input-facebook.css"' %} />
+        <link rel="stylesheet" type="text/css" href={% static 'css/token-input-mac.css"' %} />
         {% compressed_css 'cir_global' %}
-        {% block extracss %}{% endblock %}
+        {% block extracss %}
+        {% endblock %}
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
         
 
@@ -22,6 +26,7 @@
 
         {% include 'signin-signup.html' %}
         <script src="http://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.11.8/semantic.min.js"></script>
+        <script type="text/javascript" src="{% static 'lib/jquery.tokeninput.js' %}"></script>
         {% compressed_js 'cir_global' %}
         {% block extralib %}{% endblock %}
         {% block delaylib %}{% endblock %}

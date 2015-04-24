@@ -95,7 +95,10 @@
 	<div class="ui grid">
 		<div id="document-categories" class="sixteen wide column"></div>
 		<div id="document-pane" class="ten wide column">Please select a document from the list.</div>
-		<div class="six wide column"></div>
+		<div id="document-tag" class="one wide column">Tags
+			
+    	</div>
+		<div class="five wide column"></div>
 	</div>
 	<div id="doc-highlight-toolbar">
 		<div class="ui attached top segment blue labeled icon menu">
@@ -108,27 +111,14 @@
 			<a data-action="claim" class="item doc-anno-btn">
 			    <i class="code icon"></i>Extract claim
 			</a>
+			<a data-action="tags" class="item doc-anno-btn">
+			    <i class="tags icon"></i>Tag
+			</a>
 		</div>
 		<div class="ui attached bottom segment" style="display:none">
-			<form id="doc-comment-form" class="ui form comment" style="display:none">
-				<div class="field">
-					<label><span></span> (Ctrl + Enter to publish)</label>
-					<textarea rows="2"></textarea>
-				</div>
-				<div class="ui primary button doc-anno-submit">Publish</div>
-			</form>
-			<form id="doc-claim-form" class="ui form claim" style="display:none">
-				<div class="field">
-					<div style="width: 375px" class="ui attached info message">Please reword the highlighted text to form a coherent and meaningful claim.</div>
-					<textarea></textarea>
-				</div>
-				<div class="ui checkbox nopublish-wrapper">
-					<label>Save for later</label>
-					<input type="checkbox" name="nopublish">
-				</div>
-				<div class="ui primary button doc-anno-submit">Publish</div>
-			</form>
-		</div>
+			<form id="doc-comment-form" class="ui form comment" style="display:none"> <div class="field"> <label><span></span> (Ctrl + Enter to publish)</label> <textarea rows="2"></textarea> </div> <div class="ui primary button doc-anno-submit">Publish</div> </form> <form id="doc-claim-form" class="ui form claim" style="display:none"> <div class="field"> <div style="width: 375px" class="ui attached info message">Please reword the highlighted text to form a coherent and meaningful claim.</div> <textarea></textarea> </div> <div class="ui checkbox nopublish-wrapper"> <label>Save for later</label> <input type="checkbox" name="nopublish"> </div> <div class="ui primary button doc-anno-submit">Publish</div> </form> <form id="doc-tags-form" class="ui form tags" style="display:none"> <div class="field"> <label><span></span> (Ctrl + Enter to publish)</label><a href="#" id="plugin-methods-add">Add Token</a> | <a href="#" id="plugin-methods-remove">Remove Token</a> | <a href="#" id="plugin-methods-clear">Clear Tokens</a><br />
+        	<input type="text" id="demo-input-plugin-methods" name="blah" />
+        	</div> <div class="ui primary button doc-anno-submit">Publish</div> </form></div>
 	</div>
 	{% include 'doc-thread-popup.html' %}
 </div>

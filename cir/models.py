@@ -176,6 +176,7 @@ class Highlight(models.Model):
             attr['type'] = self.posts_of_highlight.order_by('-updated_at')[0].content_type
         return attr
 
+
 class ClaimTheme(models.Model):
     forum = models.ForeignKey(Forum)
     name = models.CharField(max_length=100)

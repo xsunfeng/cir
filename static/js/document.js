@@ -23,7 +23,48 @@ function CirDocument() {
 			$(this).parent().next().text('Publish');
 		}
 	});
+	//tagging input initializing
+	function S2id(str){
+            var ret;
+            for(i=0;i<str.length;i++)
+            {
+                ret += str[i].charCodeAt(0)%100
+            }
+            return parseInt(ret)
+        }
+	$("#demo-input-plugin-methods").tokenInput([
+                {id: 7, name: "Economics"},
+                {id: 11, name: "Environment"},
+                {id: 13, name: "Convenience"},
+                {id: 17, name: "Employment"},
+                {id: 19, name: "Duration"},
+                {id: 23, name: "Space"},
+             ], {
+                prePopulate: [
+                    {id: 123, name: "Cost"},
+                    {id: 555, name: "Waste disposal"},
+                    {id: 9000, name: "Safety"}
+                ],
+                theme: "facebook"
+            });
+	// Add a token programatically
+            $("#plugin-methods-add").click(function () {
+                var addedtag = $('#token-input-demo-input-plugin-methods').val();
+                $("#demo-input-plugin-methods").tokenInput("add", {id: S2id(addedtag), name: addedtag});
+                return false;
+            });
 
+            // Remove a token programatically
+            $("#plugin-methods-remove").click(function () {
+                $("#demo-input-plugin-methods").tokenInput("remove", {name: "James was here"});
+                return false;
+            });
+
+            // Clear all tokens
+            $("#plugin-methods-clear").click(function () {
+                $("#demo-input-plugin-methods").tokenInput("clear");
+                return false;
+            });
 	// static listeners
 	this.$content_element.click(function(e) {
 		// remove all popovers
@@ -45,6 +86,12 @@ function CirDocument() {
 			$('#doc-comment-form').hide();
 			$('#doc-claim-form').show().parent().show();
 			$('#doc-claim-form textarea').val($.trim(_this.$content_element.find('.tk.highlighted').text())).focus();
+		} else if (_this.newHighlight.type == 'tags'){
+			$('#doc-claim-form').hide();
+			$('#doc-comment-form').hide();
+			$('#doc-tags-form').show().parent().show();
+			$('#doc-tags-form label span').text('Tag with exisitng or new labels');
+
 		}
 	});
 	$('.doc-anno-submit').click(function(e) {
