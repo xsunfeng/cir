@@ -2,12 +2,12 @@
 {% load static %}
 {% load compressed %}
 {% block extralib %}
-{% compressed_js 'cir_forum' %}
+	{% compressed_js 'cir_forum' %}
 {% endblock %}
 {% block delaylib %}
 {% endblock %}
 {% block extracss %}
-{% compressed_css 'cir_forum' %}
+	{% compressed_css 'cir_forum' %}
 {% endblock %}
 {% block header %}
 <div class="ui fixed inverted main tabular menu">
@@ -40,14 +40,17 @@
 			</div>
 		</div>
 		<div id="header-facilitator-wrapper" class="right menu" style="display:inline-block">
-			<div class="ui simple dropdown item" tabindex="0">
+			<a href="{{ admin_url }}" class="item">
 				<i class="icon dashboard"></i>
+			</a>
+			<div class="ui simple dropdown item" tabindex="0">
+				<i class="icon spy"></i>
 				<i class="icon dropdown" tabindex="0"></i>
-				<div class="facilitator menu" tabindex="-1">
+				<div class="switch user menu" tabindex="-1">
 					{% for user in panelists %}
-					<a class="item" data-action="switch_user" data-id="{{ user.id }}">{{ user.name }}</a>
+					<a class="item" data-id="{{ user.id }}">{{ user.name }}</a>
 					{% endfor %}
-					<a class="item" data-action="switch_user" data-id="{{ user_id }}">{{ user_name }}</a>
+					<a class="item" data-id="{{ user_id }}">{{ user_name }}</a>
 				</div>
 			</div>
 		</div>

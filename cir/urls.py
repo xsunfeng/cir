@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.conf.urls.defaults import handler500
 
 import settings
-import user_views, forum_views, doc_views, claim_views
+import user_views, forum_views, doc_views, claim_views, facilitator_views
 
 admin.autodiscover()
 
@@ -24,13 +24,14 @@ urlpatterns = patterns('',
     url(r'^api_claim_flag/$', claim_views.api_claim_flag),
     url(r'^api_get_flags/$', claim_views.api_get_flags),
 
-    url(r'^api_register_delegator/$', forum_views.register_delegator),
+    url(r'^api_register_delegator/$', facilitator_views.register_delegator),
     # include other apps
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^password_reset/', include('password_reset.urls')),
 
     # these must be put last!
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum),
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/admin/?$', facilitator_views.enter_dashboard),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/statement/?$', forum_views.enter_statement),
 )
 

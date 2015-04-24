@@ -182,6 +182,20 @@ jQuery.fn.feed = function(action, data, update_callback) {
 					}
 				}
 			});
+		}).on('click', '.feed-diff-claim-version', function() {
+			var $current_text = $(this).parents('.event').find('.improved.text');
+			var text = $current_text.text();
+			if ($(this).text() == 'Show difference') {
+				_this.tempOrigText = text;
+				var adopted_text = $('#claim-pane .claim-content').text();
+				var diff = StringDiff.diffString(adopted_text, text);
+				$current_text.html(diff);
+				$(this).text('Hide difference');
+			} else {
+				$current_text.text(_this.tempOrigText);
+				delete _this.tempOrigText;
+				$(this).text('Show difference');
+			}
 		}).on('click', '.comment.form div.submit', function(e) {
 			var content = _this.find('.feed-forms .comment.form textarea').val();
 			if ($.trim(content).length == 0) {

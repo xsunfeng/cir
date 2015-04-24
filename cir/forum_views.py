@@ -55,6 +55,7 @@ def enter_forum(request, forum_url): # access /forum_name
     request.session['role'] = VISITOR_ROLE
     context = {}
     context['forum_name'] = forum.full_name
+    context['admin_url'] = forum.url + '/admin'
     context['panelists'] = []
     for panelist in forum.members.filter(Q(role='panelist') | Q(role='facilitator')):
         context['panelists'].append({
@@ -78,24 +79,12 @@ def enter_forum(request, forum_url): # access /forum_name
         context['user_id'] = -1
         context['user_name'] = ''
         context['role'] = request.session['role']
-    if forum.access_level == 'private' and (not request.user.is_authenticated() or not Membership.objects.filter(user=request.user, forum=forum).exists()):
+    if forum.access_level == 'private' and (not request.user.is_authenticated() or not Role.objects.filter(user=request.user, forum=forum).exists()):
         context['load_error'] = '403'
     return render(request, 'index.html', context)
 
 def enter_statement(request):
     return render(request, 'index.html')
-
-def register_delegator(request):
-    response = {}
-    user_id = request.REQUEST.get('user_id')
-    if user_id == request.user.id:
-        # switch back
-        if 'actual_user_id' in request.session:
-            del request.session['actual_user_id']
-    else:
-        response['role'] = Role.objects.get(user_id=user_id, forum_id=request.session['forum_id']).role
-        request.session['actual_user_id'] = user_id
-    return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def handler500(request):
     response = render_to_response('500.html', {}, context_instance=RequestContext(request))

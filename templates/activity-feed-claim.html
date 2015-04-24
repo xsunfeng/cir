@@ -128,13 +128,14 @@
 			{% endif %}
 				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
 			</div>
-			<div class="extra text">
+			<div class="extra improved text">
 				{{ entry.content }}
 			</div>
 			{% if not entry.collective %}
 			<div class="ui red improve secondary small menu" data-id="{{ entry.version_id }}">
 				<a class="item feed-delete-claim" style="display:none"><i class="delete icon"></i>Delete</a>
 				<a class="item feed-like-claim-version" data-action="like"><i class="thumbs outline up icon"></i>Like<span></span></a>
+				<a class="item feed-diff-claim-version" data-action="diff">Show difference</a>
 			</div>
 			{% endif %}
 		{% elif entry.entry_type == 'claim old version' %}

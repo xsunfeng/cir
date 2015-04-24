@@ -99,6 +99,12 @@ PIPELINE_CSS = {
         ),
         'output_filename': 'css/cir_forum.css',
     },
+    'cir_dashboard': {
+        'source_filenames': (
+            'css/dashboard.css',
+        ),
+        'output_filename': 'css/cir_dashboard.css',
+    }
 }
 
 PIPELINE_JS = {
@@ -118,6 +124,12 @@ PIPELINE_JS = {
             'js/utils.js',
         ),
         'output_filename': 'js/cir_forum.js',
+    },
+    'cir_dashboard': {
+        'source_filenames': (
+            'js/dashboard.js',
+        ),
+        'output_filename': 'js/cir_dashboard.js',
     }
 }
 

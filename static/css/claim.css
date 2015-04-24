@@ -42,3 +42,13 @@ textarea.claim.editor {
 .ui.improve.menu {
 	margin: 0;
 }
+.improved.text {
+	font-size: 1.3em!important;
+}
+del {
+	color: red;
+}
+ins {
+	color: green;
+	font-weight: 600;
+}
