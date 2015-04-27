@@ -4,7 +4,7 @@
 	});
 })(jQuery);
 
-var CirLayout = {
+var CirDashboard = {
 	initLayout: function() {
 		$('.tabular.menu > .container > .item').tab();
 		// TODO

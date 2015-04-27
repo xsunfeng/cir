@@ -3,6 +3,7 @@ import json
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.utils import timezone
+from django.db.models import Q
 
 from cir.models import *
 from cir.utils import pretty_date
@@ -75,15 +76,14 @@ def api_claim(request):
         _edit_claim(request)
     elif action == 'delete':
         claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
+        now = timezone.now()
         claim.is_deleted = True
+        claim.updated_at = now
         for version in versions:
             version.is_deleted = True
+            version.updated_at = now
             version.save()
         claim.save()
-    elif action == 'delete version':
-        version = ClaimVersion.objects.get(id=request.REQUEST.get('version_id'))
-        version.is_deleted = True
-        version.save()
     elif action == 'reword':
         claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
         content = request.REQUEST.get('content')
@@ -135,59 +135,78 @@ def api_claim_activities(request):
     response = {}
     action = request.REQUEST.get('action')
     if action == 'load-thread':
+        activity =  request.REQUEST.get('filter')
         claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
         forum = Forum.objects.get(id=request.session['forum_id'])
-        highlight = claim.source_highlight
+        
         context = {}
         context['entries'] = []
-        # discussions on the claim
-        if highlight:
-            posts = highlight.posts_of_highlight.all()
-        else: # a merged claim doesn't has a source_highlight
-            posts = claim.get_comments.all()
-        for post in posts:
-            context['entries'].append(post.getAttr(forum))
-        # suggested rewording
-        reword_flags = Vote.objects.filter(entry=claim.adopted_version()).filter(vote_type='reword')
-        for flag in reword_flags:
-            context['entries'].append(flag.getAttr(forum))
-        # suggested merging
-        merge_flags = Vote.objects.filter(entry=claim).filter(vote_type='merge')
-        for flag in merge_flags:
-            context['entries'].append(flag.getAttr(forum))
-        # performed rewording
-        for version in claim.versions.all():
-            if not version.is_adopted: # skip the adopted one
-                version_info = version.getAttr(forum)
-                context['entries'].append(version_info)
-        # performed merging
-        for newer_claim in claim.newer_versions.all():
-            new_claim = newer_claim.to_claim
-            try:
-                author_role = Role.objects.get(user=new_claim.author, forum=forum).role
-            except:
-                author_role = VISITOR_ROLE
-            try:
-                author_initial = str.upper(str(new_claim.author.first_name[0]) + str(new_claim.author.last_name[0]))
-            except:
-                author_initial = ''
-            entry = {
-                'author_role': author_role,
-                'author_initial': author_initial,
-                'new_claim_author_id': new_claim.author.id,
-                'new_claim_author_name': new_claim.author.get_full_name(),
-                'entry_type': 'claim old version',
-                'is_merged': new_claim.id,
-                'other_old_claims': '.'.join([str(claimref.from_claim.id) for claimref in new_claim.older_versions.all() if claimref.from_claim != claim]),
-                'created_at_full': new_claim.created_at,
-                'updated_at_full': new_claim.updated_at,
-                'updated_at': pretty_date(new_claim.updated_at)
-            }
-            context['entries'].append(entry)
-        if claim.older_versions.all(): # this is a merged one!
-            attribute = claim.getAttr(forum)
-            attribute['entry_type'] = 'claim new version'
-            context['entries'].append(attribute)
+        if activity == 'all' or activity == 'general':
+            if claim.source_highlight:
+                posts = claim.source_highlight.posts_of_highlight.all()
+                for post in posts:
+                    for comment in post.getTree():
+                        context['entries'].append(comment.getAttr(forum))
+            posts = claim.comments_of_entry.all()
+            for post in posts:
+                for comment in post.getTree():
+                    context['entries'].append(comment.getAttr(forum))
+        if activity == 'all' or activity == 'categorize':
+            votes = Vote.objects.filter(entry=claim).filter(Q(vote_type='pro') | Q(vote_type='con') | Q(vote_type='finding'))
+            for vote in votes:
+                context['entries'].append(vote.getAttr(forum))
+                posts = vote.comments_of_event.all()
+                for post in posts:
+                    for comment in post.getTree():
+                        context['entries'].append(comment.getAttr(forum))
+        if activity == 'all' or activity == 'theme':
+            themeassignments = ThemeAssignment.objects.filter(entry=claim)
+            for themeassignment in themeassignments:
+                context['entries'].append(themeassignment.getAttr(forum))
+                posts = themeassignment.comments_of_event.all()
+                for post in posts:
+                    for comment in post.getTree():
+                        context['entries'].append(comment.getAttr(forum))
+        if activity == 'all' or activity == 'improve':
+            reword_flags = Vote.objects.filter(entry=claim.adopted_version()).filter(vote_type='reword')
+            for flag in reword_flags:
+                context['entries'].append(flag.getAttr(forum))
+            merge_flags = Vote.objects.filter(entry=claim).filter(vote_type='merge')
+            for flag in merge_flags:
+                context['entries'].append(flag.getAttr(forum))
+            # performed rewording
+            for version in claim.versions.all():
+                if not version.is_adopted: # skip the adopted one
+                    version_info = version.getAttr(forum)
+                    context['entries'].append(version_info)
+            # performed merging
+            for newer_claim in claim.newer_versions.all():
+                new_claim = newer_claim.to_claim
+                try:
+                    author_role = Role.objects.get(user=new_claim.author, forum=forum).role
+                except:
+                    author_role = VISITOR_ROLE
+                try:
+                    author_initial = str.upper(str(new_claim.author.first_name[0]) + str(new_claim.author.last_name[0]))
+                except:
+                    author_initial = ''
+                entry = {
+                    'author_role': author_role,
+                    'author_initial': author_initial,
+                    'new_claim_author_id': new_claim.author.id,
+                    'new_claim_author_name': new_claim.author.get_full_name(),
+                    'entry_type': 'claim old version',
+                    'is_merged': new_claim.id,
+                    'other_old_claims': '.'.join([str(claimref.from_claim.id) for claimref in new_claim.older_versions.all() if claimref.from_claim != claim]),
+                    'created_at_full': new_claim.created_at,
+                    'updated_at_full': new_claim.updated_at,
+                    'updated_at': pretty_date(new_claim.updated_at)
+                }
+                context['entries'].append(entry)
+            if claim.older_versions.all(): # this is a merged one!
+                attribute = claim.getAttr(forum)
+                attribute['entry_type'] = 'claim new version'
+                context['entries'].append(attribute)
         context['entries'] = sorted(context['entries'], key=lambda entry: entry['created_at_full'])
         response['html'] = render_to_string("activity-feed-claim.html", context)
         return HttpResponse(json.dumps(response), mimetype='application/json')

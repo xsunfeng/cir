@@ -39,9 +39,6 @@ textarea.claim.editor {
 .claim.segment.accordion .title {
 	margin: -0.6rem 0;	
 }
-.ui.improve.menu {
-	margin: 0;
-}
 .improved.text {
 	font-size: 1.3em!important;
 }
@@ -51,4 +48,7 @@ del {
 ins {
 	color: green;
 	font-weight: 600;
+}
+.activity-content > .summary {
+	font-weight: inherit!important;
 }

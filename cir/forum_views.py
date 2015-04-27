@@ -55,7 +55,7 @@ def enter_forum(request, forum_url): # access /forum_name
     request.session['role'] = VISITOR_ROLE
     context = {}
     context['forum_name'] = forum.full_name
-    context['admin_url'] = forum.url + '/admin'
+    context['dashboard_url'] = forum.url + '/dashboard'
     context['panelists'] = []
     for panelist in forum.members.filter(Q(role='panelist') | Q(role='facilitator')):
         context['panelists'].append({

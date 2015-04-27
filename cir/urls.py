@@ -31,7 +31,7 @@ urlpatterns = patterns('',
 
     # these must be put last!
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum),
-    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/admin/?$', facilitator_views.enter_dashboard),
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/dashboard/?$', facilitator_views.enter_dashboard),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/statement/?$', forum_views.enter_statement),
 )
 
