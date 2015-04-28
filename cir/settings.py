@@ -88,6 +88,7 @@ PIPELINE_CSS = {
     'cir_global': {
         'source_filenames': (
           'css/container.css',
+          'css/page_body.css',
         ),
         'output_filename': 'css/cir_global.css',
     },
@@ -95,7 +96,6 @@ PIPELINE_CSS = {
         'source_filenames': (
           'css/document.css',
           'css/claim.css',
-          'css/page_body.css',
         ),
         'output_filename': 'css/cir_forum.css',
     },

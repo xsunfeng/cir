@@ -57,6 +57,7 @@ def enter_forum(request, forum_url): # access /forum_name
     context['forum_name'] = forum.full_name
     context['dashboard_url'] = forum.url + '/dashboard'
     context['panelists'] = []
+    context['forum_phase'] = forum.phase
     for panelist in forum.members.filter(Q(role='panelist') | Q(role='facilitator')):
         context['panelists'].append({
             'id': panelist.user.id,

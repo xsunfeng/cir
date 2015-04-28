@@ -103,7 +103,11 @@
 			</div>
 		{% elif entry.entry_type == 'categorize' %}
 			<div class="summary">
+			{% if entry.collective %}
+				The category of this claim changed to <strong>{{ entry.vote_type_full }}</strong>.
+			{% else %}
 				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.user_name }}</a> categorized this claim as <strong>{{ entry.vote_type_full }}</strong>.
+			{% endif %}
 				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
 			</div>
 			<div class="ui red secondary fitted menu">
@@ -111,7 +115,11 @@
 			</div>
 		{% elif entry.entry_type == 'themeassignment' %}
 			<div class="summary">
+			{% if entry.collective %}
+				The theme of this claim changed to <strong>{{ entry.theme_name }}</strong>.
+			{% else %}
 				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.user_name }}</a> assigned a theme to this claim: <strong>{{ entry.theme_name }}</strong>.
+			{% endif %}
 				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
 			</div>
 			<div class="ui red secondary fitted menu">

@@ -15,7 +15,17 @@ class Forum(models.Model):
         ('panelist', 'Panel only'),
         ('private', 'Private'),
     )
+    PHASE_CHOICES = (
+		('paused', 'Paused'),
+		('not_started', 'Not started'),
+		('extract', 'Extracting'),
+		('categorize', 'Categorizing'),
+		('theming', 'Theming'),
+		('improve', 'Prioritizing and Improving'),
+		('finished', 'Finished')
+    )
     access_level = models.CharField(max_length=100, choices=ACCESS_CHOICES, default='open')
+    phase = models.CharField(max_length=100, choices=PHASE_CHOICES, default='not_started')
     contextmap = models.TextField(null=True, blank=True)
     forum_logo = models.ImageField(upload_to='forum_logos', null=True, blank=True, default='forum_logos/default.jpg')
     def __unicode__(self): # used for admin site

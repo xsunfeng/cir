@@ -10,6 +10,15 @@
 		<div class="claim-metainfo">
 			Created by <a class="user" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a>
 			<abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>
+			{% if claim.category == 'pro' %}
+			<a class="ui teal label">Pro</a>
+			{% elif claim.category == 'con' %}
+			<a class="ui red label">Con</a>
+			{% elif claim.category == 'finding' %}
+			<a class="ui blue label">Key Finding</a>
+			{% elif claim.category == 'discarded' %}
+			<a class="ui label">Discarded</a>
+			{% endif %}
 			{% if claim.is_merged %}
 			<a class="ui merged label" data-ids="{{ claim.is_merged }}" data-action="view-newer" title="This claim has been merged -- click to view newer version(s).">Is merged</a>
 			{% endif %}

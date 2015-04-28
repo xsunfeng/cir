@@ -25,11 +25,8 @@ def enter_dashboard(request, forum_url):
             'load_error': '404'
         }
         return render(request, 'index_dashboard.html', context)
-    request.session['forum_id'] = forum.id
     request.session['role'] = VISITOR_ROLE
     context = {}
-    context['forum_name'] = forum.full_name
-    context['forum_url'] = forum.url
     if request.user.is_authenticated():
         try:
             request.session['role'] = Role.objects.get(user=request.user, forum=forum).role
@@ -37,4 +34,9 @@ def enter_dashboard(request, forum_url):
             pass
     if request.session['role'] != 'facilitator' and request.session['role'] != 'admin':
         context['load_error'] = '403'
+    context['forum_name'] = forum.full_name
+    context['forum_url'] = forum.url
+    context['description'] = forum.description
+    context['access_level'] = forum.access_level
+    context['phase'] = forum.phase
     return render(request, 'index_dashboard.html', context)

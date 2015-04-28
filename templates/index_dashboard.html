@@ -17,7 +17,7 @@
 		<div class="item">GeoDeliberator</div>
 		{% else %}
 		<a href="#" class="item active" data-tab="overview-tab">Overview</a>
-		<a href="#" class="item" data-tab="phases-tab">Phases</a>
+		<a href="#" class="item" data-tab="forum-tab">Forum</a>
 		<a href="#" class="item" data-tab="users-tab">Users</a>
 		<a href="#" class="item" data-tab="messages-tab">Messages</a>
 		<a href="#" class="item" data-tab="log-tab">Access log</a>
@@ -52,34 +52,103 @@
 </div>
 		{% endif %}
 	{% else %}
-<div class="ui main tab active" data-tab="overview-tab">
-	<div class="ui grid">
-		<div class="ten wide column">Please select a document from the list.</div>
-		<div class="six wide column"></div>
+<div class="container">
+	<div class="ui main tab active" data-tab="overview-tab">
+		<div class="ui centered grid">
+			<div class="ten wide column">
+				<h3>Current phase of deliberation</h3>
+				<div class="ui segment">
+					<div class="ui info message">
+						<ul class="list">
+							<li>Paused: used during deliberation; forum is read-only, all activities paused.</li>
+							<li>Not started: used before deliberation; forum is read-only.</li>
+							<li>Extract: document-level activities - creating highlights, commenting, Q &amp; A and claim extraction thereupon.</li>
+							<li>Categorize: claim categorization and commenting thereupon.</li>
+							<li>Theme assignment: claim theme assignment and commenting thereupon.</li>
+							<li>Prioritize and Improve: suggestion of rewording and merging, performing rewording and merging, prioritizing, and commenting on these behaviors.</li>
+							<li>Finished: used after deliberation; forum is read-only, Citizens' Statement available.</li>
+						</ul>
+					</div>
+					<div class="ui form">
+						<div class="field">
+							<select class="ui fluid dropdown">
+								<option value="paused" {% if phase == 'paused' %} selected{% endif %}>Paused</option>
+								<option value="not_started" {% if phase == 'not_started' %} selected{% endif %}>Not started</option>
+								<option value="extract" {% if phase == 'extract' %} selected{% endif %}>Extract</option>
+								<option value="categorize" {% if phase == 'categorize' %} selected{% endif %}>Categorize</option>
+								<option value="theming" {% if phase == 'theming' %} selected{% endif %}>Theme assignment</option>
+								<option value="improve" {% if phase == 'improve' %} selected{% endif %}>Prioritize and Improve</option>
+								<option value="finished" {% if phase == 'finished' %} selected{% endif %}>Finished</option>
+							</select>
+						</div>
+						<div class="field">
+							<div class="ui primary button">Update</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
-</div>
-<div class="ui main tab" data-tab="phases-tab">
-	<div class="ui grid">
-		<div class="ten wide column">Please select a document from the list.</div>
-		<div class="six wide column"></div>
+	<div class="ui main tab" data-tab="forum-tab">
+		<div class="ui centered grid">
+			<div class="ten wide column">
+				<h3>Forum options</h3>
+				<div class="ui segment">
+					<form id="forum-option-form" class="ui form">
+						<div class="field required">
+							<label>Forum full name (max 500 characters)</label>
+							<div class="ui icon input">
+								<input type="text" name="forum_name" value="{{ forum_name }}">
+							</div>
+						</div>
+						<div class="field required">
+							<label>Forum url (max 100 characters)</label>
+							<div class="ui icon input">
+								<input type="text" name="forum_url" value="{{ forum_url }}">
+							</div>
+						</div>
+						<div class="field">
+							<label>Forum description</label>
+							<textarea name="description">{{ description }}</textarea>
+						</div>
+						<div class="field">
+							<label>Access level</label>
+							<div class="ui info message">
+								<ul class="list">
+									<li>Open access: everyone can view; all registered users can contribute.</li>
+									<li>Panelist: everyone can view; only panelists can contribute.</li>
+									<li>Private: only panelists can view and contribute.</li>
+								</ul>
+							</div>
+							<select name="access_level" class="ui simple dropdown">
+								<option value="open" {% if access_level == 'open' %}selected{% endif %}>Open access</option>
+								<option value="panelist"{% if access_level == 'panelist' %}selected{% endif %}>Panelist only</option>
+								<option value="private"{% if access_level == 'private' %}selected{% endif %}>Private</option>
+							</select>
+						</div>
+						<div class="ui submit primary button">Update</div>
+					</form>	
+				</div>
+			</div>
+		</div>
 	</div>
-</div>
-<div class="ui main tab" data-tab="users-tab">
-	<div class="ui grid">
-		<div class="ten wide column">Please select a document from the list.</div>
-		<div class="six wide column"></div>
+	<div class="ui main tab" data-tab="users-tab">
+		<div class="ui grid">
+			<div class="ten wide column">Please select a document from the list.</div>
+			<div class="six wide column"></div>
+		</div>
 	</div>
-</div>
-<div class="ui main tab" data-tab="messages-tab">
-	<div class="ui grid">
-		<div class="ten wide column">Please select a document from the list.</div>
-		<div class="six wide column"></div>
+	<div class="ui main tab" data-tab="messages-tab">
+		<div class="ui grid">
+			<div class="ten wide column">Please select a document from the list.</div>
+			<div class="six wide column"></div>
+		</div>
 	</div>
-</div>
-<div class="ui main tab" data-tab="log-tab">
-	<div class="ui grid">
-		<div class="ten wide column">Please select a document from the list.</div>
-		<div class="six wide column"></div>
+	<div class="ui main tab" data-tab="log-tab">
+		<div class="ui grid">
+			<div class="ten wide column">Please select a document from the list.</div>
+			<div class="six wide column"></div>
+		</div>
 	</div>
 </div>
 	{% endif %}

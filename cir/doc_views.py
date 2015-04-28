@@ -11,10 +11,11 @@ import claim_views
 def api_doc(request):
     response = {}
     action = request.REQUEST.get('action')
+    forum = Forum.objects.get(id=request.session['forum_id'])
     if action == 'get-categories':
         context = {}
         try:
-            context['forum_name'] = Forum.objects.get(id=request.session['forum_id']).full_name
+            context['forum_name'] = forum.full_name
             # retrieve docs in a folder
             folders = EntryCategory.objects.filter(forum_id=request.session['forum_id'], category_type='doc')
             context['folders'] = []
@@ -41,6 +42,7 @@ def api_doc(request):
             ordered_sections = doc.sections.filter(order__isnull=False).order_by('order')
             unordered_sections = doc.sections.filter(order__isnull=True).order_by('updated_at')
             context = {}
+            context['forum_phase'] = forum.phase
             context['title'] = doc.title
             context['sections'] = []
             for section in ordered_sections | unordered_sections:

@@ -415,24 +415,26 @@ function CirClaim() {
 	this.flag = function(data, callback) {
 		// if you are (or pretend to be) a facilitator
 		if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (! sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
-			// TODO change actual flag
-		} else {
-			$.ajax({
-				url: '/api_claim_flag/',
-				type: 'post',
-				data: data,
-				success: function(xhr) {
-					if (typeof callback == 'function') {
-						callback(xhr);
-					}
-				},
-				error: function(xhr) {
-					if (xhr.status == 403) {
-						notify('error', xhr.responseText);
-					}
-				}
-			});
+			if (data.action == 'theme') {
+				// must be collective
+				data.collective = true;
+			}
 		}
+		$.ajax({
+			url: '/api_claim_flag/',
+			type: 'post',
+			data: data,
+			success: function(xhr) {
+				if (typeof callback == 'function') {
+					callback(xhr);
+				}
+			},
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					notify('error', xhr.responseText);
+				}
+			}
+		});
 	};
 	this.vote = function(claim_id, type, unvote, callback) {
 		// if you are (or pretend to be) a facilitator
@@ -448,6 +450,7 @@ function CirClaim() {
 				},
 				success: function(xhr) {
 					notify('success', 'The claim has been categorized.');
+					_this.updateClaimPane();
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {

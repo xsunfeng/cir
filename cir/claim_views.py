@@ -15,6 +15,7 @@ def api_get_claim(request):
     action = request.REQUEST.get('action')
     forum = Forum.objects.get(id=request.session['forum_id'])
     context = {}
+    context['forum_phase'] = forum.phase
     claims = Claim.objects.filter(forum=forum, is_deleted=False, published=True)
     if request.user.is_authenticated():
         claims = claims | Claim.objects.filter(author=request.user, forum=forum, is_deleted=False, published=False)
@@ -125,9 +126,19 @@ def api_claim(request):
         newClaim.save()
     elif action == 'change category':
         claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
-        category = request.REQUEST.get('type')
-        if category in ['pro', 'con', 'finding', 'discarded']:
-            claim.claim_category = category
+        vote_type = request.REQUEST.get('type')
+        # add a collective event
+        if 'actual_user_id' in request.session:
+            actual_author = User.objects.get(id=request.session['actual_user_id'])
+        else:
+            actual_author = None
+        if actual_author:
+            Vote.objects.create(user=actual_author, delegator=request.user, entry=claim, vote_type=vote_type, created_at=timezone.now(), collective=True)
+        else:
+            Vote.objects.create(user=request.user, entry=claim, vote_type=vote_type, created_at=timezone.now(), collective=True)
+        # change the claim itself
+        if vote_type in ['pro', 'con', 'finding', 'discarded']:
+            claim.claim_category = vote_type
             claim.save()
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
@@ -252,12 +263,12 @@ def _get_claim_votes(user, claim):
     ret = {}
     if not user.is_authenticated():
         for vote_type in ['pro', 'con', 'finding', 'discarded', 'prioritize']:
-            votes = claim.events.filter(vote__vote_type=vote_type).order_by('-created_at')
+            votes = Vote.objects.filter(entry=claim, vote_type=vote_type, collective=False).order_by('-created_at')
             ret[vote_type] = [vote.user.get_full_name() for vote in votes]
     else:
-        ret['my_votes'] = '|'.join(Vote.objects.filter(entry=claim, user=user).values_list('vote_type', flat=True))
+        ret['my_votes'] = '|'.join(Vote.objects.filter(entry=claim, user=user, collective=False).values_list('vote_type', flat=True))
         for vote_type in ['pro', 'con', 'finding', 'discarded', 'prioritize']:
-            votes = claim.events.filter(vote__vote_type=vote_type).order_by('-created_at')
+            votes = Vote.objects.filter(entry=claim, vote_type=vote_type, collective=False).order_by('-created_at')
             ret[vote_type] = [vote.user.get_full_name() for vote in votes if vote.user != user]
     return ret
 
@@ -333,7 +344,7 @@ def _get_flags(request, entry, action):
         forum = Forum.objects.get(id=request.session['forum_id'])
         context['themes'] = []
         for theme in ClaimTheme.objects.filter(forum=forum):
-            people = [themeassignment.user.get_full_name() for themeassignment in entry.events.filter(themeassignment__theme=theme)]
+            people = [themeassignment.user.get_full_name() for themeassignment in entry.events.filter(themeassignment__theme=theme, collective=False)]
             theme_info = {
                 'id': theme.id,
                 'theme_name': theme.name,
@@ -341,9 +352,9 @@ def _get_flags(request, entry, action):
                 'assignment_cnt': len(people),
             }
             if actual_author:
-                theme_info['i_voted'] = actual_author in [themeassignment.user for themeassignment in entry.events.filter(themeassignment__theme=theme)]
+                theme_info['i_voted'] = actual_author in [themeassignment.user for themeassignment in entry.events.filter(themeassignment__theme=theme, collective=False)]
             else:
-                theme_info['i_voted'] = request.user in [themeassignment.user for themeassignment in entry.events.filter(themeassignment__theme=theme)]
+                theme_info['i_voted'] = request.user in [themeassignment.user for themeassignment in entry.events.filter(themeassignment__theme=theme, collective=False)]
             context['themes'].append(theme_info)
     return context
 
@@ -352,7 +363,6 @@ def api_claim_flag(request):
     if not request.user.is_authenticated():
         return HttpResponse("Please log in first.", status=403)
     action = request.REQUEST.get('action')
-    context = {}
     if 'actual_user_id' in request.session:
         actual_author = User.objects.get(id=request.session['actual_user_id'])
     else:
@@ -403,15 +413,25 @@ def api_claim_flag(request):
         claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
         theme = ClaimTheme.objects.get(id=request.REQUEST.get('theme_id'))
         detheme = request.REQUEST.get('detheme')
-        if actual_author:
-            ThemeAssignment.objects.filter(user=actual_author, entry=claim, theme=theme).delete()
-        else:
-            ThemeAssignment.objects.filter(user=request.user, entry=claim, theme=theme).delete()
-        if detheme == 'false':
+        collective = request.REQUEST.get('collective')
+        now = timezone.now()
+        if collective == 'true':
+            claim.theme = theme
+            claim.save()
             if actual_author:
-                ThemeAssignment.objects.create(user=actual_author, delegator=request.user, entry=claim, created_at=timezone.now(), theme=theme)
+                ThemeAssignment.objects.create(user=actual_author, delegator=request.user, entry=claim, created_at=now, theme=theme, collective=True)
             else:
-                ThemeAssignment.objects.create(user=request.user, entry=claim, created_at=timezone.now(), theme=theme)
+                ThemeAssignment.objects.create(user=request.user, entry=claim, created_at=now, theme=theme, collective=True)
+        else:
+            if actual_author:
+                ThemeAssignment.objects.filter(user=actual_author, entry=claim, theme=theme).delete()
+            else:
+                ThemeAssignment.objects.filter(user=request.user, entry=claim, theme=theme).delete()
+            if detheme == 'false':
+                if actual_author:
+                    ThemeAssignment.objects.create(user=actual_author, delegator=request.user, entry=claim, created_at=now, theme=theme)
+                else:
+                    ThemeAssignment.objects.create(user=request.user, entry=claim, created_at=now, theme=theme)
         response['html'] = render_to_string("claim-tags.html", _get_flags(request, claim, 'theme'))
         return HttpResponse(json.dumps(response), mimetype='application/json')
 
