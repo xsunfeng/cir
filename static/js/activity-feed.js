@@ -40,7 +40,8 @@ jQuery.fn.feed = function(action, data, update_callback) {
 					// load votes on alternative versions
 					$('#claim-activity-feed .improve.menu').each(function() {
 						var $menu = $(this);
-						if (window.default_claim.display_type != 'fullscreen') return; // prevent users' fast view switching!
+						if (window.default_claim.display_type != 'fullscreen') return; // prevent users' fast view
+																					   // switching!
 						var version_id = this.getAttribute('data-id');
 						$.ajax({
 							url: '/api_claim_vote/',
@@ -70,7 +71,7 @@ jQuery.fn.feed = function(action, data, update_callback) {
 					}
 				});
 				_this.find('.ui.checkbox').checkbox();
-				if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (! sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
+				if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (!sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
 					_this.find('.facilitator-only').show();
 				}
 				if (typeof update_callback == 'function') {
@@ -83,7 +84,7 @@ jQuery.fn.feed = function(action, data, update_callback) {
 				}
 			},
 		});
-	}
+	};
 
 	this.updateVotingMenu = function($menu, vote_data) {
 		$menu.find('.feed-like-claim-version').each(function() {
@@ -92,14 +93,14 @@ jQuery.fn.feed = function(action, data, update_callback) {
 			var my_votes = vote_data['my_votes'] ? vote_data['my_votes'] : '';
 			var i_voted = my_votes.indexOf(vote_type) > -1;
 			var voter_cnt = voter_names.length; // doesn't include myself
-			if (voter_cnt == 0 && ! i_voted) { // nobody voted at all
+			if (voter_cnt == 0 && !i_voted) { // nobody voted at all
 				$(this).removeClass('active');
 				if (vote_type == 'like') {
 					var title = 'Like this version';
 				}
 			} else {
 				if (i_voted) {
-					voter_cnt ++;
+					voter_cnt++;
 					$(this).addClass('active');
 					voter_names.unshift('You');
 				} else {
@@ -122,24 +123,24 @@ jQuery.fn.feed = function(action, data, update_callback) {
 	if (action == 'init') {
 		// listeners
 		this.on('click', '.feed-reply-entry, .feed-reply-event', function(e) {
-			var name = $(this).parents('.event').find('.user').text();
+			var name = $(this).parents('.event').find('.user:eq(0)').text();
 			var entry_id = this.getAttribute('data-id');
 			_this.find('.feed-forms .claim.form').hide();
 			if ($(this).hasClass('feed-reply-entry')) {
 				_this.find('.feed-forms .comment.form span')
-				.attr('data-reply-id', entry_id)
-				.attr('data-reply-type', 'entry')
-				.text('Reply to ' + name);
+					.attr('data-reply-id', entry_id)
+					.attr('data-reply-type', 'entry')
+					.text('Reply to ' + name);
 			} else if ($(this).hasClass('feed-reply-event')) {
 				_this.find('.feed-forms .comment.form span')
-				.attr('data-reply-id', entry_id)
-				.attr('data-reply-type', 'event')
-				.text('Reply to ' + name);
+					.attr('data-reply-id', entry_id)
+					.attr('data-reply-type', 'event')
+					.text('Reply to ' + name);
 			}
 			_this.find('.feed-forms .comment.form').show();
 			_this.find('.feed-forms').show();
 			_this.find('.feed-forms .comment.form textarea').focus();
-		}).on('click', '.feed-delete-entry', function(e) {
+		}).on('click', '.feed-delete-entry', function() {
 			var entry_id = this.getAttribute('data-id');
 			$.ajax({
 				url: '/api_annotation/',
@@ -209,7 +210,7 @@ jQuery.fn.feed = function(action, data, update_callback) {
 					reply_type: _this.find('.feed-forms .comment.form span').attr('data-reply-type'),
 					collective: _this.find('.ui.checkbox').checkbox('is checked'),
 				}, _this.data()),
-				success: function(xhr) {
+				success: function() {
 					_this.update();
 					_this.find('.feed-forms .comment.form textarea').val('').removeAttr('css');
 					_this.find('.feed-forms .comment.form span').text('Add a comment').removeAttr('data-reply-id').removeAttr('data-reply-type');

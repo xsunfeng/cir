@@ -1,6 +1,6 @@
 {% if claim %}
 {% if not claim.published %}
-<div class="ui top attached info message">This claim is unpublished and only visible to you</div>
+<div class="ui top attached warning message">This claim is unpublished and only visible to you</div>
 {% endif %}
 <div class="ui attached segment">
 	{% if claim.published %}
@@ -44,13 +44,13 @@
 	</div>
 	<div class="ui vertical segment" style="padding: 0.5em 0">
 		<div class="ui red small secondary claim menu" data-id="{{ claim.id }}">
-			<a class="item claim-vote-btn" data-action="prioritize"><i class="thumbs outline up icon"></i><span></span></a>
-			<a class="item claim-vote-btn" data-action="pro"><i class="plus icon"></i><span></span></a>
-			<a class="item claim-vote-btn" data-action="con"><i class="minus icon"></i><span></span></a>
-			<a class="item claim-vote-btn" data-action="finding"><i class="flag outline icon"></i><span></span></a>
-			<a class="item claim-vote-btn" data-action="discarded"><i class="trash outline icon"></i><span></span></a>
+			<a class="item claim-vote-btn {{ settings.prioritize_btn }}" data-action="prioritize"><i class="thumbs outline up icon"></i><span></span></a>
+			<a class="item claim-vote-btn {{ settings.vote_btn }}" data-action="pro"><i class="plus icon"></i><span></span></a>
+			<a class="item claim-vote-btn {{ settings.vote_btn }}" data-action="con"><i class="minus icon"></i><span></span></a>
+			<a class="item claim-vote-btn {{ settings.vote_btn }}" data-action="finding"><i class="flag outline icon"></i><span></span></a>
+			<a class="item claim-vote-btn {{ settings.vote_btn }}" data-action="discarded"><i class="trash outline icon"></i><span></span></a>
 			<div class="right menu">
-				<div class="ui dropdown simple item">
+				<div class="ui dropdown simple theme item">
 					Theme
 					<i class="dropdown icon"></i>
 					<div class="ui menu">
@@ -60,7 +60,7 @@
 						<a class="item theme-suggest-btn">Suggest a new theme ...</a>
 					</div>
 				</div>
-				<div class="ui dropdown simple item">
+				<div class="ui dropdown simple flag item">
 					Flag
 					<i class="dropdown icon"></i>
 					<div class="menu" data-id="{{ claim.version_id }}">
@@ -69,7 +69,7 @@
 						<a class="item claim-flag-merge-btn">Flag as "needs merging" ...</a>
 					</div>
 				</div>
-				<div class="ui dropdown simple item">
+				<div class="ui dropdown simple improve item">
 					Improve
 					<i class="dropdown icon"></i>
 					<div class="menu">

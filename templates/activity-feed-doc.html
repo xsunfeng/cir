@@ -45,10 +45,12 @@
 			<div class="extra text">
 				{{ entry.content }}
 			</div>
+			{% if forum_phase == 'extract' %}
 			<div class="meta">
 				<a class="feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
 				<a class="feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
 			</div>
+			{% endif %}
 		{% elif entry.entry_type == 'claim' %}
 			<div class="summary">
 				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> extracted a claim from the highlighted text.
@@ -65,10 +67,12 @@
 			<div class="extra text">
 				{{ entry.content }}
 			</div>
+			{% if forum_phase == 'extract' %}
 			<div class="meta">
 				<a class="feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
 				<a class="feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
 			</div>
+			{% endif %}
 		{% elif entry.entry_type == 'comment' %}
 			<div class="summary">
 				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> commented on the highlighted text.
@@ -77,10 +81,12 @@
 			<div class="extra text">
 				{{ entry.content }}
 			</div>
+			{% if forum_phase == 'extract' %}
 			<div class="meta">
 				<a class="feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
 				<a class="feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
 			</div>
+			{% endif %}
 		{% endif %}
 		</div>
 	</div>

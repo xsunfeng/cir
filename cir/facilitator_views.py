@@ -20,10 +20,8 @@ def register_delegator(request):
 def enter_dashboard(request, forum_url):
     try:
         forum = Forum.objects.get(url=forum_url)
-    except: # 404
-        context = {
-            'load_error': '404'
-        }
+    except:  # 404
+        context = {'load_error': '404'}
         return render(request, 'index_dashboard.html', context)
     request.session['role'] = VISITOR_ROLE
     context = {}

@@ -5,50 +5,58 @@ from django.forms import MediaDefiningClass
 
 from models import *
 
-class ModelAdminWithForeignKeyLinksMetaclass(MediaDefiningClass):
-    def __getattr__(cls, name):
-        def foreign_key_link(instance, field):
-            target = getattr(instance, field)
-            return u'<a href="../../%s/%s/%d">%s</a>' % (
-                target._meta.app_label, target._meta.module_name, target.id, unicode(target))
-        if name[:8] == 'link_to_':
-            method = partial(foreign_key_link, field=name[8:])
-            method.__name__ = name[8:]
-            method.allow_tags = True
-            setattr(cls, name, method)
-            return getattr(cls, name)
-        raise AttributeError
 
 class ForumAdmin(admin.ModelAdmin):
     pass
+
+
 class RoleAdmin(admin.ModelAdmin):
     def author_name(obj):
         return ("%s %s" % (obj.user.first_name, obj.user.last_name))
+
     list_display = (author_name, 'forum', 'role')
     list_filter = ('forum', )
     pass
+
+
 class DocAdmin(admin.ModelAdmin):
     pass
+
+
 class DocSectionAdmin(admin.ModelAdmin):
     pass
+
+
 class EntryCategoryAdmin(admin.ModelAdmin):
     pass
+
+
 class ClaimThemeAdmin(admin.ModelAdmin):
     pass
+
+
 class ClaimVersionAdmin(admin.ModelAdmin):
     pass
+
+
 class PostAdmin(admin.ModelAdmin):
     def author_name(obj):
         return ("%s %s" % (obj.author.first_name, obj.author.last_name))
+
     list_display = ('content', author_name, 'content_type', 'highlight')
     list_filter = ('forum', 'content_type')
+
+
 class ClaimAdmin(admin.ModelAdmin):
     def author_name(obj):
         return ("%s %s" % (obj.author.first_name, obj.author.last_name))
+
     def claim_content(obj):
         return '<a href="../claimversion/%d">%s</a>' % (obj.adopted_version().id, obj.adopted_version().content)
+
     def version_author(obj):
         return ("%s %s" % (obj.adopted_version().author.first_name, obj.adopted_version().author.last_name))
+
     author_name.short_description = 'Author of claim'
     claim_content.short_description = 'Content of adopted version'
     claim_content.allow_tags = True
@@ -56,6 +64,8 @@ class ClaimAdmin(admin.ModelAdmin):
     list_display = (author_name, version_author, claim_content, 'claim_category', 'theme')
     list_filter = ('forum', 'claim_category', 'theme')
     ordering = ('created_at', )
+
+
 admin.site.register(Forum, ForumAdmin)
 admin.site.register(Role, RoleAdmin)
 admin.site.register(Doc, DocAdmin)

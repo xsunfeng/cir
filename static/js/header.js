@@ -255,7 +255,7 @@ var cir = {
 		});
 	},
 	initFacilitatorBtns: function() {
-		$('#header-facilitator-wrapper .switch.user.menu a').click(function() {
+		$('#header-facilitator-wrapper .switch.user.menu .item').click(function() {
 			var user_id = this.getAttribute('data-id');
 			var user_name = $(this).text();
 			$.ajax({
@@ -287,4 +287,4 @@ var cir = {
 			});
 		});
 	}
-}
+};

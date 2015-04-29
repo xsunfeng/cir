@@ -1,5 +1,4 @@
 import json
-from htmlentitydefs import name2codepoint
 
 from django.template.loader import render_to_string
 from django.http import HttpResponse
@@ -76,14 +75,18 @@ def api_highlight(request):
             actual_author = None
         if content_type == 'comment':
             if actual_author:
-                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
+                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user,
+                    content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
             else:
-                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
+                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content,
+                    created_at=now, updated_at=now, highlight=highlight, content_type='comment')
         elif content_type == 'question':
             if actual_author:
-                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
+                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user,
+                    content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
             else:
-                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
+                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content,
+                    created_at=now, updated_at=now, highlight=highlight, content_type='question')
         elif content_type == 'claim':
             claim_views._add_claim(request, highlight)
         return HttpResponse(json.dumps(response), mimetype='application/json')
@@ -105,6 +108,7 @@ def api_annotation(request):
         highlight_id = request.REQUEST.get('highlight_id')
         highlight = Highlight.objects.get(id=highlight_id)
         context = {}
+        context['forum_phase'] = forum.phase
         context['entries'] = []
         posts = highlight.posts_of_highlight.all()
         for post in posts:
@@ -128,7 +132,7 @@ def api_annotation(request):
             newPost.author = request.user
         newPost.content = request.REQUEST.get('content')
         reply_type = request.REQUEST.get('reply_type')
-        if reply_type: # replying another post, or event
+        if reply_type:  # replying another post, or event
             reply_id = request.REQUEST.get('reply_id')
             if reply_type == 'event':
                 event = Event.objects.get(id=reply_id)
@@ -136,7 +140,7 @@ def api_annotation(request):
             elif reply_type == 'entry':
                 entry = Entry.objects.get(id=reply_id)
                 newPost.target_entry = entry
-        else: # targeting at a highlight or a claim
+        else:  # targeting at a highlight or a claim
             source = request.REQUEST.get('type')
             if source == 'highlight':
                 highlight = Highlight.objects.get(id=request.REQUEST.get('highlight_id'))

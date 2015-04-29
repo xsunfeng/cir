@@ -116,7 +116,7 @@ function CirDocument() {
 			var highlight_ids = this.getAttribute('data-hl-id').split(' ');
 			for (var i = 0; i < highlight_ids.length; i++) {
 				$('#doc-thread-content').feed('update', {
-					type:'highlight',
+					type: 'highlight',
 					id: highlight_ids[i]
 				}, function() {
 					$('#doc-thread-popup').css('left', e.pageX).css('top', e.pageY);
@@ -133,7 +133,7 @@ function CirDocument() {
 					var min = Math.min(_this.newHighlight.start, _this.newHighlight.end);
 					var max = Math.max(_this.newHighlight.start, _this.newHighlight.end);
 					$target.find('.tk').removeClass('highlighted');
-					for (var i = min; i <= max; i ++) {
+					for (var i = min; i <= max; i++) {
 						$target.find('.tk[data-id="' + i + '"]').addClass('highlighted');
 					}
 					_this.newHighlight.contextId = $target.attr('data-id');

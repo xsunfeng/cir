@@ -2,7 +2,7 @@ function CirClaim() {
 	var _this = this;
 	this.display_type = 'overview';
 	// static event listeners
-	$('#claim-pane').on('click', '.claim-vote-btn', function() {
+	$('#claim-pane').on('click', '.claim-vote-btn:not(.disabled):not(.unready)', function() {
 		var _that = this;
 		var action = _that.getAttribute('data-action');
 		var $menu = $(_that).parent();
@@ -16,7 +16,7 @@ function CirClaim() {
 	}).on('click', '.claim-reword-btn', function() {
 		$('#claim-pane .reword.form input[name="collective"]').val('false');
 		$('#claim-pane .claim.reword.editor')
-		.val($.trim($('#claim-pane .claim-content').text()));
+			.val($.trim($('#claim-pane .claim-content').text()));
 		$('#claim-pane .reword.form').transition('slide down', '500ms');
 	}).on('click', '.reword.form .submit.button', function() {
 		var content = $('#claim-pane .claim.reword.editor').val();
@@ -32,7 +32,7 @@ function CirClaim() {
 				action: 'reword',
 				content: content,
 				claim_id: _this.claim_id,
-				collective: collective,
+				collective: collective
 			},
 			success: function(xhr) {
 				if (collective == 'true') {
@@ -95,8 +95,7 @@ function CirClaim() {
 	}).on('click', '.theme-suggest-btn', function() {
 
 	}).on('click', '.claim-fullscreen-btn', function() {
-		var id = $(this).parents('.claim.menu').attr('data-id');
-		_this.claim_id = id;
+		_this.claim_id = $(this).parents('.claim.menu').attr('data-id');
 		_this._setDisplayType('fullscreen');
 		_this.updateClaimPane();
 	}).on('click', '.claim-back-to-list-btn', function() {
@@ -107,8 +106,7 @@ function CirClaim() {
 	}).on('click', '.claim-edit-btn', function() {
 		// only for unpublished claims
 		// just enter fullscreen
-		var id = $(this).parents('.claim.menu').attr('data-id');
-		_this.claim_id = id;
+		_this.claim_id = $(this).parents('.claim.menu').attr('data-id');
 		_this._setDisplayType('fullscreen');
 		_this.updateClaimPane();
 	}).on('click', '.claim-save-btn', function() {
@@ -129,7 +127,7 @@ function CirClaim() {
 					claim_id: id,
 				},
 				success: function(xhr) {
-					notify('success', 'Claim updated.')
+					notify('success', 'Claim saved.')
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -263,7 +261,7 @@ function CirClaim() {
 			notify('warning', 'Please select two or more claims to merge.');
 			return;
 		}
-		if (! valid_merge) {
+		if (!valid_merge) {
 			notify('warning', 'Selected claim(s) are already labeled to be merged -- please wait until the pending merge is resolved.');
 		} else {
 			_this.flag({
@@ -318,7 +316,7 @@ function CirClaim() {
 	}).on('click', '.feed-reword-claim', function() {
 		$('#claim-pane .reword.form input[name="collective"]').val('true');
 		$('#claim-pane .claim.reword.editor')
-		.val($.trim($('#claim-pane .claim-content').text()));
+			.val($.trim($('#claim-pane .claim-content').text()));
 		$('#claim-pane .reword.form').transition('slide down', '500ms');
 	});
 
@@ -414,7 +412,7 @@ function CirClaim() {
 	};
 	this.flag = function(data, callback) {
 		// if you are (or pretend to be) a facilitator
-		if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (! sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
+		if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (!sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
 			if (data.action == 'theme') {
 				// must be collective
 				data.collective = true;
@@ -438,7 +436,7 @@ function CirClaim() {
 	};
 	this.vote = function(claim_id, type, unvote, callback) {
 		// if you are (or pretend to be) a facilitator
-		if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (! sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
+		if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (!sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
 			// change category
 			$.ajax({
 				url: '/api_claim/',
@@ -562,10 +560,20 @@ function CirClaim() {
 					} else {
 						// load activities
 						$('#claim-activity-feed').feed('init');
+						var filter = 'all';
+						if ($('#claim-pane').hasClass('extract')) {
+							filter = 'general';
+						} else if ($('#claim-pane').hasClass('categorize')) {
+							filter = 'categorize';
+						} else if ($('#claim-pane').hasClass('theming')) {
+							filter = 'theming';
+						} else if ($('#claim-pane').hasClass('improve')) {
+							filter = 'improve';
+						}
 						$('#claim-activity-feed').feed('update', { // async
 							'type': 'claim',
 							'id': _this.claim_id,
-							'filter': 'all', // TODO: phase-specific filter
+							'filter': filter
 						});
 						_this.loadRatings();
 						$('#claim-pane .ratings .rating').rating({
@@ -609,7 +617,7 @@ function CirClaim() {
 				// $('#claim-pane .menu .item').popup();
 				// $('#claim-pane abbr').popup();
 				// $('#claim-pane .merged.label').popup();
-				if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (! sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
+				if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (!sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
 					$('#claim-pane .facilitator-only').show();
 				}
 				_this.loadVotes();
@@ -671,7 +679,7 @@ function CirClaim() {
 		});
 	};
 	this.loadVotes = function() {
-		$('.claim.menu .claim-vote-btn').addClass('disabled');
+		$('.claim.menu .claim-vote-btn').addClass('unready');
 		_this.voteLoader = $.ajax({
 			url: '/api_claim_vote/',
 			type: 'post',
@@ -703,7 +711,7 @@ function CirClaim() {
 			var my_votes = vote_data['my_votes'] ? vote_data['my_votes'] : '';
 			var i_voted = my_votes.indexOf(vote_type) > -1;
 			var voter_cnt = voter_names.length; // doesn't include myself
-			if (voter_cnt == 0 && ! i_voted) { // nobody voted at all
+			if (voter_cnt == 0 && !i_voted) { // nobody voted at all
 				$(this).removeClass('active');
 				if (vote_type == 'prioritize') {
 					var title = 'Prioritize this claim';
@@ -712,7 +720,7 @@ function CirClaim() {
 				}
 			} else {
 				if (i_voted) {
-					voter_cnt ++;
+					voter_cnt++;
 					$(this).addClass('active');
 					voter_names.unshift('You');
 				} else {
@@ -730,7 +738,7 @@ function CirClaim() {
 			} else {
 				$(this).find('span').text('');
 			}
-			$(this).removeClass('disabled');
+			$(this).removeClass('unready');
 		});
 	};
 	this.updateNavigator = function() {

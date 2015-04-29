@@ -54,6 +54,19 @@ a.user {
   background-color: #d95c5c!important;
   border-color: #d95c5c!important;
 }
-.ui.inverted.menu .dropdown .menu .item {
+.user.facilitator {
+  background-color: #5bbd72!important;
+  color: #fff!important;
+  border-radius: .2857rem;
+  padding: 0 0.3rem;
+}
+.user.facilitator:after {
+  content: ' (facilitator)';
+}
+#header-facilitator-wrapper .switch.user.menu {
+  max-height: 500px;
+  overflow: auto;
+}
+#header-facilitator-wrapper .switch.user.menu .item {
   padding: 5px 10px!important;
 }

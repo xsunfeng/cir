@@ -2,3 +2,5 @@ testcase*.py
 **/*.pyc
 cir/migrations/*
 **/.DS_STORE
+.settings/**
+.idea/**

@@ -5,10 +5,11 @@ import utils
 
 VISITOR_ROLE = 'visitor'
 
+
 class Forum(models.Model):
-    full_name = models.CharField(max_length=500) # shown on top page/selection page
-    short_name = models.CharField(max_length=500) # used elsewhere
-    url = models.CharField(max_length=100) # used in url
+    full_name = models.CharField(max_length=500)  # shown on top page/selection page
+    short_name = models.CharField(max_length=500)  # used elsewhere
+    url = models.CharField(max_length=100)  # used in url
     description = models.TextField(null=True, blank=True)
     ACCESS_CHOICES = (
         ('open', 'Open access'),
@@ -16,20 +17,22 @@ class Forum(models.Model):
         ('private', 'Private'),
     )
     PHASE_CHOICES = (
-		('paused', 'Paused'),
-		('not_started', 'Not started'),
-		('extract', 'Extracting'),
-		('categorize', 'Categorizing'),
-		('theming', 'Theming'),
-		('improve', 'Prioritizing and Improving'),
-		('finished', 'Finished')
+        ('paused', 'Paused'),
+        ('not_started', 'Not started'),
+        ('extract', 'Claim extraction'),
+        ('categorize', 'Claim categorization'),
+        ('theming', 'Claim theme identification'),
+        ('improve', 'Claim prioritization and improvement'),
+        ('finished', 'Finished')
     )
     access_level = models.CharField(max_length=100, choices=ACCESS_CHOICES, default='open')
     phase = models.CharField(max_length=100, choices=PHASE_CHOICES, default='not_started')
     contextmap = models.TextField(null=True, blank=True)
     forum_logo = models.ImageField(upload_to='forum_logos', null=True, blank=True, default='forum_logos/default.jpg')
-    def __unicode__(self): # used for admin site
+
+    def __unicode__(self):  # used for admin site
         return self.full_name
+
     def getAttr(self):
         attr = {}
         attr['id'] = self.id
@@ -49,6 +52,7 @@ class Forum(models.Model):
         attr['logo_url'] = self.forum_logo.url
         return attr
 
+
 class Role(models.Model):
     ROLE_CHOICES = (
         ('panelist', 'Panelist'),
@@ -58,12 +62,14 @@ class Role(models.Model):
     )
     user = models.ForeignKey(User, related_name="role")
     forum = models.ForeignKey(Forum, related_name="members")
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES) 
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+
 
 class UserInfo(models.Model):
     user = models.OneToOneField(User, related_name='info')
     description = models.TextField(null=True, blank=True)
     last_visited_forum = models.ForeignKey(Forum, null=True, blank=True)
+
 
 class EntryCategory(models.Model):
     CONTENT_CHOICES = (
@@ -80,14 +86,17 @@ class EntryCategory(models.Model):
     can_extract = models.BooleanField(default=False)
     can_prioritize = models.BooleanField(default=False)
     instructions = models.TextField(null=True, blank=True)
-    def __str__(self): # used for admin site
+
+    def __str__(self):  # used for admin site
         return self.name
+
     def getAttr(self):
         attr = {}
         attr['id'] = self.id
         attr['name'] = self.name
         attr['instructions'] = self.instructions
         return attr
+
     def getPrivileges(self):
         priv = {}
         priv['visible'] = self.visible
@@ -97,6 +106,7 @@ class EntryCategory(models.Model):
         priv['can_extract'] = self.can_extract
         priv['can_prioritize'] = self.can_prioritize
         return priv
+
 
 class Entry(models.Model):
     forum = models.ForeignKey(Forum)
@@ -108,8 +118,10 @@ class Entry(models.Model):
     category = models.ForeignKey(EntryCategory, related_name='entries', null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
     collective = models.BooleanField(default=False)
+
     def __unicode__(self):
         return self.content
+
     def getAttr(self, forum):
         attr = {}
         try:
@@ -124,20 +136,23 @@ class Entry(models.Model):
         except:
             attr['author_initial'] = ''
         attr['content'] = self.content
-        attr['created_at_full'] = self.created_at # for sorting
+        attr['created_at_full'] = self.created_at  # for sorting
         attr['updated_at'] = utils.pretty_date(self.updated_at)
         attr['updated_at_full'] = self.updated_at
         attr['is_deleted'] = self.is_deleted
         attr['collective'] = self.collective
         return attr
 
+
 class Doc(models.Model):
     forum = models.ForeignKey(Forum)
     title = models.TextField()
     description = models.TextField(null=True, blank=True)
     folder = models.ForeignKey(EntryCategory, related_name='doc_entries', null=True, blank=True)
-    def __str__(self): # used for admin site
+
+    def __str__(self):  # used for admin site
         return self.title
+
     def getAttr(self):
         attr = {}
         attr['id'] = self.id
@@ -153,13 +168,16 @@ class Doc(models.Model):
             pass
         return attr
 
+
 class DocSection(Entry):
     title = models.TextField(null=True, blank=True)
     order = models.IntegerField(null=True, blank=True)
     doc = models.ForeignKey(Doc, related_name='sections')
-    def __str__(self): # used for admin site
+
+    def __str__(self):  # used for admin site
         return str(self.id) + ' ' + self.title
-    def getAttr(self):
+
+    def getAttr(self, forum):
         attr = {}
         attr['id'] = self.id
         attr['title'] = self.title
@@ -168,10 +186,12 @@ class DocSection(Entry):
         attr['updated_at_full'] = self.updated_at
         return attr
 
+
 class Highlight(models.Model):
     start_pos = models.IntegerField()
     end_pos = models.IntegerField()
     context = models.ForeignKey(Entry, related_name='highlights')
+
     def getAttr(self):
         attr = {}
         attr['id'] = self.id
@@ -181,10 +201,11 @@ class Highlight(models.Model):
         # type of the first entry under this highlight
         # claim has priority
         if self.claims_of_highlight.count():
-            attr['type'] = 'claim' 
+            attr['type'] = 'claim'
         else:
             attr['type'] = self.posts_of_highlight.order_by('-updated_at')[0].content_type
         return attr
+
 
 class ClaimTheme(models.Model):
     forum = models.ForeignKey(Forum)
@@ -192,30 +213,36 @@ class ClaimTheme(models.Model):
     proposer = models.ForeignKey(User)
     created_at = models.DateTimeField()
     published = models.BooleanField(default=True)
+
     def getAttr(self):
         attr = {}
         attr['id'] = self.id
         attr['name'] = self.name
         return attr
+
     def __unicode__(self):
-           return self.name
+        return self.name
+
 
 class ClaimVersion(Entry):
     claim = models.ForeignKey('Claim', related_name='versions')
     is_adopted = models.BooleanField(default=True)
+
     def getAttr(self, forum):
         attr = super(ClaimVersion, self).getAttr(forum)
         attr['version_id'] = attr['id']
         attr['entry_type'] = 'claim version'
         attr['is_adopted'] = self.is_adopted
         return attr
+
     def getExcerpt(self, forum):
-        attr = {} # for efficiency, don't inherit at all
+        attr = {}  # for efficiency, don't inherit at all
         attr['version_id'] = self.id
         attr['updated_at_full'] = self.updated_at
         attr['updated_at'] = utils.pretty_date(self.updated_at)
         attr['excerpt'] = self.content[:50] + '...'
         return attr
+
 
 class Claim(Entry):
     # for a Claim, its EntryCategory is not used for now -- for further extension of phases
@@ -230,10 +257,13 @@ class Claim(Entry):
     theme = models.ForeignKey(ClaimTheme, null=True, blank=True)
     # the highlight from which this claim is extracted
     source_highlight = models.ForeignKey(Highlight, null=True, blank=True, related_name='claims_of_highlight')
+
     def __unicode__(self):
         return self.adopted_version().content
+
     def adopted_version(self):
         return self.versions.get(is_adopted=True)
+
     def getAttr(self, forum):
         attr = self.adopted_version().getAttr(forum)
         attr['id'] = self.id
@@ -247,13 +277,15 @@ class Claim(Entry):
             # is generated by merging other claims!
             attr['merge_of'] = '.'.join([str(claimref.from_claim.id) for claimref in self.older_versions.all()])
         return attr
-    def getExcerpt(self, forum): # used for claim navigator
+
+    def getExcerpt(self, forum):  # used for claim navigator
         attr = self.adopted_version().getExcerpt(forum)
         attr['id'] = self.id
         attr['published'] = self.published
         return attr
 
-class ClaimReference(models.Model): # only for merging relationship!
+
+class ClaimReference(models.Model):  # only for merging relationship!
     TYPE_CHOICES = (
         ('merge', 'Merge'),
     )
@@ -261,12 +293,14 @@ class ClaimReference(models.Model): # only for merging relationship!
     from_claim = models.ForeignKey(Claim, related_name='newer_versions')
     to_claim = models.ForeignKey(Claim, related_name='older_versions')
 
-class Event(models.Model): # the behavior of a user on an entry
+
+class Event(models.Model):  # the behavior of a user on an entry
     user = models.ForeignKey(User)
     delegator = models.ForeignKey(User, null=True, blank=True, related_name='delegated_events')
     entry = models.ForeignKey(Entry, related_name='events')
     created_at = models.DateTimeField()
     collective = models.BooleanField(default=False)
+
     def getAttr(self, forum):
         attr = {}
         attr['id'] = self.id
@@ -280,10 +314,11 @@ class Event(models.Model): # the behavior of a user on an entry
             attr['author_initial'] = str.upper(str(self.user.first_name[0]) + str(self.user.last_name[0]))
         except:
             attr['author_initial'] = ''
-        attr['created_at_full'] = self.created_at # for sorting
+        attr['created_at_full'] = self.created_at  # for sorting
         attr['created_at'] = utils.pretty_date(self.created_at)
         attr['collective'] = self.collective
         return attr
+
 
 class Vote(Event):
     VOTE_CHOICES = (
@@ -292,17 +327,18 @@ class Vote(Event):
         ('finding', 'Key Finding'),
         ('discarded', 'Discarded'),
         ('prioritize', 'Prioritize'),
-        ('like', 'Like a version'), # not shown in activity feed
+        ('like', 'Like a version'),  # not shown in activity feed
         ('reword', 'Needs rewording'),
         ('merge', 'Needs merging'),
     )
     vote_type = models.CharField(max_length=20, choices=VOTE_CHOICES)
     reason = models.CharField(max_length=2010, null=True, blank=True)
+
     def getAttr(self, forum):
         attr = super(Vote, self).getAttr(forum)
         if self.vote_type == 'reword' or self.vote_type == 'merge':
             attr['entry_type'] = 'improve'
-        if self.vote_type == 'pro' or self.vote_type == 'con' or self.vote_type == 'finding':
+        if self.vote_type == 'pro' or self.vote_type == 'con' or self.vote_type == 'finding' or self.vote_type == 'discarded':
             attr['entry_type'] = 'categorize'
         if self.vote_type == 'prioritize':
             attr['entry_type'] = 'prioritize'
@@ -312,18 +348,23 @@ class Vote(Event):
             attr['reason'] = self.reason
         return attr
 
+
 class ThemeAssignment(Event):
     theme = models.ForeignKey(ClaimTheme)
+
     def getAttr(self, forum):
         attr = super(ThemeAssignment, self).getAttr(forum)
         attr['entry_type'] = 'themeassignment'
         attr['theme_name'] = self.theme.name
         return attr
 
-class Post(Entry): # in discussion
+
+class Post(Entry):  # in discussion
     title = models.TextField(null=True, blank=True)
-    target_entry = models.ForeignKey(Entry, related_name='comments_of_entry', null=True, blank=True) # for comments of a claim
-    target_event = models.ForeignKey(Event, related_name='comments_of_event', null=True, blank=True) # for comments of an event
+    target_entry = models.ForeignKey(Entry, related_name='comments_of_entry', null=True,
+                                     blank=True)  # for comments of a claim
+    target_event = models.ForeignKey(Event, related_name='comments_of_event', null=True,
+                                     blank=True)  # for comments of an event
     # the highlight to which this post is attached
     highlight = models.ForeignKey(Highlight, related_name='posts_of_highlight', null=True, blank=True)
     CONTENT_CHOICES = (
@@ -331,18 +372,20 @@ class Post(Entry): # in discussion
         ('comment', 'Comment'),
     )
     content_type = models.CharField(max_length=10, choices=CONTENT_CHOICES)
+
     def getTree(self):
-    	nodes = [self]
-    	for comment in self.comments_of_entry.all():
-    		nodes.extend(comment.getTree())
-    	return nodes
+        nodes = [self]
+        for comment in self.comments_of_entry.all():
+            nodes.extend(comment.getTree())
+        return nodes
+
     def getAttr(self, forum):
         attr = super(Post, self).getAttr(forum)
         attr['entry_type'] = self.content_type
         if self.target_entry:
-             attr['parent_name'] = self.target_entry.author.get_full_name()
-             attr['parent_id'] = self.target_entry.id
+            attr['parent_name'] = self.target_entry.author.get_full_name()
+            attr['parent_id'] = self.target_entry.id
         if self.target_event:
-             attr['parent_name'] = self.target_event.user.get_full_name()
-             attr['parent_id'] = self.target_event.id
+            attr['parent_name'] = self.target_event.user.get_full_name()
+            attr['parent_id'] = self.target_event.id
         return attr

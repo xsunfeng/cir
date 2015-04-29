@@ -15,7 +15,7 @@ def api_get_claim(request):
     action = request.REQUEST.get('action')
     forum = Forum.objects.get(id=request.session['forum_id'])
     context = {}
-    context['forum_phase'] = forum.phase
+    context['settings'] = _get_claim_settings(forum)
     claims = Claim.objects.filter(forum=forum, is_deleted=False, published=True)
     if request.user.is_authenticated():
         claims = claims | Claim.objects.filter(author=request.user, forum=forum, is_deleted=False, published=False)
@@ -46,9 +46,9 @@ def api_get_claim(request):
             response['html'] = render_to_string("claim-overview.html", context)
         elif display_type == 'fullscreen':
             claim_id = request.REQUEST.get('claim_id')
-            if claim_id: # claim_id is known
+            if claim_id:  # claim_id is known
                 context['claim'] = Claim.objects.get(id=claim_id).getAttr(forum)
-            else: # just clicked "full-screen review"
+            else:  # just clicked "full-screen review"
                 if len(claims):
                     context['claim'] = claims[0].getAttr(forum)
                     response['claim_id'] = context['claim']['id']
@@ -60,6 +60,23 @@ def api_get_claim(request):
         context['claims'] = sorted(context['claims'], key=lambda c: c['updated_at_full'], reverse=True)
         response['html'] = render_to_string("claim-navigator.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def _get_claim_settings(forum):
+    settings = {}
+    settings['forum_phase'] = forum.phase
+    settings['vote_btn'] = ''
+    settings['prioritize_btn'] = ''
+    if forum.phase == 'theming':
+        settings['vote_btn'] = 'disabled'
+    elif forum.phase == 'improve':
+        settings['vote_btn'] = 'disabled'
+    elif forum.phase == 'finished':
+        settings['vote_btn'] = 'disabled'
+        settings['prioritize_btn'] = 'disabled'
+    elif forum.phase == 'paused':
+        settings['vote_btn'] = 'disabled'
+        settings['prioritize_btn'] = 'disabled'
+    return settings
 
 def api_claim(request):
     response = {}
@@ -80,7 +97,7 @@ def api_claim(request):
         now = timezone.now()
         claim.is_deleted = True
         claim.updated_at = now
-        for version in versions:
+        for version in claim.versions.all():
             version.is_deleted = True
             version.updated_at = now
             version.save()
@@ -90,7 +107,8 @@ def api_claim(request):
         content = request.REQUEST.get('content')
         collective = request.REQUEST.get('collective')
         now = timezone.now()
-        new_version = ClaimVersion(forum_id=request.session['forum_id'], content=content, created_at=now, updated_at=now, is_adopted=False, claim=claim)
+        new_version = ClaimVersion(forum_id=request.session['forum_id'], content=content, created_at=now,
+            updated_at=now, is_adopted=False, claim=claim)
         if collective == 'true':
             new_version.collective = True
             # automatically adopt
@@ -110,13 +128,16 @@ def api_claim(request):
         now = timezone.now()
         content = request.REQUEST.get('content')
         if actual_author:
-            newClaim = Claim(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, created_at=now, updated_at=now)
+            newClaim = Claim(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user,
+                created_at=now, updated_at=now)
             newClaim.save()
-            ClaimVersion.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, claim=newClaim)
+            ClaimVersion.objects.create(forum_id=request.session['forum_id'], author=actual_author,
+                delegator=request.user, content=content, created_at=now, updated_at=now, claim=newClaim)
         else:
             newClaim = Claim(forum_id=request.session['forum_id'], author=request.user, created_at=now, updated_at=now)
             newClaim.save()
-            ClaimVersion.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, claim=newClaim)
+            ClaimVersion.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content,
+                created_at=now, updated_at=now, claim=newClaim)
         claim_ids = request.REQUEST.get('claim_ids').split()
         for claim_id in claim_ids:
             oldClaim = Claim.objects.get(id=claim_id)
@@ -133,9 +154,11 @@ def api_claim(request):
         else:
             actual_author = None
         if actual_author:
-            Vote.objects.create(user=actual_author, delegator=request.user, entry=claim, vote_type=vote_type, created_at=timezone.now(), collective=True)
+            Vote.objects.create(user=actual_author, delegator=request.user, entry=claim, vote_type=vote_type,
+                created_at=timezone.now(), collective=True)
         else:
-            Vote.objects.create(user=request.user, entry=claim, vote_type=vote_type, created_at=timezone.now(), collective=True)
+            Vote.objects.create(user=request.user, entry=claim, vote_type=vote_type, created_at=timezone.now(),
+                collective=True)
         # change the claim itself
         if vote_type in ['pro', 'con', 'finding', 'discarded']:
             claim.claim_category = vote_type
@@ -146,10 +169,9 @@ def api_claim_activities(request):
     response = {}
     action = request.REQUEST.get('action')
     if action == 'load-thread':
-        activity =  request.REQUEST.get('filter')
+        activity = request.REQUEST.get('filter')
         claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
         forum = Forum.objects.get(id=request.session['forum_id'])
-        
         context = {}
         context['entries'] = []
         if activity == 'all' or activity == 'general':
@@ -163,14 +185,15 @@ def api_claim_activities(request):
                 for comment in post.getTree():
                     context['entries'].append(comment.getAttr(forum))
         if activity == 'all' or activity == 'categorize':
-            votes = Vote.objects.filter(entry=claim).filter(Q(vote_type='pro') | Q(vote_type='con') | Q(vote_type='finding'))
+            votes = Vote.objects.filter(entry=claim).filter(
+                Q(vote_type='pro') | Q(vote_type='con') | Q(vote_type='finding') | Q(vote_type='discarded'))
             for vote in votes:
                 context['entries'].append(vote.getAttr(forum))
                 posts = vote.comments_of_event.all()
                 for post in posts:
                     for comment in post.getTree():
                         context['entries'].append(comment.getAttr(forum))
-        if activity == 'all' or activity == 'theme':
+        if activity == 'all' or activity == 'theming':
             themeassignments = ThemeAssignment.objects.filter(entry=claim)
             for themeassignment in themeassignments:
                 context['entries'].append(themeassignment.getAttr(forum))
@@ -187,7 +210,7 @@ def api_claim_activities(request):
                 context['entries'].append(flag.getAttr(forum))
             # performed rewording
             for version in claim.versions.all():
-                if not version.is_adopted: # skip the adopted one
+                if not version.is_adopted:  # skip the adopted one
                     version_info = version.getAttr(forum)
                     context['entries'].append(version_info)
             # performed merging
@@ -201,20 +224,16 @@ def api_claim_activities(request):
                     author_initial = str.upper(str(new_claim.author.first_name[0]) + str(new_claim.author.last_name[0]))
                 except:
                     author_initial = ''
-                entry = {
-                    'author_role': author_role,
-                    'author_initial': author_initial,
+                entry = {'author_role': author_role, 'author_initial': author_initial,
                     'new_claim_author_id': new_claim.author.id,
-                    'new_claim_author_name': new_claim.author.get_full_name(),
-                    'entry_type': 'claim old version',
-                    'is_merged': new_claim.id,
-                    'other_old_claims': '.'.join([str(claimref.from_claim.id) for claimref in new_claim.older_versions.all() if claimref.from_claim != claim]),
+                    'new_claim_author_name': new_claim.author.get_full_name(), 'entry_type': 'claim old version',
+                    'is_merged': new_claim.id, 'other_old_claims': '.'.join(
+                    [str(claimref.from_claim.id) for claimref in new_claim.older_versions.all() if
+                        claimref.from_claim != claim]),
                     'created_at_full': new_claim.created_at,
-                    'updated_at_full': new_claim.updated_at,
-                    'updated_at': pretty_date(new_claim.updated_at)
-                }
+                    'updated_at_full': new_claim.updated_at, 'updated_at': pretty_date(new_claim.updated_at)}
                 context['entries'].append(entry)
-            if claim.older_versions.all(): # this is a merged one!
+            if claim.older_versions.all():  # this is a merged one!
                 attribute = claim.getAttr(forum)
                 attribute['entry_type'] = 'claim new version'
                 context['entries'].append(attribute)
@@ -238,7 +257,7 @@ def _edit_claim(request):
     claim.save()
     return claim
 
-def _add_claim(request, highlight): # by this point user authentication must has been checked
+def _add_claim(request, highlight):  # by this point user authentication must has been checked
     private = request.REQUEST.get('nopublish')
     content = request.REQUEST.get('content')
     now = timezone.now()
@@ -247,15 +266,19 @@ def _add_claim(request, highlight): # by this point user authentication must has
     else:
         actual_author = None
     if actual_author:
-        newClaim = Claim(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, created_at=now, updated_at=now, source_highlight=highlight)
+        newClaim = Claim(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user,
+            created_at=now, updated_at=now, source_highlight=highlight)
     else:
-        newClaim = Claim(forum_id=request.session['forum_id'], author=request.user, created_at=now, updated_at=now, source_highlight=highlight)
+        newClaim = Claim(forum_id=request.session['forum_id'], author=request.user, created_at=now, updated_at=now,
+            source_highlight=highlight)
     newClaim.published = private == 'false'
     newClaim.save()
     if actual_author:
-        claim_version = ClaimVersion(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, claim=newClaim)
+        claim_version = ClaimVersion(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user,
+            content=content, created_at=now, updated_at=now, claim=newClaim)
     else:
-        claim_version = ClaimVersion(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, claim=newClaim)
+        claim_version = ClaimVersion(forum_id=request.session['forum_id'], author=request.user, content=content,
+            created_at=now, updated_at=now, claim=newClaim)
     claim_version.save()
     return newClaim
 
@@ -266,7 +289,8 @@ def _get_claim_votes(user, claim):
             votes = Vote.objects.filter(entry=claim, vote_type=vote_type, collective=False).order_by('-created_at')
             ret[vote_type] = [vote.user.get_full_name() for vote in votes]
     else:
-        ret['my_votes'] = '|'.join(Vote.objects.filter(entry=claim, user=user, collective=False).values_list('vote_type', flat=True))
+        ret['my_votes'] = '|'.join(
+            Vote.objects.filter(entry=claim, user=user, collective=False).values_list('vote_type', flat=True))
         for vote_type in ['pro', 'con', 'finding', 'discarded', 'prioritize']:
             votes = Vote.objects.filter(entry=claim, vote_type=vote_type, collective=False).order_by('-created_at')
             ret[vote_type] = [vote.user.get_full_name() for vote in votes if vote.user != user]
@@ -279,7 +303,8 @@ def _get_version_votes(user, claim_version):
             votes = claim_version.events.filter(vote__vote_type=vote_type).order_by('-created_at')
             ret[vote_type] = [vote.user.get_full_name() for vote in votes]
     else:
-        ret['my_votes'] = '|'.join(Vote.objects.filter(entry=claim_version, user=user).values_list('vote_type', flat=True))
+        ret['my_votes'] = '|'.join(
+            Vote.objects.filter(entry=claim_version, user=user).values_list('vote_type', flat=True))
         for vote_type in ['like']:
             votes = claim_version.events.filter(vote__vote_type=vote_type).order_by('-created_at')
             ret[vote_type] = [vote.user.get_full_name() for vote in votes if vote.user != user]
@@ -291,20 +316,21 @@ def api_get_flags(request):
     if action == 'load_single':
         claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
         response['version_id'] = claim.adopted_version().id
-        response['reword_flags'] = render_to_string("claim-tags.html", _get_flags(request, claim.adopted_version(), 'reword'))
-        response['merge_flags'] = render_to_string("claim-tags.html", _get_flags(request, claim, 'merge'))
-        response['themes'] = render_to_string("claim-tags.html", _get_flags(request, claim, 'theme'))
+        response['reword_flags'] = render_to_string('claim-tags.html',
+            _get_flags(request, claim.adopted_version(), 'reword'))
+        response['merge_flags'] = render_to_string('claim-tags.html', _get_flags(request, claim, 'merge'))
+        response['themes'] = render_to_string('claim-tags.html', _get_flags(request, claim, 'theme'))
         return HttpResponse(json.dumps(response), mimetype='application/json')
     if action == 'load_all':
         forum = Forum.objects.get(id=request.session['forum_id'])
         claims = Claim.objects.filter(forum=forum, is_deleted=False, published=True)
         for claim in claims:
             version_id = claim.adopted_version().id
-            response[version_id] = {'reword_flags': render_to_string("claim-tags.html", _get_flags(request, claim.adopted_version(), 'reword'))}
+            response[version_id] = {
+            'reword_flags': render_to_string('claim-tags.html', _get_flags(request, claim.adopted_version(), 'reword'))}
             response[claim.id] = {
-                'merge_flags': render_to_string("claim-tags.html", _get_flags(request, claim, 'merge')),
-                'themes': render_to_string("claim-tags.html", _get_flags(request, claim, 'theme'))
-            }
+                'merge_flags': render_to_string('claim-tags.html', _get_flags(request, claim, 'merge')),
+                'themes': render_to_string('claim-tags.html', _get_flags(request, claim, 'theme'))}
         return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def _get_flags(request, entry, action):
@@ -315,26 +341,26 @@ def _get_flags(request, entry, action):
         actual_author = None
     if 'reword' == action:
         context['version_id'] = entry.id
-        reword_people = [vote.user.get_full_name() for vote in entry.events.filter(vote__vote_type='reword', collective=False)] # ignore collective ones
-        context['reword'] = {
-            'reword_people': ', '.join(reword_people),
-            'reword_cnt': len(reword_people),
-        }
+        reword_people = [vote.user.get_full_name() for vote in
+            entry.events.filter(vote__vote_type='reword', collective=False)]  # ignore collective ones
+        context['reword'] = {'reword_people': ', '.join(reword_people), 'reword_cnt': len(reword_people), }
         if actual_author:
-            context['reword']['i_voted'] = actual_author in [vote.user for vote in entry.events.filter(vote__vote_type='reword', collective=False)] # ignore collective ones
+            context['reword']['i_voted'] = actual_author in [vote.user for vote in
+                entry.events.filter(vote__vote_type='reword', collective=False)]  # ignore collective ones
         else:
-            context['reword']['i_voted'] = request.user in [vote.user for vote in entry.events.filter(vote__vote_type='reword', collective=False)] # ignore collective ones
+            context['reword']['i_voted'] = request.user in [vote.user for vote in
+                entry.events.filter(vote__vote_type='reword', collective=False)]  # ignore collective ones
     if 'merge' == action:
         context['claim_id'] = entry.id
         # must assert that entry has been suggested for merging for only once.
-        merged_by = [vote.user.get_full_name() for vote in entry.events.filter(vote__vote_type='merge', collective=False)] # ignore collective ones
+        merged_by = [vote.user.get_full_name() for vote in
+            entry.events.filter(vote__vote_type='merge', collective=False)]  # ignore collective ones
         if len(merged_by):
             vote = entry.events.get(vote__vote_type='merge')
-            entry_ids = Vote.objects.filter(user=vote.user, created_at=vote.created_at).values_list('entry__id', flat=True)
-            context['merge'] = {
-                'entry_ids': '.'.join([str(id) for id in entry_ids]),
-                'merge_person': vote.user.get_full_name(),
-            }
+            entry_ids = Vote.objects.filter(user=vote.user, created_at=vote.created_at).values_list('entry__id',
+                flat=True)
+            context['merge'] = {'entry_ids': '.'.join([str(id) for id in entry_ids]),
+                'merge_person': vote.user.get_full_name(), }
             if actual_author:
                 context['merge']['i_voted'] = actual_author == vote.user
             else:
@@ -344,17 +370,16 @@ def _get_flags(request, entry, action):
         forum = Forum.objects.get(id=request.session['forum_id'])
         context['themes'] = []
         for theme in ClaimTheme.objects.filter(forum=forum):
-            people = [themeassignment.user.get_full_name() for themeassignment in entry.events.filter(themeassignment__theme=theme, collective=False)]
-            theme_info = {
-                'id': theme.id,
-                'theme_name': theme.name,
-                'assignment_people': ', '.join(people),
-                'assignment_cnt': len(people),
-            }
+            people = [themeassignment.user.get_full_name() for themeassignment in
+                entry.events.filter(themeassignment__theme=theme, collective=False)]
+            theme_info = {'id': theme.id, 'theme_name': theme.name, 'assignment_people': ', '.join(people),
+                'assignment_cnt': len(people), }
             if actual_author:
-                theme_info['i_voted'] = actual_author in [themeassignment.user for themeassignment in entry.events.filter(themeassignment__theme=theme, collective=False)]
+                theme_info['i_voted'] = actual_author in [themeassignment.user for themeassignment in
+                    entry.events.filter(themeassignment__theme=theme, collective=False)]
             else:
-                theme_info['i_voted'] = request.user in [themeassignment.user for themeassignment in entry.events.filter(themeassignment__theme=theme, collective=False)]
+                theme_info['i_voted'] = request.user in [themeassignment.user for themeassignment in
+                    entry.events.filter(themeassignment__theme=theme, collective=False)]
             context['themes'].append(theme_info)
     return context
 
@@ -367,38 +392,44 @@ def api_claim_flag(request):
         actual_author = User.objects.get(id=request.session['actual_user_id'])
     else:
         actual_author = None
-    if action == 'flag': # flagging a ClaimVersion
-        flag_type = request.REQUEST.get('flag_type') # whether we use claim_id or version_id, it depends on flag_type
+    if action == 'flag':  # flagging a ClaimVersion
+        flag_type = request.REQUEST.get('flag_type')  # whether we use claim_id or version_id, it depends on flag_type
         deflag = request.REQUEST.get('deflag')
         now = timezone.now()
         if flag_type == 'reword':
             claim_version = ClaimVersion.objects.get(id=request.REQUEST.get('version_id'))
             collective = request.REQUEST.get('collective')
             reason = request.REQUEST.get('reason')
-            if collective == 'true': # impossible to deflag
+            if collective == 'true':  # impossible to deflag
                 if actual_author:
-                    Vote.objects.create(user=actual_author, delegator=request.user, entry=claim_version, created_at=now, vote_type='reword', reason=reason, collective=True)
+                    Vote.objects.create(user=actual_author, delegator=request.user, entry=claim_version, created_at=now,
+                        vote_type='reword', reason=reason, collective=True)
                 else:
-                    Vote.objects.create(user=request.user, entry=claim_version, created_at=now, vote_type='reword', reason=reason, collective=True)
+                    Vote.objects.create(user=request.user, entry=claim_version, created_at=now, vote_type='reword',
+                        reason=reason, collective=True)
             else:
                 if actual_author:
                     Vote.objects.filter(user=actual_author, entry=claim_version, vote_type=flag_type).delete()
                     if deflag == 'false':
-                        Vote.objects.create(user=actual_author, delegator=request.user, entry=claim_version, created_at=now, vote_type='reword', reason=reason)
+                        Vote.objects.create(user=actual_author, delegator=request.user, entry=claim_version,
+                            created_at=now, vote_type='reword', reason=reason)
                 else:
                     Vote.objects.filter(user=request.user, entry=claim_version, vote_type=flag_type).delete()
                     if deflag == 'false':
-                        Vote.objects.create(user=request.user, entry=claim_version, created_at=now, vote_type='reword', reason=reason)
+                        Vote.objects.create(user=request.user, entry=claim_version, created_at=now, vote_type='reword',
+                            reason=reason)
             response['html'] = render_to_string("claim-tags.html", _get_flags(request, claim_version, 'reword'))
         elif flag_type == 'merge':
             if deflag == 'false':
                 claim_ids = request.REQUEST.get('claim_ids').split()
                 for claim_id in claim_ids:
                     if actual_author:
-                        Vote.objects.create(user=actual_author, delegator=request.user, entry=Claim.objects.get(id=claim_id), created_at=now, vote_type='merge')
+                        Vote.objects.create(user=actual_author, delegator=request.user,
+                            entry=Claim.objects.get(id=claim_id), created_at=now, vote_type='merge')
                     else:
-                        Vote.objects.create(user=request.user, entry=Claim.objects.get(id=claim_id), created_at=now, vote_type='merge')
-                # doesn't need to return html -- LoadFlags will be called
+                        Vote.objects.create(user=request.user, entry=Claim.objects.get(id=claim_id), created_at=now,
+                            vote_type='merge')
+                        # doesn't need to return html -- LoadFlags will be called
             else:
                 claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
                 if actual_author:
@@ -409,7 +440,7 @@ def api_claim_flag(request):
                     Vote.objects.filter(user=request.user, created_at=timestamp).delete()
                 response['html'] = render_to_string("claim-tags.html", _get_flags(request, claim, 'merge'))
         return HttpResponse(json.dumps(response), mimetype='application/json')
-    if action == 'theme': # thematizing a Claim
+    if action == 'theme':  # thematizing a Claim
         claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
         theme = ClaimTheme.objects.get(id=request.REQUEST.get('theme_id'))
         detheme = request.REQUEST.get('detheme')
@@ -419,9 +450,11 @@ def api_claim_flag(request):
             claim.theme = theme
             claim.save()
             if actual_author:
-                ThemeAssignment.objects.create(user=actual_author, delegator=request.user, entry=claim, created_at=now, theme=theme, collective=True)
+                ThemeAssignment.objects.create(user=actual_author, delegator=request.user, entry=claim, created_at=now,
+                    theme=theme, collective=True)
             else:
-                ThemeAssignment.objects.create(user=request.user, entry=claim, created_at=now, theme=theme, collective=True)
+                ThemeAssignment.objects.create(user=request.user, entry=claim, created_at=now, theme=theme,
+                    collective=True)
         else:
             if actual_author:
                 ThemeAssignment.objects.filter(user=actual_author, entry=claim, theme=theme).delete()
@@ -429,7 +462,8 @@ def api_claim_flag(request):
                 ThemeAssignment.objects.filter(user=request.user, entry=claim, theme=theme).delete()
             if detheme == 'false':
                 if actual_author:
-                    ThemeAssignment.objects.create(user=actual_author, delegator=request.user, entry=claim, created_at=now, theme=theme)
+                    ThemeAssignment.objects.create(user=actual_author, delegator=request.user, entry=claim,
+                        created_at=now, theme=theme)
                 else:
                     ThemeAssignment.objects.create(user=request.user, entry=claim, created_at=now, theme=theme)
         response['html'] = render_to_string("claim-tags.html", _get_flags(request, claim, 'theme'))
@@ -455,14 +489,15 @@ def api_claim_vote(request):
             else:
                 Vote.objects.filter(user=request.user, entry=claim, vote_type=vote_type).delete()
         else:
-            if vote_type == 'pro' or vote_type == 'con' or vote_type == 'finding' or vote_type == 'discarded': # mutual exclusive
+            if vote_type == 'pro' or vote_type == 'con' or vote_type == 'finding' or vote_type == 'discarded':  # mutual exclusive
                 for v in ['pro', 'con', 'finding', 'discarded']:
                     if actual_author:
                         Vote.objects.filter(user=actual_author, entry=claim, vote_type=v).delete()
                     else:
                         Vote.objects.filter(user=request.user, entry=claim, vote_type=v).delete()
             if actual_author:
-                Vote.objects.create(user=actual_author, delegator=request.user, entry=claim, vote_type=vote_type, created_at=timezone.now())
+                Vote.objects.create(user=actual_author, delegator=request.user, entry=claim, vote_type=vote_type,
+                    created_at=timezone.now())
             else:
                 Vote.objects.create(user=request.user, entry=claim, vote_type=vote_type, created_at=timezone.now())
         # after voting, return latest votes on the claim
@@ -503,7 +538,8 @@ def api_claim_vote(request):
             if unvote == 'true':
                 Vote.objects.filter(user=actual_author, entry=claim_version, vote_type='like').delete()
             else:
-                Vote.objects.create(user=actual_author, delegator=request.user, entry=claim_version, vote_type='like', created_at=timezone.now())
+                Vote.objects.create(user=actual_author, delegator=request.user, entry=claim_version, vote_type='like',
+                    created_at=timezone.now())
             response['voters'] = _get_version_votes(actual_author, claim_version)
         else:
             if unvote == 'true':
