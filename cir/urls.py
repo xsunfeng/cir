@@ -1,9 +1,13 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from django.conf.urls.defaults import handler500
 
 import settings
-import user_views, forum_views, doc_views, claim_views
+import user_views
+import forum_views
+import doc_views
+import claim_views
+import facilitator_views
+
 
 admin.autodiscover()
 
@@ -24,17 +28,17 @@ urlpatterns = patterns('',
     url(r'^api_claim_flag/$', claim_views.api_claim_flag),
     url(r'^api_get_flags/$', claim_views.api_get_flags),
 
-    url(r'^api_register_delegator/$', forum_views.register_delegator),
-    # include other apps
+    url(r'^api_register_delegator/$', facilitator_views.register_delegator), # include other apps
+    url(r'^api_switch_phase/$', facilitator_views.switch_phase),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^password_reset/', include('password_reset.urls')),
 
     # these must be put last!
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum),
-    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/statement/?$', forum_views.enter_statement),
-)
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/dashboard/?$', facilitator_views.enter_dashboard),
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/statement/?$', forum_views.enter_statement), )
 
-urlpatterns += patterns('', (r'^media/(?P<path>.*)$', 'django.views.static.serve', {
-	        'document_root': settings.MEDIA_ROOT}))
+urlpatterns += patterns('',
+    (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}))
 
 handler500 = forum_views.handler500

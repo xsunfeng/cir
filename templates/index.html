@@ -2,12 +2,12 @@
 {% load static %}
 {% load compressed %}
 {% block extralib %}
-{% compressed_js 'cir_forum' %}
+	{% compressed_js 'cir_forum' %}
 {% endblock %}
 {% block delaylib %}
 {% endblock %}
 {% block extracss %}
-{% compressed_css 'cir_forum' %}
+	{% compressed_css 'cir_forum' %}
 {% endblock %}
 {% block header %}
 <div class="ui fixed inverted main tabular menu">
@@ -16,8 +16,11 @@
 		{% if load_error %}
 		<div class="item">GeoDeliberator</div>
 		{% else %}
-		<a href="#" class="item active" data-tab="document-tab"><i class="icon file text outline"></i>Read Documents</a>
-		<a href="#" class="item" data-tab="claim-tab"><i class="icon comment outline"></i>Create Claims</a>
+		<a href="#" class="item {{ settings.document_active }}" data-tab="document-tab"><i class="icon file text outline"></i>Documents</a>
+		<a href="#" class="item {{ settings.claim_active }}" data-tab="claim-tab"><i class="icon comment outline"></i>Claims</a>
+		{% if settings.phase == 'finished' %}
+		<a href="{{ forum_url }}/statement" target="_blank" class="item">Citizens' Statement</a>
+		{% endif %}
 		<div id="header-visitor-wrapper" class="right menu" style="display:inline-block">
 			<div class="item">
 				<div id="login-btn" class="ui button">Log in</div>
@@ -40,23 +43,23 @@
 			</div>
 		</div>
 		<div id="header-facilitator-wrapper" class="right menu" style="display:inline-block">
-			<div class="ui simple dropdown item" tabindex="0">
+			<a href="{{ forum_url }}/dashboard" target="_blank" class="item">
 				<i class="icon dashboard"></i>
+			</a>
+			<div class="ui simple dropdown item" tabindex="0">
+				<i class="icon spy"></i>
 				<i class="icon dropdown" tabindex="0"></i>
-				<div class="facilitator menu" tabindex="-1">
-					<a href="#" class="item" data-action="overview">Overview</a>
-					<a href="#" class="item" data-action="rounds">Rounds</a>
-					<a href="#" class="item" data-action="users">Users</a>
-					<a href="#" class="item" data-action="layout">Layout</a>
-					<a href="#" class="item" data-action="log">Access Log</a>
-					<div class="ui dropdown item">Switch User<i class="dropdown icon"></i>
-						<div class="menu">
-							{% for user in panelists %}
-							<a class="item" data-action="switch_user" data-id="{{ user.id }}">{{ user.name }}</a>
-							{% endfor %}
-							<a class="item" data-action="switch_user" data-id="{{ user_id }}">{{ user_name }}</a>
-						</div>
-					</div>
+				<div class="switch user menu" tabindex="-1">
+					<div class="header">Yourself</div>
+					<div class="item" data-id="{{ user_id }}">{{ user_name }}</div>
+					<div class="header">Panelists</div>
+					{% for user in panelists %}
+					<div class="item" data-id="{{ user.id }}">{{ user.name }}</div>
+					{% endfor %}
+					<div class="header">Staff</div>
+					{% for user in staff %}
+					<div class="item" data-id="{{ user.id }}">{{ user.name }}</div>
+					{% endfor %}
 				</div>
 			</div>
 		</div>
@@ -91,16 +94,40 @@
 </div>
 		{% endif %}
 	{% else %}
-<div class="ui main tab active" data-tab="document-tab">
+<div class="ui main tab {{ settings.document_active }}" data-tab="document-tab">
 	<div class="ui grid">
-		<div id="document-categories" class="sixteen wide column"></div>
-		<div id="document-pane" class="ten wide column">Please select a document from the list.</div>
-		<div id="document-tag" class="one wide column">Tags
-			
-    	</div>
-		<div class="five wide column"></div>
+		<div class="sixteen wide column" style="padding-top:1em">
+			<div class="ui attached info message">
+				<div class="ui instructions accordion">
+					<div class="ui active title"><i class="dropdown icon"></i>Current phase: {{ settings.phase_full }}</div>
+					<div class="active content">
+						{% if settings.phase == 'not_started' %}
+							The deliberation is not started yet. Further instructions will be updated here!
+						{% elif settings.phase == 'extract' %}
+							You'll be working on ... Please ... This process will last ...
+						{% elif settings.phase == 'categorize' %}
+							You'll be working on ... Please ... This process will last ...
+						{% elif settings.phase == 'theming' %}
+							You'll be working on ... Please ... This process will last ...
+						{% elif settings.phase == 'improve' %}
+							You'll be working on ... Please ... This process will last ...
+						{% elif settings.phase == 'finished' %}
+							The deliberation event has ended. Please view the statement.
+						{% elif settings.phase == 'paused' %}
+							The deliberation process is temporarily paused.
+						{% endif %}
+					</div>
+				</div>
+			</div>
+			<div id="document-categories" class="ui attached segment"></div>
+		</div>
+		<div class="ten wide column" style="padding-top:0">
+			<div id="document-pane" class="ui segment">Please select a document from the list.</div>
+		</div>
+		<div class="six wide column"></div>
 	</div>
 	<div id="doc-highlight-toolbar">
+	{% if settings.phase == 'extract' %}
 		<div class="ui attached top segment blue labeled icon menu">
 			<a data-action="comment" class="item doc-anno-btn">
 			    <i class="comment icon"></i>Comment
@@ -111,18 +138,36 @@
 			<a data-action="claim" class="item doc-anno-btn">
 			    <i class="code icon"></i>Extract claim
 			</a>
-			<a data-action="tags" class="item doc-anno-btn">
-			    <i class="tags icon"></i>Tag
-			</a>
 		</div>
 		<div class="ui attached bottom segment" style="display:none">
-			<form id="doc-comment-form" class="ui form comment" style="display:none"> <div class="field"> <label><span></span> (Ctrl + Enter to publish)</label> <textarea rows="2"></textarea> </div> <div class="ui primary button doc-anno-submit">Publish</div> </form> <form id="doc-claim-form" class="ui form claim" style="display:none"> <div class="field"> <div style="width: 375px" class="ui attached info message">Please reword the highlighted text to form a coherent and meaningful claim.</div> <textarea></textarea> </div> <div class="ui checkbox nopublish-wrapper"> <label>Save for later</label> <input type="checkbox" name="nopublish"> </div> <div class="ui primary button doc-anno-submit">Publish</div> </form> <form id="doc-tags-form" class="ui form tags" style="display:none"> <div class="field"> <label><span></span> (Ctrl + Enter to publish)</label><a href="#" id="plugin-methods-add">Add Token</a> | <a href="#" id="plugin-methods-remove">Remove Token</a> | <a href="#" id="plugin-methods-clear">Clear Tokens</a><br />
-        	<input type="text" id="demo-input-plugin-methods" name="blah" />
-        	</div> <div class="ui primary button doc-anno-submit">Publish</div> </form></div>
+			<form id="doc-comment-form" class="ui form comment" style="display:none">
+				<div class="field">
+					<label><span></span> (Ctrl + Enter to publish)</label>
+					<textarea rows="2"></textarea>
+				</div>
+				<div class="ui primary button doc-anno-submit">Publish</div>
+			</form>
+			<form id="doc-claim-form" class="ui form claim" style="display:none">
+				<div class="field">
+					<div class="ui attached info message">Please reword the highlighted text to form a coherent and meaningful claim.</div>
+					<textarea></textarea>
+				</div>
+				<div class="ui checkbox nopublish-wrapper">
+					<label>Save for later</label>
+					<input type="checkbox" name="nopublish">
+				</div>
+				<div class="ui primary button doc-anno-submit">Publish</div>
+			</form>
+		</div>
+	{% else %}
+		<div class="ui warning message">
+			We are not in a claim extraction round. You can only work on existing highlights.
+		</div>
+	{% endif %}
 	</div>
-	{% include 'doc-thread-popup.html' %}
+	{% include 'doc-thread-popup.html' with settings=settings %}
 </div>
-<div class="ui main tab" data-tab="claim-tab">
+<div class="ui main tab {{ settings.claim_active }}" data-tab="claim-tab">
 	<div class="ui grid">
 		<div class="ten wide column" style="margin-bottom: 3em">
 			<div class="ui tabular menu" style="margin:0 -1px;border:none">
@@ -133,9 +178,33 @@
 					<i class="maximize icon"></i> Full-screen Review
 				</a>
 			</div>
-			<div id="claim-pane"></div>
+			<div class="ui attached info message" style="margin-top:0">
+				<div class="ui instructions accordion">
+					<div class="ui active title"><i class="dropdown icon"></i>Current phase: {{ settings.phase_full }}</div>
+					<div class="active content">
+						{% if settings.phase == 'not_started' %}
+							The deliberation is not started yet. Further instructions will be updated here!
+						{% elif settings.phase == 'extract' %}
+							You'll be working on ... Please ... This process will last ...
+						{% elif settings.phase == 'categorize' %}
+							You'll be working on ... Please ... This process will last ...
+						{% elif settings.phase == 'theming' %}
+							You'll be working on ... Please ... This process will last ...
+						{% elif settings.phase == 'improve' %}
+							You'll be working on ... Please ... This process will last ...
+						{% elif settings.phase == 'finished' %}
+							The deliberation event has ended. Please view the statement.
+						{% elif settings.phase == 'paused' %}
+							The deliberation process is temporarily paused.
+						{% endif %}
+					</div>
+				</div>
+			</div>
+			<div id="claim-pane" class="{{ settings.phase }}">
+				<div class="ui segment" style="height: 10em;"></div>
+			</div>
 		</div>
-		<div id="claim-navigator" class="six wide column" style="position:fixed;top:2.5em;bottom:3em;padding:0"></div>
+		<div id="claim-navigator" class="six wide column"></div>
 		<div id="claim-merge-editor" class="ui modal">
 			<i class="close icon"></i>
 			<div class="content">
@@ -166,20 +235,24 @@
 	</div>
 
 	<div class="ui five steps" style="position:fixed;bottom:0;left:0">
-		<div class="active step">
+		<div class="{% if settings.phase == 'extract' %}active {% endif %}step">
 			<div class="title">Extract</div>
 		</div>
-		<div class="step">
+		<div class="{% if settings.phase == 'categorize' %}active {% endif %}step">
 			<div class="title">Categorize</div>
 		</div>
-		<div class="step">
-			<div class="title">Assign Themes</div>
+		<div class="{% if settings.phase == 'theme' %}active {% endif %}step">
+			<div class="title">Identify Themes</div>
 		</div>
-		<div class="step">
+		<div class="{% if settings.phase == 'improve' %}active {% endif %}step">
 			<div class="title">Prioritize &amp; Improve</div>
 		</div>
-		<div class="step">
+		<div class="{% if settings.phase == 'finished' %}active {% endif %}step">
+		{% if settings.phase == 'finished' %}
+			<a href="{{ forum_url }}/statement" class="title">Citizens' Statement</a>
+		{% else %}
 			<div class="title">Citizens' Statement</div>
+		{% endif %}
 		</div>
 	</div>
 </div>

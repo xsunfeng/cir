@@ -1,5 +1,4 @@
 import json
-from htmlentitydefs import name2codepoint
 
 from django.template.loader import render_to_string
 from django.http import HttpResponse
@@ -11,10 +10,11 @@ import claim_views
 def api_doc(request):
     response = {}
     action = request.REQUEST.get('action')
+    forum = Forum.objects.get(id=request.session['forum_id'])
     if action == 'get-categories':
         context = {}
         try:
-            context['forum_name'] = Forum.objects.get(id=request.session['forum_id']).full_name
+            context['forum_name'] = forum.full_name
             # retrieve docs in a folder
             folders = EntryCategory.objects.filter(forum_id=request.session['forum_id'], category_type='doc')
             context['folders'] = []
@@ -36,19 +36,20 @@ def api_doc(request):
             return HttpResponse('Unknown error.', status=403)
     if action == 'get-document':
         doc_id = request.REQUEST.get('doc_id')
-        try:
-            doc = Doc.objects.get(id=doc_id)
-            ordered_sections = doc.sections.filter(order__isnull=False).order_by('order')
-            unordered_sections = doc.sections.filter(order__isnull=True).order_by('updated_at')
-            context = {}
-            context['title'] = doc.title
-            context['sections'] = []
-            for section in ordered_sections | unordered_sections:
-                context['sections'].append(section.getAttr())
-            response['html'] = render_to_string("doc-content.html", context)
-            return HttpResponse(json.dumps(response), mimetype='application/json')
-        except:
-            return HttpResponse('The document does not exist.', status=403)
+        # try:
+        doc = Doc.objects.get(id=doc_id)
+        ordered_sections = doc.sections.filter(order__isnull=False).order_by('order')
+        unordered_sections = doc.sections.filter(order__isnull=True).order_by('updated_at')
+        context = {}
+        context['forum_phase'] = forum.phase
+        context['title'] = doc.title
+        context['sections'] = []
+        for section in ordered_sections | unordered_sections:
+            context['sections'].append(section.getAttr())
+        response['html'] = render_to_string("doc-content.html", context)
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+        # except:
+        #     return HttpResponse('The document does not exist.', status=403)
 
 def api_highlight(request):
     response = {}
@@ -74,14 +75,18 @@ def api_highlight(request):
             actual_author = None
         if content_type == 'comment':
             if actual_author:
-                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
+                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user,
+                    content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
             else:
-                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
+                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content,
+                    created_at=now, updated_at=now, highlight=highlight, content_type='comment')
         elif content_type == 'question':
             if actual_author:
-                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
+                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user,
+                    content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
             else:
-                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
+                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content,
+                    created_at=now, updated_at=now, highlight=highlight, content_type='question')
         elif content_type == 'claim':
             claim_views._add_claim(request, highlight)
         return HttpResponse(json.dumps(response), mimetype='application/json')
@@ -103,10 +108,12 @@ def api_annotation(request):
         highlight_id = request.REQUEST.get('highlight_id')
         highlight = Highlight.objects.get(id=highlight_id)
         context = {}
+        context['forum_phase'] = forum.phase
         context['entries'] = []
         posts = highlight.posts_of_highlight.all()
         for post in posts:
-            context['entries'].append(post.getAttr(forum))
+            for comment in post.getTree():
+                context['entries'].append(comment.getAttr(forum))
         claims = highlight.claims_of_highlight.all()
         for claim in claims:
             context['entries'].append(claim.getAttr(forum))
@@ -116,48 +123,44 @@ def api_annotation(request):
     if action == 'create':
         if not request.user.is_authenticated():
             return HttpResponse("Please log in first.", status=403)
+        now = timezone.now()
+        newPost = Post(forum_id=request.session['forum_id'], content_type='comment', created_at=now, updated_at=now)
         if 'actual_user_id' in request.session:
-            actual_author = User.objects.get(id=request.session['actual_user_id'])
+            newPost.author = User.objects.get(id=request.session['actual_user_id'])
+            newPost.delegator = request.user
         else:
-            actual_author = None
-        content = request.REQUEST.get('content')
-        # need to know either highlight_id, or claim_id
-        highlight_id = request.REQUEST.get('highlight_id')
+            newPost.author = request.user
+        newPost.content = request.REQUEST.get('content')
+        reply_type = request.REQUEST.get('reply_type')
+        if reply_type:  # replying another post, or event
+            reply_id = request.REQUEST.get('reply_id')
+            if reply_type == 'event':
+                event = Event.objects.get(id=reply_id)
+                newPost.target_event = event
+            elif reply_type == 'entry':
+                entry = Entry.objects.get(id=reply_id)
+                newPost.target_entry = entry
+        else:  # targeting at a highlight or a claim
+            source = request.REQUEST.get('type')
+            if source == 'highlight':
+                highlight = Highlight.objects.get(id=request.REQUEST.get('highlight_id'))
+                newPost.highlight = highlight
+            elif source == 'claim':
+                claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
+                newPost.target_entry = claim
         collective = request.REQUEST.get('collective')
         if collective == 'true':
-            collective = True
+            newPost.collective = True
         else:
-            collective = False
-        target_entry = None
-        if not highlight_id:
-            claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
-            if claim.source_highlight: # merged claim doesn't have one
-                highlight_id = Claim.objects.get(id=request.REQUEST.get('claim_id')).source_highlight.id
-            else:
-                target_entry = claim
-        reply_id = request.REQUEST.get('reply_id', '')
-        now = timezone.now()
-        # TODO reply_id must be a post; need to inherit target_claim & target_event
-        post = Post(forum_id=request.session['forum_id'], content=content, created_at=now, updated_at=now, target_entry=target_entry, highlight_id=highlight_id, collective=collective, content_type='comment')
-        if len(reply_id) == 0:
-            if actual_author:
-                post.author = actual_author
-                post.delegator = request.user
-            else:
-                post.author = request.user
-        else:
-            post.parent_id = reply_id
-            if actual_author:
-                post.author = actual_author
-                post.delegator = request.user
-            else:
-                post.author = request.user
-        post.save()
+            newPost.collective = False
+        newPost.save()
         return HttpResponse(json.dumps(response), mimetype='application/json')
     if action == 'delete':
         entry_id = request.REQUEST.get('entry_id')
+        now = timezone.now()
         post = Post.objects.get(id=entry_id)
         post.is_deleted = True
+        post.updated_at = now
         post.save()
         return HttpResponse(json.dumps(response), mimetype='application/json')
 
