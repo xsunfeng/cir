@@ -16,7 +16,7 @@ class Migration(SchemaMigration):
 
         # User chose to not deal with backwards NULL issues for 'Entry.content'
         raise RuntimeError("Cannot reverse this migration. 'Entry.content' and its values cannot be restored.")
-        
+
         # The following code is provided here to aid in writing a correct migration
         # Changing field 'Entry.content'
         db.alter_column(u'cir_entry', 'content', self.gf('django.db.models.fields.TextField')())

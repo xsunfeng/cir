@@ -12,6 +12,7 @@
 var CirLayout = {
 	initLayout: function() {
 		$('.tabular.menu > .container > .item').tab();
+		$('.ui.instructions.accordion').accordion();
 	},
 	changeTab: function(dest, callback) {
 		if (typeof dest == 'undefined') {
@@ -27,4 +28,4 @@ var CirLayout = {
 			callback();
 		}
 	}
-}
+};

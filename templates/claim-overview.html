@@ -71,7 +71,7 @@
 	    	<i class="plus square outline icon"></i>
 	    </a>
 		{% if not claim.published %}
-		<div class="ui info message">This claim is unpublished and only visible to you</div>
+		<div class="ui warning message" style="margin-top:0">This claim is unpublished and only visible to you</div>
 		{% endif %}
 		<div class="content">
 			{% if claim.collective %}<a class="ui teal right ribbon label">Collective</a>{% endif %}
@@ -104,13 +104,13 @@
 		</div>
 		<div class="ui red small claim menu" data-id="{{ claim.id }}">
 		{% if claim.published %}
-			<a class="item claim-vote-btn" data-action="prioritize"><i class="thumbs outline up icon"></i><span></span></a>
-			<a class="item claim-vote-btn" data-action="pro"><i class="plus icon"></i><span></span></a>
-			<a class="item claim-vote-btn" data-action="con"><i class="minus icon"></i><span></span></a>
-			<a class="item claim-vote-btn" data-action="finding"><i class="flag outline icon"></i><span></span></a>
-			<a class="item claim-vote-btn" data-action="discarded"><i class="trash outline icon"></i><span></span></a>
+			<a class="item claim-vote-btn {{ settings.prioritize_btn }}" data-action="prioritize"><i class="thumbs outline up icon"></i><span></span></a>
+			<a class="item claim-vote-btn {{ settings.vote_btn }}" data-action="pro"><i class="plus icon"></i><span></span></a>
+			<a class="item claim-vote-btn {{ settings.vote_btn }}" data-action="con"><i class="minus icon"></i><span></span></a>
+			<a class="item claim-vote-btn {{ settings.vote_btn }}" data-action="finding"><i class="flag outline icon"></i><span></span></a>
+			<a class="item claim-vote-btn {{ settings.vote_btn }}" data-action="discarded"><i class="trash outline icon"></i><span></span></a>
 			<div class="right menu">
-				<div class="ui dropdown simple item">
+				<div class="ui dropdown simple theme item">
 					Theme
 					<i class="dropdown icon"></i>
 					<div class="ui menu">
@@ -120,7 +120,7 @@
 						<a class="item theme-suggest-btn">Suggest a new theme ...</a>
 					</div>
 				</div>
-				<div class="ui dropdown simple item">
+				<div class="ui dropdown simple flag item">
 					Flag
 					<i class="dropdown icon"></i>
 					<div class="menu" data-id="{{ claim.version_id }}">

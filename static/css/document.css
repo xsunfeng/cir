@@ -1,10 +1,6 @@
 #document-categories,
 #document-pane {
-	background-color: #FFFFFF;
-	border: 1px solid #DDDDDD;
 	font-size: 1.3rem;
-	line-height: 30px;
-	margin: 10px 0px;
 }
 .noselect {
 	-webkit-touch-callout: none;
@@ -42,6 +38,9 @@
 	top: -999999px;
 	z-index: 900;
 	width: 450px;
+}
+.section-content {
+	line-height: 1.6em;
 }
 .section-content img {
 	max-width: 100%;

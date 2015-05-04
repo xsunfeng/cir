@@ -1,6 +1,7 @@
 # Django settings for cir project.
 import os
-DEBUG = False
+
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -11,24 +12,26 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'cir',                      # Or path to database file if using sqlite3.
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'cir',  # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': 'postgres',
         'PASSWORD': 'asdf1234',
-        'HOST': '130.203.136.141',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                      # Set to empty string for default.
+        'HOST': '130.203.136.141',
+        # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '',  # Set to empty string for default.
     }
 }
 
-PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..'))
+PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 POSTGIS_VERSION = (2, 0, 3)
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = [
-    '127.0.0.1', 
-    'localhost', 
+    '127.0.0.1',
+    'localhost',
     '.ist.psu.edu',
 ]
 
@@ -88,37 +91,49 @@ PIPELINE_EMBED_PATH = r'[/]?static/embed/'
 PIPELINE_CSS = {
     'cir_global': {
         'source_filenames': (
-          'css/container.css',
+            'css/container.css',
+            'css/page_body.css',
         ),
         'output_filename': 'css/cir_global.css',
     },
     'cir_forum': {
         'source_filenames': (
-          'css/document.css',
-          'css/claim.css',
-          'css/page_body.css',
+            'css/document.css',
+            'css/claim.css',
         ),
         'output_filename': 'css/cir_forum.css',
     },
+    'cir_dashboard': {
+        'source_filenames': (
+            'css/dashboard.css',
+        ),
+        'output_filename': 'css/cir_dashboard.css',
+    }
 }
 
 PIPELINE_JS = {
     'cir_global': {
         'source_filenames': (
             'js/header.js',
-            'js/utils.js', 
+            'js/utils.js',
         ),
         'output_filename': 'js/cir_global.js',
     },
     'cir_forum': {
         'source_filenames': (
             'js/layout.js',
-            'js/document.js', 
-            'js/claim.js', 
-            'js/activity-feed.js', 
+            'js/document.js',
+            'js/claim.js',
+            'js/activity-feed.js',
             'js/utils.js',
         ),
         'output_filename': 'js/cir_forum.js',
+    },
+    'cir_dashboard': {
+        'source_filenames': (
+            'js/dashboard.js',
+        ),
+        'output_filename': 'js/cir_dashboard.js',
     }
 }
 
@@ -128,7 +143,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'pipeline.finders.PipelineFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -138,13 +153,13 @@ SECRET_KEY = 'cj6k998fi&=fesrf39*2g07jcuf!%)=xfnvji8z2f==d7yb_-d'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    # 'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
+        # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.transaction.TransactionMiddleware',

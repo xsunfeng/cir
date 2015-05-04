@@ -8,6 +8,7 @@ from cir.models import *
 
 VISITOR_ROLE = 'visitor'
 
+
 def login_view(request):
     response = {}
     email = request.REQUEST.get('email').lower()
@@ -23,6 +24,7 @@ def login_view(request):
         response['user_name'] = user.get_full_name()
         request.session['role'] = VISITOR_ROLE
         try:
+            forum = Forum.objects.get(id=request.session['forum_id'])
             if request.session['forum_id'] != -1:
                 request.session['role'] = Role.objects.get(user=user, forum=forum).role
         except:
@@ -31,6 +33,7 @@ def login_view(request):
         return HttpResponse(json.dumps(response), mimetype='application/json')
     else:
         return HttpResponse("Your user name and/or password is incorrect.", status=403)
+
 
 def register(request):
     response = {}
@@ -56,12 +59,14 @@ def register(request):
     else:
         return HttpResponse("Unknown error.", status=403)
 
-def logout_view(request): 
+
+def logout_view(request):
     forum_id = request.session['forum_id']
     logout(request)
     # request.session['user_id'] = -1
     request.session['forum_id'] = forum_id
     return HttpResponse(json.dumps({}), mimetype='application/json')
+
 
 def change_info(request):
     if not request.user.is_authenticated():

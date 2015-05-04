@@ -255,39 +255,36 @@ var cir = {
 		});
 	},
 	initFacilitatorBtns: function() {
-		$('.facilitator.menu .item').click(function() {
-			var action = this.getAttribute('data-action');
-			if (action == 'switch_user') {
-				var user_id = this.getAttribute('data-id');
-				var user_name = $(this).text();
-				$.ajax({
-					url: '/api_register_delegator/',
-					type: 'post',
-					data: {
-						user_id: user_id,
-					},
-					success: function(xhr) {
-						if (user_name.indexOf(sessionStorage['user_name']) > -1) {
-							// switched back!
-							$('#header-user-name').text(user_name);
-							delete sessionStorage['simulated_user_name'];
-							delete sessionStorage['simulated_user_id'];
-							delete sessionStorage['simulated_user_role'];
-						} else {
-							$('#header-user-name').text(user_name + ' (simulated)');
-							sessionStorage['simulated_user_name'] = user_name;
-							sessionStorage['simulated_user_id'] = user_id;
-							sessionStorage['simulated_user_role'] = xhr.role;
-						}
-						window.default_claim.updateClaimPane();
-					},
-					error: function(xhr) {
-						if (xhr.status == 403) {
-							notify('error', xhr.responseText);
-						}
+		$('#header-facilitator-wrapper .switch.user.menu .item').click(function() {
+			var user_id = this.getAttribute('data-id');
+			var user_name = $(this).text();
+			$.ajax({
+				url: '/api_register_delegator/',
+				type: 'post',
+				data: {
+					user_id: user_id,
+				},
+				success: function(xhr) {
+					if (user_name.indexOf(sessionStorage['user_name']) > -1) {
+						// switched back!
+						$('#header-user-name').text(user_name);
+						delete sessionStorage['simulated_user_name'];
+						delete sessionStorage['simulated_user_id'];
+						delete sessionStorage['simulated_user_role'];
+					} else {
+						$('#header-user-name').text(user_name + ' (simulated)');
+						sessionStorage['simulated_user_name'] = user_name;
+						sessionStorage['simulated_user_id'] = user_id;
+						sessionStorage['simulated_user_role'] = xhr.role;
 					}
-				});
-			}
+					window.default_claim.updateClaimPane();
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						notify('error', xhr.responseText);
+					}
+				}
+			});
 		});
 	}
-}
+};
