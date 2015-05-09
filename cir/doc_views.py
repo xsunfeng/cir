@@ -92,6 +92,70 @@ def api_highlight(request):
         for section in doc.sections.all():
             highlights = section.highlights.all()
             for highlight in highlights:
+                print highlight.getAttr()
+                response['highlights'].append(highlight.getAttr())
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+
+
+def api_tag_input(request):
+    response = {}
+    action = request.REQUEST.get('action')
+    if action == 'create':
+        if not request.user.is_authenticated():
+            return HttpResponse("Please log in first.", status=403)
+        content = request.REQUEST.get('content')
+        content_type = request.REQUEST.get('type')
+        start = request.REQUEST.get('start')
+        end = request.REQUEST.get('end')
+        context_id = request.REQUEST.get('contextId')
+        # create highlight object
+        context = Entry.objects.get(id=context_id)
+        highlight = Highlight(start_pos=start, end_pos=end, context=context)
+        highlight.save()
+        response['highlight_id'] = highlight.id
+        # then create the content
+        now = timezone.now()
+        if 'actual_user_id' in request.session:
+            actual_author = User.objects.get(id=request.session['actual_user_id'])
+        else:
+            actual_author = None
+        if content_type == 'comment':
+            if actual_author:
+                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
+            else:
+                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
+        elif content_type == 'question':
+            if actual_author:
+                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
+            else:
+                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
+        elif content_type == 'claim':
+            claim_views._add_claim(request, highlight)
+        elif content_type == 'tags':
+            content_tags = content.split()
+            for ctag in content_tags:
+                if actual_author:
+                    try:
+                        tobj = Tag.objects.get(id=content)##seems not very efficient
+                        Tag.highlight.add(highlight)
+                        tPos = TagPosition.objects.get(highlight=highlight)
+                        tPos.authors.add(actual_author)
+                        # TPU = TagPosUser.objects.get(author=actual_author)
+                    except ObjectDoesNotExist:
+                        tobj = Tag.objects.create(id=content)
+                        Tag.highlight.add(highlight)
+                        tPos = TagPosition.objects.get(highlight=highlight)
+                        tPos.authors.add(actual_author) 
+
+
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+    if action == 'load-doc':
+        doc_id = request.REQUEST.get('doc_id')
+        doc = Doc.objects.get(id=doc_id)
+        response['highlights'] = []
+        for section in doc.sections.all():
+            highlights = section.highlights.all()
+            for highlight in highlights:
                 response['highlights'].append(highlight.getAttr())
         return HttpResponse(json.dumps(response), mimetype='application/json')
 

@@ -176,6 +176,20 @@ class Highlight(models.Model):
             attr['type'] = self.posts_of_highlight.order_by('-updated_at')[0].content_type
         return attr
 
+class Tag(models.Model):
+    id = models.TextField(default=True, primary_key=True)
+    
+    highlight = models.ManyToManyField(Highlight,through="TagPosition")
+
+class TagPosition(models.Model):
+    tag = models.ForeignKey(Tag)
+    authors = models.ManyToManyField(User, through="TagPosUser")
+    highlight = models.ForeignKey(Highlight)
+
+class TagPosUser(models.Model):
+    tagPos = models.ForeignKey(TagPosition)
+    author = models.ForeignKey(User)
+    created_at = models.DateTimeField()
 
 class ClaimTheme(models.Model):
     forum = models.ForeignKey(Forum)

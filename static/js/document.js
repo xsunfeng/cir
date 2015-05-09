@@ -25,13 +25,14 @@ function CirDocument() {
 	});
 	//tagging input initializing
 	function S2id(str){
-            var ret;
+            var ret='';
             for(i=0;i<str.length;i++)
             {
-                ret += str[i].charCodeAt(0)%100
+                ret += (str[i].charCodeAt(0)%100).toString();
             }
-            return parseInt(ret)
+            return parseInt(ret);
         }
+
 	$("#demo-input-plugin-methods").tokenInput([
                 {id: 7, name: "Economics"},
                 {id: 11, name: "Environment"},
@@ -96,7 +97,7 @@ function CirDocument() {
 	});
 	$('.doc-anno-submit').click(function(e) {
 		var content = $(this).parents('form').find('textarea').val();
-		if ($.trim(content).length == 0) {
+		if ($.trim(content).length == 0 && _this.newHighlight.type == 'tags' && $("#demo-input-plugin-methods").tokenInput("get").length==0) {
 			notify('error', 'Content must not be empty.');
 			return;
 		}
@@ -105,34 +106,67 @@ function CirDocument() {
 		if ($(this).parents('form').hasClass('claim')) {
 			nopublish = $(this).parents('form').find('.nopublish-wrapper').checkbox('is checked');
 		}
-		$.ajax({
-			url: '/api_highlight/',
-			type: 'post',
-			data: $.extend({
-				action: 'create',
-				content: content,
-				nopublish: nopublish,
-			}, _this.newHighlight),
-			success: function(xhr) {
-				$('#doc-highlight-toolbar').removeAttr('style');
-				$('#doc-highlight-toolbar textarea').val('');
-				$('#doc-highlight-toolbar .button').removeClass('loading');
-				$('.tk.highlighted').removeClass('highlighted')
-				_this.highlight({
-					type: _this.newHighlight.type,
-					start: _this.newHighlight.start,
-					end: _this.newHighlight.end,
-					context_id: _this.newHighlight.contextId,
-					id: xhr.highlight_id
-				});
-			},
-			error: function(xhr) {
-				$('#doc-highlight-toolbar .button').removeClass('loading');
-				if (xhr.status == 403) {
-					notify('error', xhr.responseText);
+		if (_this.newHighlight.type!='tags') {
+			$.ajax({
+				url: '/api_highlight/',
+				type: 'post',
+				data: $.extend({
+					action: 'create',
+					content: content,
+					nopublish: nopublish,
+				}, _this.newHighlight),
+				success: function(xhr) {
+					$('#doc-highlight-toolbar').removeAttr('style');
+					$('#doc-highlight-toolbar textarea').val('');
+					$('#doc-highlight-toolbar .button').removeClass('loading');
+					$('.tk.highlighted').removeClass('highlighted')
+					_this.highlight({
+						type: _this.newHighlight.type,
+						start: _this.newHighlight.start,
+						end: _this.newHighlight.end,
+						context_id: _this.newHighlight.contextId,
+						id: xhr.highlight_id
+					});
+				},
+				error: function(xhr) {
+					$('#doc-highlight-toolbar .button').removeClass('loading');
+					if (xhr.status == 403) {
+						notify('error', xhr.responseText);
+					}
 				}
-			}
-		});
+			});
+		}
+		else {
+			var content = $("#demo-input-plugin-methods").tokenInput("get");
+			$.ajax({
+				url: '/api_tag_input/',
+				type: 'post',
+				data: $.extend({
+					action: 'create',
+					content: content,
+					nopublish: nopublish,
+				}, _this.newHighlight),
+				success: function(xhr) {
+					$('#doc-highlight-toolbar').removeAttr('style');
+					$('#doc-highlight-toolbar textarea').val('');
+					$('#doc-highlight-toolbar .button').removeClass('loading');
+					$('.tk.highlighted').removeClass('highlighted')
+					_this.highlight({
+						type: _this.newHighlight.type,
+						start: _this.newHighlight.start,
+						end: _this.newHighlight.end,
+						context_id: _this.newHighlight.contextId,
+						id: xhr.highlight_id
+					});
+				},
+				error: function(xhr) {
+					$('#doc-highlight-toolbar .button').removeClass('loading');
+					if (xhr.status == 403) {
+						notify('error', xhr.responseText);
+					}
+				}
+			});
+		}
 	});
 	$('.doc-thread-btn').click(function(e) {
 		var action = this.getAttribute('data-action');
