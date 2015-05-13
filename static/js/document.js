@@ -172,22 +172,76 @@ function CirDocument() {
 						destArea.enter().append("text").style("font-size", function(d) {
 							return d.size + "px";
 						}).style("font-family", "serif").style("fill", function(d, i) {
-							return 'blue'; //colors[d.topic];
+							// var sel_navtags = $("#secVisbtn-"+sec_id).siblings('.token-input-list-facebook').find('p.selected').filter(function(){
+							// 	return $(this).text()==d.text;
+							// });
+							// if($(sel_navtags[0]).hasClass('selected')){
+							// 	return 'red';
+							// }
+							// else {return 'blue';} //colors[d.topic];
+							return 'blue';
 						}).attr("text-anchor", "middle").attr("transform", function(d) {
 							// return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
 							return "translate(" + [d.x, d.y] + ")";
 						}).text(function(d) {
 							return d.text;
 						}).on("click", function(d, i) {
-							// var x = d.text;
-							// if ($.inArray(x, self.clickedw) == -1) {
-							// 	self.clickedw.push(x);
-							// 	d3.select(this).style("stroke", "red").style("stroke-width", 2);
-							// } else {
-							// 	self.clickedw.splice(self.clickedw.indexOf(x), 1);
-							// 	d3.select(this).style("stroke", "red").style("stroke-width", 0);
-							// }
+							var e = event.target;
+							var sel_navtags = $("#secVisbtn-"+sec_id).siblings('.token-input-list-facebook').find('p.selected').filter(function(){
+								return $(this).text()==d.text;
+							});
+							if(sel_navtags.length==0){ //it was not selected before 
+								var navtags = $("#secVisbtn-"+sec_id).siblings('.token-input-list-facebook').find('p').filter(function(){
+									return $(this).text()==d.text;
+								});
+								d3.select(this).style("stroke", 'rgba(226, 101, 101, 0.8)').style("stroke-width", 2);
+								$(navtags[0]).addClass('selected');
+
+							}
+							else { //the clicked word has been selected
+								d3.select(this).style("stroke", "blue").style("stroke-width", 0);
+								$(sel_navtags[0]).removeClass('selected');
+							}
+							
+							
+							$.ajax({
+								url: '/api_tagbling/',
+								type:'post',
+								data: {tag:d.text},
+								success: function(xhr) {
+									if(e.class=='selected'){
+										e.class = undefined;
+										for (var i = 0; i < xhr.highlights.length; i++) {
+											_this.deactivetags(xhr.highlights[i]);
+										}
+									}
+									else {
+										e.class='selected';
+										for (var i = 0; i < xhr.highlights.length; i++) {
+											_this.activetags(xhr.highlights[i]);
+										}
+									}
+
+									
+
+								}
+							});
 						});
+						var sel_navtags = $("#secVisbtn-"+sec_id).siblings('.token-input-list-facebook').find('p.selected');
+						if(sel_navtags.length){
+							var hi_tags = [];
+							for(var k=0; k<sel_navtags.length;k++){
+								hi_tags.push(sel_navtags[k].text());
+							}
+							var words = $('#tagcloud-'+sec_id).find('text').filter(function() {
+								return hi_tags.indexOf($(this).text())>-1;
+							});
+							for(var i=0; i<words.length; i++){
+								words[i].style['fill']='green';
+								words[i].class='selected';
+							}
+						}
+
 					}
 				},
 				failure: function(xhr) {
@@ -207,22 +261,37 @@ function CirDocument() {
 		
 	}));
 
-	$(document.body).on('click', '.tag-section-nav',(function(e) {
+	$(document.body).on('click', '.tag-section-nav p',(function(e) {
 		$.ajax({
 			url: '/api_tagbling/',
 			type:'post',
 			data: {tag:$(e.target).text()},
 			success: function(xhr) {
+				var words='', sec_id = parseInt($(e.target).parents('.token-input-list-facebook').siblings('.doc-sect-cloud-vis')[0].id.match(/secVisbtn-(\d+)/)[1]);
+				if($("#secVisbtn-"+sec_id).text()!="Visualize"){
+					words = $('#tagcloud-'+sec_id).find('text').filter(function() {
+						return $(this).text() == $(e.target).text();
+					});
+				}
+				
 				if($(e.target).hasClass('selected')){
 					$(e.target).removeClass('selected');
 					for (var i = 0; i < xhr.highlights.length; i++) {
-					_this.deactivetags(xhr.highlights[i]);
+						_this.deactivetags(xhr.highlights[i]);
+					}
+					
+					if(words!=''){
+						words[0].style['stroke']='blue';
 					}
 				}
 				else {
 					$(e.target).addClass('selected');
 					for (var i = 0; i < xhr.highlights.length; i++) {
 						_this.activetags(xhr.highlights[i]);
+					}
+
+					if(words!=''){
+						words[0].style['stroke']='rgba(226, 101, 101, 0.8)';
 					}
 				}
 
