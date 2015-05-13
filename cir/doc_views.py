@@ -226,7 +226,7 @@ def api_annotation(request):
         post.is_deleted = True
         post.updated_at = now
         post.save()
-        # return HttpResponse(json.dumps(response), mimetype='application/json')
+        return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_tagFrequency(request):
     response={}

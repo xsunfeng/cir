@@ -2,12 +2,12 @@
 {% load static %}
 {% load compressed %}
 {% block extralib %}
-{% compressed_js 'cir_forum' %}
+	{% compressed_js 'cir_forum' %}
 {% endblock %}
 {% block delaylib %}
 {% endblock %}
 {% block extracss %}
-{% compressed_css 'cir_forum' %}
+	{% compressed_css 'cir_forum' %}
 {% endblock %}
 {% block header %}
 <div class="ui fixed inverted main tabular menu">
@@ -16,10 +16,10 @@
 		{% if load_error %}
 		<div class="item">GeoDeliberator</div>
 		{% else %}
-		<a href="#" class="item {{ settings.document_active }}" data-tab="document-tab"><i class="icon file text outline"></i>Read Documents</a>
-		<a href="#" class="item {{ settings.claim_active }}" data-tab="claim-tab"><i class="icon comment outline"></i>Create Claims</a>
+		<a href="#" class="item {{ settings.document_active }}" data-tab="document-tab"><i class="icon file text outline"></i>Documents</a>
+		<a href="#" class="item {{ settings.claim_active }}" data-tab="claim-tab"><i class="icon comment outline"></i>Claims</a>
 		{% if settings.phase == 'finished' %}
-		<a href="{{ forum_url }}/statement" class="item">Citizens' Statement</a>
+		<a href="{{ forum_url }}/statement" target="_blank" class="item">Citizens' Statement</a>
 		{% endif %}
 		<div id="header-visitor-wrapper" class="right menu" style="display:inline-block">
 			<div class="item">
@@ -43,7 +43,7 @@
 			</div>
 		</div>
 		<div id="header-facilitator-wrapper" class="right menu" style="display:inline-block">
-			<a href="{{ forum_url }}/dashboard" class="item">
+			<a href="{{ forum_url }}/dashboard" target="_blank" class="item">
 				<i class="icon dashboard"></i>
 			</a>
 			<div class="ui simple dropdown item" tabindex="0">
@@ -70,8 +70,8 @@
 
 {% block body %}
 <div id="popup-notification" class="ui message hidden"></div>
-{% if load_error %}
-{% if load_error == '404' %}
+	{% if load_error %}
+		{% if load_error == '404' %}
 <div class="ui two column centered grid">
 	<div class="column" style="top:50px">
 		<div class="ui error message">
@@ -80,7 +80,7 @@
 		</div>
 	</div>
 </div>
-{% elif load_error == '403' %}
+		{% elif load_error == '403' %}
 <div class="ui two column centered grid">
 	<div class="column" style="top:50px">
 		<div class="ui error message">
@@ -92,8 +92,8 @@
 		</div>
 	</div>
 </div>
-{% endif %}
-{% else %}
+		{% endif %}
+	{% else %}
 <div class="ui main tab {{ settings.document_active }}" data-tab="document-tab">
 	<div class="ui grid">
 		<div class="sixteen wide column" style="padding-top:1em">
@@ -102,19 +102,19 @@
 					<div class="ui active title"><i class="dropdown icon"></i>Current phase: {{ settings.phase_full }}</div>
 					<div class="active content">
 						{% if settings.phase == 'not_started' %}
-						The deliberation is not started yet. Further instructions will be updated here!
+							The deliberation is not started yet. Further instructions will be updated here!
 						{% elif settings.phase == 'extract' %}
-						You'll be working on ... Please ... This process will last ...
+							You'll be working on ... Please ... This process will last ...
 						{% elif settings.phase == 'categorize' %}
-						You'll be working on ... Please ... This process will last ...
+							You'll be working on ... Please ... This process will last ...
 						{% elif settings.phase == 'theming' %}
-						You'll be working on ... Please ... This process will last ...
+							You'll be working on ... Please ... This process will last ...
 						{% elif settings.phase == 'improve' %}
-						You'll be working on ... Please ... This process will last ...
+							You'll be working on ... Please ... This process will last ...
 						{% elif settings.phase == 'finished' %}
-						The deliberation event has ended. Please view the statement.
+							The deliberation event has ended. Please view the statement.
 						{% elif settings.phase == 'paused' %}
-						The deliberation process is temporarily paused.
+							The deliberation process is temporarily paused.
 						{% endif %}
 					</div>
 				</div>
@@ -127,16 +127,16 @@
 		<div class="six wide column"></div>
 	</div>
 	<div id="doc-highlight-toolbar">
-		{% if settings.phase == 'extract' %}
+	{% if settings.phase == 'extract' %}
 		<div class="ui attached top segment blue labeled icon menu">
 			<a data-action="comment" class="item doc-anno-btn">
-				<i class="comment icon"></i>Comment
+			    <i class="comment icon"></i>Comment
 			</a>
 			<a data-action="question" class="item doc-anno-btn">
-				<i class="help icon"></i>Raise question
+			    <i class="help icon"></i>Raise question
 			</a>
 			<a data-action="claim" class="item doc-anno-btn">
-				<i class="code icon"></i>Extract claim
+			    <i class="code icon"></i>Extract claim
 			</a>
 			<a data-action="tags" class="item doc-anno-btn">
 				<i class="tags icon"></i>Tag
@@ -212,19 +212,19 @@
 					<div class="ui active title"><i class="dropdown icon"></i>Current phase: {{ settings.phase_full }}</div>
 					<div class="active content">
 						{% if settings.phase == 'not_started' %}
-						The deliberation is not started yet. Further instructions will be updated here!
+							The deliberation is not started yet. Further instructions will be updated here!
 						{% elif settings.phase == 'extract' %}
-						You'll be working on ... Please ... This process will last ...
+							You'll be working on ... Please ... This process will last ...
 						{% elif settings.phase == 'categorize' %}
-						You'll be working on ... Please ... This process will last ...
+							You'll be working on ... Please ... This process will last ...
 						{% elif settings.phase == 'theming' %}
-						You'll be working on ... Please ... This process will last ...
+							You'll be working on ... Please ... This process will last ...
 						{% elif settings.phase == 'improve' %}
-						You'll be working on ... Please ... This process will last ...
+							You'll be working on ... Please ... This process will last ...
 						{% elif settings.phase == 'finished' %}
-						The deliberation event has ended. Please view the statement.
+							The deliberation event has ended. Please view the statement.
 						{% elif settings.phase == 'paused' %}
-						The deliberation process is temporarily paused.
+							The deliberation process is temporarily paused.
 						{% endif %}
 					</div>
 				</div>
@@ -277,11 +277,11 @@
 			<div class="title">Prioritize &amp; Improve</div>
 		</div>
 		<div class="{% if settings.phase == 'finished' %}active {% endif %}step">
-			{% if settings.phase == 'finished' %}
+		{% if settings.phase == 'finished' %}
 			<a href="{{ forum_url }}/statement" class="title">Citizens' Statement</a>
-			{% else %}
+		{% else %}
 			<div class="title">Citizens' Statement</div>
-			{% endif %}
+		{% endif %}
 		</div>
 	</div>
 </div>

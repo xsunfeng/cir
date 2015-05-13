@@ -41,11 +41,11 @@ function CirDocument() {
                 {id: 19, name: "Duration"},
                 {id: 23, name: "Space"},
              ], {
-                prePopulate: [
-                    {id: 123, name: "Cost"},
-                    {id: 555, name: "Waste disposal"},
-                    {id: 9000, name: "Safety"}
-                ],
+                // prePopulate: [
+                //     {id: 123, name: "Cost"},
+                //     {id: 555, name: "Waste disposal"},
+                //     {id: 9000, name: "Safety"}
+                // ],
                 theme: "facebook"
             });
 	// Add a token programatically
