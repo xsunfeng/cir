@@ -3,6 +3,7 @@
 		<div class="header">Activities on Highlight</div>
 	</div>
 	<div id="doc-thread-content" class="ui attached segment"></div>
+	{% if settings.phase == 'extract' %}
 	<div class="ui attached bottom segment labeled icon menu">
 		<a data-action="comment" class="item doc-thread-btn">
 		    <i class="comment icon"></i>Comment
@@ -13,5 +14,13 @@
 		<a data-action="tags" class="item doc-thread-btn">
 		    <i class="tags icon"></i>Tag
 		</a>
+		<a data-action="tags" class="item doc-thread-btn">
+		    <i class="cloud icon"></i>Cloud
+		</a>
 	</div>
+	{% else %}
+	<div class="ui attached bottom warning message">
+		We are not in a claim extraction round. Please discuss in the claim view.
+	</div>
+	{% endif %}
 </div>

@@ -125,7 +125,9 @@ div.token-input-dropdown-facebook ul li.token-input-selected-dropdown-item-faceb
 
 li.token-input-token-facebook p {
     display:inline-block!important;
-    background-color: red;
+}
+li.token-input-token-facebook p.selected {
+    background-color: rgba(226, 101, 101, 0.8);
 }
 li.token-input-input-token-facebook input {
     display:block!important;

@@ -29,7 +29,7 @@ class Migration(SchemaMigration):
 
         # User chose to not deal with backwards NULL issues for 'Post.highlight'
         raise RuntimeError("Cannot reverse this migration. 'Post.highlight' and its values cannot be restored.")
-        
+
         # The following code is provided here to aid in writing a correct migration
         # Changing field 'Post.highlight'
         db.alter_column(u'cir_post', 'highlight_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cir.Highlight']))

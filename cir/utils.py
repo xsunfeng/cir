@@ -1,6 +1,7 @@
 from HTMLParser import HTMLParser, HTMLParseError
-
+from cir.models import *
 from django.utils import timezone
+
 
 def segment_text(content):
     s = Segmenter()
@@ -10,33 +11,40 @@ def segment_text(content):
     except HTMLParseError:
         pass
 
+
 class Segmenter(HTMLParser):
     def __init__(self):
         self.reset()
         self.fed = []
         self.token_id = 0
+
     def handle_data(self, d):
         for token in d.split():
             self.fed.append('<u class="tk" data-id="' + str(self.token_id) + '">' + token + '</u>')
             self.token_id += 1
             self.fed.append('<u class="tk" data-id="' + str(self.token_id) + '"> </u>')
             self.token_id += 1
+
     def handle_starttag(self, d, attr):
         tag = ['<', d]
         for a in attr:
             tag.extend([' ', a[0], '="', a[1], '"'])
         tag.append('>')
         self.fed.append(''.join(tag))
+
     def handle_endtag(self, d):
-        self.fed.append('</' + d + '>')  
+        self.fed.append('</' + d + '>')
+
     def handle_startendtag(self, d, attr):
         tag = ['<', d]
         for a in attr:
             tag.extend([' ', a[0], '="', a[1], '"'])
         tag.append(' />')
         self.fed.append(''.join(tag))
+
     def get_data(self):
         return ''.join(self.fed)
+
 
 def pretty_date(time):
     now = timezone.now()
@@ -69,4 +77,6 @@ def pretty_date(time):
     if day_diff < 365:
         return str(day_diff / 30) + " months ago"
     return str(day_diff / 365) + " years ago"
+
+
 

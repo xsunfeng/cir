@@ -33,19 +33,28 @@
 		</div>
 	</form>
 </div>
-{% if entries %}
 <h4 class="ui horizontal header divider">
-	Activities (latest first)
+	Activities (oldest first)
 </h4>
-<div class="ui feed">
+<div class="ui five fluid basic buttons filter" style="margin-bottom: 1em;">
+	<div class="ui button" data-filter="all">All</div>
+	<div class="ui button" data-filter="general">General</div>
+	<div class="ui button" data-filter="categorize">Categorizing</div>
+	<div class="ui button" data-filter="theme">Theming</div>
+	<div class="ui button" data-filter="improve">Improving</div>
+</div>
+{% if entries %}
+<div class="ui feed" style="margin-top: 1em">
 {% for entry in entries %}
 	<div class="event" data-type="{{ entry.entry_type }}">
-		<div class="user-initial {{ entry.author_role }}{% if entry.collective %} collective{% endif %}">
+		<div class="user-initial">
+			<div class="{{ entry.author_role }}{% if entry.collective %} collective{% endif %}">
 			{% if entry.author_role == 'facilitator' %}F
 			{% elif entry.collective %}C
 			{% elif entry.author_role == 'admin' %}A
 			{% else %}{{ entry.author_initial }}
 			{% endif %}
+			</div>
 		</div>
 		<div class="activity-content content">
 		{% if entry.is_deleted %}
@@ -54,15 +63,15 @@
 			</div>
 		{% elif entry.parent_name %}
 			<div class="summary">
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> replied to <a class="user {{ entry.author_role }}">{{ entry.parent_name }}</a>
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> replied to <a class="user">{{ entry.parent_name }}</a>
 				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
 			</div>
 			<div class="extra text">
 				{{ entry.content }}
 			</div>
-			<div class="meta">
-				<a class="feed-reply-post" data-id="{{ entry.id }}">Reply</a>
-				<a class="feed-delete-post" data-id="{{ entry.id }}" style="display:none">Delete</a>
+			<div class="ui red secondary post fitted menu">
+				<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+				<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
 			</div>
 		{% elif entry.entry_type == 'question' %}
 			<div class="summary">
@@ -72,9 +81,9 @@
 			<div class="extra text">
 				{{ entry.content }}
 			</div>
-			<div class="meta">
-				<a class="feed-reply-post" data-id="{{ entry.id }}">Reply</a>
-				<a class="feed-delete-post" data-id="{{ entry.id }}" style="display:none">Delete</a>
+			<div class="ui red secondary post fitted menu">
+				<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+				<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
 			</div>
 		{% elif entry.entry_type == 'comment' %}
 			<div class="summary">
@@ -88,11 +97,35 @@
 			<div class="extra text">
 				{{ entry.content }}
 			</div>
-			<div class="meta">
-				<a class="feed-reply-post" data-id="{{ entry.id }}">Reply</a>
-				<a class="feed-delete-post" data-id="{{ entry.id }}" style="display:none">Delete</a>
+			<div class="ui red secondary post fitted menu">
+				<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+				<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
 			</div>
-		{% elif entry.entry_type == 'vote' and entry.vote_type == 'reword' %}
+		{% elif entry.entry_type == 'categorize' %}
+			<div class="summary">
+			{% if entry.collective %}
+				The category of this claim changed to <strong>{{ entry.vote_type_full }}</strong>.
+			{% else %}
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.user_name }}</a> categorized this claim as <strong>{{ entry.vote_type_full }}</strong>.
+			{% endif %}
+				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
+			</div>
+			<div class="ui red secondary categorize fitted menu">
+				<a class="item feed-reply-event" data-id="{{ entry.id }}">Reply</a>
+			</div>
+		{% elif entry.entry_type == 'themeassignment' %}
+			<div class="summary">
+			{% if entry.collective %}
+				The theme of this claim changed to <strong>{{ entry.theme_name }}</strong>.
+			{% else %}
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.user_name }}</a> assigned a theme to this claim: <strong>{{ entry.theme_name }}</strong>.
+			{% endif %}
+				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
+			</div>
+			<div class="ui red secondary theme fitted menu">
+				<a class="item feed-reply-event" data-id="{{ entry.id }}">Reply</a>
+			</div>
+		{% elif entry.entry_type == 'improve' and entry.vote_type == 'reword' %}
 			<div class="summary">
 			{% if entry.collective %}
 				The panel agree that this claim should be reworded.
@@ -105,11 +138,11 @@
 				Reason: {{ entry.reason }}
 			</div>{% endif %}
 			{% if entry.collective %}
-			<div class="meta">
-				<a class="feed-reword-claim">Reword the claim</a>
+			<div class="ui red secondary reword fitted menu">
+				<a class="item feed-reword-claim">Reword the claim</a>
 			</div>
 			{% endif %}
-		{% elif entry.entry_type == 'vote' and entry.vote_type == 'merge' %}
+		{% elif entry.entry_type == 'improve' and entry.vote_type == 'merge' %}
 			<div class="summary">
 				<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> suggested that this claim can be merged. Please click on the "Needs merging" label to see details.
 				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
@@ -126,13 +159,13 @@
 			{% endif %}
 				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
 			</div>
-			<div class="extra text">
+			<div class="extra improved text">
 				{{ entry.content }}
 			</div>
 			{% if not entry.collective %}
-			<div class="ui red improve menu" data-id="{{ entry.version_id }}" style="display:inline-block">
-				<a class="item feed-delete-claim" style="display:none"><i class="delete icon"></i>Delete</a>
+			<div class="ui red secondary improve fitted menu" data-id="{{ entry.version_id }}">
 				<a class="item feed-like-claim-version" data-action="like"><i class="thumbs outline up icon"></i>Like<span></span></a>
+				<a class="item feed-diff-claim-version" data-action="diff">Show difference</a>
 			</div>
 			{% endif %}
 		{% elif entry.entry_type == 'claim old version' %}
@@ -153,4 +186,3 @@
 {% else %}
 <div class="ui info message">No activities to show</div>
 {% endif %}
-

@@ -75,26 +75,162 @@ function CirDocument() {
 		_this.newHighlight.type = this.getAttribute('data-action');
 		if (_this.newHighlight.type == 'comment') {
 			$('#doc-claim-form').hide();
+			$('#doc-cloud-form').hide();
+			$('#doc-tags-form').hide();
 			$('#doc-comment-form').show().parent().show();
 			$('#doc-comment-form textarea').focus();
 			$('#doc-comment-form label span').text('Add a comment');
 		} else if (_this.newHighlight.type == 'question') {
 			$('#doc-claim-form').hide();
+			$('#doc-cloud-form').hide();
+			$('#doc-tags-form').hide();
 			$('#doc-comment-form').show().parent().show();
 			$('#doc-comment-form textarea').focus();
 			$('#doc-comment-form label span').text('Raise a question');
 		} else if (_this.newHighlight.type == 'claim') {
 			$('#doc-comment-form').hide();
+			$('#doc-cloud-form').hide();
+			$('#doc-tags-form').hide();
 			$('#doc-claim-form').show().parent().show();
 			$('#doc-claim-form textarea').val($.trim(_this.$content_element.find('.tk.highlighted').text())).focus();
 		} else if (_this.newHighlight.type == 'tags'){
 			$('#doc-claim-form').hide();
 			$('#doc-comment-form').hide();
+			$('#doc-cloud-form').hide();
 			$('#doc-tags-form').show().parent().show();
 			$('#doc-tags-form label span').text('Tag with exisitng or new labels');
 
+		} else if (_this.newHighlight.type == 'cloud'){
+			$('#doc-claim-form').hide();
+			$('#doc-comment-form').hide();
+			$('#doc-tags-form').hide();
+			$('#doc-tags-form').hide();
+			$('#doc-cloud-form').show().parent().show();
+			$('#doc-tags-form label span').text('Visualize tags from the community');
+
 		}
 	});
+	$(document.body).on('click', '.doc-sect-cloud-vis',(function(e) {
+		var sec_id = parseInt(e.target.id.match(/secVisbtn-(\d+)/)[1]);
+		var changeTo = $("#secVisbtn-"+sec_id).text()=="Visualize"?"Close":"Visualize";
+		$("#secVisbtn-"+sec_id).text(changeTo);
+		if($("#secVisbtn-"+sec_id).text()=="Visualize"){
+			d3.select("#tc-"+sec_id).remove();
+			return;
+		}
+		else {
+
+		}
+
+		e.preventDefault();
+
+		if (self.data == null) { // load data
+			$.ajax({
+				url: '/api_tagFrequency/',
+				type: "POST",
+				success: function(xhr) {
+					// self.data = xhr.data;
+					// self.startdate = xhr.startdate;
+					// self.starttime = xhr.starttime;
+					// self.enddate = xhr.enddate;
+					// self.endtime = xhr.endtime;
+					// self.changeControlValue();
+					console.log(xhr);
+					var cloudsizew = 700, cloudsizeh = 400;
+					var keyword = [];
+					var colors = ["brown", "skyblue", "darkcyan", "gold", "forestgreen", "bisque", "indigo", "lightcoral", "mediumorchid", "olive"];
+					
+					//var fill = d3.scale.category20b();
+					// var ScaleText = d3.scale.linear().domain([0, 0.1]).range([16, 100]);
+					var sizeScale = d3.scale.linear()
+                   .domain([0, d3.max(xhr.data, function(d) { return d.id__count} )])
+                                    .range([10, cloudsizew/10]);
+					
+					d3.layout.cloud().size([cloudsizew, cloudsizeh]).words(xhr.data.map(function(d) {
+						console.log(d.tag);
+						return {
+							text: d.tag,
+							size: d.id__count*29
+						};
+					})).padding(2).rotate(function() {
+						return ~~(Math.random() * 2) * 90;
+					}).font("serif").fontSize(function(d) {
+						console.log(d);
+						return d.size;
+					}).on("end", draw).start();
+				
+					function draw(words) {
+						destArea = d3.select("#tagcloud-"+sec_id)
+							.append("svg")
+							.attr("id","tc-"+sec_id)
+							.attr("width", cloudsizew)
+							.attr("height", cloudsizeh)
+							.append("g")
+							.attr("transform", "translate(" + cloudsizew / 2 + "," + cloudsizeh / 2 + ")")
+							.selectAll("text")
+							.data(words);
+						destArea.enter().append("text").style("font-size", function(d) {
+							return d.size + "px";
+						}).style("font-family", "serif").style("fill", function(d, i) {
+							return 'blue'; //colors[d.topic];
+						}).attr("text-anchor", "middle").attr("transform", function(d) {
+							// return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+							return "translate(" + [d.x, d.y] + ")";
+						}).text(function(d) {
+							return d.text;
+						}).on("click", function(d, i) {
+							// var x = d.text;
+							// if ($.inArray(x, self.clickedw) == -1) {
+							// 	self.clickedw.push(x);
+							// 	d3.select(this).style("stroke", "red").style("stroke-width", 2);
+							// } else {
+							// 	self.clickedw.splice(self.clickedw.indexOf(x), 1);
+							// 	d3.select(this).style("stroke", "red").style("stroke-width", 0);
+							// }
+						});
+					}
+				},
+				failure: function(xhr) {
+					alert("failed to load the entries!")
+					
+				},
+				data: {
+					sections: JSON.stringify([sec_id]),
+						
+				}
+			});
+		} else {
+			if (self.data.length != 0) {
+				self._drawWordCloud();
+			}
+		}
+		
+	}));
+
+	$(document.body).on('click', '.tag-section-nav',(function(e) {
+		$.ajax({
+			url: '/api_tagbling/',
+			type:'post',
+			data: {tag:$(e.target).text()},
+			success: function(xhr) {
+				if($(e.target).hasClass('selected')){
+					$(e.target).removeClass('selected');
+					for (var i = 0; i < xhr.highlights.length; i++) {
+					_this.deactivetags(xhr.highlights[i]);
+					}
+				}
+				else {
+					$(e.target).addClass('selected');
+					for (var i = 0; i < xhr.highlights.length; i++) {
+						_this.activetags(xhr.highlights[i]);
+					}
+				}
+
+				
+
+			}
+		});
+	}));
 	$('.doc-anno-submit').click(function(e) {
 		var content = $(this).parents('form').find('textarea').val();
 		if ($.trim(content).length == 0 && _this.newHighlight.type == 'tags' && $("#demo-input-plugin-methods").tokenInput("get").length==0) {
@@ -138,12 +274,14 @@ function CirDocument() {
 		}
 		else {
 			var content = $("#demo-input-plugin-methods").tokenInput("get");
+			console.log(content);
+			console.log(Array.isArray(content));
 			$.ajax({
 				url: '/api_tag_input/',
 				type: 'post',
 				data: $.extend({
 					action: 'create',
-					content: content,
+					tagcontent: JSON.stringify(content),
 					nopublish: nopublish,
 				}, _this.newHighlight),
 				success: function(xhr) {
@@ -197,7 +335,7 @@ function CirDocument() {
 			var highlight_ids = this.getAttribute('data-hl-id').split(' ');
 			for (var i = 0; i < highlight_ids.length; i++) {
 				$('#doc-thread-content').feed('update', {
-					type:'highlight',
+					type: 'highlight',
 					id: highlight_ids[i]
 				}, function() {
 					$('#doc-thread-popup').css('left', e.pageX).css('top', e.pageY);
@@ -214,7 +352,7 @@ function CirDocument() {
 					var min = Math.min(_this.newHighlight.start, _this.newHighlight.end);
 					var max = Math.max(_this.newHighlight.start, _this.newHighlight.end);
 					$target.find('.tk').removeClass('highlighted');
-					for (var i = min; i <= max; i ++) {
+					for (var i = min; i <= max; i++) {
 						$target.find('.tk[data-id="' + i + '"]').addClass('highlighted');
 					}
 					_this.newHighlight.contextId = $target.attr('data-id');
@@ -320,6 +458,8 @@ function CirDocument() {
 			className = 'q'; // for 'question'
 		} else if (highlight.type == 'claim') {
 			className = 'c'; // for 'claim'
+		} else if (highlight.type == 'tags') {
+			className = 't';
 		}
 		var text = [];
 		for (var i = highlight.start; i <= highlight.end; i++) {
@@ -334,6 +474,53 @@ function CirDocument() {
 		}
 		_this.currHighlights[highlight.id] = highlight;
 		_this.currHighlights[highlight.id].text = text.join('');
+	};
+	this.activetags = function(highlight) {
+		var $context = _this.$content_element.find('.section-content[data-id="' + highlight.context_id + '"]');
+		var className;
+		if (highlight.type == 'tags') {
+			className = 'active';
+		}
+		var text = [];
+		for (var i = highlight.start; i <= highlight.end; i++) {
+			var $token = $context.find('.tk[data-id="' + i + '"]');
+			text.push($token.text());
+			if (typeof $token.attr('data-activetag-id') == 'undefined' || $token.attr('data-activetag-id').length==0) { // new highlight for this word
+				$token.addClass(className).attr('data-activetag-id', highlight.id);;
+			} else {
+				var curr_id = $token.attr('data-activetag-id'); // append highlight for this word
+				$token.addClass(className).attr('data-activetag-id', curr_id + ' ' + highlight.id);
+			}
+		}
+		_this.currHighlights[highlight.id] = highlight;
+		_this.currHighlights[highlight.id].text = text.join('');
+	};
+	this.deactivetags = function(highlight) {
+		var $context = _this.$content_element.find('.section-content[data-id="' + highlight.context_id + '"]');
+		var className;
+		if (highlight.type == 'tags') {
+			className = 'active';
+		}
+		var text = [];
+		for (var i = highlight.start; i <= highlight.end; i++) {
+			var $token = $context.find('.tk[data-id="' + i + '"]');
+			text.push($token.text());
+			
+			// split the strings in to array and remove the deselected one
+			var curr_ids = $token.attr('data-activetag-id').split(' ');
+			var rem_id = curr_ids.indexOf(highlight.id.toString());
+			if(rem_id > -1){
+				curr_ids.splice(rem_id, 1);
+			}
+			if(curr_ids.length==0){
+				$token.removeClass(className);
+			}
+			$token.attr('data-activetag-id', curr_ids.join(' '));
+			
+			
+		}
+		// _this.currHighlights[highlight.id] = highlight;//I don't know whether currentHighlight is necessary or to be used in the future or not, it was not updated after deleting the current tagId related to the text 
+		// _this.currHighlights[highlight.id].text = text.join('');
 	};
 	this._jumpToSection = function(section_id) {
 		$('body').animate({

@@ -13,6 +13,19 @@
 {% if section.title %}<h3 class="ui header section-header" data-id="{{ section.id }}">{{ section.title }}</h3>{% endif %}
 <div class="ui label"><i class="calendar icon"></i>updated <abbr title="{{ section.updated_at_full }}">{{ section.updated_at }}</abbr></div>
 <div class="section-content noselect" data-id="{{ section.id }}">{{ section.segmented_text|safe }}</div>
+<div class="tag-section">
+	<ul class="token-input-list-facebook">
+		{% for tagPair in section.tagF %}
+		<li class="token-input-token-facebook tag-section-nav"><p>{{tagPair.tag}}</p><span class="token-input-delete-token-facebook">{{tagPair.id__count}}</span></li>
+		{% endfor %}
+		
+	</ul>
+	<div id="secVisbtn-{{ section.id}}" class="ui primary button doc-sect-cloud-vis">Visualize</div> 
+	<div id="tagcloud-{{ section.id}}" class="tagcloud">
+		<!-- <div class="wc-area"></div> -->
+	</div>
+</div>
+
 {% endfor %}
 {% else %}
 <div class="ui info message">

@@ -1,9 +1,11 @@
 import json
-from htmlentitydefs import name2codepoint
 
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
+from django.core import serializers
+from django.db.models import Count, Avg
 
 from cir.models import *
 import claim_views
@@ -11,10 +13,11 @@ import claim_views
 def api_doc(request):
     response = {}
     action = request.REQUEST.get('action')
+    forum = Forum.objects.get(id=request.session['forum_id'])
     if action == 'get-categories':
         context = {}
         try:
-            context['forum_name'] = Forum.objects.get(id=request.session['forum_id']).full_name
+            context['forum_name'] = forum.full_name
             # retrieve docs in a folder
             folders = EntryCategory.objects.filter(forum_id=request.session['forum_id'], category_type='doc')
             context['folders'] = []
@@ -36,19 +39,22 @@ def api_doc(request):
             return HttpResponse('Unknown error.', status=403)
     if action == 'get-document':
         doc_id = request.REQUEST.get('doc_id')
-        try:
-            doc = Doc.objects.get(id=doc_id)
-            ordered_sections = doc.sections.filter(order__isnull=False).order_by('order')
-            unordered_sections = doc.sections.filter(order__isnull=True).order_by('updated_at')
-            context = {}
-            context['title'] = doc.title
-            context['sections'] = []
-            for section in ordered_sections | unordered_sections:
-                context['sections'].append(section.getAttr())
-            response['html'] = render_to_string("doc-content.html", context)
-            return HttpResponse(json.dumps(response), mimetype='application/json')
-        except:
-            return HttpResponse('The document does not exist.', status=403)
+        # try:
+        doc = Doc.objects.get(id=doc_id)
+        ordered_sections = doc.sections.filter(order__isnull=False).order_by('order')
+        unordered_sections = doc.sections.filter(order__isnull=True).order_by('updated_at')
+        context = {}
+        context['forum_phase'] = forum.phase
+        context['title'] = doc.title
+        context['sections'] = []
+        for section in ordered_sections | unordered_sections:
+            sectionatt = section.getAttr()
+            sectionatt['tagF']=tag_sections([section.id])
+            context['sections'].append(sectionatt)
+        response['html'] = render_to_string("doc-content.html", context)
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+        # except:
+        #     return HttpResponse('The document does not exist.', status=403)
 
 def api_highlight(request):
     response = {}
@@ -74,14 +80,18 @@ def api_highlight(request):
             actual_author = None
         if content_type == 'comment':
             if actual_author:
-                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
+                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user,
+                    content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
             else:
-                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
+                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content,
+                    created_at=now, updated_at=now, highlight=highlight, content_type='comment')
         elif content_type == 'question':
             if actual_author:
-                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
+                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user,
+                    content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
             else:
-                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
+                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content,
+                    created_at=now, updated_at=now, highlight=highlight, content_type='question')
         elif content_type == 'claim':
             claim_views._add_claim(request, highlight)
         return HttpResponse(json.dumps(response), mimetype='application/json')
@@ -92,7 +102,7 @@ def api_highlight(request):
         for section in doc.sections.all():
             highlights = section.highlights.all()
             for highlight in highlights:
-                print highlight.getAttr()
+                # print highlight.getAttr()
                 response['highlights'].append(highlight.getAttr())
         return HttpResponse(json.dumps(response), mimetype='application/json')
 
@@ -100,11 +110,15 @@ def api_highlight(request):
 def api_tag_input(request):
     response = {}
     action = request.REQUEST.get('action')
+    print request.REQUEST
     if action == 'create':
         if not request.user.is_authenticated():
             return HttpResponse("Please log in first.", status=403)
-        content = request.REQUEST.get('content')
-        content_type = request.REQUEST.get('type')
+        
+        content_tags = request.REQUEST.get('tagcontent')
+        print "content tags are", content_tags, len(content_tags)
+        content_tags = json.loads(content_tags)
+        print "content tags are", content_tags, len(content_tags)
         start = request.REQUEST.get('start')
         end = request.REQUEST.get('end')
         context_id = request.REQUEST.get('contextId')
@@ -115,37 +129,28 @@ def api_tag_input(request):
         response['highlight_id'] = highlight.id
         # then create the content
         now = timezone.now()
-        if 'actual_user_id' in request.session:
-            actual_author = User.objects.get(id=request.session['actual_user_id'])
-        else:
-            actual_author = None
-        if content_type == 'comment':
-            if actual_author:
-                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
-            else:
-                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
-        elif content_type == 'question':
-            if actual_author:
-                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
-            else:
-                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
-        elif content_type == 'claim':
-            claim_views._add_claim(request, highlight)
-        elif content_type == 'tags':
-            content_tags = content.split()
-            for ctag in content_tags:
-                if actual_author:
-                    try:
-                        tobj = Tag.objects.get(id=content)##seems not very efficient
-                        Tag.highlight.add(highlight)
-                        tPos = TagPosition.objects.get(highlight=highlight)
-                        tPos.authors.add(actual_author)
-                        # TPU = TagPosUser.objects.get(author=actual_author)
-                    except ObjectDoesNotExist:
-                        tobj = Tag.objects.create(id=content)
-                        Tag.highlight.add(highlight)
-                        tPos = TagPosition.objects.get(highlight=highlight)
-                        tPos.authors.add(actual_author) 
+        # if 'actual_user_id' in request.session:
+        #     actual_author = User.objects.get(id=request.session['actual_user_id'])
+        # else:
+        #     actual_author = None
+            
+        for ctag in content_tags:
+            # if actual_author:
+            print "enter, ctag is ", ctag, 'id is ',ctag['name']
+            try:
+                tobj = Tag.objects.get(id=ctag['name'])##seems not very efficient
+                tPos = TagPosition(tag=tobj, highlight=highlight)
+                tPos.save()
+                TPU = TagPosUser(tagPos=tPos, author=request.user, created_at=now)
+                TPU.save()
+            except ObjectDoesNotExist:
+                print "new tag entering"
+                tobj = Tag(id=ctag['name'])
+                tobj.save()
+                tPos = TagPosition(tag=tobj,  highlight=highlight)
+                tPos.save()
+                TPU = TagPosUser(tagPos=tPos, author=request.user, created_at=now)
+                TPU.save()
 
 
         return HttpResponse(json.dumps(response), mimetype='application/json')
@@ -167,10 +172,12 @@ def api_annotation(request):
         highlight_id = request.REQUEST.get('highlight_id')
         highlight = Highlight.objects.get(id=highlight_id)
         context = {}
+        context['forum_phase'] = forum.phase
         context['entries'] = []
         posts = highlight.posts_of_highlight.all()
         for post in posts:
-            context['entries'].append(post.getAttr(forum))
+            for comment in post.getTree():
+                context['entries'].append(comment.getAttr(forum))
         claims = highlight.claims_of_highlight.all()
         for claim in claims:
             context['entries'].append(claim.getAttr(forum))
@@ -180,48 +187,76 @@ def api_annotation(request):
     if action == 'create':
         if not request.user.is_authenticated():
             return HttpResponse("Please log in first.", status=403)
+        now = timezone.now()
+        newPost = Post(forum_id=request.session['forum_id'], content_type='comment', created_at=now, updated_at=now)
         if 'actual_user_id' in request.session:
-            actual_author = User.objects.get(id=request.session['actual_user_id'])
+            newPost.author = User.objects.get(id=request.session['actual_user_id'])
+            newPost.delegator = request.user
         else:
-            actual_author = None
-        content = request.REQUEST.get('content')
-        # need to know either highlight_id, or claim_id
-        highlight_id = request.REQUEST.get('highlight_id')
+            newPost.author = request.user
+        newPost.content = request.REQUEST.get('content')
+        reply_type = request.REQUEST.get('reply_type')
+        if reply_type:  # replying another post, or event
+            reply_id = request.REQUEST.get('reply_id')
+            if reply_type == 'event':
+                event = Event.objects.get(id=reply_id)
+                newPost.target_event = event
+            elif reply_type == 'entry':
+                entry = Entry.objects.get(id=reply_id)
+                newPost.target_entry = entry
+        else:  # targeting at a highlight or a claim
+            source = request.REQUEST.get('type')
+            if source == 'highlight':
+                highlight = Highlight.objects.get(id=request.REQUEST.get('highlight_id'))
+                newPost.highlight = highlight
+            elif source == 'claim':
+                claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
+                newPost.target_entry = claim
         collective = request.REQUEST.get('collective')
         if collective == 'true':
-            collective = True
+            newPost.collective = True
         else:
-            collective = False
-        target_entry = None
-        if not highlight_id:
-            claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
-            if claim.source_highlight: # merged claim doesn't have one
-                highlight_id = Claim.objects.get(id=request.REQUEST.get('claim_id')).source_highlight.id
-            else:
-                target_entry = claim
-        reply_id = request.REQUEST.get('reply_id', '')
-        now = timezone.now()
-        # TODO reply_id must be a post; need to inherit target_claim & target_event
-        post = Post(forum_id=request.session['forum_id'], content=content, created_at=now, updated_at=now, target_entry=target_entry, highlight_id=highlight_id, collective=collective, content_type='comment')
-        if len(reply_id) == 0:
-            if actual_author:
-                post.author = actual_author
-                post.delegator = request.user
-            else:
-                post.author = request.user
-        else:
-            post.parent_id = reply_id
-            if actual_author:
-                post.author = actual_author
-                post.delegator = request.user
-            else:
-                post.author = request.user
-        post.save()
+            newPost.collective = False
+        newPost.save()
         return HttpResponse(json.dumps(response), mimetype='application/json')
     if action == 'delete':
         entry_id = request.REQUEST.get('entry_id')
+        now = timezone.now()
         post = Post.objects.get(id=entry_id)
         post.is_deleted = True
+        post.updated_at = now
         post.save()
-        return HttpResponse(json.dumps(response), mimetype='application/json')
+        # return HttpResponse(json.dumps(response), mimetype='application/json')
 
+def api_tagFrequency(request):
+    response={}
+    sections = request.REQUEST.get('sections')
+    print sections, type(sections)
+    tmp=json.loads(sections)
+    print tmp, type(tmp),len(tmp)
+    response['data'] = tag_sections(tmp)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def api_tagbling(request):
+    response = {}
+    response['highlights']=[]
+    tag = request.REQUEST.get('tag')
+    print tag
+    tobj = Tag.objects.get(id=tag)
+    ths = tobj.highlight.all()
+    print ths
+    for th in ths:
+        print "inloop:",th
+        response['highlights'].append(th.getAttr())
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+
+def ValuesQuerySetToDict(vqs):
+    return [item for item in vqs]
+
+def tag_sections(sections):
+    hLights = Highlight.objects.filter(context__in=sections)
+    tagPos = TagPosition.objects.filter(highlight__in=hLights)
+    ret = tagPos.values("tag").annotate(Count("id")).order_by("-id__count")
+    # print "section",sections, "the tags include:", ret
+    return ValuesQuerySetToDict(ret)

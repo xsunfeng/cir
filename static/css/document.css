@@ -1,10 +1,6 @@
 #document-categories,
 #document-pane {
-	background-color: #FFFFFF;
-	border: 1px solid #DDDDDD;
 	font-size: 1.3rem;
-	line-height: 30px;
-	margin: 10px 0px;
 }
 .noselect {
 	-webkit-touch-callout: none;
@@ -32,6 +28,9 @@
 .tk.c {
 	background-color: rgba(113, 217, 255, 0.5);
 }
+.tk.t.active {
+	background-color: rgba(172, 235, 117, 0.8);
+}
 .tk.highlighted { /* must be put after p, q and c */
 	background-color: #f2c61f;
 }
@@ -41,6 +40,10 @@
 	left: -999999px;
 	top: -999999px;
 	z-index: 900;
+	width: 450px;
+}
+.section-content {
+	line-height: 1.6em;
 }
 .section-content img {
 	max-width: 100%;
@@ -54,7 +57,7 @@
 	height: inherit;
 }
 #doc-thread-popup .segment {
-	min-width: 400px;
+	min-width: 450px;
 }
 #doc-thread-content {
 	max-height: 500px;
