@@ -194,12 +194,13 @@ function CirDocument() {
 								var navtags = $("#secVisbtn-"+sec_id).siblings('.token-input-list-facebook').find('p').filter(function(){
 									return $(this).text()==d.text;
 								});
-								d3.select(this).style("stroke", 'rgba(226, 101, 101, 0.8)').style("stroke-width", 2);
+								d3.select(this).style("stroke", 'rgba(226, 101, 101, 0.8)').style("stroke-width", 2).style('fill','rgba(172, 235, 117, 0.8)');
+
 								$(navtags[0]).addClass('selected');
 
 							}
 							else { //the clicked word has been selected
-								d3.select(this).style("stroke", "blue").style("stroke-width", 0);
+								d3.select(this).style("fill", "blue").style("stroke-width", 0);
 								$(sel_navtags[0]).removeClass('selected');
 							}
 							
@@ -231,13 +232,15 @@ function CirDocument() {
 						if(sel_navtags.length){
 							var hi_tags = [];
 							for(var k=0; k<sel_navtags.length;k++){
-								hi_tags.push(sel_navtags[k].text());
+								hi_tags.push(sel_navtags[k].innerHTML);
 							}
 							var words = $('#tagcloud-'+sec_id).find('text').filter(function() {
 								return hi_tags.indexOf($(this).text())>-1;
 							});
 							for(var i=0; i<words.length; i++){
-								words[i].style['fill']='green';
+								words[i].style['fill']='rgba(172, 235, 117, 0.8)';
+								words[i].style['stroke']='rgba(226, 101, 101, 0.8)';
+								words[i].style['stroke-width']=2;
 								words[i].class='selected';
 							}
 						}
@@ -274,24 +277,28 @@ function CirDocument() {
 					});
 				}
 				
-				if($(e.target).hasClass('selected')){
+				if($(e.target).hasClass('selected')){//the word has been selected and thus needs to be deselected
 					$(e.target).removeClass('selected');
 					for (var i = 0; i < xhr.highlights.length; i++) {
 						_this.deactivetags(xhr.highlights[i]);
 					}
 					
-					if(words!=''){
-						words[0].style['stroke']='blue';
+					if(words!=''){//there is wordcloud now for the selected section
+						words[0].style['fill']='blue';
+						words[0].style['stroke-width']=0;
+						words[0].class = undefined;
 					}
 				}
-				else {
+				else { //the word was not selected before
 					$(e.target).addClass('selected');
 					for (var i = 0; i < xhr.highlights.length; i++) {
 						_this.activetags(xhr.highlights[i]);
 					}
 
-					if(words!=''){
+					if(words!=''){//there is wordcloud now for the selected section
 						words[0].style['stroke']='rgba(226, 101, 101, 0.8)';
+						words[0].style['stroke-width']=2;
+						words[0].style['fill']='rgba(172, 235, 117, 0.8)';
 					}
 				}
 
