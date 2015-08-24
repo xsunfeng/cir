@@ -77,7 +77,7 @@ def enter_forum(request, forum_url):  # access /forum_name
             'id': panelist.user.id,
             'name': panelist.user.get_full_name()
         })
-    for staff in forum.members.filter(Q(role='facilitator') | Q(role='admin')).exclude(user=request.user):
+    for staff in forum.members.filter(Q(role='facilitator') | Q(role='admin')).exclude(user=request.user.id):
         context['staff'].append({
             'id': staff.user.id,
             'name': staff.user.get_full_name()

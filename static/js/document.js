@@ -4,6 +4,69 @@ function CirDocument() {
 	this.$content_element = $('#document-pane'); // static; initiate once
 	this.$annotation_element = $('#annotation-pane'); // static; initiate once
 
+	// $(document.body).on('click', '#tag-nav-tab',(function(e){ 
+		$.ajax({
+		    url: '/api_tag_nav/',
+		    type: 'POST',
+		    data: {
+		    	action: "show_tag",
+		    },
+		    success: function(xhr) {
+		    	$("#tag-nav-container").html(xhr.html);
+		    	$('.tag-nav-tag').click(function(e) {
+		    		tag = e.target.text;
+					$.ajax({
+					    url: '/api_tag_nav/',
+					    type: 'POST',
+					    data: {
+					    	action: "show_highlight",
+					    	tag: tag,
+					    },
+					    success: function(xhr) {
+					    	tag_nav_list = "";
+							for (var i = 0; i < xhr.highlights.length; i++) {
+								st = xhr.highlights[i].start_pos;
+								ed = xhr.highlights[i].end_pos;
+								tmp = xhr.highlights[i].context;
+								var div = document.createElement('div');
+								div.innerHTML = tmp;
+								var text = [];
+								for (var j = st; j <= ed; j++) {
+									var $token = $(div).find('.tk[data-id="' + j + '"]');
+									text.push($token.text());
+								}
+								hl = "... ";
+								for (var k = 0; k < text.length; k++) {
+									hl = hl + text[k];
+								}
+								hl = hl + " ...";
+								console.log(hl);
+								tag_nav_list = tag_nav_list + 
+									'<div class="item">' +
+										'<div class="content">' +
+											'<h3 class="header">' + hl + '</h3>' +
+											'<a class="description go-to-section" data-id="' + xhr.highlights[i].context_id + '">go to section</a>' +
+										'</div>' +
+									'</div>';
+							}
+							$(".tag-nav-header").html('highlights with "' + tag + '"');
+							$(".tag-nav-list").html(tag_nav_list);
+							$('.go-to-section').click(function(e) {
+								var section_id = this.getAttribute('data-id');
+								CirLayout.changeTab('document-tab', function() {
+									_this._jumpToSection(section_id);
+								});
+								// $('body').animate({
+								// 	scrollTop: _this.$content_element.find('.section-header[data-id="' + section_id + '"]').offset().top - 50
+								// }, 100);
+							});
+					    }
+					});
+		    	});
+		    }
+		});
+	// }));
+
 	// this.currentFolderId = -1;
 	// this.currentDocId = -1;
 
@@ -23,7 +86,8 @@ function CirDocument() {
 			$(this).parent().next().text('Publish');
 		}
 	});
-	//tagging input initializing
+
+	//tagging input initializing; converting string to unique id?
 	function S2id(str){
             var ret='';
             for(i=0;i<str.length;i++)
@@ -48,6 +112,7 @@ function CirDocument() {
                 // ],
                 theme: "facebook"
             });
+
 	// Add a token programatically
             $("#plugin-methods-add").click(function () {
                 var addedtag = $('#token-input-demo-input-plugin-methods').val();
@@ -66,12 +131,17 @@ function CirDocument() {
                 $("#demo-input-plugin-methods").tokenInput("clear");
                 return false;
             });
+
 	// static listeners
 	this.$content_element.click(function(e) {
 		// remove all popovers
 		$('#doc-thread-popup').removeAttr('style');
+		$('#doc-highlight-toolbar').find('.active').removeClass('active');
+		// $("#demo-input-plugin-methods").tokenInput("clear");
 	});
 	$('.doc-anno-btn').click(function(e) {
+		$(this).addClass('active');
+		$(this).siblings('.active').removeClass('active');
 		_this.newHighlight.type = this.getAttribute('data-action');
 		if (_this.newHighlight.type == 'comment') {
 			$('#doc-claim-form').hide();
@@ -99,7 +169,53 @@ function CirDocument() {
 			$('#doc-cloud-form').hide();
 			$('#doc-tags-form').show().parent().show();
 			$('#doc-tags-form label span').text('Tag with exisitng or new labels');
-
+			// list all tags that the user has used as candidates
+			//tags used by you
+			$.ajax({
+				url: '/api_tag_input/',
+				type: 'post',
+				data: {
+					action:'load-individual-tag'
+				},
+				success: function(xhr) {
+					$('#candidate-tags').html("")
+					for(var i=0;i<xhr.result.length;i++){
+						$('#candidate-tags').append('<a class="ui label candidate-tag">' + xhr.result[i] + '</a>')
+					} 
+					$('.candidate-tag').click(function(){
+						var addedtag = $(this).text()
+                		$("#demo-input-plugin-methods").tokenInput("add", {id: S2id(addedtag), name: addedtag});
+					});
+					//tags used by others
+					$.ajax({
+						url: '/api_tag_input/',
+						type: 'post',
+						data: {
+							action:'load-others-tag'
+						},
+						success: function(xhr) {
+							$('#candidate-tags-others').html("")
+							for(var i=0;i<xhr.result.length;i++){
+								$('#candidate-tags-others').append('<a class="ui label candidate-tag-others">' + xhr.result[i] + '</a>')
+							} 
+							$('.candidate-tag-others').click(function(){
+								var addedtag = $(this).text()
+		                		$("#demo-input-plugin-methods").tokenInput("add", {id: S2id(addedtag), name: addedtag});
+							});
+						},
+						error: function(xhr) {
+							if (xhr.status == 403) {
+								notify('error', xhr.responseText);
+							}
+						}
+					});
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						notify('error', xhr.responseText);
+					}
+				}
+			});
 		} else if (_this.newHighlight.type == 'cloud'){
 			$('#doc-claim-form').hide();
 			$('#doc-comment-form').hide();
@@ -110,6 +226,74 @@ function CirDocument() {
 
 		}
 	});
+
+	$(document.body).on('click', '.compare-tags',(function(e){
+		section_id = $(this).parent().find('.tag-all-section')[0].getAttribute('data-id');
+		$('#slopegraph-' + section_id).empty();
+		$('#slopegraph-segment-' + section_id).removeClass('segment');
+		if ($(this).text()=='Compare'){
+			$(this).text("Hidden");
+			$('#slopegraph-segment-' + section_id).addClass('segment');
+			var tagData = {};
+			tagData["myTag"] = {};
+			var tagList1 = $($.find('.tag-my-section[data-id="' + section_id + '"]')).children(".token-input-list-feng").children();
+			for(i=0;i<tagList1.length;i++){
+				key = $(tagList1[i]).children('span').text();
+				val = $(tagList1[i]).children('.detail').text()
+				tagData["myTag"][key] = val
+			}
+			no_authors = $($.find('.tag-all-section[data-id="' + section_id + '"]'))[0].getAttribute('data-count-authors');
+			tagData["allTag"] = {};
+			var tagList2 = $($.find('.tag-all-section[data-id="' + section_id + '"]')).children(".token-input-list-feng").children();
+			for(i=0;i<tagList2.length;i++){
+				key = $(tagList2[i]).children('span').text();
+				val = ($(tagList2[i]).children('.detail').text())/no_authors;
+				tagData["allTag"][key] = val
+			}
+			compareTags(tagData, section_id);
+
+			$(document.body).on('click', '.compare-tag-nav',(function(e) {
+				individual_tag = false;
+				if ($("#my-tag-toggle").hasClass('active')){
+					individual_tag = true;
+				}
+				$(this).parent().toggleClass('green');
+				$.ajax({
+					url: '/api_tagbling/',
+					type:'post',
+					data: {
+						tag:$(e.target).text(),
+						individual_tag: false
+					},
+					success: function(xhr) {
+						var words=''
+						//var sec_id = parseInt($(e.target).parents('.token-input-list-feng').siblings('.doc-sect-cloud-vis')[0].id.match(/secVisbtn-(\d+)/)[1]);
+						var sec_id = $(e.target).parents('.compare-tag-segment')[0].getAttribute('data-id');
+						
+						$(".tag-section-nav").filter(function() {
+					    	return $(this).children('span').text() === $(e.target).text();
+						}).each(function(){
+							if($(this).hasClass('selected')){
+								$(this).removeClass('selected').removeClass('green');
+								for (var i = 0; i < xhr.highlights.length; i++) {
+									_this.deactivetags(xhr.highlights[i]);
+								}
+							}else{
+								$(this).addClass('selected').addClass('green');
+								for (var i = 0; i < xhr.highlights.length; i++) {
+									_this.activetags(xhr.highlights[i]);
+								}
+							}							
+						});
+					}
+				});
+			}));
+
+		}else if ($(this).text()=='Hidden'){
+			$(this).text("Compare");
+		}
+	}));
+
 	$(document.body).on('click', '.doc-sect-cloud-vis',(function(e) {
 		var sec_id = parseInt(e.target.id.match(/secVisbtn-(\d+)/)[1]);
 		var changeTo = $("#secVisbtn-"+sec_id).text()=="Visualize"?"Close":"Visualize";
@@ -136,7 +320,8 @@ function CirDocument() {
 					// self.endtime = xhr.endtime;
 					// self.changeControlValue();
 					console.log(xhr);
-					var cloudsizew = 700, cloudsizeh = 400;
+					var cloudsizew = $(".tagcloud").parent().width()
+					var cloudsizeh = cloudsizew;
 					var keyword = [];
 					var colors = ["brown", "skyblue", "darkcyan", "gold", "forestgreen", "bisque", "indigo", "lightcoral", "mediumorchid", "olive"];
 					
@@ -187,11 +372,11 @@ function CirDocument() {
 							return d.text;
 						}).on("click", function(d, i) {
 							var e = event.target;
-							var sel_navtags = $("#secVisbtn-"+sec_id).siblings('.token-input-list-facebook').find('p.selected').filter(function(){
+							var sel_navtags = $("#secVisbtn-"+sec_id).siblings('.token-input-list-feng').find('p.selected').filter(function(){
 								return $(this).text()==d.text;
 							});
 							if(sel_navtags.length==0){ //it was not selected before 
-								var navtags = $("#secVisbtn-"+sec_id).siblings('.token-input-list-facebook').find('p').filter(function(){
+								var navtags = $("#secVisbtn-"+sec_id).siblings('.token-input-list-feng').find('p').filter(function(){
 									return $(this).text()==d.text;
 								});
 								d3.select(this).style("stroke", 'rgba(226, 101, 101, 0.8)').style("stroke-width", 2).style('fill','rgba(172, 235, 117, 0.8)');
@@ -228,7 +413,7 @@ function CirDocument() {
 								}
 							});
 						});
-						var sel_navtags = $("#secVisbtn-"+sec_id).siblings('.token-input-list-facebook').find('p.selected');
+						var sel_navtags = $("#secVisbtn-"+sec_id).siblings('.token-input-list-feng').find('p.selected');
 						if(sel_navtags.length){
 							var hi_tags = [];
 							for(var k=0; k<sel_navtags.length;k++){
@@ -264,49 +449,80 @@ function CirDocument() {
 		
 	}));
 
-	$(document.body).on('click', '.tag-section-nav p',(function(e) {
+	$(document.body).on('click', '.tag-section-nav span',(function(e) {
+
+		individual_tag = false;
+		if ($("#my-tag-toggle").hasClass('active')){
+			individual_tag = true;
+		}
+
 		$.ajax({
 			url: '/api_tagbling/',
 			type:'post',
-			data: {tag:$(e.target).text()},
+			data: {
+				tag: $(e.target).text(),
+				individual_tag: individual_tag
+			},
 			success: function(xhr) {
-				var words='', sec_id = parseInt($(e.target).parents('.token-input-list-facebook').siblings('.doc-sect-cloud-vis')[0].id.match(/secVisbtn-(\d+)/)[1]);
+				var words=''
+				//var sec_id = parseInt($(e.target).parents('.token-input-list-feng').siblings('.doc-sect-cloud-vis')[0].id.match(/secVisbtn-(\d+)/)[1]);
+				var sec_id = ($(e.target).parents('.token-input-list-feng').parent()[0]).getAttribute('data-id');
 				if($("#secVisbtn-"+sec_id).text()!="Visualize"){
 					words = $('#tagcloud-'+sec_id).find('text').filter(function() {
 						return $(this).text() == $(e.target).text();
 					});
 				}
 				
-				if($(e.target).hasClass('selected')){//the word has been selected and thus needs to be deselected
-					$(e.target).removeClass('selected');
-					for (var i = 0; i < xhr.highlights.length; i++) {
-						_this.deactivetags(xhr.highlights[i]);
-					}
-					
-					if(words!=''){//there is wordcloud now for the selected section
-						words[0].style['fill']='blue';
-						words[0].style['stroke-width']=0;
-						words[0].class = undefined;
-					}
-				}
-				else { //the word was not selected before
-					$(e.target).addClass('selected');
-					for (var i = 0; i < xhr.highlights.length; i++) {
-						_this.activetags(xhr.highlights[i]);
-					}
-
-					if(words!=''){//there is wordcloud now for the selected section
-						words[0].style['stroke']='rgba(226, 101, 101, 0.8)';
-						words[0].style['stroke-width']=2;
-						words[0].style['fill']='rgba(172, 235, 117, 0.8)';
-					}
-				}
-
-				
-
+				$(".tag-section-nav").filter(function() {
+			    	return $(this).children('span').text() === $(e.target).text();
+				}).each(function(){
+					if($(this).hasClass('selected')){
+						$(this).removeClass('selected');
+						$(this).removeClass('green');
+						for (var i = 0; i < xhr.highlights.length; i++) {
+							_this.deactivetags(xhr.highlights[i]);
+						}
+					}else{
+						$(this).addClass('selected');
+						$(this).addClass('green');
+						for (var i = 0; i < xhr.highlights.length; i++) {
+							_this.activetags(xhr.highlights[i]);
+						}
+					}							
+				});
 			}
 		});
 	}));
+
+	// highlights control; question not implemented yet
+	$(document.body).on('click', '#highlight-toggle',(function(e){
+		$(this).addClass('active');
+		$(this).siblings('.active').removeClass('active');
+		$('.tk.c').removeClass('c')
+		$('.tk.q').removeClass('q')
+		_this.reloadHighlightsByAuthor();
+	})).on('click', '#no-annotation-toggle',(function(e){
+		$(this).addClass('active');
+		$(this).siblings('.active').removeClass('active');
+		$('.tk.c').removeClass('c')
+		$('.tk.q').removeClass('q')
+	})).on('click', '#all-highlight-toggle',(function(e){
+		$(this).addClass('active');
+		$(this).siblings('.active').removeClass('active');
+		_this.reloadHighlights();
+	}));
+
+	// tags view control
+	$(document.body).on('click', '#all-tag-toggle',(function(e){
+		$(".tag-all-section").show();
+		$(this).addClass('active');
+		$(this).siblings('.active').removeClass('active');
+	})).on('click', '#my-tag-toggle',(function(e){
+		$(".tag-all-section").hide();
+		$(this).addClass('active');
+		$(this).siblings('.active').removeClass('active');
+	}));
+
 	$('.doc-anno-submit').click(function(e) {
 		var content = $(this).parents('form').find('textarea').val();
 		if ($.trim(content).length == 0 && _this.newHighlight.type == 'tags' && $("#demo-input-plugin-methods").tokenInput("get").length==0) {
@@ -329,6 +545,8 @@ function CirDocument() {
 				}, _this.newHighlight),
 				success: function(xhr) {
 					$('#doc-highlight-toolbar').removeAttr('style');
+					$('#doc-highlight-toolbar').find('.active').removeClass('active');
+					$("#demo-input-plugin-methods").tokenInput("clear");
 					$('#doc-highlight-toolbar textarea').val('');
 					$('#doc-highlight-toolbar .button').removeClass('loading');
 					$('.tk.highlighted').removeClass('highlighted')
@@ -362,9 +580,11 @@ function CirDocument() {
 				}, _this.newHighlight),
 				success: function(xhr) {
 					$('#doc-highlight-toolbar').removeAttr('style');
+					$('#doc-highlight-toolbar').find('.active').removeClass('active');
+					// $("#demo-input-plugin-methods").tokenInput("clear");
 					$('#doc-highlight-toolbar textarea').val('');
 					$('#doc-highlight-toolbar .button').removeClass('loading');
-					$('.tk.highlighted').removeClass('highlighted')
+					$('.tk.highlighted').removeClass('highlighted');
 					_this.highlight({
 						type: _this.newHighlight.type,
 						start: _this.newHighlight.start,
@@ -372,6 +592,35 @@ function CirDocument() {
 						context_id: _this.newHighlight.contextId,
 						id: xhr.highlight_id
 					});
+					myTagList = $(".tag-my-section[data-id='" + _this.newHighlight.contextId + "']").children('.token-input-list-feng').find('span');
+					myTagSet = new Set()
+					for (var j=0;j<xhr.tags.length;j++){
+						myTagSet.add(xhr.tags[j]);
+						for (var k=0;k<myTagList.length;k++){
+							if ($(myTagList[k]).text()===xhr.tags[j]){
+								newValue = parseInt($(myTagList[k]).siblings().text()) + 1;
+								$(myTagList[k]).siblings().text(newValue.toString());
+								myTagSet.delete(xhr.tags[j]);
+							}
+						}			
+					}
+					myTagSet.forEach(function(value) {
+  						var tmp = '<a class="tag-section-nav ui label"><span>' + value + '</span><div class="detail">1</div></a>'
+						$(".tag-my-section[data-id='" + _this.newHighlight.contextId + "']").children('.token-input-list-feng').append(tmp)
+					});
+					// make created tag highlighted paragraph active
+					var $context = _this.$content_element.find('.section-content[data-id="' + _this.newHighlight.contextId + '"]');
+					var text = [];
+					for (var i = _this.newHighlight.start; i <= _this.newHighlight.end; i++) {
+						var $token = $context.find('.tk[data-id="' + i + '"]');
+						text.push($token.text());
+						$token.addClass('active');
+					}
+					// for (var j=0;j<xhr.tags.length;j++){
+					// 	$(".tag-section-nav").filter(function() {
+					//     	return $(this).children('span').text() === xhr.tags[j];
+					// 	}).addClass('green');			
+					// }
 				},
 				error: function(xhr) {
 					$('#doc-highlight-toolbar .button').removeClass('loading');
@@ -418,6 +667,113 @@ function CirDocument() {
 				});
 			}
 		}
+		if ($(this).hasClass('t')) {
+			sec_id = $(this).parent().attr('data-id')
+			highlight_ids = this.getAttribute('data-hl-id').split(' ');
+			$('#tag-thread-popup').css('left', e.pageX).css('top', e.pageY);
+			$( "#highlight-tags" ).empty();
+			var tagSet = new Set();
+			for (var i = 0; i < highlight_ids.length; i++) {
+				$.ajax({
+					url: '/api_highlight/',
+					type:'post',
+					data: {
+						action: "show-tag",
+						highlight_id: highlight_ids[i],
+					},
+					success: function(xhr) {
+						for (var j = 0; j < xhr['tags'].length; j++){
+							if(!tagSet.has(xhr['tags'][j])){
+								tagSet.add(xhr['tags'][j]);
+								$( "#highlight-tags" ).append('<a class="ui label">' + xhr['tags'][j] + '</a>');
+							}
+						}
+					},
+					error: function(xhr) {
+						if (xhr.status == 403) {
+							notify('error', xhr.responseText);
+						}
+					}
+				});
+			}
+
+			$('#tag-thread-popup-delete').click(function(){
+				$('#tag-thread-popup').hide();
+				for (var i = 0; i < highlight_ids.length; i++) {
+					$.ajax({
+						url: '/api_highlight/',
+						type:'post',
+						data: {
+							action: "delete",
+							highlight_id: highlight_ids[i],
+						},
+						success: function(xhr) {
+							// remove tag highlighting; if associated with other tags, then not
+							$("u[data-hl-id*='" + xhr.highlight_id + "']").each(function(){
+								var hightlightSet = new Set();
+								var hightlightArray = $(this).attr("data-hl-id").split(" ");
+								index = hightlightArray.indexOf("");
+								if (index > -1){
+									hightlightArray.splice(index, 1);
+								}
+								// hightlightArray might contains "", have to be removed
+
+								for (var j = 0; j < hightlightArray.length; j++){
+									hightlightSet.add(hightlightArray[j]);
+								}
+								// only one highlight is slected, delete it
+								if (hightlightSet.size===1){
+									$(this).removeClass('t');
+									$(this).removeClass('active');
+									$(this).attr("data-hl-id", "");
+									$(this).attr("data-activetag-id", "");
+								} else{
+								// more than one, appearance no difference
+									hightlightSet.delete(xhr.highlight_id);
+									temp = ""
+									hightlightSet.forEach(function(value) {
+										temp = temp + value + " ";
+									});
+									temp = temp.replace(/\s+$/, '');
+									$(this).attr("data-hl-id", temp);
+									$(this).attr("data-activetag-id", temp);
+								}
+							});
+
+							myTagList = $(".tag-my-section[data-id='" + sec_id + "']").children('.token-input-list-feng').find('span');
+							myTagSet = new Set();
+							for (var j=0;j<xhr.tags.length;j++){
+								myTagSet.add(xhr.tags[j]);
+								for (var k=0;k<myTagList.length;k++){
+									if ($(myTagList[k]).text()===xhr.tags[j]){
+										newValue = parseInt($(myTagList[k]).siblings().text()) - 1;
+										if (newValue == 0){
+											$(myTagList[k]).parent().removeClass('ui label').empty();
+										} else{
+											$(myTagList[k]).siblings().text(newValue.toString());
+											myTagSet.delete(xhr.tags[j]);
+										}
+									}
+								}			
+							}
+						},
+						error: function(xhr) {
+							if (xhr.status == 403) {
+								notify('error', xhr.responseText);
+							}
+						}
+					});
+				}
+			});
+			$('#tag-thread-popup').show();
+			$('html').click(function() {
+  				//Hide the menus if visible
+  				$('#tag-thread-popup').hide();
+			});
+			$('#tag-thread-popup').click(function(event){
+			    event.stopPropagation();
+			});
+		}
 	}).on('mousedown', '.section-content', function(e) {
 		if ($(e.target).is('u.tk')) {
 			var $target = $(this);
@@ -452,6 +808,7 @@ function CirDocument() {
 				$('#doc-claim-form').hide();
 				$('#doc-comment-form').parent().hide();
 				$('#doc-highlight-toolbar').css('left', e.pageX).css('top', e.pageY);
+				$("#demo-input-plugin-methods").tokenInput("clear");
 			}
 		} else { // just clicking
 			$('#doc-highlight-toolbar').removeAttr('style');
@@ -478,6 +835,7 @@ function CirDocument() {
 			}
 		});
 	};
+
 	this.updateDocument = function() {
 		$.ajax({
 			url: '/api_doc/',
@@ -525,6 +883,27 @@ function CirDocument() {
 		});
 	};
 
+	this.reloadHighlightsByAuthor = function() {
+		$.ajax({
+			url: '/api_highlight/',
+			type: 'post',
+			data: {
+				action: 'load-doc-by-individual',
+				doc_id: _this.doc_id,
+			},
+			success: function(xhr) {
+				for (var i = 0; i < xhr.highlights.length; i++) {
+					_this.highlight(xhr.highlights[i]);
+				}
+			},
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					notify('error', xhr.responseText);
+				}
+			}
+		});
+	};
+
 	this.highlight = function(highlight) {
 		var $context = _this.$content_element.find('.section-content[data-id="' + highlight.context_id + '"]');
 		var className;
@@ -534,7 +913,8 @@ function CirDocument() {
 			className = 'q'; // for 'question'
 		} else if (highlight.type == 'claim') {
 			className = 'c'; // for 'claim'
-		} else if (highlight.type == 'tags') {
+		} 
+		else if (highlight.type == 'tags') {
 			className = 't';
 		}
 		var text = [];
@@ -551,11 +931,12 @@ function CirDocument() {
 		_this.currHighlights[highlight.id] = highlight;
 		_this.currHighlights[highlight.id].text = text.join('');
 	};
+	// click tag label, activate tag highlighting
 	this.activetags = function(highlight) {
 		var $context = _this.$content_element.find('.section-content[data-id="' + highlight.context_id + '"]');
 		var className;
 		if (highlight.type == 'tags') {
-			className = 'active';
+			className = 'active t';
 		}
 		var text = [];
 		for (var i = highlight.start; i <= highlight.end; i++) {
@@ -571,11 +952,12 @@ function CirDocument() {
 		_this.currHighlights[highlight.id] = highlight;
 		_this.currHighlights[highlight.id].text = text.join('');
 	};
+	// click tag label again, deactivate tag highlighting
 	this.deactivetags = function(highlight) {
 		var $context = _this.$content_element.find('.section-content[data-id="' + highlight.context_id + '"]');
 		var className;
 		if (highlight.type == 'tags') {
-			className = 'active';
+			className = 'active t';
 		}
 		var text = [];
 		for (var i = highlight.start; i <= highlight.end; i++) {
@@ -583,17 +965,17 @@ function CirDocument() {
 			text.push($token.text());
 			
 			// split the strings in to array and remove the deselected one
-			var curr_ids = $token.attr('data-activetag-id').split(' ');
-			var rem_id = curr_ids.indexOf(highlight.id.toString());
-			if(rem_id > -1){
-				curr_ids.splice(rem_id, 1);
-			}
-			if(curr_ids.length==0){
-				$token.removeClass(className);
-			}
-			$token.attr('data-activetag-id', curr_ids.join(' '));
-			
-			
+			if ($token[0].hasAttribute('data-activetag-id')){
+				var curr_ids = $token.attr('data-activetag-id').split(' ');
+				var rem_id = curr_ids.indexOf(highlight.id.toString());
+				if(rem_id > -1){
+					curr_ids.splice(rem_id, 1);
+				}
+				if(curr_ids.length==0){
+					$token.removeClass(className);
+				}
+				$token.attr('data-activetag-id', curr_ids.join(' '));
+			}		
 		}
 		// _this.currHighlights[highlight.id] = highlight;//I don't know whether currentHighlight is necessary or to be used in the future or not, it was not updated after deleting the current tagId related to the text 
 		// _this.currHighlights[highlight.id].text = text.join('');

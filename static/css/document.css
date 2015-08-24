@@ -34,13 +34,22 @@
 .tk.highlighted { /* must be put after p, q and c */
 	background-color: #f2c61f;
 }
+
+#tag-thread-popup {
+	position: absolute;
+	left: -999999px;
+	top: -999999px;
+	z-index: 900;
+	min-width: 350px;
+}
+
 #doc-highlight-toolbar,
 #doc-thread-popup {
 	position: absolute;
 	left: -999999px;
 	top: -999999px;
 	z-index: 900;
-	width: 450px;
+	min-width: 350px;
 }
 .section-content {
 	line-height: 1.6em;

@@ -24,6 +24,8 @@ urlpatterns = patterns('',
     url(r'^api_tagFrequency/$', doc_views.api_tagFrequency),
     url(r'^api_tagbling/$', doc_views.api_tagbling),
     url(r'^api_annotation/$', doc_views.api_annotation),
+    url(r'^api_tag_nav/$', doc_views.tag_nav),
+
     url(r'^api_claim/$', claim_views.api_claim),
     url(r'^api_get_claim/$', claim_views.api_get_claim),
     url(r'^api_claim_activities/$', claim_views.api_claim_activities),
@@ -33,6 +35,7 @@ urlpatterns = patterns('',
 
     url(r'^api_register_delegator/$', facilitator_views.register_delegator), # include other apps
     url(r'^api_switch_phase/$', facilitator_views.switch_phase),
+    url(r'^api_tag_theme/$', facilitator_views.tag_theme),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^password_reset/', include('password_reset.urls')),
 

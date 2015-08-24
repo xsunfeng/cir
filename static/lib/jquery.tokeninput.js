@@ -21,7 +21,7 @@ var DEFAULT_SETTINGS = {
     jsonContainer: null,
 
 	// Display settings
-    hintText: "Type in tags for the selected text",
+    // hintText: "Type in tags for the selected text",
     noResultsText: "No results",
     searchingText: "Searching...",
     deleteText: "&times;",
