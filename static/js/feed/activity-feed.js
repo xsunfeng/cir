@@ -1,6 +1,7 @@
 jQuery.fn.feed = function(action, data, update_callback) {
 	var _this = this;
-
+	var ClaimView = require('claim');
+	var notify = require('utils').notify;
 	this.update = function() {
 		if (_this.updater) {
 			_this.updater.abort();
@@ -34,13 +35,13 @@ jQuery.fn.feed = function(action, data, update_callback) {
 					}
 				});
 
-				if (_this.data('type') == 'claim' && window.default_claim.display_type == 'fullscreen') {
+				if (_this.data('type') == 'claim' && ClaimView.display_type == 'fullscreen') {
 					_this.find('.filter.buttons .button').removeClass('loading').removeClass('active');
 					_this.find('.filter.buttons .button[data-filter="' + _this.data('filter') + '"]').addClass('active');
 					// load votes on alternative versions
 					$('#claim-activity-feed .improve.menu').each(function() {
 						var $menu = $(this);
-						if (window.default_claim.display_type != 'fullscreen') return; // prevent users' fast view
+						if (ClaimView.display_type != 'fullscreen') return; // prevent users' fast view
 																					   // switching!
 						var version_id = this.getAttribute('data-id');
 						$.ajax({
@@ -185,7 +186,7 @@ jQuery.fn.feed = function(action, data, update_callback) {
 			if ($(this).text() == 'Show difference') {
 				_this.tempOrigText = text;
 				var adopted_text = $('#claim-pane .claim-content').text();
-				var diff = StringDiff.diffString(adopted_text, text);
+				var diff = require('utils').StringDiff.diffString(adopted_text, text);
 				$current_text.html(diff);
 				$(this).text('Hide difference');
 			} else {
@@ -266,7 +267,7 @@ jQuery.fn.feed = function(action, data, update_callback) {
 		}).on('click', '.doc-jumpto-claim', function(e) {
 			var claim_id = this.getAttribute('data-id');
 			CirLayout.changeTab('claim-tab', function() {
-				window.default_claim.jumpTo(claim_id, 'fullscreen')
+				ClaimView.jumpTo(claim_id, 'fullscreen')
 			});
 		}).on('click', '.filter.buttons .button', function() {
 			$(this).addClass('loading');

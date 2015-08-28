@@ -70,19 +70,20 @@ def enter_forum(request, forum_url):  # access /forum_name
     context['forum_name'] = forum.full_name
     context['forum_url'] = forum.url
     context['settings'] = _get_forum_settings(forum)
-    context['panelists'] = []
-    context['staff'] = []
-    for panelist in forum.members.filter(role='panelist'):
-        context['panelists'].append({
-            'id': panelist.user.id,
-            'name': panelist.user.get_full_name()
-        })
-    for staff in forum.members.filter(Q(role='facilitator') | Q(role='admin')).exclude(user=request.user):
-        context['staff'].append({
-            'id': staff.user.id,
-            'name': staff.user.get_full_name()
-        })
+
     if request.user.is_authenticated():
+        context['panelists'] = []
+        context['staff'] = []
+        for panelist in forum.members.filter(role='panelist'):
+            context['panelists'].append({
+                'id': panelist.user.id,
+                'name': panelist.user.get_full_name()
+            })
+        for staff in forum.members.filter(Q(role='facilitator') | Q(role='admin')).exclude(user=request.user):
+            context['staff'].append({
+                'id': staff.user.id,
+                'name': staff.user.get_full_name()
+            })
         try:
             request.user.info.last_visited_forum = forum
             request.user.info.save()
@@ -100,7 +101,8 @@ def enter_forum(request, forum_url):  # access /forum_name
         context['user_name'] = ''
         context['role'] = request.session['role']
     if forum.access_level == 'private' and (
-        not request.user.is_authenticated() or not Role.objects.filter(user=request.user, forum=forum).exists()):
+                not request.user.is_authenticated() or not Role.objects.filter(user=request.user,
+                    forum=forum).exists()):
         context['load_error'] = '403'
     return render(request, 'index.html', context)
 
@@ -132,7 +134,8 @@ def enter_statement(request, forum_url):
         context['user_name'] = ''
         context['role'] = request.session['role']
     if forum.access_level == 'private' and (
-        not request.user.is_authenticated() or not Role.objects.filter(user=request.user, forum=forum).exists()):
+                not request.user.is_authenticated() or not Role.objects.filter(user=request.user,
+                    forum=forum).exists()):
         context['load_error'] = '403'
     return render(request, 'index_statement.html', context)
 
