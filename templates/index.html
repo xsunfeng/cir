@@ -2,7 +2,13 @@
 {% load static %}
 {% load compressed %}
 {% block extralib %}
-	{% compressed_js 'cir_forum' %}
+    <script>
+        (function($) {
+            require([
+                'layout/layout'
+            ]);
+        })(jQuery);
+    </script>
 {% endblock %}
 {% block delaylib %}
 {% endblock %}

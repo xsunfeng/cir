@@ -11,8 +11,17 @@
         {% compressed_css 'cir_global' %}
         {% block extracss %}{% endblock %}
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-        
-
+        <script src="{% static 'js/require.js' %}"></script>
+        <script>
+            require.config({
+                baseUrl: "{% static 'js' %}"
+            });
+            require([
+                'header'
+            ], function(Header) {
+                Header.initHeader();
+            });
+        </script>
     </head>
     <body id="cir">
         {% block header %}
@@ -22,7 +31,6 @@
 
         {% include 'signin-signup.html' %}
         <script src="http://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.12.0/semantic.min.js"></script>
-        {% compressed_js 'cir_global' %}
         {% block extralib %}{% endblock %}
         {% block delaylib %}{% endblock %}
     </body>
