@@ -203,7 +203,10 @@ class Highlight(models.Model):
         if self.claims_of_highlight.count():
             attr['type'] = 'claim'
         else:
-            attr['type'] = self.posts_of_highlight.order_by('-updated_at')[0].content_type
+            if not self.posts_of_highlight.count():
+                attr['type'] = 'tags'
+            else:
+                attr['type'] = self.posts_of_highlight.order_by('-updated_at')[0].content_type
         return attr
 
 

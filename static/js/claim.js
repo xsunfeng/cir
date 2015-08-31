@@ -5,7 +5,6 @@ define([
 ) {
 	var module = {};
 	module.initClaimView = function() {
-		var _this = this;
 		this.display_type = 'overview';
 		// static event listeners
 		$('#claim-pane').on('click', '.claim-vote-btn:not(.disabled):not(.unready)', function() {
@@ -15,7 +14,7 @@ define([
 			var claim_id = $menu.attr('data-id');
 			vote(claim_id, action, $(_that).hasClass('active'), function(vote_data) {
 				_updateVotingMenu($menu, vote_data);
-				if (_this.display_type == 'fullscreen') {
+				if (module.display_type == 'fullscreen') {
 					$('#claim-activity-feed').feed('update');
 				}
 			});
@@ -37,7 +36,7 @@ define([
 				data: {
 					action: 'reword',
 					content: content,
-					claim_id: _this.claim_id,
+					claim_id: module.claim_id,
 					collective: collective
 				},
 				success: function(xhr) {
@@ -47,7 +46,7 @@ define([
 					} else {
 						$('#claim-activity-feed').feed('update', {
 							'type': 'claim',
-							'id': _this.claim_id,
+							'id': module.claim_id,
 						});
 						$('#claim-pane .claim.reword.editor').val('');
 						$('#claim-pane .reword.form').transition('slide down', '500ms');
@@ -72,7 +71,7 @@ define([
 			$('#claim-reason-editor input[name="collective"]').val(this.getAttribute('data-collective'));
 			$('#claim-reason-editor').modal('show');
 		}).on('click', '.claim-flag-merge-btn', function() {
-			if (_this.display_type != 'overview') {
+			if (module.display_type != 'overview') {
 				Utils.notify('warning', 'Please switch to Overview and try again.');
 				return;
 			}
@@ -92,7 +91,7 @@ define([
 				action: 'theme',
 				detheme: false
 			}, function(xhr) {
-				if (_this.display_type == 'fullscreen') {
+				if (module.display_type == 'fullscreen') {
 					$('#claim-activity-feed').feed('update');
 				}
 				$('#claim-pane .theme-tags[data-id="' + claim_id + '"]').html($(xhr.html).filter('.theme-tags').html());
@@ -101,7 +100,7 @@ define([
 		}).on('click', '.theme-suggest-btn', function() {
 
 		}).on('click', '.claim-fullscreen-btn', function() {
-			_this.claim_id = $(this).parents('.claim.menu').attr('data-id');
+			module.claim_id = $(this).parents('.claim.menu').attr('data-id');
 			_setDisplayType('fullscreen');
 			module.updateClaimPane();
 		}).on('click', '.claim-back-to-list-btn', function() {
@@ -112,11 +111,11 @@ define([
 		}).on('click', '.claim-edit-btn', function() {
 			// only for unpublished claims
 			// just enter fullscreen
-			_this.claim_id = $(this).parents('.claim.menu').attr('data-id');
+			module.claim_id = $(this).parents('.claim.menu').attr('data-id');
 			_setDisplayType('fullscreen');
 			module.updateClaimPane();
 		}).on('click', '.claim-save-btn', function() {
-			if (_this.display_type == 'fullscreen') {
+			if (module.display_type == 'fullscreen') {
 				var id = $(this).parents('.claim.menu').attr('data-id');
 				var content = $('#claim-pane textarea.claim.editor').val();
 				if ($.trim(content).length == 0) {
@@ -145,7 +144,7 @@ define([
 		}).on('click', '.claim-publish-btn', function() {
 			var id = $(this).parents('.claim.menu').attr('data-id');
 			// only for unpublished claims
-			if (_this.display_type == 'fullscreen') {
+			if (module.display_type == 'fullscreen') {
 				var content = $('#claim-pane textarea.claim.editor').val();
 				if ($.trim(content).length == 0) {
 					Utils.notify('error', 'Content must not be empty.');
@@ -158,7 +157,7 @@ define([
 						action: 'update',
 						content: content,
 						nopublish: false,
-						claim_id: _this.claim_id,
+						claim_id: module.claim_id,
 					},
 					success: function(xhr) {
 						module.updateClaimPane();
@@ -182,10 +181,10 @@ define([
 				},
 				success: function(xhr) {
 					$('#claim-navigator .item[data-id="' + id + '"]').remove();
-					if (_this.display_type == 'overview') {
+					if (module.display_type == 'overview') {
 						$('#claim-pane .claim.segment[data-id="' + id + '"]').remove();
 					} else {
-						delete _this.claim_id;
+						delete module.claim_id;
 						_setDisplayType('overview');
 						module.updateClaimPane();
 					}
@@ -204,7 +203,7 @@ define([
 				flag_type: 'reword',
 				deflag: true
 			}, function(xhr) {
-				if (_this.display_type == 'fullscreen') {
+				if (module.display_type == 'fullscreen') {
 					$('#claim-activity-feed').feed('update');
 				}
 				$('#claim-pane .reword-flag-tags[data-id="' + version_id + '"]').html($(xhr.html).filter('.reword-flag-tags').html());
@@ -219,10 +218,10 @@ define([
 				flag_type: 'merge',
 				deflag: true
 			}, function(xhr) {
-				if (_this.display_type == 'fullscreen') {
+				if (module.display_type == 'fullscreen') {
 					$('#claim-activity-feed').feed('update', {
 						'type': 'claim',
-						'id': _this.claim_id,
+						'id': module.claim_id,
 					});
 				} else {
 					loadFlags();
@@ -237,7 +236,7 @@ define([
 				action: 'theme',
 				detheme: true
 			}, function(xhr) {
-				if (_this.display_type == 'fullscreen') {
+				if (module.display_type == 'fullscreen') {
 					$('#claim-activity-feed').feed('update');
 				}
 				$('#claim-pane .theme-tags[data-id="' + claim_id + '"]').html($(xhr.html).filter('.theme-tags').html());
@@ -344,7 +343,7 @@ define([
 			}, function(xhr) {
 				$('#claim-reason-editor').modal('hide');
 				$('#claim-reason-editor textarea').val('');
-				if (_this.display_type == 'fullscreen') {
+				if (module.display_type == 'fullscreen') {
 					$('#claim-activity-feed').feed('update');
 				}
 				$('#claim-pane .reword-flag-tags[data-id="' + version_id + '"]').html($(xhr.html).filter('.reword-flag-tags').html());
@@ -395,7 +394,7 @@ define([
 		// dynamic event listeners
 		$('.claim-view-btn').click(function() {
 			var type = this.getAttribute('data-type');
-			if (_this.display_type != type) {
+			if (module.display_type != type) {
 				_setDisplayType(type);
 				module.updateClaimPane();
 			}
@@ -692,19 +691,18 @@ define([
 	}
 
 	function loadVotes() {
-		var _this = this;
 		$('.claim.menu .claim-vote-btn').addClass('unready');
-		_this.voteLoader = $.ajax({
+		module.voteLoader = $.ajax({
 			url: '/api_claim_vote/',
 			type: 'post',
 			data: {
-				action: _this.display_type == 'fullscreen' ? 'load_single' : 'load_all',
-				claim_id: _this.claim_id,
+				action: module.display_type == 'fullscreen' ? 'load_single' : 'load_all',
+				claim_id: module.claim_id,
 			},
 			success: function(xhr) {
-				if (_this.display_type == 'fullscreen') {
+				if (module.display_type == 'fullscreen') {
 					_updateVotingMenu($('#claim-pane .claim.menu'), xhr['voters']);
-				} else if (_this.display_type == 'overview') {
+				} else if (module.display_type == 'overview') {
 					$('#claim-pane .claim.menu').each(function() {
 						var claim_id = this.getAttribute('data-id');
 						_updateVotingMenu($(this), xhr[claim_id]);
@@ -758,15 +756,14 @@ define([
 	};
 
 	module.updateNavigator = function() {
-		var _this = this;
 		$('#claim-navigator').css('opacity', '0.5');
 		$.ajax({
 			url: '/api_get_claim/',
 			type: 'post',
 			data: {
 				'action': 'navigator',
-				'category': _this.category,
-				'theme': _this.theme,
+				'category': module.category,
+				'theme': module.theme,
 			},
 			success: function(xhr) {
 				$('#claim-navigator').css('opacity', '1.0');

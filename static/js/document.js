@@ -6,18 +6,17 @@ define([
 ) {
 	var module = {};
 	module.initDocumentView = function() {
-		var _this = this;
-		this.$category_element = $('#document-categories'); // static; initiate once
-		this.$content_element = $('#document-pane'); // static; initiate once
-		this.$annotation_element = $('#annotation-pane'); // static; initiate once
+		module.$category_element = $('#document-categories'); // static; initiate once
+		module.$content_element = $('#document-pane'); // static; initiate once
+		module.$annotation_element = $('#annotation-pane'); // static; initiate once
 
-		// this.currentFolderId = -1;
-		// this.currentDocId = -1;
+		// module.currentFolderId = -1;
+		// module.currentDocId = -1;
 
 		// highlighting
-		this.currHighlights = {};
-		this.newHighlight = {};
-		this.isDragging = false;
+		module.currHighlights = {};
+		module.newHighlight = {};
+		module.isDragging = false;
 
 		$('#doc-thread-content').feed('init');
 
@@ -32,26 +31,26 @@ define([
 		});
 
 		// static listeners
-		this.$content_element.click(function(e) {
+		module.$content_element.click(function(e) {
 			// remove all popovers
 			$('#doc-thread-popup').removeAttr('style');
 		});
 		$('.doc-anno-btn').click(function(e) {
-			_this.newHighlight.type = this.getAttribute('data-action');
-			if (_this.newHighlight.type == 'comment') {
+			module.newHighlight.type = this.getAttribute('data-action');
+			if (module.newHighlight.type == 'comment') {
 				$('#doc-claim-form').hide();
 				$('#doc-comment-form').show().parent().show();
 				$('#doc-comment-form textarea').focus();
 				$('#doc-comment-form label span').text('Add a comment');
-			} else if (_this.newHighlight.type == 'question') {
+			} else if (module.newHighlight.type == 'question') {
 				$('#doc-claim-form').hide();
 				$('#doc-comment-form').show().parent().show();
 				$('#doc-comment-form textarea').focus();
 				$('#doc-comment-form label span').text('Raise a question');
-			} else if (_this.newHighlight.type == 'claim') {
+			} else if (module.newHighlight.type == 'claim') {
 				$('#doc-comment-form').hide();
 				$('#doc-claim-form').show().parent().show();
-				$('#doc-claim-form textarea').val($.trim(_this.$content_element.find('.tk.highlighted').text())).focus();
+				$('#doc-claim-form textarea').val($.trim(module.$content_element.find('.tk.highlighted').text())).focus();
 			}
 		});
 		$('.doc-anno-submit').click(function(e) {
@@ -72,17 +71,17 @@ define([
 					action: 'create',
 					content: content,
 					nopublish: nopublish,
-				}, _this.newHighlight),
+				}, module.newHighlight),
 				success: function(xhr) {
 					$('#doc-highlight-toolbar').removeAttr('style');
 					$('#doc-highlight-toolbar textarea').val('');
 					$('#doc-highlight-toolbar .button').removeClass('loading');
 					$('.tk.highlighted').removeClass('highlighted')
-					_this.highlight({
-						type: _this.newHighlight.type,
-						start: _this.newHighlight.start,
-						end: _this.newHighlight.end,
-						context_id: _this.newHighlight.contextId,
+					highlight({
+						type: module.newHighlight.type,
+						start: module.newHighlight.start,
+						end: module.newHighlight.end,
+						context_id: module.newHighlight.contextId,
 						id: xhr.highlight_id
 					});
 				},
@@ -105,16 +104,16 @@ define([
 			});
 			if (action == 'claim') {
 				var highlight_id = $('#doc-thread-content').feed('get_id');
-				$('#doc-thread-content .claim.form textarea').val(_this.currHighlights[highlight_id].text).focus();
+				$('#doc-thread-content .claim.form textarea').val(module.currHighlights[highlight_id].text).focus();
 			}
 		});
 
 		// dynamic listeners
-		this.$category_element.on('click', '.open-doc', function(e) {
-			_this.doc_id = this.getAttribute('data-id');
+		module.$category_element.on('click', '.open-doc', function(e) {
+			module.doc_id = this.getAttribute('data-id');
 			updateDocument();
 		});
-		this.$content_element.on('click', '.jump-to-section', function(e) {
+		module.$content_element.on('click', '.jump-to-section', function(e) {
 			var section_id = this.getAttribute('data-id');
 			_jumpToSection(section_id);
 		}).on('click', '.tk', function(e) {
@@ -135,31 +134,31 @@ define([
 				var $target = $(this);
 				$(window).mousemove(function(e2) {
 					if ($(e2.target).hasClass('tk')) {
-						_this.isDragging = true;
-						_this.newHighlight.end = e2.target.getAttribute('data-id');
-						var min = Math.min(_this.newHighlight.start, _this.newHighlight.end);
-						var max = Math.max(_this.newHighlight.start, _this.newHighlight.end);
+						module.isDragging = true;
+						module.newHighlight.end = e2.target.getAttribute('data-id');
+						var min = Math.min(module.newHighlight.start, module.newHighlight.end);
+						var max = Math.max(module.newHighlight.start, module.newHighlight.end);
 						$target.find('.tk').removeClass('highlighted');
 						for (var i = min; i <= max; i++) {
 							$target.find('.tk[data-id="' + i + '"]').addClass('highlighted');
 						}
-						_this.newHighlight.contextId = $target.attr('data-id');
+						module.newHighlight.contextId = $target.attr('data-id');
 					} else {
 						$target.find('.tk').removeClass('highlighted');
 					}
 				});
-				_this.newHighlight.start = e.target.getAttribute('data-id');
-				_this.newHighlight.end = e.target.getAttribute('data-id');
+				module.newHighlight.start = e.target.getAttribute('data-id');
+				module.newHighlight.end = e.target.getAttribute('data-id');
 			}
 		}).on('mouseup', '.section-content', function(e) {
 			$(window).off('mousemove');
-			var wasDragging = _this.isDragging;
-			_this.isDragging = false;
+			var wasDragging = module.isDragging;
+			module.isDragging = false;
 			if (wasDragging) {
-				var min = Math.min(_this.newHighlight.start, _this.newHighlight.end);
-				var max = Math.max(_this.newHighlight.start, _this.newHighlight.end);
-				_this.newHighlight.start = min;
-				_this.newHighlight.end = max;
+				var min = Math.min(module.newHighlight.start, module.newHighlight.end);
+				var max = Math.max(module.newHighlight.start, module.newHighlight.end);
+				module.newHighlight.start = min;
+				module.newHighlight.end = max;
 				if ($(this).find('.tk.highlighted').length) {
 					$('#doc-claim-form').hide();
 					$('#doc-comment-form').parent().hide();
@@ -172,7 +171,6 @@ define([
 		});
 	};
 	module.updateCategories = function() {
-		var _this = this;
 		$.ajax({
 			url: '/api_doc/',
 			type: 'post',
@@ -180,9 +178,9 @@ define([
 				'action': 'get-categories'
 			},
 			success: function(xhr) {
-				_this.$category_element.html(xhr.html);
-				_this.$category_element.find('.ui.accordion').accordion();
-				_this.$category_element.find('abbr').popup();
+				module.$category_element.html(xhr.html);
+				module.$category_element.find('.ui.accordion').accordion();
+				module.$category_element.find('abbr').popup();
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -192,23 +190,22 @@ define([
 		});
 	};
 	function updateDocument() {
-		var _this = this;
 		$.ajax({
 			url: '/api_doc/',
 			type: 'post',
 			data: {
 				'action': 'get-document',
-				'doc_id': _this.doc_id
+				'doc_id': module.doc_id
 			},
 			success: function(xhr) {
 				// collapse document category accordion
-				_this.$category_element.find('.ui.accordion').accordion('close', 0);
-				_this.$content_element.html(xhr.html);
-				_this.$content_element.find('.ui.sticky').sticky({
+				module.$category_element.find('.ui.accordion').accordion('close', 0);
+				module.$content_element.html(xhr.html);
+				module.$content_element.find('.ui.sticky').sticky({
 					context: '#document-pane',
 					offset: 70,
 				});
-				_this.$content_element.find('abbr').popup();
+				module.$content_element.find('abbr').popup();
 				reloadHighlights();
 			},
 			error: function(xhr) {
@@ -219,13 +216,12 @@ define([
 		});
 	}
 	function reloadHighlights() {
-		var _this = this;
 		$.ajax({
 			url: '/api_highlight/',
 			type: 'post',
 			data: {
 				action: 'load-doc',
-				doc_id: _this.doc_id,
+				doc_id: module.doc_id,
 			},
 			success: function(xhr) {
 				for (var i = 0; i < xhr.highlights.length; i++) {
@@ -241,8 +237,7 @@ define([
 	}
 
 	function highlight(highlight) {
-		var _this = this;
-		var $context = _this.$content_element.find('.section-content[data-id="' + highlight.context_id + '"]');
+		var $context = module.$content_element.find('.section-content[data-id="' + highlight.context_id + '"]');
 		var className;
 		if (highlight.type == 'comment') {
 			className = 'p'; // for 'post'
@@ -262,14 +257,13 @@ define([
 				$token.addClass(className).attr('data-hl-id', curr_id + ' ' + highlight.id);
 			}
 		}
-		_this.currHighlights[highlight.id] = highlight;
-		_this.currHighlights[highlight.id].text = text.join('');
+		module.currHighlights[highlight.id] = highlight;
+		module.currHighlights[highlight.id].text = text.join('');
 	}
 
 	function _jumpToSection(section_id) {
-		var _this = this;
 		$('body').animate({
-			scrollTop: _this.$content_element.find('.section-header[data-id="' + section_id + '"]').offset().top - 50
+			scrollTop: module.$content_element.find('.section-header[data-id="' + section_id + '"]').offset().top - 50
 		}, 100);
 	}
 	return module;

@@ -45,7 +45,7 @@ def api_doc(request):
             context['title'] = doc.title
             context['sections'] = []
             for section in ordered_sections | unordered_sections:
-                context['sections'].append(section.getAttr())
+                context['sections'].append(section.getAttr(forum))
             response['html'] = render_to_string("doc-content.html", context)
             return HttpResponse(json.dumps(response), mimetype='application/json')
         except:
