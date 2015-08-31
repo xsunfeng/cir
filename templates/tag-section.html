@@ -1,0 +1,11 @@
+<div class="tag-section" data-id="{{ section.id }}" style="margin: 10px; margin-top: 50px;">
+	<div class="token-input-list-feng ui labels">
+		{% for tagPair in section.tagF %}
+		<a class="tag-section-nav ui label"><span>{{tagPair.tag}}</span><div class="detail">{{tagPair.id__count}}</div></a>
+		{% endfor %}
+	</div>
+	<div id="secVisbtn-{{ section.id}}" class="ui primary button doc-sect-cloud-vis" style="width:100%">Visualize</div> 
+	<div id="tagcloud-{{ section.id}}" class="tagcloud">
+		<!-- <div class="wc-area"></div> -->
+	</div>
+</div>

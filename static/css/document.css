@@ -28,16 +28,28 @@
 .tk.c {
 	background-color: rgba(113, 217, 255, 0.5);
 }
+.tk.t.active {
+	background-color: rgba(172, 235, 117, 0.8);
+}
 .tk.highlighted { /* must be put after p, q and c */
 	background-color: #f2c61f;
 }
+
+#tag-thread-popup {
+	position: absolute;
+	left: -999999px;
+	top: -999999px;
+	z-index: 900;
+	min-width: 350px;
+}
+
 #doc-highlight-toolbar,
 #doc-thread-popup {
 	position: absolute;
 	left: -999999px;
 	top: -999999px;
 	z-index: 900;
-	width: 450px;
+	min-width: 350px;
 }
 .section-content {
 	line-height: 1.6em;

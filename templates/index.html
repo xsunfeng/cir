@@ -20,8 +20,9 @@
 		{% if load_error %}
 		<div class="item">GeoDeliberator</div>
 		{% else %}
-		<a href="#" class="item {{ settings.document_active }}" data-tab="document-tab"><i class="icon file text outline"></i>Documents</a>
-		<a href="#" class="item {{ settings.claim_active }}" data-tab="claim-tab"><i class="icon comment outline"></i>Claims</a>
+		<a href="#document-tab" class="item tab {{ settings.document_active }}" data-tab="document-tab"><i class="icon file text outline"></i>Documents</a>
+		<a href="#claim-tab" class="item tab {{ settings.claim_active }}" data-tab="claim-tab"><i class="icon comment outline"></i>Claims</a>
+		<a href="#tag-nav-tab" class="item tab {{ settings.claim_active }}" data-tab="tag-nav-tab" id="tag-nav-tab"><i class="icon comment outline"></i>Tags</a>
 		{% if settings.phase == 'finished' %}
 		<a href="{{ forum_url }}/statement" target="_blank" class="item">Citizens' Statement</a>
 		{% endif %}
@@ -125,14 +126,14 @@
 			</div>
 			<div id="document-categories" class="ui attached segment"></div>
 		</div>
-		<div class="ten wide column" style="padding-top:0">
-			<div id="document-pane" class="ui segment">Please select a document from the list.</div>
+		<div class="three wide column"></div>
+		<div class="thirteen wide column" style="padding-top:0">
+			<div id="document-pane"></div>
 		</div>
-		<div class="six wide column"></div>
 	</div>
 	<div id="doc-highlight-toolbar">
 	{% if settings.phase == 'extract' %}
-		<div class="ui attached top segment blue labeled icon menu">
+		<div class="ui top raised segment blue labeled icon menu" style="text-align:left; width:auto;">
 			<a data-action="comment" class="item doc-anno-btn">
 			    <i class="comment icon"></i>Comment
 			</a>
@@ -142,8 +143,14 @@
 			<a data-action="claim" class="item doc-anno-btn">
 			    <i class="code icon"></i>Extract claim
 			</a>
+			<a data-action="tags" class="item doc-anno-btn">
+				<i class="tags icon"></i>Tag
+			</a>
+<!-- 			<a data-action="cloud" class="item doc-anno-btn">
+				<i class="cloud icon"></i>Cloud
+			</a> -->
 		</div>
-		<div class="ui attached bottom segment" style="display:none">
+		<div class="ui bottom raised segment" style="display:none; margin-top:0;">
 			<form id="doc-comment-form" class="ui form comment" style="display:none">
 				<div class="field">
 					<label><span></span> (Ctrl + Enter to publish)</label>
@@ -162,14 +169,53 @@
 				</div>
 				<div class="ui primary button doc-anno-submit">Publish</div>
 			</form>
-		</div>
-	{% else %}
-		<div class="ui warning message">
-			We are not in a claim extraction round. You can only work on existing highlights.
-		</div>
-	{% endif %}
+			<form id="doc-tags-form" class="ui form tags" style="display:none"> 
+				<div class="field"> 
+<!-- 				<label><span></span> (Ctrl + Enter to publish)</label>
+ -->				<a href="#" id="plugin-methods-add">add</a> | <!-- <a href="#" id="plugin-methods-remove">remove</a> |  --><a href="#" id="plugin-methods-clear">clear all</a><br />
+					<input type="text" id="demo-input-plugin-methods" name="blah" />
+				</div> 
+
+<div>
+tags used by you...
+<div id="candidate-tags" class="ui labels">
+</div>
+	<div class="ui divider">
 	</div>
-	{% include 'doc-thread-popup.html' with settings=settings %}
+</div>
+<div>
+tags used by others...
+<div id="candidate-tags-others" class="ui labels">
+</div>
+	<div class="ui divider">
+	</div>
+</div>
+				<div class="ui primary button doc-anno-submit">Publish</div> 
+		</form>
+		<form id="doc-cloud-form" class="ui form cloud" style="display:none"> 
+				<div class="field"> 
+				<label><span></span></label>
+				<label>Time:</label>
+				<input id="wc-startdate" class="form-control field-filter" size="10" placeholder="Date of start"></input>
+				<label>at</label>
+				<input id="wc-starttime" class="form-control field-filter" size="8" placeholder="Time of start"></input>
+				<label>to</label>
+				<input id="wc-enddate" class="form-control field-filter" size="10" placeholder="Date of end"></input>
+				<label>at</label>
+				<input id="wc-endtime" class="form-control field-filter" size="8" placeholder="Time of end"></input>
+				</div> 
+				<div class="ui primary button doc-anno-submit">Visualize</div> 
+		</form>
+
+	</div>
+	{% else %}
+	<div class="ui warning message">
+		We are not in a claim extraction round. You can only work on existing highlights.
+	</div>
+	{% endif %}
+</div>
+{% include 'doc-thread-popup.html' with settings=settings %}
+{% include 'tag-thread-popup.html' with settings=settings %}
 </div>
 <div class="ui main tab {{ settings.claim_active }}" data-tab="claim-tab">
 	<div class="ui grid">
@@ -260,5 +306,22 @@
 		</div>
 	</div>
 </div>
-	{% endif %}
+
+<div class="ui main tab" data-tab="tag-nav-tab">
+	<div id="tag-nav-container"></div>
+	<div class="ui tag-nav-segment">
+		<h4 class="tag-nav-header">Highlights with</h4>
+		<div class="ui relaxed divided list tag-nav-list">
+		</div>
+<!-- 	  	<div class="actions">
+			<div class="ui button">Cancel</div>
+			<div class="ui primary button add-tag-theme-ok">Confirm</div>
+		</div> -->
+	</div>
+</div>
+
+<div id="cloudpage">
+	<div id="cloudsvg"></div>
+</div>
+{% endif %}
 {% endblock %}

@@ -1,5 +1,5 @@
 from HTMLParser import HTMLParser, HTMLParseError
-
+from cir.models import *
 from django.utils import timezone
 
 
@@ -77,4 +77,6 @@ def pretty_date(time):
     if day_diff < 365:
         return str(day_diff / 30) + " months ago"
     return str(day_diff / 365) + " years ago"
+
+
 

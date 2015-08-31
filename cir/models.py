@@ -177,7 +177,7 @@ class DocSection(Entry):
     def __str__(self):  # used for admin site
         return str(self.id) + ' ' + self.title
 
-    def getAttr(self, forum):
+    def getAttr(self):
         attr = {}
         attr['id'] = self.id
         attr['title'] = self.title
@@ -209,6 +209,34 @@ class Highlight(models.Model):
                 attr['type'] = self.posts_of_highlight.order_by('-updated_at')[0].content_type
         return attr
 
+class TagTheme(models.Model):
+    forum = models.ForeignKey(Forum)
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=100)
+    def getAttr(self):
+        attr = {}
+        attr['id'] = self.id
+        attr['name'] = self.name
+        attr['forum'] = self.forum
+        attr['description'] = self.description
+        return attr
+    def __unicode__(self):
+        return self.name
+
+class Tag(models.Model):
+    id = models.TextField(default=True, primary_key=True)
+    highlight = models.ManyToManyField(Highlight,through="TagPosition")
+    tagTheme = models.ForeignKey(TagTheme, related_name="tags", null=True, blank=True)
+
+class TagPosition(models.Model):
+    tag = models.ForeignKey(Tag)
+    authors = models.ManyToManyField(User, through="TagPosUser")
+    highlight = models.ForeignKey(Highlight)
+
+class TagPosUser(models.Model):
+    tagPos = models.ForeignKey(TagPosition)
+    author = models.ForeignKey(User)
+    created_at = models.DateTimeField()
 
 class ClaimTheme(models.Model):
     forum = models.ForeignKey(Forum)

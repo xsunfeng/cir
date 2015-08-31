@@ -1,21 +1,97 @@
-<h2 class="ui header">{{ title }}</h2>
+<div class="ui grid">
+	<div class="twelve wide column" style="text-align: center;">
+		<div class="ui segment">
+			<h2 class="ui header">{{ title }}</h2>
+		</div>
+	</div>
+	<div class="four wide column">
+	</div>
+</div>
 {% if sections %}
-<div class="right ui rail">
+<div class="ui rail" style="left: -20%; right: auto; padding: 0; margin: 0;">
     <div class="ui sticky">
-        <div class="header">Content of {{ title }}</div>
+        <div class="header">Contents<!-- {{ title }} --></div>
         <div class="ui secondary vertical  menu">{% for section in sections %}
-            <a class="header item jump-to-section" data-id="{{ section.id }}"><i class="right triangle icon"></i>{{ section.title }}</a>
+            <a class="header item jump-to-section" data-id="{{ section.id }}"><!-- <i class="right triangle icon"></i> -->{{ section.title }}</a>
         {% endfor %}</div>
     </div>
 </div>
+<!-- <div class="ui grid">
+	<div class="twelve wide column">
+		<div class="ui blue four item pointing large menu">
+	    <a class="item active" id="all-highlight-toggle">All Highlights</a>
+	    <a class="item" id="highlight-toggle">My Highlights</a>
+	    <a class="item" id="question-toggle">Questions Only</a>
+	    <a class="item" id="no-annotation-toggle">Hide Annotations</a>
+		</div>
+	</div>
+</div> -->
 {% for section in sections %}
-<div class="ui divider"></div>
-{% if section.title %}<h3 class="ui header section-header" data-id="{{ section.id }}">{{ section.title }}</h3>{% endif %}
-<div class="ui label"><i class="calendar icon"></i>updated <abbr title="{{ section.updated_at_full }}">{{ section.updated_at }}</abbr></div>
-<div class="section-content noselect" data-id="{{ section.id }}">{{ section.segmented_text|safe }}</div>
+<!-- <div class="ui divider"></div> -->
+<div class="ui grid">
+	<div class="twelve wide column">
+		<div class="ui piled segment" style="margin:1em 0; padding:2em;">
+			{% if section.title %}<h2 class="ui header section-header" style="text-align: center;" data-id="{{ section.id }}">{{ section.title }}</h2>{% endif %}
+			<div class="ui label" style="width: 100%; text-align: center;"><i class="calendar icon"></i>updated <abbr title="{{ section.updated_at_full }}">{{ section.updated_at }}</abbr></div>
+			<div class="section-content noselect" style="margin-top: 2em;" data-id="{{ section.id }}">{{ section.segmented_text|safe }}</div>
+		</div>
+	</div>
+	<div class="four wide column" id="">
+		<div class="ui grid">
+
+			<div class="eight wide column" style="padding-right: 0;">
+				<!-- my tag -->
+				<div class="tag-my-section ui segment" data-id="{{ section.id }}" style="margin: 10px; margin-top: 50px; margin-left:0;">
+					<h4>My tags</h4>
+					<div class="token-input-list-feng ui labels">
+						{% for tagPair in section.tagMyF %}
+						<a class="tag-section-nav ui label"><span>{{tagPair.tag}}</span><div class="detail">{{tagPair.id__count}}</div></a>
+						{% endfor %}
+					</div>
+				</div>	
+			</div>
+
+			<div class="eight wide column" style="padding-left: 0;">
+				<!-- all tag -->
+				<div class="tag-all-section ui segment" data-id="{{ section.id }}" data-count-authors="{{ section.countAuthors }}" style="margin: 10px; margin-top: 50px; margin-right:0;">
+					<h4>Others (average)</h4>
+					<div class="token-input-list-feng ui labels">
+						{% for tagPair in section.tagF %}
+						<a class="tag-section-nav ui label"><span>{{tagPair.tag}}</span><div class="detail">{{tagPair.id__count}}</div></a>
+						{% endfor %}
+					</div>
+					<div id="secVisbtn-{{ section.id}}" class="ui primary button doc-sect-cloud-vis" style="width:100%">Visualize</div> 
+					<div id="tagcloud-{{ section.id}}" class="tagcloud">
+						<!-- <div class="wc-area"></div> -->
+					</div>
+				</div>
+			</div>
+
+			<div class="ui primary button compare-tags" style="margin-left:10%; width:80%">Compare</div> 
+			<div class="ui segment compare-tag-segment" id="slopegraph-segment-{{ section.id}}" data-id="{{ section.id }}">
+				<div id='slopegraph-{{ section.id}}' data-id="{{ section.id }}"></div>
+			</div>
+	</div>
+</div>
+
 {% endfor %}
 {% else %}
 <div class="ui info message">
     No sections in this document.
 </div>
 {% endif %}
+
+	<div style="position:fixed;bottom:0;left:0;">
+		<div style="margin-left:80px;">Tags</div>
+		<div class="ui blue two item vertical pointing menu">
+	    <a class="item active" id="all-tag-toggle" style="width:100%;">All Tags</a>
+	    <a class="item" id="my-tag-toggle" style="width:100%;">My Tag</a>
+		</div>
+		<div style="margin-left:80px;">Highlights</div>
+		<div class="ui blue four item vertical pointing menu">
+	    <a class="item active" id="all-highlight-toggle" style="width:100%;">All Highlights</a>
+	    <a class="item" id="highlight-toggle" style="width:100%;">My Highlights</a>
+	    <a class="item" id="question-toggle" style="width:100%;">Questions Only</a>
+	    <a class="item" id="no-annotation-toggle" style="width:100%;" >Hide Annotations</a>
+		</div>
+	</div>

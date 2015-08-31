@@ -1,0 +1,15 @@
+	<div id="tag-nav-section">
+		<div class="ui grid" id="tag-nav-grid">
+			{% for theme, tags in tag_theme.items %}
+			<div class="four wide column">
+				<div class="ui segment tag-nav-segment">
+					<div class="tag-nav-name"><h4>{{ theme }}</h4></div>
+					<div class="ui divider"></div>
+					{% for tag in tags %}
+						<a class="ui big label tag-nav-tag" style="margin-bottom:.5em;">{{ tag }}</a>
+					{% endfor %}
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	</div>

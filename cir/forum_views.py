@@ -101,8 +101,7 @@ def enter_forum(request, forum_url):  # access /forum_name
         context['user_name'] = ''
         context['role'] = request.session['role']
     if forum.access_level == 'private' and (
-                not request.user.is_authenticated() or not Role.objects.filter(user=request.user,
-                    forum=forum).exists()):
+        not request.user.is_authenticated() or not Role.objects.filter(user=request.user, forum=forum).exists()):
         context['load_error'] = '403'
     return render(request, 'index.html', context)
 
@@ -134,8 +133,7 @@ def enter_statement(request, forum_url):
         context['user_name'] = ''
         context['role'] = request.session['role']
     if forum.access_level == 'private' and (
-                not request.user.is_authenticated() or not Role.objects.filter(user=request.user,
-                    forum=forum).exists()):
+        not request.user.is_authenticated() or not Role.objects.filter(user=request.user, forum=forum).exists()):
         context['load_error'] = '403'
     return render(request, 'index_statement.html', context)
 
