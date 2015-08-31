@@ -29,6 +29,7 @@ urlpatterns = patterns('',
     url(r'^api_get_flags/$', claim_views.api_get_flags),
 
     url(r'^api_register_delegator/$', facilitator_views.register_delegator), # include other apps
+    url(r'^api_switch_phase/$', facilitator_views.switch_phase),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^password_reset/', include('password_reset.urls')),
 

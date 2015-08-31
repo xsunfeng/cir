@@ -1,0 +1,21 @@
+[
+	{
+		"environment":
+	{
+	"freq":1,
+	"upvote":1
+	"downvote":1,
+	}},
+	{"economic":
+	{
+	"freq":2,
+	"upvote":2,
+	"downvote":1,
+	}},
+	{"issue definition":
+	{
+	"freq":2,
+	"upvote":2,
+	"downvote":1,
+	}},
+]

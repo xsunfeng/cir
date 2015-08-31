@@ -20,10 +20,10 @@
 		{% if load_error %}
 		<div class="item">GeoDeliberator</div>
 		{% else %}
-		<a href="#" class="item {{ settings.document_active }}" data-tab="document-tab"><i class="icon file text outline"></i>Read Documents</a>
-		<a href="#" class="item {{ settings.claim_active }}" data-tab="claim-tab"><i class="icon comment outline"></i>Create Claims</a>
+		<a href="#" class="item {{ settings.document_active }}" data-tab="document-tab"><i class="icon file text outline"></i>Documents</a>
+		<a href="#" class="item {{ settings.claim_active }}" data-tab="claim-tab"><i class="icon comment outline"></i>Claims</a>
 		{% if settings.phase == 'finished' %}
-		<a href="{{ forum_url }}/statement" class="item">Citizens' Statement</a>
+		<a href="{{ forum_url }}/statement" target="_blank" class="item">Citizens' Statement</a>
 		{% endif %}
 		<div id="header-visitor-wrapper" class="right menu" style="display:inline-block">
 			<div class="item">
@@ -47,7 +47,7 @@
 			</div>
 		</div>
 		<div id="header-facilitator-wrapper" class="right menu" style="display:inline-block">
-			<a href="{{ forum_url }}/dashboard" class="item">
+			<a href="{{ forum_url }}/dashboard" target="_blank" class="item">
 				<i class="icon dashboard"></i>
 			</a>
 			<div class="ui simple dropdown item" tabindex="0">

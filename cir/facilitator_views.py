@@ -38,3 +38,10 @@ def enter_dashboard(request, forum_url):
     context['access_level'] = forum.access_level
     context['phase'] = forum.phase
     return render(request, 'index_dashboard.html', context)
+
+def switch_phase(request):
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    newPhase = request.REQUEST.get('newPhase')
+    forum.phase = newPhase
+    forum.save()
+    return HttpResponse()
