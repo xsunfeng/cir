@@ -1,3 +1,24 @@
+<div id="claim-filter-pane" class="ui vertical accordion text menu">
+    <div class="item active">
+        <a class="active title">Theme</a>
+        <div class="active content menu">
+            <a class="item">All</a>
+            {% for theme in themes %}<a class="item">{{ theme.name }}</a>{% endfor %}
+            <a class="item">Undecided</a>
+        </div>
+    </div>
+    <div class="item">
+        <a class="title">Category</a>
+        <div class="content menu">
+            <a class="item">All</a>
+            <a class="item">Pro</a>
+            <a class="item">Con</a>
+            <a class="item">Finding</a>
+            <a class="item">Discarded</a>
+            <a class="item">Undecided</a>
+        </div>
+    </div>
+</div>
 <div class="ui secondary vertical blue menu">
 	<div class="item">
 		{% if category %}Category: <strong>{{ category }}</strong>{% endif %}
@@ -5,7 +26,7 @@
 		{% if not category and not theme %}<strong>All claims</strong>{% endif %}
 		({{ claims_cnt }})
 	</div>
-	<a class="refresh item">Refresh list<i class="refresh icon"></i></a>
+	<a class="refresh item">Refresh claim list<i class="refresh icon"></i></a>
 	{% if claims %}{% for claim in claims %}
 	<a class="claim item" data-id="{{ claim.id }}">
 		{% if not claim.published %}

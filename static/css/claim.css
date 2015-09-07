@@ -1,5 +1,6 @@
 .claim-content {
 	font-size: 1.5em;
+    line-height: 1.5em;
 	padding-top: 0;
     -moz-transition: background-color 0.5s;
     -webkit-transition: background-color 0.5s;
@@ -46,6 +47,15 @@ a.claim-vote-btn.unready:hover {
 	cursor: default!important;
 	color: rgba(40,40,40,.3)!important;
 	background-color: transparent!important;
+}
+#claim-pane .claim.segment {
+    padding-bottom: 0;
+}
+#claim-pane .claim.menu {
+    margin: 0 -1rem;
+}
+#claim-pane .private.claim.segment {
+    opacity: 0.6;
 }
 #claim-pane.not_started .claim.menu .claim-vote-btn {
 	display: none;

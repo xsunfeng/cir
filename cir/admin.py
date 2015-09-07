@@ -7,7 +7,7 @@ from models import *
 
 
 class ForumAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('full_name', 'url', 'access_level', 'phase')
 
 
 class RoleAdmin(admin.ModelAdmin):
@@ -16,7 +16,6 @@ class RoleAdmin(admin.ModelAdmin):
 
     list_display = (author_name, 'forum', 'role')
     list_filter = ('forum', )
-    pass
 
 
 class DocAdmin(admin.ModelAdmin):

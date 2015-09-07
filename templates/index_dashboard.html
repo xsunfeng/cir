@@ -16,19 +16,17 @@
 	{% compressed_css 'cir_dashboard' %}
 {% endblock %}
 {% block header %}
-<div class="ui fixed inverted main tabular menu">
-	<div class="container">
-		<a href="/{{ forum_url }}" class="title item">Back to {{ forum_name }}</a>
-		{% if load_error %}
-		<div class="item">GeoDeliberator</div>
-		{% else %}
-		<a href="#" class="item active" data-tab="overview-tab">Overview</a>
-		<a href="#" class="item" data-tab="forum-tab">Forum</a>
-		<a href="#" class="item" data-tab="users-tab">Users</a>
-		<a href="#" class="item" data-tab="messages-tab">Messages</a>
-		<a href="#" class="item" data-tab="log-tab">Access log</a>
-		{% endif %}
-	</div>
+<div id="nav-menu" class="ui fixed inverted main menu">
+    <a href="/{{ forum_url }}" class="title item">Back to {{ forum_name }}</a>
+    {% if load_error %}
+    <div class="item">GeoDeliberator</div>
+    {% else %}
+    <a href="#" class="red item active" data-tab="overview-tab">Overview</a>
+    <a href="#" class="red item" data-tab="forum-tab">Forum</a>
+    <a href="#" class="red item" data-tab="users-tab">Users</a>
+    <a href="#" class="red item" data-tab="messages-tab">Messages</a>
+    <a href="#" class="red item" data-tab="log-tab">Access log</a>
+    {% endif %}
 </div>
 {% endblock %}
 

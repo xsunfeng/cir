@@ -1,28 +1,4 @@
 <div class="ui segments">
-	<div class="ui top attached secondary filter segment" style="padding:0.5em 0">
-		<div class="ui secondary menu">
-			<div class="item">
-				{% if category %}Category: <strong>{{ category|capfirst }}</strong>{% endif %}
-				{% if theme %}Theme: <strong>{{ theme }}</strong>{% endif %}
-				{% if not category and not theme %}<strong>All claims</strong>{% endif %}
-				({{ claims_cnt }})
-			</div>
-			<div class="right menu">
-				<div class="ui dropdown item">
-					Sort by
-					<i class="dropdown icon"></i>
-					<div class="menu">
-						<a class="item">Created at</a>
-						<a class="item">Source document</a>
-					</div>
-				</div>
-				<a id="claim-toggle-filter-btn" class="item">
-					Filter claims
-					<i class="dropdown icon"></i>
-				</a>
-			</div>
-		</div>
-	</div>
 	<div class="ui top attached secondary merging segment" style="padding:0.5em 0;display:none;border-top:1px solid #d4d4d5">
 		<div class="ui secondary menu">
 			<a id="claim-label-merge" class="item merge control" title="Suggest that the flagged claims can be merged.">
@@ -36,43 +12,18 @@
 			</a>
 		</div>
 	</div>
-	<div id="claim-filter-pane" class="ui secondary attached segment hidden" style="z-index:1000;">
-		<div class="ui form">
-			<div class="field">
-				<label>Category</label>
-				<select class="ui category dropdown">
-					<option value="all">All</option>
-					<option value="pro">Pro</option>
-					<option value="con">Con</option>
-					<option value="finding">Finding</option>
-					<option value="discarded">Discarded</option>
-					<option value="undecided">Undecided</option>
-				</select>
-			</div>
-			<div class="field">
-				<label>Theme</label>
-				<select class="ui theme dropdown">
-					<option value="all">All</option>
-					{% for theme in themes %}<option value="{{ theme.id }}">{{ theme.name }}</option>{% endfor %}
-					<option value="undecided">Undecided</option>
-				</select>
-			</div>
-		</div>
-	</div>
+
 	{% if claims %}{% for claim in claims %}
 	{% if claim.is_merged %}
 	<div class="ui attached claim segment accordion" data-id="{{ claim.id }}">
 		<div class="title"><i class="dropdown icon"></i>This claim has been merged -- click to show.</div>
 		<div class="content">
 	{% else %}
-	<div class="ui attached segment claim" data-id="{{ claim.id }}">
+	<div class="ui attached segment claim {% if not claim.published %}private{% endif %}" data-id="{{ claim.id }}">
 	{% endif %}
 		<a class="ui right teal corner merge label" title="Flagged as to be merged -- click to remove flag" style="display:none">
 	    	<i class="plus square outline icon"></i>
 	    </a>
-		{% if not claim.published %}
-		<div class="ui warning message" style="margin-top:0">This claim is unpublished and only visible to you</div>
-		{% endif %}
 		<div class="content">
 			{% if claim.collective %}<a class="ui teal right ribbon label">Collective</a>{% endif %}
 			<div class="claim-content">
@@ -102,7 +53,7 @@
 				{% endif %}
 			</div>
 		</div>
-		<div class="ui red small claim menu" data-id="{{ claim.id }}">
+		<div class="ui red small secondary claim menu" data-id="{{ claim.id }}">
 		{% if claim.published %}
 			<a class="item claim-vote-btn {{ settings.prioritize_btn }}" data-action="prioritize"><i class="thumbs outline up icon"></i><span></span></a>
 			<a class="item claim-vote-btn {{ settings.vote_btn }}" data-action="pro"><i class="plus icon"></i><span></span></a>
@@ -132,6 +83,7 @@
 				<a class="item claim-fullscreen-btn" title="Show in full screen"><i class="maximize icon"></i></a>
 			</div>
 		{% else %}
+            <div class="red active item" title="This claim is unpublished and only visible to you">Private</div>
 			<a class="item claim-edit-btn"><i class="edit icon"></i>Edit</a>
 			<a class="item claim-delete-btn"><i class="delete icon"></i>Delete</a>
 			<div class="right menu">

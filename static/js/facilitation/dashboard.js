@@ -3,7 +3,7 @@ define([
 ], function() {
 	var module = {};
 	module.initLayout = function() {
-		$('.tabular.menu > .container > .item').tab();
+		$('#nav-menu > .item').tab();
 	};
 
 	module.initLayout();

@@ -1,28 +1,26 @@
 {% extends 'base.html' %}
 {% block header %}
 <div class="ui fixed inverted main menu">
-	<div class="container">
-		<div class="title item">GeoDeliberator</div>
-		<div id="header-visitor-wrapper" class="right menu" style="display:inline-block">
-			<div class="item">
-				<div id="login-btn" class="ui button">Log in</div>
-			</div>
-			<div class="item">
-				<div id="signup-btn" class="ui button">Sign up</div>
-			</div>
-		</div>
-		<div id="header-member-wrapper" class="right menu" style="display:inline-block">
-			<a href="#" class="item"><i class="mail icon"></i>Messages</a>
-			<div class="ui dropdown simple item" tabindex="0">
-				<span id="header-user-name" data-id="{{ user_id }}">{{ user_name }}</span>
-				<i class="icon dropdown" tabindex="0"></i>
-				<div class="menu" tabindex="-1">
-					<a href="#" id="edit-profile-btn" class="item"><i class="edit icon"></i>Edit Profile</a>
-					<a href="#" id="sign-out-btn" class="item"><i class="sign out icon"></i>Sign out</a>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="title item">GeoDeliberator</div>
+    <div id="header-visitor-wrapper" class="right menu" style="display:flex">
+        <div class="item">
+            <div id="login-btn" class="ui button">Log in</div>
+        </div>
+        <div class="item">
+            <div id="signup-btn" class="ui button">Sign up</div>
+        </div>
+    </div>
+    <div id="header-member-wrapper" class="right menu" style="display:flex">
+        <a href="#" class="item"><i class="mail icon"></i>Messages</a>
+        <div class="ui dropdown simple item" tabindex="0">
+            <span id="header-user-name" data-id="{{ user_id }}">{{ user_name }}</span>
+            <i class="icon dropdown" tabindex="0"></i>
+            <div class="menu" tabindex="-1">
+                <a href="#" id="edit-profile-btn" class="item"><i class="edit icon"></i>Edit Profile</a>
+                <a href="#" id="sign-out-btn" class="item"><i class="sign out icon"></i>Sign out</a>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 {% block body %}

@@ -50,21 +50,22 @@ define([
 				$form_dlg.find('.menu .item').tab();
 				$form_dlg.modal('show');
 				$form_profile.form({
-					first_name: {
-						identifier: 'first-name',
-						rules: [{
-							type: 'empty',
-							prompt: 'Please enter your first name'
-						}]
+					fields: {
+						first_name: {
+							identifier: 'first-name',
+							rules: [{
+								type: 'empty',
+								prompt: 'Please enter your first name'
+							}]
+						},
+						last_name: {
+							identifier: 'last-name',
+							rules: [{
+								type: 'empty',
+								prompt: 'Please enter your last name'
+							}]
+						}
 					},
-					last_name: {
-						identifier: 'last-name',
-						rules: [{
-							type: 'empty',
-							prompt: 'Please enter your last name'
-						}]
-					}
-				}, {
 					onSuccess: function(e) {
 						e.preventDefault();
 						$('#edit-profile-submit-btn').addClass('loading');
@@ -89,27 +90,28 @@ define([
 					}
 				});
 				$form_password.form({
-					old_password: {
-						identifier: 'old_password',
-						rules: [{
-							type: 'empty',
-							prompt: 'Please enter a password'
-						}]
+					fields: {
+						old_password: {
+							identifier: 'old_password',
+							rules: [{
+								type: 'empty',
+								prompt: 'Please enter a password'
+							}]
+						},
+						new_password: {
+							identifier: 'new_password',
+							rules: [{
+								type: 'empty',
+								prompt: 'Please enter a password'
+							}, {
+								type: 'length[6]',
+								prompt: 'Your password must be at least 6 characters'
+							}, {
+								type: 'match[confirm_password]',
+								prompt: 'Password and confirmation should be equal'
+							}]
+						}
 					},
-					new_password: {
-						identifier: 'new_password',
-						rules: [{
-							type: 'empty',
-							prompt: 'Please enter a password'
-						}, {
-							type: 'length[6]',
-							prompt: 'Your password must be at least 6 characters'
-						}, {
-							type: 'match[confirm_password]',
-							prompt: 'Password and confirmation should be equal'
-						}]
-					},
-				}, {
 					onSuccess: function(e) {
 						e.preventDefault();
 						$('#edit-profile-submit-btn').addClass('loading');
@@ -134,21 +136,22 @@ define([
 			});
 
 			$('#sign-in-form form').form({
-				email: {
-					identifier: 'email',
-					rules: [{
-						type: 'email',
-						prompt: 'Please enter a valid email address'
-					}]
+				fields: {
+					email: {
+						identifier: 'email',
+						rules: [{
+							type: 'email',
+							prompt: 'Please enter a valid email address'
+						}]
+					},
+					password: {
+						identifier: 'password',
+						rules: [{
+							type: 'empty',
+							prompt: 'Please enter a password'
+						}]
+					}
 				},
-				password: {
-					identifier: 'password',
-					rules: [{
-						type: 'empty',
-						prompt: 'Please enter a password'
-					}]
-				},
-			}, {
 				onSuccess: function(e) {
 					e.preventDefault();
 					$('#sign-in-btn').addClass('loading');
@@ -181,38 +184,39 @@ define([
 				}
 			});
 			$('#sign-up-form form').form({
-				first_name: {
-					identifier: 'first-name',
-					rules: [{
-						type: 'empty',
-						prompt: 'Please enter your first name'
-					}]
+				fields: {
+					first_name: {
+						identifier: 'first-name',
+						rules: [{
+							type: 'empty',
+							prompt: 'Please enter your first name'
+						}]
+					},
+					last_name: {
+						identifier: 'last-name',
+						rules: [{
+							type: 'empty',
+							prompt: 'Please enter your last name'
+						}]
+					},
+					email: {
+						identifier: 'email',
+						rules: [{
+							type: 'email',
+							prompt: 'Please enter a valid email address'
+						}]
+					},
+					password: {
+						identifier: 'password',
+						rules: [{
+							type: 'empty',
+							prompt: 'Please enter a password'
+						}, {
+							type: 'length[6]',
+							prompt: 'Your password must be at least 6 characters'
+						}]
+					}
 				},
-				last_name: {
-					identifier: 'last-name',
-					rules: [{
-						type: 'empty',
-						prompt: 'Please enter your last name'
-					}]
-				},
-				email: {
-					identifier: 'email',
-					rules: [{
-						type: 'email',
-						prompt: 'Please enter a valid email address'
-					}]
-				},
-				password: {
-					identifier: 'password',
-					rules: [{
-						type: 'empty',
-						prompt: 'Please enter a password'
-					}, {
-						type: 'length[6]',
-						prompt: 'Your password must be at least 6 characters'
-					}]
-				},
-			}, {
 				onSuccess: function(e) {
 					e.preventDefault();
 					$('#register-btn').addClass('loading');
