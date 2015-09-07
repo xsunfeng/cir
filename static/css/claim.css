@@ -1,3 +1,6 @@
+.ui.secondary.menu .dropdown.item > .menu {
+    margin-top: 0!important;
+}
 .claim-content {
 	font-size: 1.5em;
     line-height: 1.5em;
@@ -83,16 +86,16 @@ a.claim-vote-btn.unready:hover {
 }
 #claim-navigator {
 	position: fixed;
-	top: 2.5em;
+	top: 3em;
 	bottom: 3em;
-	padding: 0;
+	padding: 1em 0 0 1em;
 	right: 1em;
+    overflow: auto;
 }
 #claim-navigator .vertical.menu {
 	width: 100%;
-	height: 100%;
-	overflow-y: auto;
 	overflow-x: hidden;
+    margin: 1em 0 0 0;
 }
 #claim-navigator .vertical.menu .claim.item {
 	white-space: nowrap;

@@ -28,16 +28,17 @@ def api_get_claim(request):
             claims = claims.filter(claim_category=category)
     theme = request.REQUEST.get('theme')
     if theme:
-        context['theme'] = ClaimTheme.objects.get(id=theme).name
-        if theme == 'undecided':
+        if theme == '-1':
             claims = claims.filter(theme__isnull=True)
+            context['theme'] = 'Undecided'
         else:
+            context['theme'] = ClaimTheme.objects.get(id=theme).name
             claims = claims.filter(theme_id=theme)
     context['claims'] = []
     context['claims_cnt'] = 0
+    context['themes'] = [theme.getAttr() for theme in ClaimTheme.objects.filter(forum=forum)]
     if action == 'get-claim':
         display_type = request.REQUEST.get('display_type')
-        context['themes'] = [theme.getAttr() for theme in ClaimTheme.objects.filter(forum=forum)]
         if display_type == 'overview':
             for claim in claims:
                 context['claims_cnt'] += 1
@@ -45,13 +46,19 @@ def api_get_claim(request):
             context['claims'] = sorted(context['claims'], key=lambda c: c['updated_at_full'], reverse=True)
             response['html'] = render_to_string("claim-overview.html", context)
         elif display_type == 'fullscreen':
-            claim_id = request.REQUEST.get('claim_id')
-            if claim_id:  # claim_id is known
-                context['claim'] = Claim.objects.get(id=claim_id).getAttr(forum)
-            else:  # just clicked "full-screen review"
-                if len(claims):
-                    context['claim'] = claims[0].getAttr(forum)
-                    response['claim_id'] = context['claim']['id']
+            # if no claims available, just leave context['claim'] and response['claim_id'] undefined.
+            if len(claims) != 0:
+                claim_return = claims.reverse()[0]
+                old_claim_id = request.REQUEST.get('claim_id')
+                # the specified claim may not exist in the current filtered set.
+                # if this is the case, return the first claim in the current filtered set.
+                if old_claim_id:
+                    for claim in claims:
+                        if claim.id == int(old_claim_id):
+                            claim_return = claim
+                            break
+                context['claim'] = claim_return.getAttr(forum)
+                response['claim_id'] = claim_return.id
             response['html'] = render_to_string("claim-fullscreen.html", context)
     if action == 'navigator':
         for claim in claims:

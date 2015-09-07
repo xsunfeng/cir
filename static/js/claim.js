@@ -1,6 +1,8 @@
 define([
+	'claim-navigator',
 	'utils'
 ], function(
+	ClaimNavigator,
 	Utils
 ) {
 	var module = {};
@@ -106,8 +108,6 @@ define([
 		}).on('click', '.claim-back-to-list-btn', function() {
 			var id = $(this).parents('.claim.menu').attr('data-id');
 			module.jumpTo(id, 'overview');
-		}).on('click', '#claim-toggle-filter-btn', function() {
-			$('#claim-filter-pane').transition('slide down', '500ms');
 		}).on('click', '.claim-edit-btn', function() {
 			// only for unpublished claims
 			// just enter fullscreen
@@ -180,7 +180,7 @@ define([
 					claim_id: id,
 				},
 				success: function(xhr) {
-					$('#claim-navigator .item[data-id="' + id + '"]').remove();
+					ClaimNavigator.removeItem(id);
 					if (module.display_type == 'overview') {
 						$('#claim-pane .claim.segment[data-id="' + id + '"]').remove();
 					} else {
@@ -366,7 +366,7 @@ define([
 				success: function(xhr) {
 					// must be in overview now.
 					module.updateClaimPane();
-					module.updateNavigator();
+					ClaimNavigator.updateNavigator({'claim_only': true});
 					$('#claim-merge-editor').modal('hide');
 					$('#claim-merge-editor .claim-content').text('');
 					$('#claim-merge-editor input').val('');
@@ -384,12 +384,7 @@ define([
 			$('#claim-merge-editor input').val('');
 			$('#claim-merge-editor textarea').val('');
 		});
-		$('#claim-navigator').on('click', '.claim.item', function() {
-			var claim_id = this.getAttribute('data-id');
-			module.jumpTo(claim_id); // without changing display_type
-		}).on('click', '.refresh.item', function() {
-			module.updateNavigator();
-		});
+
 
 		// dynamic event listeners
 		$('.claim-view-btn').click(function() {
@@ -404,7 +399,7 @@ define([
 	function highlightClaims(claim_ids) {
 		$('#claim-pane .claim.segment .claim-content').removeClass('highlight-found');
 		$('#claim-pane .claim.segment.accordion').removeClass('highlight-found');
-		$('#claim-navigator .item').removeClass('highlight-found');
+		ClaimNavigator.highlight(claim_ids);
 		for (var i = 0; i < claim_ids.length; i++) {
 			if (this.display_type == 'overview') {
 				if ($('#claim-pane .claim.segment[data-id="' + claim_ids[i] + '"]').hasClass('accordion')) {
@@ -413,7 +408,6 @@ define([
 					$('#claim-pane .claim.segment[data-id="' + claim_ids[i] + '"] .claim-content').addClass('highlight-found');
 				}
 			}
-			$('#claim-navigator .item[data-id="' + claim_ids[i] + '"]').addClass('highlight-found');
 		}
 	}
 
@@ -494,9 +488,14 @@ define([
 		module.display_type = display_type;
 	}
 
+	/**
+	 * Jump to a specific claim.
+	 * @param claim_id Destination claim.
+	 * @param display_type (optional) If specified, switch to specified display type first.
+	 */
 	module.jumpTo = function(claim_id, display_type) {
 		$('#claim-pane .claim.segment .claim-content').removeClass('highlight-found');
-		$('#claim-navigator .item').removeClass('highlight-found');
+		ClaimNavigator.highlight();
 		if (typeof display_type != 'undefined') {
 			// change display type and update pane
 			_setDisplayType(display_type);
@@ -539,7 +538,7 @@ define([
 	module.updateClaimPane = function(callback) {
 		$('#claim-pane > .segment').addClass('loading'); // for fullscreen view
 		$('#claim-pane > .segments').css('opacity', '0.5'); // for overview
-		$('#claim-navigator a.item').removeClass('active');
+		ClaimNavigator.setActive();
 		if (module.flagLoader) {
 			module.flagLoader.abort();
 		}
@@ -553,8 +552,8 @@ define([
 				'action': 'get-claim',
 				'display_type': module.display_type,
 				'claim_id': module.claim_id, // used only when display_type == 'fullscreen'
-				'category': module.category,
-				'theme': module.theme,
+				'category': ClaimNavigator.currentCategory,
+				'theme': ClaimNavigator.currentTheme,
 			},
 			success: function(xhr) {
 				$('#claim-pane').html(xhr.html);
@@ -562,8 +561,7 @@ define([
 
 				if (module.display_type == 'fullscreen') {
 					if (xhr.claim_id) module.claim_id = xhr.claim_id; // undefined if no claim exists
-					$('#claim-navigator a.item[data-id="' + module.claim_id + '"]').addClass('active');
-					// TODO scroll to the current claim in the navigator
+					ClaimNavigator.setActive(module.claim_id);
 
 					if ($('#claim-pane textarea.claim.editor').length) { // this is unpublished!
 						$('#claim-pane textarea.claim.editor').focus();
@@ -592,35 +590,6 @@ define([
 						});
 					}
 				} else if (module.display_type == 'overview') {
-					// initialize filters
-					$('#claim-pane .ui.category.dropdown').dropdown({
-						action: function(text, value) {
-							if (value == 'all') {
-								delete module.category;
-							} else {
-								module.category = value;
-							}
-							module.updateClaimPane();
-							module.updateNavigator();
-							delete module.claim_id;
-						}
-					});
-					if ('category' in module) $('#claim-pane .ui.category.dropdown').dropdown('set selected', module.category)
-					$('#claim-pane .ui.theme.dropdown').dropdown({
-						action: function(text, value) {
-							if (value == 'all') {
-								delete module.theme;
-							} else {
-								module.theme = value;
-							}
-							module.updateClaimPane();
-							module.updateNavigator();
-							delete module.claim_id;
-						}
-					});
-					if ('theme' in module) $('#claim-pane .ui.theme.dropdown').dropdown('set selected', module.theme)
-					// $('#claim-pane .merge.corner.label').popup();
-					// $('#claim-pane .merge.control').popup();
 					$('#claim-pane .ui.accordion').accordion({'close nested': false});
 				}
 				// initialize menu/button popups
@@ -715,7 +684,7 @@ define([
 				}
 			}
 		});
-	};
+	}
 
 	function _updateVotingMenu($menu, vote_data) {
 		$menu.find('.claim-vote-btn').each(function() {
@@ -753,30 +722,7 @@ define([
 			}
 			$(this).removeClass('unready');
 		});
-	};
-
-	module.updateNavigator = function() {
-		$('#claim-navigator').css('opacity', '0.5');
-		$.ajax({
-			url: '/api_get_claim/',
-			type: 'post',
-			data: {
-				'action': 'navigator',
-				'category': module.category,
-				'theme': module.theme,
-			},
-			success: function(xhr) {
-				$('#claim-navigator').css('opacity', '1.0');
-				$('#claim-navigator').html(xhr.html);
-			},
-			error: function(xhr) {
-				$('#claim-navigator').css('opacity', '1.0');
-				if (xhr.status == 403) {
-					Utils.notify('error', xhr.responseText);
-				}
-			}
-		});
-	};
+	}
 
 	return module;
 });

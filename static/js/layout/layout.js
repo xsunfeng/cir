@@ -1,9 +1,11 @@
 define([
 	'document',
-	'claim'
+	'claim',
+	'claim-navigator'
 ], function(
 	DocumentView,
-	ClaimView
+	ClaimView,
+	ClaimNavigator
 ) {
 	var module = {
 		changeTab: function(dest, callback) {
@@ -30,7 +32,7 @@ define([
 	initLayout();
 	DocumentView.updateCategories();
 	ClaimView.updateClaimPane();
-	ClaimView.updateNavigator();
+	ClaimNavigator.updateNavigator();
 	return module;
 });
 
