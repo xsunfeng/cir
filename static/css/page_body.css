@@ -70,3 +70,10 @@ a.user {
 #header-facilitator-wrapper .switch.user.menu .item {
   padding: 5px 10px!important;
 }
+.doc-content img {
+}
+iframe[src^="//www.youtube.com"] {
+
+    width: 100%;
+    height: 100%;
+}

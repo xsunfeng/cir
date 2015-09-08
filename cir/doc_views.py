@@ -38,13 +38,15 @@ def api_doc(request):
         doc_id = request.REQUEST.get('doc_id')
         try:
             doc = Doc.objects.get(id=doc_id)
-            ordered_sections = doc.sections.filter(order__isnull=False).order_by('order')
-            unordered_sections = doc.sections.filter(order__isnull=True).order_by('updated_at')
             context = {}
             context['forum_phase'] = forum.phase
             context['title'] = doc.title
             context['sections'] = []
-            for section in ordered_sections | unordered_sections:
+            ordered_sections = doc.sections.filter(order__isnull=False).order_by('order')
+            for section in ordered_sections:
+                context['sections'].append(section.getAttr(forum))
+            unordered_sections = doc.sections.filter(order__isnull=True).order_by('updated_at')
+            for section in unordered_sections:
                 context['sections'].append(section.getAttr(forum))
             response['html'] = render_to_string("doc-content.html", context)
             return HttpResponse(json.dumps(response), mimetype='application/json')

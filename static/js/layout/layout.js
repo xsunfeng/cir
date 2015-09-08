@@ -1,7 +1,8 @@
 define([
 	'document',
 	'claim',
-	'claim-navigator'
+	'claim-navigator',
+	'semantic-ui'
 ], function(
 	DocumentView,
 	ClaimView,

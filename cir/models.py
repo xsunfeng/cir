@@ -19,6 +19,7 @@ class Forum(models.Model):
     PHASE_CHOICES = (
         ('paused', 'Paused'),
         ('not_started', 'Not started'),
+        ('tagging', 'Tagging'),
         ('extract', 'Claim extraction'),
         ('categorize', 'Claim categorization'),
         ('theming', 'Claim theme identification'),
@@ -177,6 +178,16 @@ class DocSection(Entry):
     def __str__(self):  # used for admin site
         return str(self.id) + ' ' + self.title
 
+    def getAttrAdmin(self):
+        attr = {}
+        attr['id'] = self.id
+        attr['title'] = self.title
+        attr['author_name'] = self.author.get_full_name()
+        attr['content'] = self.content
+        attr['updated_at'] = utils.pretty_date(self.updated_at)
+        attr['updated_at_full'] = self.updated_at
+        attr['order'] = self.order
+        return attr
     def getAttr(self, forum):
         attr = {}
         attr['id'] = self.id
@@ -213,9 +224,6 @@ class Highlight(models.Model):
 class ClaimTheme(models.Model):
     forum = models.ForeignKey(Forum)
     name = models.CharField(max_length=100)
-    proposer = models.ForeignKey(User)
-    created_at = models.DateTimeField()
-    published = models.BooleanField(default=True)
 
     def getAttr(self):
         attr = {}

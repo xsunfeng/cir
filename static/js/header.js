@@ -1,6 +1,8 @@
 define([
+	'jquery',
 	'cir',
 ], function(
+	$,
 	CIR
 ) {
 	var module = {

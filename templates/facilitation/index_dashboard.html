@@ -3,12 +3,11 @@
 {% load compressed %}
 {% block extralib %}
     <script>
-        (function($) {
-            require([
-                'facilitation/dashboard'
-            ]);
-        })(jQuery);
+        require([
+            'facilitation/dashboard'
+        ]);
     </script>
+    <script src="//cdn.ckeditor.com/4.5.3/standard/ckeditor.js"></script>
 {% endblock %}
 {% block delaylib %}
 {% endblock %}
@@ -24,6 +23,7 @@
     <a href="#" class="red item active" data-tab="overview-tab">Overview</a>
     <a href="#" class="red item" data-tab="forum-tab">Forum</a>
     <a href="#" class="red item" data-tab="users-tab">Users</a>
+    <a href="#" class="red item" data-tab="document-tab">Documents</a>
     <a href="#" class="red item" data-tab="messages-tab">Messages</a>
     <a href="#" class="red item" data-tab="log-tab">Access log</a>
     {% endif %}
@@ -60,7 +60,7 @@
 	<div class="ui main tab active" data-tab="overview-tab">
 		<div class="ui centered grid">
 			<div class="sixteen wide column">
-				<h3>Forum activities</h3>
+				<h3>Forum activities -- mockup</h3>
 				<div class="ui segment" style="padding:0">
 					<iframe src="http://code.shutterstock.com/rickshaw/examples/multi.html" style="border:none;width:100%;height:800px"></iframe>
 				</div>
@@ -144,19 +144,22 @@
 	</div>
 	<div class="ui main tab" data-tab="users-tab">
 		<div class="ui grid">
-			<div class="ten wide column">Please select a document from the list.</div>
+			<div class="ten wide column">Under construction.</div>
 			<div class="six wide column"></div>
 		</div>
 	</div>
+    <div class="ui main tab" data-tab="document-tab">
+        <div class="ui loading segment" style="min-height:10em"></div>
+    </div>
 	<div class="ui main tab" data-tab="messages-tab">
 		<div class="ui grid">
-			<div class="ten wide column">Please select a document from the list.</div>
+			<div class="ten wide column">Under construction.</div>
 			<div class="six wide column"></div>
 		</div>
 	</div>
 	<div class="ui main tab" data-tab="log-tab">
 		<div class="ui grid">
-			<div class="ten wide column">Please select a document from the list.</div>
+			<div class="ten wide column">Under construction.</div>
 			<div class="six wide column"></div>
 		</div>
 	</div>

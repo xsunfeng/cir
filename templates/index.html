@@ -3,9 +3,9 @@
 {% load compressed %}
 {% block extralib %}
     <script>
-            require([
-                'layout/layout'
-            ]);
+        require([
+            'layout/layout'
+        ]);
     </script>
 {% endblock %}
 {% block delaylib %}
@@ -46,7 +46,7 @@
         </div>
     </div>
     <div id="header-facilitator-wrapper" class="right menu" style="display:flex">
-        <a href="{{ forum_url }}/dashboard" class="item">
+        <a href="{{ forum_url }}/dashboard" target="_blank" class="item">
             <i class="icon dashboard"></i>
         </a>
         <div class="ui simple dropdown item" tabindex="0">
@@ -126,7 +126,6 @@
 		<div class="ten wide column" style="padding-top:0">
 			<div id="document-pane" class="ui segment">Please select a document from the list.</div>
 		</div>
-		<div class="six wide column"></div>
 	</div>
 	<div id="doc-highlight-toolbar">
 	{% if settings.phase == 'extract' %}

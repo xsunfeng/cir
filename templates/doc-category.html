@@ -11,11 +11,11 @@
                     <div class="list">
                     {% for doc in folder.docs %}
                         <div class="item">
-                            <i class="right triangle icon"></i>
+                            <i class="file text outline big icon"></i>
                             <div class="content">
                                 <a class="header open-doc" data-id="{{ doc.id }}">{{ doc.title }}</a>
                                 <div class="description">{{ doc.description }} ({{ doc.num_sections }} sections)</div>
-                                <div class="ui label"><i class="calendar icon"></i>updated <abbr title="{{ doc.updated_at_full }}">{{ doc.updated_at }}</abbr></div>
+                                {% if doc.num_sections %}<div class="ui label"><i class="calendar icon"></i>updated <abbr title="{{ doc.updated_at_full }}">{{ doc.updated_at }}</abbr></div>{% endif %}
                             </div>
                         </div>
                     {% endfor %}
@@ -28,10 +28,14 @@
                 <span class="ui top aligned avatar image"><i class="ui file text outline big icon"></i></span>
                 <div class="content">
                     <a class="header open-doc" data-id="{{ root_doc.id }}">{{ root_doc.title }}</a>
-                    <div class="description">{{ root_doc.description }} ({{ root_doc.num_sections }} sections, updated {{ root_doc.updated_at }})</div>
+                    <div class="description">{{ root_doc.description }} ({{ root_doc.num_sections }} sections)</div>
+                    {% if root_doc.num_sections %}<div class="ui label"><i class="calendar icon"></i>updated <abbr title="{{ root_doc.updated_at_full }}">{{ root_doc.updated_at }}</abbr></div>{% endif %}
                 </div>
             </div>
         {% endfor %}
+        {% if not folders and not root_docs %}
+            <div class="item">No document for now.</div>
+        {% endif %}
         </div>
     </div>
 </div>

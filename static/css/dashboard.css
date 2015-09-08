@@ -1,0 +1,35 @@
+#doc-content {
+    overflow: auto;
+}
+#doc-content .section-title {
+    cursor: move;
+}
+#doc-content .section-title:hover {
+    background-color: #f0f8ff;
+}
+#doc-content .sortable-placeholder {
+    background-color: #a9d5de;
+    height: 10em;
+}
+#doc-content .section.ui-sortable-helper {
+    height: 10em;
+}
+#doc-content .delete-item,
+#doc-content .edit-folder,
+#doc-content .edit-doc,
+#doc-content .edit-docsection {
+    cursor: pointer;
+}
+#doc-content .section.shortened {
+    overflow: hidden;
+    max-height: 10em;
+}
+#doc-content .section.shortened:after {
+    content: "";
+    height: 5em;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0), white);
+}

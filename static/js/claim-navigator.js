@@ -1,5 +1,7 @@
 define([
+	'jquery'
 ], function(
+	$
 ) {
 	var module = {};
 	module.currentCategory = null;
@@ -29,7 +31,7 @@ define([
 			success: function(xhr) {
 				if (options.claim_only) {
 					$('#claim-nav-pane').css('opacity', '1.0');
-					$('#claim-nav-pane').html($(xhr.html).filter('#claim-nav-pane'));
+					$('#claim-nav-pane').html($(xhr.html).filter('#claim-nav-pane').children());
 				} else {
 					$('#claim-navigator').css('opacity', '1.0');
 					$('#claim-navigator').html(xhr.html);

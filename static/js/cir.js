@@ -1,6 +1,9 @@
 define([
-	'utils'
+	'jquery',
+	'utils',
+	'semantic-ui'
 ], function(
+	$,
 	Utils
 ) {
 	var module = {
