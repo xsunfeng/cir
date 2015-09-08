@@ -237,14 +237,14 @@
 	</div>
 
 	<div class="ui five steps" style="position:fixed;bottom:0;left:0">
+		<div class="{% if settings.phase == 'tagging' %}active {% endif %}step">
+			<div class="title">Tag & Understand</div>
+		</div>
 		<div class="{% if settings.phase == 'extract' %}active {% endif %}step">
-			<div class="title">Extract</div>
+			<div class="title">Extract Claims</div>
 		</div>
 		<div class="{% if settings.phase == 'categorize' %}active {% endif %}step">
 			<div class="title">Categorize</div>
-		</div>
-		<div class="{% if settings.phase == 'theme' %}active {% endif %}step">
-			<div class="title">Identify Themes</div>
 		</div>
 		<div class="{% if settings.phase == 'improve' %}active {% endif %}step">
 			<div class="title">Prioritize &amp; Improve</div>

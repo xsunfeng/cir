@@ -31,7 +31,9 @@ urlpatterns = patterns('',
     url(r'^api_register_delegator/$', facilitator_views.register_delegator), # include other apps
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^password_reset/', include('password_reset.urls')),
+    url(r'^dashboard/forum/$', facilitator_views.admin_forum),
     url(r'^dashboard/docs/$', facilitator_views.admin_document),
+    url(r'^dashboard/phase/$', facilitator_views.admin_phase),
 
     # these must be put last!
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum),

@@ -42,6 +42,30 @@ def enter_dashboard(request, forum_url):
     context['phase'] = forum.phase
     return render(request, 'facilitation/index_dashboard.html', context)
 
+def admin_phase(request):
+    response = {}
+    action = request.REQUEST.get('action')
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    if action == 'change-phase':
+        phase = request.REQUEST.get('phase')
+        forum.phase = phase
+        forum.save()
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def admin_forum(request):
+    response = {}
+    action = request.REQUEST.get('action')
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    if action == 'update-forum-info':
+        forum.full_name = request.REQUEST.get('forum_name')
+        forum.url = request.REQUEST.get('forum_url')
+        forum.description = request.REQUEST.get('description')
+        forum.access_level = request.REQUEST.get('access_level')
+        forum.save()
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+
+
+
 def admin_document(request):
     response = {}
     action = request.REQUEST.get('action')
