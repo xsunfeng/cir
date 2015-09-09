@@ -19,6 +19,7 @@
     {% if load_error %}
     <div class="item">GeoDeliberator</div>
     {% else %}
+	<a href="#" class="blue item {{ settings.tag_active }}" data-tab="tag-nav-tab" id="tag-nav-tab"><i class="icon comment outline"></i>Sensemaking</a>
     <a href="#" class="blue item {{ settings.document_active }}" data-tab="document-tab"><i class="icon file text outline"></i>Documents</a>
     <a href="#" class="blue item {{ settings.claim_active }}" data-tab="claim-tab"><i class="icon comment outline"></i>Claims</a>
     {% if settings.phase == 'finished' %}
@@ -96,6 +97,11 @@
 </div>
 		{% endif %}
 	{% else %}
+
+<div class="ui main tab" data-tab="tag-nav-tab">
+	{% include 'tag-sensemaking.html' with settings=settings %}
+</div>
+
 <div class="ui main tab {{ settings.document_active }}" data-tab="document-tab">
 	<div class="ui grid">
 		<div class="sixteen wide column" style="padding-top:1em">

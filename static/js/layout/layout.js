@@ -1,9 +1,11 @@
 define([
 	'document',
-	'claim'
+	'claim',
+	'tag'
 ], function(
 	DocumentView,
-	ClaimView
+	ClaimView,
+	TagView
 ) {
 	var module = {
 		changeTab: function(dest, callback) {
@@ -26,8 +28,10 @@ define([
 		$('.ui.instructions.accordion').accordion();
 		DocumentView.initDocumentView();
 		ClaimView.initClaimView();
+		TagView.initTagView();
 	}
 	initLayout();
+	TagView.updateCategories();
 	DocumentView.updateCategories();
 	ClaimView.updateClaimPane();
 	ClaimView.updateNavigator();

@@ -1,0 +1,72 @@
+<div class="doc-container" data-id="{{ id }}">
+<h2 class="ui header doc-hader" data-id="{{ id }}">{{ title }}</h2>
+{% if sections %}
+<div class="ui grid">
+	<div class="ten wide column">
+		{% for section in sections %}
+		<div class="ui segment">
+			{% if section.title %}
+				<h3 class="ui header section-header" data-id="{{ section.id }}">{{ section.title }}</h3>
+			{% endif %}
+			<div class="ui label"><i class="calendar icon"></i>updated <abbr title="{{ section.updated_at_full }}">{{ section.updated_at }}</abbr></div>
+			<div class="section-content noselect" data-id="{{ section.id }}">{{ section.segmented_text|safe }}</div>
+		</div>
+		{% endfor %}
+	</div>
+	<div id="tag-section" class="six wide column">
+		<div class="ui segment">
+			<div class="ui form">
+			  	<div class="inline fields">
+			    	<label>How would you like to take notes (tag)?</label>
+				    <div class="field">
+				      	<div class="ui radio checkbox individual-tag-ind">
+				        	<input type="radio" name="frequency">
+				        	<label>Individually</label>
+				      	</div>
+				    </div>
+				    <div class="field">
+				      <div class="ui radio checkbox collaborate-tag-ind">
+				        <input type="radio" name="frequency">
+				        <label>Collaboratively</label>
+				      </div>
+				    </div>
+			  	</div>
+			</div>
+			<div class="ui divider"></div>
+			<div>
+				<!-- my tag -->
+				<div class="tag-my-section" data-id="{{ section.id }}">
+					<h4>My tags</h4>
+					<div class="token-input-list-feng ui labels">
+						{% for tag in myTags %}
+						<a class="tag-section-nav ui label">
+							<span>{{ tag.name }}</span>
+							<div class="detail">#</div>
+						</a>
+						{% endfor %}
+					</div>
+				</div>	
+
+				<!-- all tag -->
+				<div class="tag-all-section" data-id="{{ section.id }}" data-count-authors="{{ section.countAuthors }}">
+					<h4>Others (average)</h4>
+					<div class="token-input-list-feng ui labels">
+						{% for tag in allTags %}
+						<a class="tag-section-nav ui label"><span>{{ tag.name }}</span><div class="detail">#</div></a>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+			
+		</div>
+	</div>
+</div>
+
+	{% else %}
+	<div class="ui info message">
+	    No sections in this document.
+	</div>
+{% endif %}
+</div>
+
+{% include 'tag-thread-popup.html' with settings=settings %}

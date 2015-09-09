@@ -13,6 +13,7 @@ def home(request):  # access /
     if 'actual_user_id' in request.session:
         del request.session['actual_user_id']
     request.session['forum_id'] = -1
+    request.session['individual_tag'] = True
     if request.user.is_authenticated():
         # request.session['user_id'] = request.user.id
         context = {

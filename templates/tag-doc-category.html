@@ -1,0 +1,22 @@
+<div class="ui list">
+    {% for folder in folders %}
+    <div class="item">
+        <i class="folder icon"></i>
+        <div class="content">
+            <div class="header">{{ folder.name }}</div>
+            <div class="description">{{ folder.instructions }}</div>
+            <div class="list">
+                {% for doc in folder.docs %}
+                <div class="item">
+                    <i class="folder icon"></i>
+                    <div class="content">
+                        <a class="header open-doc" data-id="{{ doc.id }}">{{ doc.title }}</a>
+                        <div class="description">{{ doc.description }} ({{ doc.num_sections }} sections)</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>

@@ -130,6 +130,7 @@ define([
 				}
 			}
 		}).on('mousedown', '.section-content', function(e) {
+			alert("haha");
 			if ($(e.target).is('u.tk')) {
 				var $target = $(this);
 				$(window).mousemove(function(e2) {

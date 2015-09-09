@@ -213,19 +213,17 @@ class Highlight(models.Model):
 class ClaimTheme(models.Model):
     forum = models.ForeignKey(Forum)
     name = models.CharField(max_length=100)
-    proposer = models.ForeignKey(User)
-    created_at = models.DateTimeField()
-    published = models.BooleanField(default=True)
+    description = models.TextField(default='')
 
     def getAttr(self):
         attr = {}
         attr['id'] = self.id
         attr['name'] = self.name
+        attr['description'] = self.description
         return attr
 
     def __unicode__(self):
         return self.name
-
 
 class ClaimVersion(Entry):
     claim = models.ForeignKey('Claim', related_name='versions')
@@ -352,6 +350,20 @@ class Vote(Event):
         return attr
 
 
+class Tag(Highlight):
+    content = models.TextField()
+    author = models.ForeignKey(User)
+    claimTheme = models.ForeignKey(ClaimTheme, related_name="tags", null=True, blank=True)
+    def getAttr(self):
+        attr = {}
+        attr['id'] = self.id
+        attr['content'] = self.content
+        attr['end_pos'] = self.end_pos
+        attr['start_pos'] = self.start_pos
+        attr['claimTheme'] = self.claimTheme.name
+        attr['context_id'] = self.context.id
+        return attr
+
 class ThemeAssignment(Event):
     theme = models.ForeignKey(ClaimTheme)
 
@@ -360,7 +372,6 @@ class ThemeAssignment(Event):
         attr['entry_type'] = 'themeassignment'
         attr['theme_name'] = self.theme.name
         return attr
-
 
 class Post(Entry):  # in discussion
     title = models.TextField(null=True, blank=True)

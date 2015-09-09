@@ -5,6 +5,7 @@ import settings
 import user_views
 import forum_views
 import doc_views
+import tag_views
 import claim_views
 import facilitator_views
 
@@ -19,6 +20,12 @@ urlpatterns = patterns('',
     url(r'^api_logout/$', user_views.logout_view),
     url(r'^api_change_info/$', user_views.change_info),
     url(r'^api_doc/$', doc_views.api_doc),
+    url(r'^api_tag/$', tag_views.api_tag),
+    url(r'^api_tagbling/$', tag_views.api_tagbling),
+    url(r'^api_tag_input/$', tag_views.api_tag_input),
+    url(r'^api_individual_tag_toggle/$', tag_views.api_individual_tag_toggle),
+    url(r'^api_get_individual_tag/$', tag_views.api_get_individual_tag),
+
     url(r'^api_highlight/$', doc_views.api_highlight),
     url(r'^api_annotation/$', doc_views.api_annotation),
     url(r'^api_claim/$', claim_views.api_claim),
@@ -28,6 +35,7 @@ urlpatterns = patterns('',
     url(r'^api_claim_flag/$', claim_views.api_claim_flag),
     url(r'^api_get_flags/$', claim_views.api_get_flags),
 
+    url(r'^api_tag_theme/$', facilitator_views.tag_theme),
     url(r'^api_register_delegator/$', facilitator_views.register_delegator), # include other apps
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^password_reset/', include('password_reset.urls')),
