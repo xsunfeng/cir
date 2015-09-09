@@ -224,11 +224,13 @@ class Highlight(models.Model):
 class ClaimTheme(models.Model):
     forum = models.ForeignKey(Forum)
     name = models.CharField(max_length=100)
+    description = models.TextField()
 
     def getAttr(self):
         attr = {}
         attr['id'] = self.id
         attr['name'] = self.name
+        attr['discription'] = self.description
         return attr
 
     def __unicode__(self):
@@ -281,6 +283,8 @@ class Claim(Entry):
         attr['published'] = self.published
         attr['entry_type'] = 'claim'
         attr['category'] = self.claim_category
+        if self.theme:
+            attr['theme'] = self.theme.name
         if self.newer_versions:
             # is outdated!
             attr['is_merged'] = '.'.join([str(claimref.to_claim.id) for claimref in self.newer_versions.all()])

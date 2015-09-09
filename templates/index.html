@@ -19,9 +19,9 @@
     {% if load_error %}
     <div class="item">GeoDeliberator</div>
     {% else %}
-    <a href="#" class="blue item {{ settings.document_active }}" data-tab="document-tab"><i class="icon file text outline"></i>Documents</a>
-    <a href="#" class="blue item {{ settings.claim_active }}" data-tab="claim-tab"><i class="icon comment outline"></i>Claims</a>
-    {% if settings.phase == 'finished' %}
+    <a href="#" class="blue item {{ phase.document_active }}" data-tab="document-tab"><i class="icon file text outline"></i>Documents</a>
+    <a href="#" class="blue item {{ phase.claim_active }}" data-tab="claim-tab"><i class="icon comment outline"></i>Claims</a>
+    {% if phase.show_statement_link %}
     <a href="{{ forum_url }}/statement" class="item">Citizens' Statement</a>
     {% endif %}
     <div id="header-visitor-wrapper" class="right menu" style="display:flex">
@@ -96,28 +96,14 @@
 </div>
 		{% endif %}
 	{% else %}
-<div class="ui main tab {{ settings.document_active }}" data-tab="document-tab">
+<div class="ui main tab {{ phase.document_active }}" data-tab="document-tab">
 	<div class="ui grid">
 		<div class="sixteen wide column" style="padding-top:1em">
 			<div class="ui attached info message">
 				<div class="ui instructions accordion">
-					<div class="ui active title"><i class="dropdown icon"></i>Current phase: {{ settings.phase_full }}</div>
+					<div class="ui active title"><i class="dropdown icon"></i>Current phase: {{ phase.full_name }}</div>
 					<div class="active content">
-						{% if settings.phase == 'not_started' %}
-							The deliberation is not started yet. Further instructions will be updated here!
-						{% elif settings.phase == 'extract' %}
-							You'll be working on ... Please ... This process will last ...
-						{% elif settings.phase == 'categorize' %}
-							You'll be working on ... Please ... This process will last ...
-						{% elif settings.phase == 'theming' %}
-							You'll be working on ... Please ... This process will last ...
-						{% elif settings.phase == 'improve' %}
-							You'll be working on ... Please ... This process will last ...
-						{% elif settings.phase == 'finished' %}
-							The deliberation event has ended. Please view the statement.
-						{% elif settings.phase == 'paused' %}
-							The deliberation process is temporarily paused.
-						{% endif %}
+					{{ phase.instructions }}
 					</div>
 				</div>
 			</div>
@@ -128,7 +114,7 @@
 		</div>
 	</div>
 	<div id="doc-highlight-toolbar">
-	{% if settings.phase == 'extract' %}
+	{% if phase.show_highlight_toolbar %}
 		<div class="ui attached top segment blue labeled icon menu">
 			<a data-action="comment" class="item doc-anno-btn">
 			    <i class="comment icon"></i>Comment
@@ -149,15 +135,29 @@
 				<div class="ui primary button doc-anno-submit">Publish</div>
 			</form>
 			<form id="doc-claim-form" class="ui form claim" style="display:none">
-				<div class="field">
+                <div class="ui error message"></div>
+                <div class="required field">
+                    <label>Please assign a theme</label>
+                    <select class="ui fluid dropdown" name="theme">
+                    {% if themes %}
+                        <option value="">(not decided)</option>
+                    {% for theme in themes %}
+                        <option value="{{ theme.id }}">{{ theme.name }}</option>
+                    {% endfor %}
+                    {% else %}<option value="">(no theme available)</option>{% endif %}
+                    </select>
+                </div>
+				<div class="required field">
 					<div class="ui attached info message">Please reword the highlighted text to form a coherent and meaningful claim.</div>
-					<textarea></textarea>
+					<textarea name="content"></textarea>
 				</div>
-				<div class="ui checkbox nopublish-wrapper">
-					<label>Save for later</label>
-					<input type="checkbox" name="nopublish">
-				</div>
-				<div class="ui primary button doc-anno-submit">Publish</div>
+                <div class="inline field">
+                    <div class="ui checkbox">
+                        <input type="checkbox" name="nopublish">
+                        <label>Save for later</label>
+                    </div>
+                </div>
+				<div class="ui submit primary button">Publish</div>
 			</form>
 		</div>
 	{% else %}
@@ -166,30 +166,16 @@
 		</div>
 	{% endif %}
 	</div>
-	{% include 'doc-thread-popup.html' with settings=settings %}
+	{% include 'doc-thread-popup.html' with phase=phase %}
 </div>
-<div class="ui main tab {{ settings.claim_active }}" data-tab="claim-tab">
+<div class="ui main tab {{ phase.claim_active }}" data-tab="claim-tab">
 	<div class="ui grid">
 		<div class="ten wide column" style="margin-bottom: 3em">
             <div class="ui attached info message" style="margin-top:0">
                 <div class="ui instructions accordion">
-                    <div class="ui active title"><i class="dropdown icon"></i>Current phase: {{ settings.phase_full }}</div>
+                    <div class="ui active title"><i class="dropdown icon"></i>Current phase: {{ phase.full_name }}</div>
                     <div class="active content">
-                        {% if settings.phase == 'not_started' %}
-                            The deliberation is not started yet. Further instructions will be updated here!
-                        {% elif settings.phase == 'extract' %}
-                            You'll be working on ... Please ... This process will last ...
-                        {% elif settings.phase == 'categorize' %}
-                            You'll be working on ... Please ... This process will last ...
-                        {% elif settings.phase == 'theming' %}
-                            You'll be working on ... Please ... This process will last ...
-                        {% elif settings.phase == 'improve' %}
-                            You'll be working on ... Please ... This process will last ...
-                        {% elif settings.phase == 'finished' %}
-                            The deliberation event has ended. Please view the statement.
-                        {% elif settings.phase == 'paused' %}
-                            The deliberation process is temporarily paused.
-                        {% endif %}
+                        {{ phase.instructions }}
                     </div>
                 </div>
             </div>
@@ -202,7 +188,7 @@
 				</a>
 			</div>
 
-			<div id="claim-pane" class="{{ settings.phase }}">
+			<div id="claim-pane" class="{{ phase.short_name }}">
 				<div class="ui segment" style="height: 10em;"></div>
 			</div>
 		</div>
@@ -237,20 +223,20 @@
 	</div>
 
 	<div class="ui five steps" style="position:fixed;bottom:0;left:0">
-		<div class="{% if settings.phase == 'tagging' %}active {% endif %}step">
+		<div class="{% if phase.short_name == 'tagging' %}active {% endif %}step">
 			<div class="title">Tag & Understand</div>
 		</div>
-		<div class="{% if settings.phase == 'extract' %}active {% endif %}step">
+		<div class="{% if phase.short_name == 'extract' %}active {% endif %}step">
 			<div class="title">Extract Claims</div>
 		</div>
-		<div class="{% if settings.phase == 'categorize' %}active {% endif %}step">
+		<div class="{% if phase.short_name == 'categorize' %}active {% endif %}step">
 			<div class="title">Categorize</div>
 		</div>
-		<div class="{% if settings.phase == 'improve' %}active {% endif %}step">
+		<div class="{% if phase.short_name == 'improve' %}active {% endif %}step">
 			<div class="title">Prioritize &amp; Improve</div>
 		</div>
-		<div class="{% if settings.phase == 'finished' %}active {% endif %}step">
-		{% if settings.phase == 'finished' %}
+		<div class="{% if phase.short_name == 'finished' %}active {% endif %}step">
+		{% if phase.short_name == 'finished' %}
 			<a href="{{ forum_url }}/statement" class="title">Citizens' Statement</a>
 		{% else %}
 			<div class="title">Citizens' Statement</div>

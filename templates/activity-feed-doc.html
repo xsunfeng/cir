@@ -57,6 +57,7 @@
 				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
 			</div>
 			<div class="meta">
+                {% if not claim.published %}<div class="ui red label">Private</div>{% endif %}
 				<a class="doc-jumpto-claim" data-id="{{ entry.id }}">Review in full screen</a>
 			</div>
 		{% elif entry.entry_type == 'question' %}

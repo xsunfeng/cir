@@ -7,6 +7,7 @@ from django.db.models import Q
 
 from cir.models import *
 from cir.utils import pretty_date
+from cir.phase_control import PHASE_CONTROL
 
 VISITOR_ROLE = 'visitor'
 
@@ -15,7 +16,7 @@ def api_get_claim(request):
     action = request.REQUEST.get('action')
     forum = Forum.objects.get(id=request.session['forum_id'])
     context = {}
-    context['settings'] = _get_claim_settings(forum)
+    context['phase'] = PHASE_CONTROL[forum.phase]
     claims = Claim.objects.filter(forum=forum, is_deleted=False, published=True)
     if request.user.is_authenticated():
         claims = claims | Claim.objects.filter(author=request.user, forum=forum, is_deleted=False, published=False)
@@ -68,22 +69,6 @@ def api_get_claim(request):
         response['html'] = render_to_string("claim-navigator.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
-def _get_claim_settings(forum):
-    settings = {}
-    settings['forum_phase'] = forum.phase
-    settings['vote_btn'] = ''
-    settings['prioritize_btn'] = ''
-    if forum.phase == 'theming':
-        settings['vote_btn'] = 'disabled'
-    elif forum.phase == 'improve':
-        settings['vote_btn'] = 'disabled'
-    elif forum.phase == 'finished':
-        settings['vote_btn'] = 'disabled'
-        settings['prioritize_btn'] = 'disabled'
-    elif forum.phase == 'paused':
-        settings['vote_btn'] = 'disabled'
-        settings['prioritize_btn'] = 'disabled'
-    return settings
 
 def api_claim(request):
     response = {}
@@ -267,17 +252,21 @@ def _edit_claim(request):
 def _add_claim(request, highlight):  # by this point user authentication must has been checked
     private = request.REQUEST.get('nopublish')
     content = request.REQUEST.get('content')
+    theme_id = request.REQUEST.get('theme')
     now = timezone.now()
+    theme = None
+    if theme_id:
+        theme = ClaimTheme.objects.get(id=theme_id)
     if 'actual_user_id' in request.session:
         actual_author = User.objects.get(id=request.session['actual_user_id'])
     else:
         actual_author = None
     if actual_author:
         newClaim = Claim(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user,
-            created_at=now, updated_at=now, source_highlight=highlight)
+            created_at=now, updated_at=now, source_highlight=highlight, theme=theme)
     else:
         newClaim = Claim(forum_id=request.session['forum_id'], author=request.user, created_at=now, updated_at=now,
-            source_highlight=highlight)
+            source_highlight=highlight, theme=theme)
     newClaim.published = private == 'false'
     newClaim.save()
     if actual_author:

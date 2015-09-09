@@ -6,6 +6,7 @@ from django.template import RequestContext
 from django.db.models import Q
 
 from cir.models import *
+from cir.phase_control import PHASE_CONTROL
 
 VISITOR_ROLE = 'visitor'
 
@@ -41,19 +42,6 @@ def _forums(request):
         forum_infos.append(forum_info)
     return forum_infos
 
-def _get_forum_settings(forum):
-    settings = {}
-    settings['phase'] = forum.phase
-    settings['phase_full'] = forum.get_phase_display()
-    if forum.phase == 'not_started' or forum.phase == 'extract':
-        settings['document_active'] = 'active'
-        settings['claim_active'] = ''
-    else:
-        settings['document_active'] = ''
-        settings['claim_active'] = 'active'
-    # TODO add settings for "citizens statement" tab
-    return settings
-
 def enter_forum(request, forum_url):  # access /forum_name
     if 'actual_user_id' in request.session:
         del request.session['actual_user_id']
@@ -69,7 +57,7 @@ def enter_forum(request, forum_url):  # access /forum_name
     context = {}
     context['forum_name'] = forum.full_name
     context['forum_url'] = forum.url
-    context['settings'] = _get_forum_settings(forum)
+    context['phase'] = PHASE_CONTROL[forum.phase]
 
     if request.user.is_authenticated():
         context['panelists'] = []
@@ -104,6 +92,8 @@ def enter_forum(request, forum_url):  # access /forum_name
                 not request.user.is_authenticated() or not Role.objects.filter(user=request.user,
                     forum=forum).exists()):
         context['load_error'] = '403'
+    themes = ClaimTheme.objects.filter(forum=forum)
+    context['themes'] = [theme.getAttr() for theme in themes]
     return render(request, 'index.html', context)
 
 def enter_statement(request, forum_url):

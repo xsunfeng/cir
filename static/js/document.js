@@ -20,16 +20,6 @@ define([
 
 		$('#doc-thread-content').feed('init');
 
-		// element initialization
-		$('.nopublish-wrapper').checkbox({
-			onChecked: function() {
-				$(this).parent().next().text('Save');
-			},
-			onUnchecked: function() {
-				$(this).parent().next().text('Publish');
-			}
-		});
-
 		// static listeners
 		module.$content_element.click(function(e) {
 			// remove all popovers
@@ -53,46 +43,8 @@ define([
 				$('#doc-claim-form textarea').val($.trim(module.$content_element.find('.tk.highlighted').text())).focus();
 			}
 		});
-		$('.doc-anno-submit').click(function(e) {
-			var content = $(this).parents('form').find('textarea').val();
-			if ($.trim(content).length == 0) {
-				Utils.notify('error', 'Content must not be empty.');
-				return;
-			}
-			$('#doc-highlight-toolbar .button').addClass('loading');
-			var nopublish = false;
-			if ($(this).parents('form').hasClass('claim')) {
-				nopublish = $(this).parents('form').find('.nopublish-wrapper').checkbox('is checked');
-			}
-			$.ajax({
-				url: '/api_highlight/',
-				type: 'post',
-				data: $.extend({
-					action: 'create',
-					content: content,
-					nopublish: nopublish,
-				}, module.newHighlight),
-				success: function(xhr) {
-					$('#doc-highlight-toolbar').removeAttr('style');
-					$('#doc-highlight-toolbar textarea').val('');
-					$('#doc-highlight-toolbar .button').removeClass('loading');
-					$('.tk.highlighted').removeClass('highlighted')
-					highlight({
-						type: module.newHighlight.type,
-						start: module.newHighlight.start,
-						end: module.newHighlight.end,
-						context_id: module.newHighlight.contextId,
-						id: xhr.highlight_id
-					});
-				},
-				error: function(xhr) {
-					$('#doc-highlight-toolbar .button').removeClass('loading');
-					if (xhr.status == 403) {
-						Utils.notify('error', xhr.responseText);
-					}
-				}
-			});
-		});
+
+		initForms();
 		$('.doc-thread-btn').click(function(e) {
 			var action = this.getAttribute('data-action');
 			if (action == 'claim' && $('#doc-thread-content .event[data-type="claim"]').length) {
@@ -189,6 +141,59 @@ define([
 			}
 		});
 	};
+	function initForms() {
+		// element initialization
+		$('#doc-claim-form .ui.checkbox').checkbox({
+			onChecked: function() {
+				$(this).parent().parent().next().text('Save');
+			},
+			onUnchecked: function() {
+				$(this).parent().parent().next().text('Publish');
+			}
+		});
+		$('#doc-claim-form').form({
+			fields: {
+				content: {
+					identifier: 'content',
+					rules: [{
+						type: 'empty',
+						prompt: 'Content must not be empty.'
+					}]
+				}
+			},
+			onSuccess: function(e) {
+				e.preventDefault();
+				$('#doc-highlight-toolbar .button').addClass('loading');
+				$.ajax({
+					url: '/api_highlight/',
+					type: 'post',
+					data: $.extend({
+						action: 'create',
+					}, module.newHighlight, $('#doc-claim-form').form('get values')),
+					success: function(xhr) {
+						$('#doc-claim-form').form('reset');
+						$('#doc-highlight-toolbar').removeAttr('style');
+						//$('#doc-highlight-toolbar textarea').val('');
+						$('#doc-highlight-toolbar .button').removeClass('loading');
+						$('.tk.highlighted').removeClass('highlighted')
+						highlight({
+							type: module.newHighlight.type,
+							start: module.newHighlight.start,
+							end: module.newHighlight.end,
+							context_id: module.newHighlight.contextId,
+							id: xhr.highlight_id
+						});
+					},
+					error: function(xhr) {
+						$('#doc-highlight-toolbar .button').removeClass('loading');
+						if (xhr.status == 403) {
+							Utils.notify('error', xhr.responseText);
+						}
+					}
+				});
+			}
+		});
+	}
 	function updateDocument() {
 		$.ajax({
 			url: '/api_doc/',

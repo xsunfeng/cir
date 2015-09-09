@@ -17,6 +17,19 @@ class RoleAdmin(admin.ModelAdmin):
     list_display = (author_name, 'forum', 'role')
     list_filter = ('forum', )
 
+class HighlightAdmin(admin.ModelAdmin):
+    def context_type(self):
+        try:
+            DocSection.objects.get(id=self.context.id)
+            return 'DocSection'
+        except:
+            return 'Post'
+    def context_content(self):
+        try:
+            return DocSection.objects.get(id=self.context.id).title
+        except:
+            return self.context.content[:100]
+    list_display = (context_type, context_content, 'start_pos', 'end_pos')
 
 class DocAdmin(admin.ModelAdmin):
     pass
@@ -73,3 +86,4 @@ admin.site.register(ClaimTheme, ClaimThemeAdmin)
 admin.site.register(Claim, ClaimAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(ClaimVersion, ClaimVersionAdmin)
+admin.site.register(Highlight, HighlightAdmin)

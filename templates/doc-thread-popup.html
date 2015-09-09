@@ -3,7 +3,7 @@
 		<div class="header">Activities on Highlight</div>
 	</div>
 	<div id="doc-thread-content" class="ui attached segment"></div>
-	{% if settings.phase == 'extract' %}
+	{% if phase.show_highlight_toolbar %}
 	<div class="ui attached bottom segment labeled icon menu">
 		<a data-action="comment" class="item doc-thread-btn">
 		    <i class="comment icon"></i>Comment

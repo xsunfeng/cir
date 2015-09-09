@@ -1,3 +1,6 @@
+#claim-pane .hidden {
+    display: none;
+}
 .ui.secondary.menu .dropdown.item > .menu {
     margin-top: 0!important;
 }
@@ -59,30 +62,6 @@ a.claim-vote-btn.unready:hover {
 }
 #claim-pane .private.claim.segment {
     opacity: 0.6;
-}
-#claim-pane.not_started .claim.menu .claim-vote-btn {
-	display: none;
-}
-#claim-pane.extract .claim.menu .claim-vote-btn,
-#claim-pane.extract .claim.menu .dropdown.item {
-	display: none;
-}
-#claim-pane.categorize .claim.menu [data-action="prioritize"],
-#claim-pane.categorize .claim.menu .dropdown.item {
-	display: none;
-}
-#claim-pane.theming .claim.menu [data-action="prioritize"],
-#claim-pane.theming .claim.menu .flag.item,
-#claim-pane.theming .claim.menu .improve.item {
-	display: none;
-}
-#claim-pane.improve .claim.menu .theme.item {
-	display: none;
-}
-#claim-pane.not_started .claim.menu .dropdown.item,
-#claim-pane.paused .claim.menu .dropdown.item,
-#claim-pane.finished .claim.menu .dropdown.item {
-	display: none;
 }
 #claim-navigator {
 	position: fixed;
