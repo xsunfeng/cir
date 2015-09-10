@@ -18,7 +18,8 @@
 }
 .tk.p,
 .tk.q,
-.tk.c {
+.tk.c,
+.tk.t {
 	cursor: pointer;
 }
 .tk.p {

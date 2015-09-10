@@ -11,10 +11,6 @@ define([
 	module.initDocumentView = function() {
 		module.$category_element = $('#document-categories'); // static; initiate once
 		module.$content_element = $('#document-pane'); // static; initiate once
-		module.$annotation_element = $('#annotation-pane'); // static; initiate once
-
-		// module.currentFolderId = -1;
-		// module.currentDocId = -1;
 
 		// highlighting
 		module.highlightText = {};
@@ -52,8 +48,20 @@ define([
 						$('#doc-thread-popup').css('left', e.pageX).css('top', e.pageY);
 					});
 				}
+			} else if ($(this).hasClass('t')) {
+				var highlight_ids = this.getAttribute('data-hl-id').split(' ');
+				var contents = [];
+				for (var i = 0; i < module.highlightsData.length; i++) {
+					if (highlight_ids.indexOf(String(module.highlightsData[i].id)) > -1) {
+						contents.push(module.highlightsData[i].content);
+					}
+				}
+				$(this).popup({
+					content: 'Tags: ' + contents.join('; ')
+				});
 			}
 		}).on('mousedown', '.section-content', function(e) {
+			$('#doc-highlight-toolbar').removeAttr('style');
 			if ($(e.target).is('u.tk')) {
 				var $target = $(this);
 				$(window).mousemove(function(e2) {
