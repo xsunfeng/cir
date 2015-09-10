@@ -44,7 +44,10 @@ class HighlightAdmin(admin.ModelAdmin):
             return DocSection.objects.get(id=self.context.id).title
         except:
             return self.context.content[:100]
-    list_display = (context_type, highlight_type, context_content, 'start_pos', 'end_pos')
+    def forum(self):
+        return self.context.forum
+    list_display = (forum, context_type, highlight_type, 'author', context_content, 'start_pos', 'end_pos')
+    # list_filter = (forum, highlight_type)
 
 class DocAdmin(admin.ModelAdmin):
     pass
