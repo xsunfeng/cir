@@ -199,6 +199,25 @@ define([
 					delete _this.tempOrigText;
 					$(this).text('Show difference');
 				}
+			}).on('click', '.feed-adopt-claim-version', function() {
+				var $menu = $(this).parent();
+				var id = $menu.attr('data-id');
+				$.ajax({
+					url: '/api_claim_vote/',
+					type: 'post',
+					data: {
+						action: 'adopt version',
+						version_id: id,
+					},
+					success: function(xhr) {
+						ClaimView.updateClaimPane();
+					},
+					error: function(xhr) {
+						if (xhr.status == 403) {
+							Utils.notify('error', xhr.responseText);
+						}
+					}
+				});
 			}).on('click', '.comment.form div.submit', function(e) {
 				var content = _this.find('.feed-forms .comment.form textarea').val();
 				if ($.trim(content).length == 0) {

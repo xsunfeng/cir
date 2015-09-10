@@ -166,6 +166,7 @@
 			<div class="ui red secondary improve fitted menu" data-id="{{ entry.version_id }}">
 				<a class="item feed-like-claim-version" data-action="like"><i class="thumbs outline up icon"></i>Like<span></span></a>
 				<a class="item feed-diff-claim-version" data-action="diff">Show difference</a>
+				<a class="item feed-adopt-claim-version facilitator-only" data-action="adopt" style="display: none;">Adopt</a>
 			</div>
 			{% endif %}
 		{% elif entry.entry_type == 'claim old version' %}

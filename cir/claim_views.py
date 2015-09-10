@@ -544,3 +544,11 @@ def api_claim_vote(request):
                 Vote.objects.create(user=request.user, entry=claim_version, vote_type='like', created_at=timezone.now())
             response['voters'] = _get_version_votes(request.user, claim_version)
         return HttpResponse(json.dumps(response), mimetype='application/json')
+    if action == 'adopt version':
+        new_version = ClaimVersion.objects.get(id=request.REQUEST.get('version_id'))
+        current_version = new_version.claim.adopted_version()
+        current_version.is_adopted = False
+        current_version.save()
+        new_version.is_adopted = True
+        new_version.save()
+        return HttpResponse(json.dumps(response), mimetype='application/json')
