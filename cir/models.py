@@ -202,20 +202,24 @@ class Highlight(models.Model):
     start_pos = models.IntegerField()
     end_pos = models.IntegerField()
     context = models.ForeignKey(Entry, related_name='highlights')
+    author = models.ForeignKey(User)
 
     def getAttr(self):
         attr = {}
         attr['id'] = self.id
         attr['start'] = self.start_pos
         attr['end'] = self.end_pos
+        attr['author_id'] = self.author.id
         attr['context_id'] = self.context.id
-        # type of the first entry under this highlight
-        # claim has priority
-        if self.claims_of_highlight.count():
-            attr['type'] = 'claim'
-        else:
-            if not self.posts_of_highlight.count():
-                attr['type'] = 'tags'
+        try:
+            tag = Tag.objects.get(highlight_ptr=self)
+            attr['content'] = tag.content
+            attr['type'] = 'tag'
+        except:
+            # type of the first entry under this highlight
+            # claim has priority
+            if self.claims_of_highlight.count():
+                attr['type'] = 'claim'
             else:
                 attr['type'] = self.posts_of_highlight.order_by('-updated_at')[0].content_type
         return attr
@@ -230,7 +234,7 @@ class ClaimTheme(models.Model):
         attr = {}
         attr['id'] = self.id
         attr['name'] = self.name
-        attr['discription'] = self.description
+        attr['description'] = self.description
         return attr
 
     def __unicode__(self):
@@ -363,6 +367,15 @@ class Vote(Event):
             attr['reason'] = self.reason
         return attr
 
+class Tag(Highlight):
+    content = models.TextField()
+    claimTheme = models.ForeignKey(ClaimTheme, related_name="tags", null=True, blank=True)
+    def getAttr(self):
+        attr = super(Tag, self).getAttr()
+        attr['content'] = self.content
+        if self.claimTheme:
+            attr['claimTheme'] = self.claimTheme.name
+        return attr
 
 class ThemeAssignment(Event):
     theme = models.ForeignKey(ClaimTheme)

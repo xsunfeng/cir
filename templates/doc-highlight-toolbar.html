@@ -1,0 +1,69 @@
+<div id="doc-highlight-toolbar">
+	{% if phase.show_highlight_toolbar %}
+		<div class="ui attached top segment blue labeled icon menu">
+			<a data-action="comment" class="item doc-anno-btn">
+				<i class="comment icon"></i>Comment
+			</a>
+			<a data-action="question" class="item doc-anno-btn">
+				<i class="help icon"></i>Raise question
+			</a>
+			<a data-action="claim" class="item doc-anno-btn">
+				<i class="code icon"></i>Extract claim
+			</a>
+			<a data-action="tag" class="item doc-anno-btn">
+				<i class="tag icon"></i>Add tag
+			</a>
+		</div>
+		<div class="ui attached bottom segment" style="display:none">
+			<form id="doc-comment-form" class="ui form comment" style="display:none">
+				<div class="field">
+					<label><span></span> (Ctrl + Enter to publish)</label>
+					<textarea rows="2"></textarea>
+				</div>
+				<div class="ui primary button doc-anno-submit">Publish</div>
+			</form>
+			<form id="doc-claim-form" class="ui form claim" style="display:none">
+				<div class="ui error message"></div>
+				<div class="required field">
+					<label>Please assign a theme</label>
+					<select class="ui fluid dropdown" name="theme">
+						{% if themes %}
+							<option value="">(not decided)</option>
+							{% for theme in themes %}
+								<option value="{{ theme.id }}">{{ theme.name }}</option>
+							{% endfor %}
+						{% else %}<option value="">(no theme available)</option>{% endif %}
+					</select>
+				</div>
+				<div class="required field">
+					<div class="ui attached info message">Please reword the highlighted text to form a coherent and meaningful claim.</div>
+					<textarea name="content"></textarea>
+				</div>
+				<div class="inline field">
+					<div class="ui checkbox">
+						<input type="checkbox" name="nopublish">
+						<label>Save for later</label>
+					</div>
+				</div>
+				<div class="ui submit primary button">Publish</div>
+			</form>
+			<form id="doc-tag-form" class="ui form" style="display: none;">
+				<div class="ui message">
+					What is a tag?
+					Please separate two tags with a comma.
+				</div>
+				<div class="field">
+					<label>Input your tag(s)</label>
+					<select class="ui fluid search dropdown tag" multiple="">
+						<option value="">Separate tags with comma</option>
+					</select>
+				</div>
+				<div class="ui primary button">Submit</div>
+			</form>
+		</div>
+	{% else %}
+		<div class="ui warning message">
+			We are not in a claim extraction round. You can only work on existing highlights.
+		</div>
+	{% endif %}
+</div>

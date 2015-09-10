@@ -18,6 +18,21 @@ class RoleAdmin(admin.ModelAdmin):
     list_filter = ('forum', )
 
 class HighlightAdmin(admin.ModelAdmin):
+    def highlight_type(self):
+        try:
+            Tag.objects.get(highlight_ptr=self)
+            return 'tag'
+        except:
+            # type of the first entry under this highlight
+            # claim has priority
+            if self.claims_of_highlight.count():
+                return 'claim'
+            else:
+                if self.posts_of_highlight.exists():
+                    return self.posts_of_highlight.order_by('-updated_at')[0].content_type
+                else:
+                    return 'unknown'
+
     def context_type(self):
         try:
             DocSection.objects.get(id=self.context.id)
@@ -29,11 +44,13 @@ class HighlightAdmin(admin.ModelAdmin):
             return DocSection.objects.get(id=self.context.id).title
         except:
             return self.context.content[:100]
-    list_display = (context_type, context_content, 'start_pos', 'end_pos')
+    list_display = (context_type, highlight_type, context_content, 'start_pos', 'end_pos')
 
 class DocAdmin(admin.ModelAdmin):
     pass
 
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('content', 'author', 'claimTheme')
 
 class DocSectionAdmin(admin.ModelAdmin):
     pass
@@ -87,3 +104,4 @@ admin.site.register(Claim, ClaimAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(ClaimVersion, ClaimVersionAdmin)
 admin.site.register(Highlight, HighlightAdmin)
+admin.site.register(Tag, TagAdmin)

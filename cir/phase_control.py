@@ -23,6 +23,8 @@ PHASE_CONTROL = {
         'short_name': 'tagging',
         'full_name': 'Tagging',
         'instructions': 'You\'ll be working on ... Please ... This process will last ...',
+        'show_highlight_toolbar': True,
+        'document_active': 'active',
         'vote_btn': 'hidden',
         'prioritize_btn': 'hidden',
         'theming_menu': 'hidden',

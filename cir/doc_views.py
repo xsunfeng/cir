@@ -66,7 +66,7 @@ def api_highlight(request):
         context_id = request.REQUEST.get('contextId')
         # create highlight object
         context = Entry.objects.get(id=context_id)
-        highlight = Highlight(start_pos=start, end_pos=end, context=context)
+        highlight = Highlight(start_pos=start, end_pos=end, context=context, author=request.user)
         highlight.save()
         response['highlight_id'] = highlight.id
         # then create the content
@@ -96,10 +96,18 @@ def api_highlight(request):
         doc_id = request.REQUEST.get('doc_id')
         doc = Doc.objects.get(id=doc_id)
         response['highlights'] = []
+        mytags = set()
+        alltags = set()
         for section in doc.sections.all():
             highlights = section.highlights.all()
             for highlight in highlights:
-                response['highlights'].append(highlight.getAttr())
+                highlight_info = highlight.getAttr()
+                response['highlights'].append(highlight_info)
+                if highlight_info['type'] == 'tag':
+                    if highlight_info['author_id'] == request.user.id:
+                        mytags.add(highlight_info['content'])
+                    alltags.add(highlight_info['content'])
+        response['html'] = render_to_string('doc-tag-area.html', {'mytags': mytags, 'alltags': alltags})
         return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_annotation(request):

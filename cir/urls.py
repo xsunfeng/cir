@@ -7,6 +7,7 @@ import forum_views
 import doc_views
 import claim_views
 import facilitator_views
+import tag_views
 
 
 admin.autodiscover()
@@ -27,6 +28,7 @@ urlpatterns = patterns('',
     url(r'^api_claim_vote/$', claim_views.api_claim_vote),
     url(r'^api_claim_flag/$', claim_views.api_claim_flag),
     url(r'^api_get_flags/$', claim_views.api_get_flags),
+    url(r'^api_tag/$', tag_views.api_tag),
 
     url(r'^api_register_delegator/$', facilitator_views.register_delegator), # include other apps
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

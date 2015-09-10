@@ -2,6 +2,9 @@
 #document-pane {
 	font-size: 1.3rem;
 }
+#document-pane {
+    margin-bottom: 4em;
+}
 .noselect {
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
@@ -20,13 +23,15 @@
 }
 .tk.p {
 	background-color: rgba(224, 123, 83, 0.2);
-	
 }
 .tk.q {
 	background-color: rgba(217, 92, 92, 0.5);
 }
 .tk.c {
 	background-color: rgba(113, 217, 255, 0.5);
+}
+.tk.t {
+	background-color: rgba(172, 235, 117, 0.8);
 }
 .tk.highlighted { /* must be put after p, q and c */
 	background-color: #f2c61f;
@@ -62,4 +67,7 @@
 #doc-thread-content {
 	max-height: 500px;
 	overflow: auto;
+}
+#available-tags .ui.toggle.button {
+	margin-bottom: 0.75em;
 }

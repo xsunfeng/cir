@@ -109,63 +109,13 @@
 			</div>
 			<div id="document-categories" class="ui attached segment"></div>
 		</div>
-		<div class="ten wide column" style="padding-top:0">
+		<div class="ten wide document column" style="padding-top:0">
 			<div id="document-pane" class="ui segment">Please select a document from the list.</div>
+			{% include 'doc-tag-filter.html' %}
 		</div>
+
 	</div>
-	<div id="doc-highlight-toolbar">
-	{% if phase.show_highlight_toolbar %}
-		<div class="ui attached top segment blue labeled icon menu">
-			<a data-action="comment" class="item doc-anno-btn">
-			    <i class="comment icon"></i>Comment
-			</a>
-			<a data-action="question" class="item doc-anno-btn">
-			    <i class="help icon"></i>Raise question
-			</a>
-			<a data-action="claim" class="item doc-anno-btn">
-			    <i class="code icon"></i>Extract claim
-			</a>
-		</div>
-		<div class="ui attached bottom segment" style="display:none">
-			<form id="doc-comment-form" class="ui form comment" style="display:none">
-				<div class="field">
-					<label><span></span> (Ctrl + Enter to publish)</label>
-					<textarea rows="2"></textarea>
-				</div>
-				<div class="ui primary button doc-anno-submit">Publish</div>
-			</form>
-			<form id="doc-claim-form" class="ui form claim" style="display:none">
-                <div class="ui error message"></div>
-                <div class="required field">
-                    <label>Please assign a theme</label>
-                    <select class="ui fluid dropdown" name="theme">
-                    {% if themes %}
-                        <option value="">(not decided)</option>
-                    {% for theme in themes %}
-                        <option value="{{ theme.id }}">{{ theme.name }}</option>
-                    {% endfor %}
-                    {% else %}<option value="">(no theme available)</option>{% endif %}
-                    </select>
-                </div>
-				<div class="required field">
-					<div class="ui attached info message">Please reword the highlighted text to form a coherent and meaningful claim.</div>
-					<textarea name="content"></textarea>
-				</div>
-                <div class="inline field">
-                    <div class="ui checkbox">
-                        <input type="checkbox" name="nopublish">
-                        <label>Save for later</label>
-                    </div>
-                </div>
-				<div class="ui submit primary button">Publish</div>
-			</form>
-		</div>
-	{% else %}
-		<div class="ui warning message">
-			We are not in a claim extraction round. You can only work on existing highlights.
-		</div>
-	{% endif %}
-	</div>
+	{% include 'doc-highlight-toolbar.html' with phase=phase %}
 	{% include 'doc-thread-popup.html' with phase=phase %}
 </div>
 <div class="ui main tab {{ phase.claim_active }}" data-tab="claim-tab">
@@ -221,27 +171,26 @@
 			</div>
 		</div>
 	</div>
-
-	<div class="ui five steps" style="position:fixed;bottom:0;left:0">
-		<div class="{% if phase.short_name == 'tagging' %}active {% endif %}step">
-			<div class="title">Tag & Understand</div>
-		</div>
-		<div class="{% if phase.short_name == 'extract' %}active {% endif %}step">
-			<div class="title">Extract Claims</div>
-		</div>
-		<div class="{% if phase.short_name == 'categorize' %}active {% endif %}step">
-			<div class="title">Categorize</div>
-		</div>
-		<div class="{% if phase.short_name == 'improve' %}active {% endif %}step">
-			<div class="title">Prioritize &amp; Improve</div>
-		</div>
-		<div class="{% if phase.short_name == 'finished' %}active {% endif %}step">
+</div>
+<div class="ui five steps" style="position:fixed;bottom:0;left:0;margin:0">
+	<div class="{% if phase.short_name == 'tagging' %}active {% endif %}step">
+		<div class="title">Tag & Understand</div>
+	</div>
+	<div class="{% if phase.short_name == 'extract' %}active {% endif %}step">
+		<div class="title">Extract Claims</div>
+	</div>
+	<div class="{% if phase.short_name == 'categorize' %}active {% endif %}step">
+		<div class="title">Categorize</div>
+	</div>
+	<div class="{% if phase.short_name == 'improve' %}active {% endif %}step">
+		<div class="title">Prioritize &amp; Improve</div>
+	</div>
+	<div class="{% if phase.short_name == 'finished' %}active {% endif %}step">
 		{% if phase.short_name == 'finished' %}
 			<a href="{{ forum_url }}/statement" class="title">Citizens' Statement</a>
 		{% else %}
 			<div class="title">Citizens' Statement</div>
 		{% endif %}
-		</div>
 	</div>
 </div>
 	{% endif %}

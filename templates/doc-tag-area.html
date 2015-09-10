@@ -1,0 +1,12 @@
+<h4>Tags by me</h4>
+{% if mytags %}{% for tag in mytags %}
+	<button class="ui toggle basic button">{{ tag }}</button>
+{% endfor %}{% else %}
+<div class="ui disabled button">(No tags for now)</div>
+{% endif %}
+<h4>Tags from everyone</h4>
+{% if alltags %}{% for tag in alltags %}
+	<button class="ui toggle basic button">{{ tag }}</button>
+{% endfor %}{% else %}
+	<div class="ui disabled button">(No tags for now)</div>
+{% endif %}

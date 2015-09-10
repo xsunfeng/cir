@@ -1,0 +1,43 @@
+<div class="ui right rail">
+	<div class="ui sticky">
+		<div id="highlight-filter-pane" style="display: none;">
+			<h4 class="ui header">Highlights in the document</h4>
+			<div class="ui form">
+				<div class="grouped showtype fields">
+					<label for="showtype">Type</label>
+					<div class="field">
+						<div class="ui radio checkbox">
+							<input val="annotation" type="radio" name="showtype" class="hidden" />
+							<label class="tk t">Annotations</label>
+						</div>
+					</div>
+					<div class="field">
+						<div class="ui radio checkbox">
+							<input val="claim" type="radio" name="showtype" class="hidden" />
+							<label class="tk c">Claims</label>
+						</div>
+					</div>
+					<div class="field">
+						<div class="ui radio checkbox">
+							<input val="question" type="radio" name="showtype" class="hidden" />
+							<label class="tk q">Questions</label>
+						</div>
+					</div>
+					<div class="field">
+						<div class="ui radio checkbox">
+							<input val="comment" type="radio" name="showtype" class="hidden" />
+							<label class="tk p">Comments</label>
+						</div>
+					</div>
+					<div class="field">
+						<div class="ui radio checkbox none">
+							<input val="none" type="radio" name="showtype" class="hidden" />
+							<label>None</label>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="available-tags" style="display: none;"></div>
+		</div>
+	</div>
+</div>

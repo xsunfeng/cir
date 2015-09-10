@@ -2,14 +2,7 @@
   margin: 0rem 2rem;
 }
 
-#cir .main.container > .right.rail .sticky,
-#cir .main.container > .tab > .examples > .right.rail .sticky,
-#cir .main.container > .tab > .right.rail .sticky {
-  width: 300px;
-  padding: 2em 0em;
-  -webkit-transform: translate3d(0, 0, 0);
-  transform: translate3d(0, 0, 0);
-}
+
 #cir .container {
   position: relative;
   max-width: 1050px;
