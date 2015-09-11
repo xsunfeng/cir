@@ -69,6 +69,9 @@
 	max-height: 500px;
 	overflow: auto;
 }
+#available-tags {
+	margin-top: 2em;
+}
 #available-tags .ui.toggle.button {
 	margin-bottom: 0.75em;
 }

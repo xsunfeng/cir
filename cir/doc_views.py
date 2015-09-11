@@ -13,27 +13,41 @@ def api_doc(request):
     forum = Forum.objects.get(id=request.session['forum_id'])
     if action == 'get-categories':
         context = {}
-        try:
-            context['forum_name'] = forum.full_name
-            # retrieve docs in a folder
-            folders = EntryCategory.objects.filter(forum_id=request.session['forum_id'], category_type='doc')
-            context['folders'] = []
-            for folder in folders:
-                folder_info = folder.getAttr()
-                folder_info['docs'] = []
-                docs = Doc.objects.filter(folder=folder)
-                for doc in docs:
-                    folder_info['docs'].append(doc.getAttr())
-                context['folders'].append(folder_info)
-            # retrieve docs not in any folder
-            context['root_docs'] = []
-            root_docs = Doc.objects.filter(forum_id=request.session['forum_id'], folder__isnull=True)
-            for doc in root_docs:
-                context['root_docs'].append(doc.getAttr())
-            response['html'] = render_to_string("doc-category.html", context)
-            return HttpResponse(json.dumps(response), mimetype='application/json')
-        except:
-            return HttpResponse('Unknown error.', status=403)
+        # try:
+        context['forum_name'] = forum.full_name
+        # retrieve docs in a folder
+        folders = EntryCategory.objects.filter(forum_id=request.session['forum_id'], category_type='doc')
+        context['folders'] = []
+        for folder in folders:
+            folder_info = folder.getAttr()
+            folder_info['docs'] = []
+            docs = Doc.objects.filter(folder=folder)
+            for doc in docs:
+                folder_info['docs'].append(doc.getAttr())
+            context['folders'].append(folder_info)
+        # retrieve docs not in any folder
+        context['root_docs'] = []
+        root_docs = Doc.objects.filter(forum_id=request.session['forum_id'], folder__isnull=True)
+        for doc in root_docs:
+            context['root_docs'].append(doc.getAttr())
+
+        # retrieve aggregated tags
+        tags_count = {}
+        context['tags'] = []
+        all_sections = DocSection.objects.filter(forum_id=request.session['forum_id'])
+        for section in all_sections:
+            for tag in Tag.objects.filter(context=section):
+                if tag.content in tags_count:
+                    tags_count[tag.content] += 1
+                else:
+                    tags_count[tag.content] = 1
+        tags = sorted(tags_count, key=tags_count.get, reverse=True)
+        for tag in tags:
+            context['tags'].append({'content': tag, 'count': tags_count[tag]})
+        response['html'] = render_to_string("doc-category.html", context)
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+        # except:
+        #     return HttpResponse('Unknown error.', status=403)
     if action == 'get-document':
         doc_id = request.REQUEST.get('doc_id')
         try:
