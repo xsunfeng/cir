@@ -25,7 +25,7 @@ class HighlightAdmin(admin.ModelAdmin):
         except:
             # type of the first entry under this highlight
             # claim has priority
-            if self.claims_of_highlight.count():
+            if self.claims_of_highlight.exists():
                 return 'claim'
             else:
                 if self.posts_of_highlight.exists():

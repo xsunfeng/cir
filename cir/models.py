@@ -218,10 +218,13 @@ class Highlight(models.Model):
         except:
             # type of the first entry under this highlight
             # claim has priority
-            if self.claims_of_highlight.count():
+            if self.claims_of_highlight.exists():
                 attr['type'] = 'claim'
-            else:
+            elif self.posts_of_highlight.exists():
                 attr['type'] = self.posts_of_highlight.order_by('-updated_at')[0].content_type
+            else:
+                # ghost highlight with no entries attached
+                attr['type'] = None
         return attr
 
 
