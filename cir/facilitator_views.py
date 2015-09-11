@@ -1,4 +1,5 @@
 import json
+from sets import Set
 
 from django.template.loader import render_to_string
 from django.shortcuts import render
@@ -40,6 +41,28 @@ def enter_dashboard(request, forum_url):
     context['description'] = forum.description
     context['access_level'] = forum.access_level
     context['phase'] = forum.phase
+    # tag theme
+    context['tag_theme'] = {}
+    
+    context['tag_theme']['undecided'] = []
+    sections = DocSection.objects.filter(forum=forum.id)
+    undecidedTagSet = Set()
+    for section in sections:
+        tags = Tag.objects.filter(context=section, claimTheme__isnull=True)
+        for tag in tags:
+            undecidedTagSet.add(tag.content)
+    for tag in undecidedTagSet:
+        print tag
+        context['tag_theme']['undecided'].append(tag)
+    for theme in ClaimTheme.objects.filter(forum_id=request.session['forum_id']):
+        print theme.name
+        context['tag_theme'][theme.name] = []
+        tagSet = Set()
+        for tag in theme.tags.all():
+            tagSet.add(tag.content)
+        for tag in tagSet:
+            print tag
+            context['tag_theme'][theme.name].append(tag)
     return render(request, 'facilitation/index_dashboard.html', context)
 
 def admin_phase(request):
@@ -173,3 +196,26 @@ def admin_document(request):
         elif item_type == 'docsection':
             DocSection.objects.get(id=item_id).delete()
         return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def tag_theme(request):
+    print "tag_theme"
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    action = request.REQUEST.get('action')
+    print "action", action
+    if (action=="save_tag_theme_change"):
+        print "save_tag_theme_change"
+        tagThemeDic = request.REQUEST.get('tagthemedic')
+        try:
+            dic = json.loads(tagThemeDic)
+            for theme in dic:
+                if (theme!="undecided"):
+                    print "theme=", theme
+                    claimTheme, created = ClaimTheme.objects.get_or_create(forum_id=request.session['forum_id'], name=theme)
+                    for item in dic[theme]:
+                        tags = Tag.objects.filter(content=item)
+                        for tag in tags:
+                            tag.claimTheme = claimTheme
+                            tag.save()
+        except:
+            print "except"
+    return HttpResponse()

@@ -333,6 +333,7 @@ define([
 				module.$category_element.find('.ui.accordion').accordion('close', 0);
 				module.$content_element.html(xhr.html);
 				$('#highlight-filter-pane').show();
+				$('#tag-filter-pane').show();
 				$('#highlight-filter-pane .none.checkbox').checkbox('check');
 				module.$content_element.find('abbr').popup();
 				reloadHighlights();
@@ -349,7 +350,7 @@ define([
 							.css('margin-top', '70px');
 					}
 				});
-
+				$('.ui.dropdown').dropdown();
 
 			},
 			error: function(xhr) {
