@@ -5,6 +5,9 @@ from django.forms import MediaDefiningClass
 
 from models import *
 
+def user_unicode(self):
+    return  u'%s %s (%s)' % (self.first_name, self.last_name, self.email)
+User.__unicode__ = user_unicode
 
 class ForumAdmin(admin.ModelAdmin):
     list_display = ('full_name', 'url', 'access_level', 'phase')
@@ -64,6 +67,7 @@ class EntryCategoryAdmin(admin.ModelAdmin):
 
 
 class ClaimThemeAdmin(admin.ModelAdmin):
+    list_filter = ('forum', )
     pass
 
 

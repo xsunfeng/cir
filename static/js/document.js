@@ -306,6 +306,10 @@ define([
 		});
 		$('#doc-tag-form').on('click', '.primary.button', function() {
 			var tags = $('#doc-tag-form .tag.dropdown').dropdown('get values');
+			if (tags == null) {
+				notify('error', 'No tag created; please append a comma to make one.');
+				return;
+			}
 			$.ajax({
 				url: '/api_tag/',
 				type: 'post',
