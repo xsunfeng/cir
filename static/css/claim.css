@@ -1,6 +1,11 @@
 #claim-pane .hidden {
     display: none;
 }
+.claim.column > .ui.menu {
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	box-shadow: none;
+}
 .ui.secondary.menu .dropdown.item > .menu {
     margin-top: 0!important;
 }

@@ -229,7 +229,7 @@ def api_claim_activities(request):
                 attribute = claim.getAttr(forum)
                 attribute['entry_type'] = 'claim new version'
                 context['entries'].append(attribute)
-        context['entries'] = sorted(context['entries'], key=lambda entry: entry['created_at_full'])
+        context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'])
         response['html'] = render_to_string("activity-feed-claim.html", context)
         return HttpResponse(json.dumps(response), mimetype='application/json')
 
@@ -355,7 +355,7 @@ def _get_flags(request, entry, action):
             vote = entry.events.get(vote__vote_type='merge')
             entry_ids = Vote.objects.filter(user=vote.user, created_at=vote.created_at).values_list('entry__id',
                 flat=True)
-            context['merge'] = {'entry_ids': '.'.join([str(id) for id in entry_ids]),
+            context['merge'] = {'entry_ids': '.'.join([str(entry_id) for entry_id in entry_ids]),
                 'merge_person': vote.user.get_full_name(), }
             if actual_author:
                 context['merge']['i_voted'] = actual_author == vote.user

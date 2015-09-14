@@ -166,7 +166,7 @@ define([
 				});
 			}).on('click', '.feed-like-claim-version', function(e) {
 				var _that = this;
-				var $menu = $(this).parent()
+				var $menu = $(this).parent();
 				var id = $menu.attr('data-id');
 				$.ajax({
 					url: '/api_claim_vote/',

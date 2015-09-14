@@ -536,6 +536,9 @@ define([
 		}
 	};
 	module.updateClaimPane = function(callback) {
+		if (module.claimLoader) {
+			module.claimLoader.abort();
+		}
 		$('#claim-pane > .segment').addClass('loading'); // for fullscreen view
 		$('#claim-pane > .segments').css('opacity', '0.5'); // for overview
 		ClaimNavigator.setActive();
@@ -545,7 +548,7 @@ define([
 		if (module.voteLoader) {
 			module.voteLoader.abort();
 		}
-		$.ajax({
+		module.claimLoader = $.ajax({
 			url: '/api_get_claim/',
 			type: 'post',
 			data: {

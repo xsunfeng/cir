@@ -1,7 +1,4 @@
-from functools import partial
-
 from django.contrib import admin
-from django.forms import MediaDefiningClass
 
 from models import *
 
@@ -14,8 +11,8 @@ class ForumAdmin(admin.ModelAdmin):
 
 
 class RoleAdmin(admin.ModelAdmin):
-    def author_name(obj):
-        return ("%s %s" % (obj.user.first_name, obj.user.last_name))
+    def author_name(self):
+        return "%s %s" % (self.user.first_name, self.user.last_name)
 
     list_display = (author_name, 'forum', 'role')
     list_filter = ('forum', )
@@ -76,22 +73,22 @@ class ClaimVersionAdmin(admin.ModelAdmin):
 
 
 class PostAdmin(admin.ModelAdmin):
-    def author_name(obj):
-        return ("%s %s" % (obj.author.first_name, obj.author.last_name))
+    def author_name(self):
+        return "%s %s" % (self.author.first_name, self.author.last_name)
 
     list_display = ('content', author_name, 'content_type', 'highlight')
     list_filter = ('forum', 'content_type')
 
 
 class ClaimAdmin(admin.ModelAdmin):
-    def author_name(obj):
-        return ("%s %s" % (obj.author.first_name, obj.author.last_name))
+    def author_name(self):
+        return "%s %s" % (self.author.first_name, self.author.last_name)
 
-    def claim_content(obj):
-        return '<a href="../claimversion/%d">%s</a>' % (obj.adopted_version().id, obj.adopted_version().content)
+    def claim_content(self):
+        return '<a href="../claimversion/%d">%s</a>' % (self.adopted_version().id, self.adopted_version().content)
 
-    def version_author(obj):
-        return ("%s %s" % (obj.adopted_version().author.first_name, obj.adopted_version().author.last_name))
+    def version_author(self):
+        return "%s %s" % (self.adopted_version().author.first_name, self.adopted_version().author.last_name)
 
     author_name.short_description = 'Author of claim'
     claim_content.short_description = 'Content of adopted version'
