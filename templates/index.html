@@ -15,12 +15,15 @@
 {% endblock %}
 {% block header %}
 <div id="nav-menu" class="ui fixed inverted main menu">
+	<a href="javascript:;" class="item" id="document-toc-btn"><i class="icon sidebar"></i></a>
     <a href="/" class="title item">{{ forum_name }}</a>
     {% if load_error %}
     <div class="item">GeoDeliberator</div>
     {% else %}
     <a href="#" class="blue item {{ phase.document_active }}" data-tab="document-tab"><i class="icon file text outline"></i>Documents</a>
     <a href="#" class="blue item {{ phase.claim_active }}" data-tab="claim-tab"><i class="icon comment outline"></i>Claims</a>
+    <!-- workbench -->
+    <a href="#" class="blue item" data-tab="workbench-tab"><i class="icon file text outline"></i>Workbench</a>
     {% if phase.show_statement_link %}
     <a href="{{ forum_url }}/statement" class="item">Citizens' Statement</a>
     {% endif %}
@@ -71,6 +74,11 @@
 {% endblock %}
 
 {% block body %}
+<div class="ui custom sidebar inverted vertical menu" id="document-toc" style="padding-top:100px">
+</div>
+        
+<div class="pusher">
+
 <div id="popup-notification" class="ui message hidden"></div>
 	{% if load_error %}
 		{% if load_error == '404' %}
@@ -96,6 +104,15 @@
 </div>
 		{% endif %}
 	{% else %}
+
+<div class="ui main tab" data-tab="workbench-tab">
+	<div class="ui grid">
+		<div id="workbench-document" class="eight wide document column">
+		</div>
+		<div id="workbench-container" class="eight wide column"></div>
+	</div>
+</div>
+
 <div class="ui main tab {{ phase.document_active }}" data-tab="document-tab">
 	<div class="ui grid">
 		<div class="sixteen wide column" style="padding-top:1em">
@@ -194,4 +211,7 @@
 	</div>
 </div>
 	{% endif %}
+
+</div>
 {% endblock %}
+

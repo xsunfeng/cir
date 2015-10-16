@@ -1,0 +1,12 @@
+
+{% for highlight in highlights %}
+
+	<li data-hl-id = {{ highlight.id }}>
+		<span>{{ highlight.text }}</span>
+		<a href='javascript:;' class='use-nugget'>use</a> 
+		<span> | </span> 
+		<a href='javascript:;' class='source-nugget'>source</a> 
+		<span> | </span> 
+		<a href='javascript:;' class='delete-nugget'>remove</a>
+	</li>
+{% endfor %}

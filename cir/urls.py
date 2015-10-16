@@ -8,6 +8,7 @@ import doc_views
 import claim_views
 import facilitator_views
 import tag_views
+import workbench_views
 
 
 admin.autodiscover()
@@ -30,6 +31,16 @@ urlpatterns = patterns('',
     url(r'^api_get_flags/$', claim_views.api_get_flags),
     url(r'^api_tag/$', tag_views.api_tag),
     url(r'^api_tag_theme/$', facilitator_views.tag_theme),
+
+    url(r'^workbench/api_load_all_documents/$', workbench_views.api_load_all_documents),
+    url(r'^workbench/api_load_all_themes/$', workbench_views.api_load_all_themes),
+    url(r'^workbench/api_load_highlights/$', workbench_views.api_load_highlights),
+    url(r'^workbench/api_get_claim_by_theme/$', workbench_views.api_get_claim_by_theme),
+    url(r'^workbench/api_change_to_nugget/$', workbench_views.api_change_to_nugget),
+    url(r'^workbench/api_remove_nugget/$', workbench_views.api_remove_nugget),
+    url(r'^workbench/api_add_claim/$', workbench_views.api_add_claim),
+    url(r'^workbench/api_get_toc/$', workbench_views.api_get_toc),
+    url(r'^workbench/add_nugget_comment/$', workbench_views.add_nugget_comment),
 
     url(r'^api_register_delegator/$', facilitator_views.register_delegator), # include other apps
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

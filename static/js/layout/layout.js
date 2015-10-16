@@ -2,11 +2,13 @@ define([
 	'document',
 	'claim',
 	'claim-navigator',
+	'workbench',
 	'semantic-ui'
 ], function(
 	DocumentView,
 	ClaimView,
-	ClaimNavigator
+	ClaimNavigator,
+	WorkbenchView
 ) {
 	var module = {
 		changeTab: function(dest, callback) {
@@ -29,6 +31,7 @@ define([
 		$('.ui.instructions.accordion').accordion();
 		DocumentView.initDocumentView();
 		ClaimView.initClaimView();
+		WorkbenchView.initWorkbenchView();
 	}
 	initLayout();
 	DocumentView.updateCategories();

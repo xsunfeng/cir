@@ -197,37 +197,6 @@ class DocSection(Entry):
         attr['updated_at_full'] = self.updated_at
         return attr
 
-
-class Highlight(models.Model):
-    start_pos = models.IntegerField()
-    end_pos = models.IntegerField()
-    context = models.ForeignKey(Entry, related_name='highlights')
-    author = models.ForeignKey(User)
-
-    def getAttr(self):
-        attr = {}
-        attr['id'] = self.id
-        attr['start'] = self.start_pos
-        attr['end'] = self.end_pos
-        attr['author_id'] = self.author.id
-        attr['context_id'] = self.context.id
-        try:
-            tag = Tag.objects.get(highlight_ptr=self)
-            attr['content'] = tag.content
-            attr['type'] = 'tag'
-        except:
-            # type of the first entry under this highlight
-            # claim has priority
-            if self.claims_of_highlight.exists():
-                attr['type'] = 'claim'
-            elif self.posts_of_highlight.exists():
-                attr['type'] = self.posts_of_highlight.order_by('-updated_at')[0].content_type
-            else:
-                # ghost highlight with no entries attached
-                attr['type'] = None
-        return attr
-
-
 class ClaimTheme(models.Model):
     forum = models.ForeignKey(Forum)
     name = models.CharField(max_length=100)
@@ -242,6 +211,37 @@ class ClaimTheme(models.Model):
 
     def __unicode__(self):
         return self.name
+
+class Highlight(models.Model):
+    start_pos = models.IntegerField()
+    end_pos = models.IntegerField()
+    context = models.ForeignKey(Entry, related_name='highlights')
+    author = models.ForeignKey(User)
+    theme = models.ForeignKey(ClaimTheme, null=True, blank=True)
+    is_nugget = models.BooleanField(default=False)
+    text = models.TextField(null=True, blank=True)
+
+    def getAttr(self):
+        attr = {}
+        attr['id'] = self.id
+        attr['start'] = self.start_pos
+        attr['end'] = self.end_pos
+        attr['author_id'] = self.author.id
+        attr['context_id'] = self.context.id
+        attr['text'] = self.text
+        try:
+            tag = Tag.objects.get(highlight_ptr=self)
+            attr['content'] = tag.content
+            attr['type'] = 'tag'
+        except:
+            # type of the first entry under this highlight
+            # claim has priority
+            if self.posts_of_highlight.exists():
+                attr['type'] = self.posts_of_highlight.order_by('-updated_at')[0].content_type
+            else:
+                # ghost highlight with no entries attached
+                attr['type'] = 'claim'
+        return attr
 
 
 class ClaimVersion(Entry):
@@ -263,7 +263,6 @@ class ClaimVersion(Entry):
         attr['excerpt'] = self.content[:50] + '...'
         return attr
 
-
 class Claim(Entry):
     # for a Claim, its EntryCategory is not used for now -- for further extension of phases
     published = models.BooleanField(default=True)
@@ -276,7 +275,8 @@ class Claim(Entry):
     claim_category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, null=True, blank=True)
     theme = models.ForeignKey(ClaimTheme, null=True, blank=True)
     # the highlight from which this claim is extracted
-    source_highlight = models.ForeignKey(Highlight, null=True, blank=True, related_name='claims_of_highlight')
+    # source_highlight = models.ForeignKey(Highlight, null=True, blank=True, related_name='claims_of_highlight')
+    source_highlights = models.ManyToManyField(Highlight, through='HighlightClaim')
 
     def __unicode__(self):
         return self.adopted_version().content
@@ -305,7 +305,6 @@ class Claim(Entry):
         attr['id'] = self.id
         attr['published'] = self.published
         return attr
-
 
 class ClaimReference(models.Model):  # only for merging relationship!
     TYPE_CHOICES = (
@@ -420,3 +419,14 @@ class Post(Entry):  # in discussion
             attr['parent_name'] = self.target_event.user.get_full_name()
             attr['parent_id'] = self.target_event.id
         return attr
+
+class HighlightClaim(models.Model):
+    claim = models.ForeignKey(Claim)
+    highlight = models.ForeignKey(Highlight)
+
+class NuggetComment(models.Model):
+    forum = models.ForeignKey(Forum)
+    author = models.ForeignKey(User)
+    theme = models.ForeignKey(ClaimTheme, null=True, blank=True)
+    content = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField()

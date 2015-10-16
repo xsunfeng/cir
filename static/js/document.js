@@ -91,7 +91,14 @@ define([
 				var max = Math.max(module.newHighlight.start, module.newHighlight.end);
 				module.newHighlight.start = min;
 				module.newHighlight.end = max;
+
 				if ($(this).find('.tk.highlighted').length) {
+					var highlights = $(this).find('.tk.highlighted');
+					var text = "";
+					for (var i = 0; i < highlights.length; i ++) {
+						text += highlights[i].textContent;
+					};
+					module.newHighlight.text = text;
 					$('#doc-claim-form').hide();
 					$('#doc-comment-form').parent().hide();
 					$('#doc-highlight-toolbar').css('left', e.pageX).css('top', e.pageY);
@@ -113,6 +120,8 @@ define([
 				module.$category_element.html(xhr.html);
 				module.$category_element.find('.ui.accordion').accordion();
 				module.$category_element.find('abbr').popup();
+
+				$("#document-toc").html(xhr.document_toc);
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -213,6 +222,7 @@ define([
 			start: module.newHighlight.start,
 			end: module.newHighlight.end,
 			id: newHighlightId,
+			text: module.newHighlight.text,
 			type: module.newHighlight.type
 		});
 
@@ -276,6 +286,7 @@ define([
 					type: 'post',
 					data: $.extend({
 						action: 'create',
+						theme_id: $(this).find("select").val(),
 					}, module.newHighlight, $('#doc-claim-form').form('get values')),
 					success: function(xhr) {
 						afterAddHighlight(xhr.highlight_id);

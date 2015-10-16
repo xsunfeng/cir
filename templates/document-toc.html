@@ -1,0 +1,40 @@
+  {% for folder in folders %}
+      <div class="item">
+          <div class="content">
+              <div class="header">{{ folder.name }}</div>
+              <div class="list">
+              {% for doc in folder.content %}
+                  <div class="item">
+                      <div class="content">
+                          <a style="color:#FFF" class="header" data-id="{{ doc.id }}">{{ doc.name }}</a>
+                          {% for sec in doc.content %}
+                          <div class="item">
+                              <div class="content">
+                                  <a href="javascript:;" class="document-toc-sec-link" data-id="{{ sec.id }}">{{ sec.name }}</a>
+                              </div>
+                          </div>
+                          {% endfor %}
+                      </div>
+                  </div>
+              {% endfor %}
+              </div>
+          </div>
+      </div>
+  {% endfor %}
+  {% for root_doc in root_docs %}
+      <div class="item">
+          <div class="content">
+              <a style="color:#FFF" class="header" data-id="{{ doc.id }}">{{ root_doc.name }}</a>
+              {% for sec in root_doc.content %}
+              <div class="item">
+                  <div class="content">
+                      <a href="javascript:;" class="document-toc-sec-link" data-id="{{ sec.id }}">{{ sec.name }}</a>
+                  </div>
+              </div>
+              {% endfor %}
+          </div>
+      </div>
+  {% endfor %}
+  {% if not folders and not root_docs %}
+      <div class="item">No document for now.</div>
+  {% endif %}

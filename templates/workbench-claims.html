@@ -1,0 +1,79 @@
+<div class="ui segment">
+<h3>Nuggets</h3>
+<ul id="workbench-nuggets">
+{% include 'workbench-nuggets.html' %}
+</ul>
+<div class="ui styled fluid accordion">
+	<div class="title">
+		<i class="dropdown icon"></i>
+    	Disucssion
+	</div>
+	<div class="content">
+		<div class="ui form">
+		  	<div class="field">
+		    	<textarea rows="3"></textarea>
+		    	<a href="javascript:;" class="workbench-add-nugget-comment">add</a>
+		  	</div>
+		</div>
+		<ul class="workbench-nugget-comments">
+			<li>A said: A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many households across the world.</li>
+			<li>B said: A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many households across the world.</li>
+		</ul>
+  	</div>
+</div>
+</div>
+
+<div class="ui top attached tabular menu" id="workbench-tab">
+	<a class="item active" data-tab="finding">Findings</a>
+	<a class="item" data-tab="pro">Opinions (Substantiate)</a>
+	<a class="item" data-tab="con">Opinions (Refute)</a>
+</div>
+<div class="ui bottom attached tab segment active" data-tab="finding">
+	<div class="ui form">
+	  	<div class="field">
+	    	<label>Construct the finding by revealing important facts</label>
+	    	<textarea rows="5"></textarea>
+	  	</div>
+	</div>
+	<a class="workbench-add-claim" style="margin-top:0.5em">
+  		add
+	</a>
+	<ul>
+		{% for item in finding %}
+			<li><div class="workbench-claim-content"> {{ item }} </div><div><a href="javascript:;" class="workbench-edit-claim">edit</a><span></span><a href="javascript:;" class="workbench-save-claim" style="display: none;">save</a></li>
+		{% endfor %}
+	</ul>
+</div>
+<div class="ui bottom attached tab segment" data-tab="pro">
+	<div class="ui form">
+	  	<div class="field">
+	    	<label>Construct the opinion with your position, reason and corresponding facts</label>
+	    	<textarea rows="5"></textarea>
+	  	</div>
+	</div>
+	<a class="workbench-add-claim" style="margin-top:0.5em">
+  		add
+	</a>
+	<ul>
+		{% for item in pro %}
+			<li><div class="workbench-claim-content"> {{ item }} </div><div><a href="javascript:;" class="workbench-edit-claim">edit</a><span></span><a href="javascript:;" class="workbench-save-claim" style="display: none;">save</a></li>
+		{% endfor %}
+	</ul>
+</div>
+<div class="ui bottom attached tab segment" data-tab="con">
+	<div class="ui form">
+	  	<div class="field">
+	    	<label>Construct the opinion with your position, reason and corresponding facts</label>
+	    	<textarea rows="5"></textarea>
+	  	</div>
+	</div>
+	<a class="workbench-add-claim" style="margin-top:0.5em">
+  		add
+	</a>
+	<ul>
+		{% for item in con %}
+			<li><div class="workbench-claim-content"> {{ item }} </div><div><a href="javascript:;" class="workbench-edit-claim">edit</a><span></span><a href="javascript:;" class="workbench-save-claim" style="display: none;">save</a></li>
+		{% endfor %}
+	</ul>
+</div>
+

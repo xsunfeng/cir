@@ -85,3 +85,21 @@ a.claim-vote-btn.unready:hover {
 	white-space: nowrap;
 
 }
+
+#workbench-document {
+	position: fixed;
+	top: 3em;
+	bottom: 3em;
+	padding: 1.5em;
+	left: 0em;
+    overflow: auto;
+}
+
+#workbench-container {
+	position: fixed;
+	top: 3em;
+	bottom: 3em;
+	padding: 1.5em;
+	right: 0em;
+    overflow: auto;
+}

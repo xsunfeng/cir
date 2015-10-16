@@ -78,9 +78,13 @@ def api_highlight(request):
         start = request.REQUEST.get('start')
         end = request.REQUEST.get('end')
         context_id = request.REQUEST.get('contextId')
+        text = request.REQUEST.get('text')
         # create highlight object
         context = Entry.objects.get(id=context_id)
-        highlight = Highlight(start_pos=start, end_pos=end, context=context, author=request.user)
+        highlight = Highlight(start_pos=start, end_pos=end, context=context, author=request.user, text=text)
+        if (request.REQUEST.get('theme_id')):
+            theme_id = request.REQUEST.get('theme_id')
+            highlight.theme = ClaimTheme.objects.get(id = theme_id)
         highlight.save()
         response['highlight_id'] = highlight.id
         # then create the content
@@ -104,7 +108,7 @@ def api_highlight(request):
                 Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content,
                     created_at=now, updated_at=now, highlight=highlight, content_type='question')
         elif content_type == 'claim':
-            claim_views._add_claim(request, highlight)
+            print ""
         return HttpResponse(json.dumps(response), mimetype='application/json')
     if action == 'load-doc':
         doc_id = request.REQUEST.get('doc_id')
@@ -138,7 +142,7 @@ def api_annotation(request):
         for post in posts:
             for comment in post.getTree():
                 context['entries'].append(comment.getAttr(forum))
-        claims = highlight.claims_of_highlight.all()
+        claims = highlight.claim_set.all()
         for claim in claims:
             context['entries'].append(claim.getAttr(forum))
         context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'], reverse=True)

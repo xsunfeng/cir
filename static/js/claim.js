@@ -507,8 +507,8 @@ define([
 						$claim_wrapper.find('.claim-content').addClass('highlight-found');
 						setTimeout(function() {
 							$claim_wrapper.find('.claim-content').removeClass('highlight-found');
-						}, 1000);
-					}
+						}, 1000);window.scrollTo(0, 96.4375 - 20);
+					} 
 				});
 			}
 		} else {

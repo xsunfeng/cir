@@ -66,7 +66,7 @@
   }
 }
 
-@media only screen and (max-width : 998px) {
+/*@media only screen and (max-width : 998px) {
 
   #cir > .pusher {
     display: block;
@@ -80,7 +80,7 @@
   #cir .following.menu {
     display: none;
   }
-}
+}*/
 @media only screen and (min-width : 998px) {
   #cir .following.menu {
     display: block;
@@ -260,7 +260,7 @@
     width: 200px;
   }
 }
-@media only screen and (min-width : 998px) {
+/*@media only screen and (min-width : 998px) {
   #cir .examples {
     margin-right: 280px;
     padding: 1px;
@@ -284,4 +284,4 @@
   #cir > .pusher > .full.height {
     flex: none;
   }
-}
+}*/

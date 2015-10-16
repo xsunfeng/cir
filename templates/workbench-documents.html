@@ -1,0 +1,14 @@
+{% for doc in docs %} 
+	{% for section in doc.sections %} 
+		<div class="ui piled segment workbench-documents-column">
+			<div>{{doc.folder.name}} >> {{doc.title}} >> {{section.title}}</div>
+			{% if section.title %}
+				<h3 class="ui header section-header" data-id="{{ section.id }}">{{ section.title }}</h3>
+			{% endif %}
+			<div>{{ section.update_at }}</div>
+			<div class="section-content noselect" data-id="{{ section.id }}">{{ section.segmented_text|safe }}</div>
+		</div>
+	{% endfor %}
+{% endfor %}
+
+

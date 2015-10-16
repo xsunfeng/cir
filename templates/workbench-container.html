@@ -1,0 +1,11 @@
+<div class="ui segment">
+	<h3>Themes</h3>
+	{% for theme in themes %}
+	<a class="ui large label claim-theme-filter" data-id="{{ theme.id }}" style="margin-bottom: 0.5em;">
+	  	{{ theme.name }}
+	</a>
+	{% endfor %}
+</div>
+
+<div id = "workbench-claims">
+</div>
