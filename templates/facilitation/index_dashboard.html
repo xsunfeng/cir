@@ -26,7 +26,6 @@
     <a href="#" class="red item" data-tab="document-tab">Documents</a>
     <a href="#" class="red item" data-tab="messages-tab">Messages</a>
     <a href="#" class="red item" data-tab="log-tab">Access log</a>
-    <a href="#" class="red item" data-tab="tag-theme-tab">Themes for Tags</a>
     {% endif %}
 </div>
 {% endblock %}
@@ -161,53 +160,6 @@
 			<div class="six wide column"></div>
 		</div>
 	</div>
-
-	<div class="ui main tab" data-tab="tag-theme-tab">
-		<div style="margin-top:2em; margin-bottom:2em;">
-			<button class="ui primary button" id="add-tag-theme-btn">
-	 			<i class="icon plus"></i>add a theme for tags
-			</button>
-			<button class="ui primary button" id="save-tag-theme-change">
-	 			<i class="icon save"></i>save all changes
-			</button>
-		</div>
-		<div class="ui modal add-tag-theme-modal">
-			<div class="header">Add a theme for tags</div>
-			<div class="content"> 
-			<form class="ui form">
-				<div class="field">
-				<label>Theme Name</label>
-					<input class="new-theme-name" type="text" name="theme-name" placeholder="theme name">
-				</div>
-				<div class="field">
-					<label>Description</label>
-					<input class="new-theme-description" type="text" name="description" placeholder="description">
-				</div>
-			</form>
-			</div>
-		  	<div class="actions">
-				<div class="ui button">Cancel</div>
-				<div class="ui primary button add-tag-theme-ok">Confirm</div>
-			</div>
-		</div>
-		<div id="tag-theme-section">
-			<div class="ui grid" id="tag-theme-grid">
-				{% for theme, tags in tag_theme.items %}
-				<div class="four wide column">
-					<div class="ui segment tag-theme-segment">
-						<div class="tag-theme-name"><h4>{{ theme }}</h4></div>
-						<div class="ui divider"></div>
-						{% for tag in tags %}
-							<a class="ui big label tag-theme-tags" style="margin-bottom:.5em;" draggable="true">{{ tag }}</a>
-						{% endfor %}
-					</div>
-				</div>
-				{% endfor %}
-			</div>
-		</div>
-	</div>
-	</div>
-
 </div>
 	{% endif %}
 {% endblock %}
