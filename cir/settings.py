@@ -126,6 +126,7 @@ PIPELINE_JS = {
             'js/claim.js',
             'js/activity-feed.js',
             'js/utils.js',
+            'js/workbench.js',
         ),
         'output_filename': 'js/cir_forum.js',
     },
