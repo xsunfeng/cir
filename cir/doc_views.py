@@ -27,7 +27,7 @@ def api_doc(request):
             context['folders'].append(folder_info)
         # retrieve docs not in any folder
         context['root_docs'] = []
-        root_docs = Doc.objects.filter(forum_id=request.session['forum_id'], folder__isnull=True)
+        root_docs = Doc.objects.filter(forum_id=request.session['forum_id'], folder__isnull=True).order_by("order")
         for doc in root_docs:
             context['root_docs'].append(doc.getAttr())
 

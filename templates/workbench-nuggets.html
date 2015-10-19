@@ -2,11 +2,20 @@
 {% for highlight in highlights %}
 
 	<li class="workbench-nugget" data-hl-id = {{ highlight.id }}>
-		<span>{{ highlight.text }}</span>
-		<a href='javascript:;' class='use-nugget'>use</a> 
-		<span> | </span> 
-		<a href='javascript:;' class='source-nugget'>source</a> 
-		<span> | </span> 
-		<a href='javascript:;' class='delete-nugget'>remove</a>
+		{% if highlight.is_nugget %}
+			<span> {{ highlight.text }} </span>
+			<a href='javascript:;' class='use-nugget'>use</a> 
+			<span> | </span> 
+			<a href='javascript:;' class='source-nugget'>source</a> 
+			<span> | </span> 
+			<a href='javascript:;' class='delete-nugget'>not useful</a>
+		{% else %}
+			<span><del> {{ highlight.text }} </del></span>
+<!-- 			<a href='javascript:;' class='use-nugget'>use</a> 
+			<span> | </span>  -->
+			<a href='javascript:;' class='source-nugget'>source</a> 
+<!-- 			<span> | </span> 
+			<a href='javascript:;' class='delete-nugget'>remove</a> -->
+		{% endif %}
 	</li>
 {% endfor %}

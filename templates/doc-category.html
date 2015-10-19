@@ -2,6 +2,18 @@
     <div class="active title"><h1 class="ui header"><i class="dropdown icon"></i>Documents for {{ forum_name }}</h1></div>
     <div class="active content">
         <div class="ui list">
+
+        {% for root_doc in root_docs %}
+            <div class="item">
+                <span class="ui top aligned avatar image"><i class="ui file text outline big icon"></i></span>
+                <div class="content">
+                    <a class="header open-doc" data-id="{{ root_doc.id }}">{{ root_doc.title }}</a>
+                    <div class="description">{{ root_doc.description }} ({{ root_doc.num_sections }} sections)</div>
+                    {% if root_doc.num_sections %}<div class="ui label"><i class="calendar icon"></i>updated <abbr title="{{ root_doc.updated_at_full }}">{{ root_doc.updated_at }}</abbr></div>{% endif %}
+                </div>
+            </div>
+        {% endfor %}
+            
         {% for folder in folders %}
             <div class="item">
                 <span class="ui top aligned avatar image"><i class="ui folder open outline big icon"></i></span>
@@ -23,16 +35,7 @@
                 </div>
             </div>
         {% endfor %}
-        {% for root_doc in root_docs %}
-            <div class="item">
-                <span class="ui top aligned avatar image"><i class="ui file text outline big icon"></i></span>
-                <div class="content">
-                    <a class="header open-doc" data-id="{{ root_doc.id }}">{{ root_doc.title }}</a>
-                    <div class="description">{{ root_doc.description }} ({{ root_doc.num_sections }} sections)</div>
-                    {% if root_doc.num_sections %}<div class="ui label"><i class="calendar icon"></i>updated <abbr title="{{ root_doc.updated_at_full }}">{{ root_doc.updated_at }}</abbr></div>{% endif %}
-                </div>
-            </div>
-        {% endfor %}
+
         {% if not folders and not root_docs %}
             <div class="item">No document for now.</div>
         {% endif %}

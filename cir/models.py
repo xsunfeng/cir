@@ -150,6 +150,7 @@ class Doc(models.Model):
     title = models.TextField()
     description = models.TextField(null=True, blank=True)
     folder = models.ForeignKey(EntryCategory, related_name='doc_entries', null=True, blank=True)
+    order = models.TextField(null=True, blank=True)
 
     def __str__(self):  # used for admin site
         return self.title
@@ -229,6 +230,7 @@ class Highlight(models.Model):
         attr['author_id'] = self.author.id
         attr['context_id'] = self.context.id
         attr['text'] = self.text
+        attr['is_nugget'] = self.is_nugget
         try:
             tag = Tag.objects.get(highlight_ptr=self)
             attr['content'] = tag.content
@@ -269,7 +271,8 @@ class Claim(Entry):
     CATEGORY_CHOICES = (
         ('pro', 'Pro'),
         ('con', 'Con'),
-        ('finding', 'Finding'),
+        ('finding', 'finding'),
+        ('opinion', 'Opinion'),
         ('discarded', 'Discarded'),
     )
     claim_category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, null=True, blank=True)

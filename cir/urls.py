@@ -41,6 +41,8 @@ urlpatterns = patterns('',
     url(r'^workbench/api_add_claim/$', workbench_views.api_add_claim),
     url(r'^workbench/api_get_toc/$', workbench_views.api_get_toc),
     url(r'^workbench/add_nugget_comment/$', workbench_views.add_nugget_comment),
+    url(r'^workbench/api_edit_claim/$', workbench_views.api_edit_claim),
+    
 
     url(r'^api_register_delegator/$', facilitator_views.register_delegator), # include other apps
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

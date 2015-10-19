@@ -154,7 +154,6 @@ define([
 					}
 				});
 				$(".delete-nugget").click(function(e) {
-					$(this).parent().remove();
 					var hl_id = $(this).parent().attr("data-hl-id");
 					$.ajax({
 						url: 'workbench/api_remove_nugget/',
@@ -163,6 +162,8 @@ define([
 							hl_id: hl_id,
 						},
 						success: function(xhr) {
+							curr_claim_tab = $('#workbench-tab>.item.active').attr("data-tab");
+							load_nuggets_and_claims(curr_claim_tab);
 						},
 						error: function(xhr) {
 							if (xhr.status == 403) {
@@ -193,12 +194,36 @@ define([
 					var content = $(this).parentsUntil('li').parent().find('textarea').val();
 					var html = content;
 					var content = $(this).parentsUntil('li').parent().find('.workbench-claim-content').html(html);
+
+					var claim_id = $(this).parentsUntil('li').parent().find(".workbench-claim-content").attr("claim-id");
+					$.ajax({
+						url: 'workbench/api_edit_claim/',
+						type: 'post',
+						data: {
+							claim_id: claim_id,
+							content: content.text(),
+						},
+						success: function(xhr) {
+							console.log(xhr);
+						},
+						error: function(xhr) {
+							if (xhr.status == 403) {
+								Utils.notify('error', xhr.responseText);
+							}
+						}
+					});
 				});
 				$(".workbench-source-claim").click(function(e) {
 					highlight_ids = $(this).parentsUntil("ul").find(".workbench-claim-content").attr("data-id").trim().split(" ");
 					for (var i = 0; i < highlight_ids.length; i ++) {
 						$tmp = $($(".workbench-nugget[data-hl-id='" + highlight_ids[i] + "']"));
-						$tmp.fadeIn(100).fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+						// $tmp.fadeIn(100).fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+						$tmp.css("background-color", "yellow").addClass("highlighted");
+						setTimeout(
+							function(){
+								$(".highlighted").css("background", "none");
+							}, 
+						4000);	
 					}
 				});
 				$(".workbench-add-nugget-comment").click(function(e) {

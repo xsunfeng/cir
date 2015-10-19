@@ -1,6 +1,6 @@
 <div class="ui segment">
 <h3>Nuggets</h3>
-<ul id="workbench-nuggets">
+<ul id="workbench-nuggets" style="overflow:auto; height:500px;">
 {% include 'workbench-nuggets.html' %}
 </ul>
 <div class="ui styled fluid accordion">
@@ -23,8 +23,7 @@
 
 <div class="ui top attached tabular menu" id="workbench-tab">
 	<a class="item active" data-tab="finding">Findings</a>
-	<a class="item" data-tab="pro">Opinions (Substantiate)</a>
-	<a class="item" data-tab="con">Opinions (Refute)</a>
+	<a class="item" data-tab="opinion">Opinions</a>
 </div>
 <div class="ui bottom attached tab segment active" data-tab="finding">
 	<div class="ui form">
@@ -39,17 +38,20 @@
 	<ul>
 		{% for item in finding %}
 			<li>
-				<div class="workbench-claim-content" data-id="{{ item.highlight_ids }}"> {{ item.content }} </div>
+				<div class="workbench-claim-content" claim-id="{{ item.id }}" data-id="{{ item.highlight_ids }}"> {{ item.content }} </div>
 				<div>
+					{% if item.is_author %}
 					<a href="javascript:;" class="workbench-edit-claim">edit</a>
 					<a href="javascript:;" class="workbench-save-claim" style="display: none;">save</a>
+					<span> | </span>
+					{% endif %}
 					<a href="javascript:;" class="workbench-source-claim">source</a>
 				</div>
 			</li>
 		{% endfor %}
 	</ul>
 </div>
-<div class="ui bottom attached tab segment" data-tab="pro">
+<div class="ui bottom attached tab segment" data-tab="opinion">
 	<div class="ui form">
 	  	<div class="field">
 	    	<label>Construct the opinion with your position, reason and corresponding facts</label>
@@ -60,35 +62,15 @@
   		add
 	</a>
 	<ul>
-		{% for item in pro %}
+		{% for item in opinion %}
 			<li>
-				<div class="workbench-claim-content" data-id="{{ item.highlight_ids }}"> {{ item.content }} </div>
+				<div class="workbench-claim-content" claim-id="{{ item.id }}" data-id="{{ item.highlight_ids }}"> {{ item.content }} </div>
 				<div>
+					{% if item.is_author %}
 					<a href="javascript:;" class="workbench-edit-claim">edit</a>
 					<a href="javascript:;" class="workbench-save-claim" style="display: none;">save</a>
-					<a href="javascript:;" class="workbench-source-claim">source</a>
-				</div>
-			</li>
-		{% endfor %}
-	</ul>
-</div>
-<div class="ui bottom attached tab segment" data-tab="con">
-	<div class="ui form">
-	  	<div class="field">
-	    	<label>Construct the opinion with your position, reason and corresponding facts</label>
-	    	<textarea rows="5"></textarea>
-	  	</div>
-	</div>
-	<a class="workbench-add-claim" style="margin-top:0.5em">
-  		add
-	</a>
-	<ul>
-		{% for item in con %}
-			<li>
-				<div class="workbench-claim-content" data-id="{{ item.highlight_ids }}"> {{ item.content }} </div>
-				<div>
-					<a href="javascript:;" class="workbench-edit-claim">edit</a>
-					<a href="javascript:;" class="workbench-save-claim" style="display: none;">save</a>
+					<span> | </span>
+					{% endif %}
 					<a href="javascript:;" class="workbench-source-claim">source</a>
 				</div>
 			</li>

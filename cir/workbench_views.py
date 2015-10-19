@@ -32,6 +32,19 @@ def api_load_all_documents(request):
 def api_get_toc(request):
     response = {}
     context = {}
+    # retrieve docs not in any folder
+    context['root_docs'] = []
+    root_docs = Doc.objects.filter(forum_id=request.session['forum_id'], folder__isnull=True).order_by("order")
+    for doc in root_docs:
+        m_doc = {}
+        m_doc['name'] = doc.title
+        m_doc['content'] = []
+        for section in doc.sections.all():
+            m_sec = {}
+            m_sec["name"] = section.title
+            m_sec["id"] = section.id
+            m_doc['content'].append(m_sec)
+        context['root_docs'].append(m_doc)
     # retrieve docs in a folder
     folders = EntryCategory.objects.filter(forum_id=request.session['forum_id'], category_type='doc')
     context['folders'] = []
@@ -51,19 +64,6 @@ def api_get_toc(request):
                 m_doc['content'].append(m_sec)
             m_folder['content'].append(m_doc)
         context['folders'].append(m_folder)
-    # retrieve docs not in any folder
-    context['root_docs'] = []
-    root_docs = Doc.objects.filter(forum_id=request.session['forum_id'], folder__isnull=True)
-    for doc in root_docs:
-        m_doc = {}
-        m_doc['name'] = doc.title
-        m_doc['content'] = []
-        for section in doc.sections.all():
-            m_sec = {}
-            m_sec["name"] = section.title
-            m_sec["id"] = section.id
-            m_doc['content'].append(m_sec)
-        context['root_docs'].append(m_doc)
     response['document_toc'] = render_to_string("document-toc.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
@@ -149,10 +149,10 @@ def api_add_claim(request):
     else:
         actual_author = None
     if actual_author:
-        newClaim = Claim(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user,
+        newClaim = Claim(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user, content=content,
             created_at=now, updated_at=now, theme_id=theme_id, claim_category=category)
     else:
-        newClaim = Claim(forum_id=request.session['forum_id'], author=request.user, created_at=now, updated_at=now,
+        newClaim = Claim(forum_id=request.session['forum_id'], author=request.user, created_at=now, updated_at=now, content=content,
             theme_id=theme_id, claim_category=category)
     newClaim.save()
     if actual_author:
@@ -173,7 +173,6 @@ def api_add_claim(request):
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_change_to_nugget(request):
-    print "api_change_to_nugget"
     response = {}
     context = {}
     data_hl_ids = request.REQUEST.get("data_hl_ids").split(" ")
@@ -191,6 +190,18 @@ def api_change_to_nugget(request):
     response['workbench_nuggets'] = render_to_string("workbench-nuggets.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
+def api_edit_claim(request):
+    print "api_edit_claim"
+    claim_id = request.REQUEST.get("claim_id")
+    print claim_id
+    content = request.REQUEST.get("content")
+    print content
+    claim = Claim.objects.get(id = claim_id)
+    claim.content = content
+    claim.save()
+    response = {}
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
 def api_get_claim_by_theme(request):
     forum = Forum.objects.get(id=request.session['forum_id'])
     response = {}
@@ -198,11 +209,14 @@ def api_get_claim_by_theme(request):
     context["finding"] = []
     context["pro"] = []
     context["con"] = []
+    context["opinion"] = []
     theme_id = request.REQUEST.get('theme_id')
     claims = Claim.objects.filter(theme_id=theme_id)
     for claim in claims:
         item = {}
-        item['content'] = claim
+        item['content'] = claim.content
+        item['id'] = claim.id
+        item['is_author'] = (request.user == claim.author)
         item['highlight_ids'] = ""
         for highlight in claim.source_highlights.all():
             item['highlight_ids'] += (str(highlight.id) + " ")
@@ -212,7 +226,7 @@ def api_get_claim_by_theme(request):
     docs = Doc.objects.filter(forum_id=request.session['forum_id'])
     for doc in docs:
         for section in doc.sections.all():
-            highlights = section.highlights.filter(is_nugget = True, theme_id=theme_id)
+            highlights = section.highlights.filter(theme_id=theme_id)
             for highlight in highlights:
                 context['highlights'].append(highlight.getAttr())
     response['workbench_claims'] = render_to_string("workbench-claims.html", context)
