@@ -201,12 +201,13 @@ def api_get_claim_by_theme(request):
     theme_id = request.REQUEST.get('theme_id')
     claims = Claim.objects.filter(theme_id=theme_id)
     for claim in claims:
-        if (claim.claim_category == "finding"):
-            context["finding"].append(claim)
-        if (claim.claim_category == "pro"):
-            context["pro"].append(claim)
-        if (claim.claim_category == "con"):
-            context["con"].append(claim)
+        item = {}
+        item['content'] = claim
+        item['highlight_ids'] = ""
+        for highlight in claim.source_highlights.all():
+            item['highlight_ids'] += (str(highlight.id) + " ")
+        item['highlight_ids'].strip(" ")
+        context[claim.claim_category].append(item)
     context['highlights'] = []
     docs = Doc.objects.filter(forum_id=request.session['forum_id'])
     for doc in docs:

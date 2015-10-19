@@ -117,7 +117,7 @@ define([
 		load_highlights("-1");
 	}
 
-	function load_nuggets_and_claims() {
+	function load_nuggets_and_claims(curr_claim_tab) {
 		$.ajax({
 			url: 'workbench/api_get_claim_by_theme/',
 			type: 'post',
@@ -194,6 +194,13 @@ define([
 					var html = content;
 					var content = $(this).parentsUntil('li').parent().find('.workbench-claim-content').html(html);
 				});
+				$(".workbench-source-claim").click(function(e) {
+					highlight_ids = $(this).parentsUntil("ul").find(".workbench-claim-content").attr("data-id").trim().split(" ");
+					for (var i = 0; i < highlight_ids.length; i ++) {
+						$tmp = $($(".workbench-nugget[data-hl-id='" + highlight_ids[i] + "']"));
+						$tmp.fadeIn(100).fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+					}
+				});
 				$(".workbench-add-nugget-comment").click(function(e) {
 					var content = $(this).parentsUntil(".content").parent().find('textarea').val();
 					$.ajax({
@@ -213,12 +220,17 @@ define([
 						}
 					});
 				});
+				// set claim tab to the last one
 				$('.menu .item').tab();
+				if (curr_claim_tab != undefined) {
+					$('.tabular.menu .item[data-tab="' + curr_claim_tab + '"]').click();
+				}
+				// initiate claim tab operations
 				$(".workbench-add-claim").click(function(e) {
 					var content = $(this).siblings(".form").find("textarea").val();
 					var data_hl_ids = $(this).siblings(".form").find("textarea").attr("data-id");
 					var category = $(this).parent().attr("data-tab");
-					$(this).siblings('ul').append("<li data-id ='" + data_hl_ids + "'>" + content + "</li>");
+					// $(this).siblings('ul').append("<li data-id ='" + data_hl_ids + "'>" + content + "</li>");
 					$(this).parent().find("textarea").attr("data-id", "").val("");
 					$.ajax({
 						url: 'workbench/api_add_claim/',
@@ -230,6 +242,8 @@ define([
 							category: category,
 						},
 						success: function(xhr) {
+							curr_claim_tab = $('#workbench-tab>.item.active').attr("data-tab");
+							load_nuggets_and_claims(curr_claim_tab);
 						},
 						error: function(xhr) {
 							if (xhr.status == 403) {

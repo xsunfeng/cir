@@ -120,8 +120,6 @@ define([
 				module.$category_element.html(xhr.html);
 				module.$category_element.find('.ui.accordion').accordion();
 				module.$category_element.find('abbr').popup();
-
-				$("#document-toc").html(xhr.document_toc);
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -347,6 +345,9 @@ define([
 				// collapse document category accordion
 				module.$category_element.find('.ui.accordion').accordion('close', 0);
 				module.$content_element.html(xhr.html);
+				$("#back-to-top-btn").click(function(){
+					$("body").scrollTop(0);
+				});
 				$('#highlight-filter-pane').show();
 				$('#tag-filter-pane').show();
 				$('#highlight-filter-pane .none.checkbox').checkbox('check');
