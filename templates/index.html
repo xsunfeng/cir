@@ -106,10 +106,39 @@
 	{% else %}
 
 <div class="ui main tab" data-tab="workbench-tab">
-	<div class="ui grid">
-		<div id="workbench-document" class="eight wide document column">
+	<div id="workbench-container">
+		<div class="ui grid">
+			<div id="workbench-theme-container" class="ui segment sixteen wide column">
+			</div>
+			<div class="ui sixteen wide column" style="height:80vh">
+				<div id="workbench-document-container" class="ui segment">
+					<div class="ui top attached label">Refer document</div>
+					<div id="workbench-document-panel">
+						<div id="workbench-document">
+
+						</div>
+					</div>
+				</div>
+				<div id="workbench-nugget-container" class="ui segment">
+					<div class="ui top attached label">Collect nuggets</div>
+					<div id="workbench-nugget-panel">
+						<div id="workbench-nugget">
+							<div id="workbench-nugget-list"></div>
+							<div id="workbench-nugget-discuss"></div>
+						</div>
+					</div>
+				</div>
+				<div id="workbench-claim-container" class="ui segment">
+					<div class="ui top attached label">Construct Claim</div>
+					<div id="workbench-claim-panel">
+						<div id="workbench-claim">
+							<div id="workbench-claim-textarea"></div>
+							<div id="workbench-claim-list"></div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
-		<div id="workbench-container" class="eight wide column"></div>
 	</div>
 </div>
 

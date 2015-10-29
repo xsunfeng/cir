@@ -167,11 +167,6 @@ def api_claim_activities(request):
         context = {}
         context['entries'] = []
         if activity == 'all' or activity == 'general':
-            if claim.source_highlight:
-                posts = claim.source_highlight.posts_of_highlight.all()
-                for post in posts:
-                    for comment in post.getTree():
-                        context['entries'].append(comment.getAttr(forum))
             posts = claim.comments_of_entry.all()
             for post in posts:
                 for comment in post.getTree():

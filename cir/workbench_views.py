@@ -91,9 +91,13 @@ def api_load_all_themes(request):
     context = {}
     themes = ClaimTheme.objects.filter(forum_id=request.session['forum_id'])
     context["themes"] = []
+    unassigned_theme = ClaimTheme.objects.filter(forum_id = "22", name__iexact="unassigned")
+    if not unassigned_theme:
+        c = ClaimTheme.objects.create(forum_id=request.session['forum_id'], name="Unassigned")
+        c.save()
     for theme in themes:
         context["themes"].append(theme)
-    response['workbench_container'] = render_to_string("workbench-container.html", context)
+    response['workbench_container'] = render_to_string("workbench-theme-container.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_load_highlights(request):
@@ -119,28 +123,20 @@ def api_load_highlights(request):
                         response['highlights'].append(highlight_info)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
-def api_remove_nugget(request):
-    print "api_change_to_nugget"
+def api_remove_claim(request):
     response = {}
-    context = {}
-    hl_id = request.REQUEST.get("hl_id")
-    hl = Highlight.objects.get(id = hl_id)
-    hl.is_nugget = False
-    hl.save()
-    docs = Doc.objects.filter(forum_id=request.session["forum_id"])
-    context['highlights'] = []
-    for doc in docs:
-        for section in doc.sections.all():
-            highlights = section.highlights.filter(is_nugget = True)
-            for highlight in highlights:
-                context['highlights'].append(highlight.getAttr())
-    response['workbench_nuggets'] = render_to_string("workbench-nuggets.html", context)
+    claim_id = request.REQUEST.get('claim_id')
+    c = Claim.objects.get(id=claim_id)
+    c.delete()
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_add_claim(request):
     response = {}
     content = request.REQUEST.get('content')
     theme_id = request.REQUEST.get('theme_id')
+    if (int(theme_id) < 0):
+        forum_id = request.session['forum_id']
+        theme_id = ClaimTheme.objects.get(forum_id = forum_id, name__iexact="unassigned").id
     data_hl_ids = request.REQUEST.get('data_hl_ids')
     category = request.REQUEST.get('category')
     now = timezone.now()
@@ -162,17 +158,27 @@ def api_add_claim(request):
         claim_version = ClaimVersion(forum_id=request.session['forum_id'], author=request.user, content=content,
             created_at=now, updated_at=now, claim=newClaim)
     claim_version.save()
-    print "1111"
     data_hl_ids = data_hl_ids.strip()
     data_hl_ids_set = data_hl_ids.split(" ")
-    print "2222"
     for data_hl_id in data_hl_ids_set:
-        print data_hl_id
         newHighlightClaim = HighlightClaim(claim_id=newClaim.id, highlight_id=data_hl_id)
         newHighlightClaim.save()
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
+def api_assign_nugget(request):
+    print "api_assign_nugget"
+    highlight_id = request.REQUEST.get("highlight_id")
+    theme_id = request.REQUEST.get("theme_id")
+    highlight = Highlight.objects.get(id=highlight_id)
+    highlight.theme_id = theme_id
+    highlight.save()
+    response = {}
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+# nugget list zone
+
 def api_change_to_nugget(request):
+    # input: highlight_ids, output: set as nugget
     response = {}
     context = {}
     data_hl_ids = request.REQUEST.get("data_hl_ids").split(" ")
@@ -190,6 +196,48 @@ def api_change_to_nugget(request):
     response['workbench_nuggets'] = render_to_string("workbench-nuggets.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
+def api_remove_nugget(request):
+    # input: highlight_ids, output: set as not nugget
+    print "api_change_to_nugget"
+    response = {}
+    context = {}
+    hl_id = request.REQUEST.get("hl_id")
+    hl = Highlight.objects.get(id = hl_id)
+    hl.is_nugget = False
+    hl.save()
+    docs = Doc.objects.filter(forum_id=request.session["forum_id"])
+    context['highlights'] = []
+    for doc in docs:
+        for section in doc.sections.all():
+            highlights = section.highlights.filter(is_nugget = True)
+            for highlight in highlights:
+                context['highlights'].append(highlight.getAttr())
+    response['workbench_nuggets'] = render_to_string("workbench-nuggets.html", context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def api_load_nugget_list(request):
+    print "load_nugget_list"
+    response = {}
+    context = {}
+    theme_id = int(request.REQUEST.get("theme_id"))
+    print "theme_id= ", theme_id
+    docs = Doc.objects.filter(forum_id=request.session["forum_id"])
+    context['highlights'] = []
+    for doc in docs:
+        for section in doc.sections.all():
+            if (theme_id > 0):
+                print "theme_id= ", theme_id
+                print "11"
+                highlights = section.highlights.filter(theme_id = theme_id)
+            else:
+                print "22"
+                highlights = section.highlights.all()
+            for highlight in highlights:
+                print "33"
+                context['highlights'].append(highlight.getAttr())
+    response['workbench_nugget_list'] = render_to_string("workbench-nuggets.html", context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
 def api_edit_claim(request):
     print "api_edit_claim"
     claim_id = request.REQUEST.get("claim_id")
@@ -203,16 +251,18 @@ def api_edit_claim(request):
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_get_claim_by_theme(request):
+    print "api_get_claim_by_theme"
     forum = Forum.objects.get(id=request.session['forum_id'])
     response = {}
     context = {}
-    context["finding"] = []
-    context["pro"] = []
-    context["con"] = []
-    context["opinion"] = []
-    theme_id = request.REQUEST.get('theme_id')
-    claims = Claim.objects.filter(theme_id=theme_id)
+    theme_id = int(request.REQUEST.get('theme_id'))
+    if (theme_id > 0): 
+        claims = Claim.objects.filter(theme_id = theme_id)
+    else:
+        claims = Claim.objects.filter(forum = forum)
     for claim in claims:
+        if claim.claim_category not in context:
+            context[claim.claim_category] = []
         item = {}
         item['content'] = claim.content
         item['id'] = claim.id
@@ -226,7 +276,10 @@ def api_get_claim_by_theme(request):
     docs = Doc.objects.filter(forum_id=request.session['forum_id'])
     for doc in docs:
         for section in doc.sections.all():
-            highlights = section.highlights.filter(theme_id=theme_id)
+            if (theme_id > 0): 
+                highlights = section.highlights.filter(theme_id=theme_id)
+            else:
+                highlights = section.highlights.all()
             for highlight in highlights:
                 context['highlights'].append(highlight.getAttr())
     response['workbench_claims'] = render_to_string("workbench-claims.html", context)
@@ -287,69 +340,5 @@ def api_others(request):
                         mytags.add(highlight_info['content'])
                     alltags.add(highlight_info['content'])
         response['html'] = render_to_string('doc-tag-area.html', {'mytags': mytags, 'alltags': alltags})
-        return HttpResponse(json.dumps(response), mimetype='application/json')
-
-def api_annotation(request):
-    response = {}
-    action = request.REQUEST.get('action')
-    if action == 'load-thread':
-        forum = Forum.objects.get(id=request.session['forum_id'])
-        highlight_id = request.REQUEST.get('highlight_id')
-        highlight = Highlight.objects.get(id=highlight_id)
-        context = {}
-        context['forum_phase'] = forum.phase
-        context['entries'] = []
-        posts = highlight.posts_of_highlight.all()
-        for post in posts:
-            for comment in post.getTree():
-                context['entries'].append(comment.getAttr(forum))
-        claims = highlight.claim_set.all()
-        for claim in claims:
-            context['entries'].append(claim.getAttr(forum))
-        context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'], reverse=True)
-        response['html'] = render_to_string("activity-feed-doc.html", context)
-        return HttpResponse(json.dumps(response), mimetype='application/json')
-    if action == 'create':
-        if not request.user.is_authenticated():
-            return HttpResponse("Please log in first.", status=403)
-        now = timezone.now()
-        newPost = Post(forum_id=request.session['forum_id'], content_type='comment', created_at=now, updated_at=now)
-        if 'actual_user_id' in request.session:
-            newPost.author = User.objects.get(id=request.session['actual_user_id'])
-            newPost.delegator = request.user
-        else:
-            newPost.author = request.user
-        newPost.content = request.REQUEST.get('content')
-        reply_type = request.REQUEST.get('reply_type')
-        if reply_type:  # replying another post, or event
-            reply_id = request.REQUEST.get('reply_id')
-            if reply_type == 'event':
-                event = Event.objects.get(id=reply_id)
-                newPost.target_event = event
-            elif reply_type == 'entry':
-                entry = Entry.objects.get(id=reply_id)
-                newPost.target_entry = entry
-        else:  # targeting at a highlight or a claim
-            source = request.REQUEST.get('type')
-            if source == 'highlight':
-                highlight = Highlight.objects.get(id=request.REQUEST.get('highlight_id'))
-                newPost.highlight = highlight
-            elif source == 'claim':
-                claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
-                newPost.target_entry = claim
-        collective = request.REQUEST.get('collective')
-        if collective == 'true':
-            newPost.collective = True
-        else:
-            newPost.collective = False
-        newPost.save()
-        return HttpResponse(json.dumps(response), mimetype='application/json')
-    if action == 'delete':
-        entry_id = request.REQUEST.get('entry_id')
-        now = timezone.now()
-        post = Post.objects.get(id=entry_id)
-        post.is_deleted = True
-        post.updated_at = now
-        post.save()
         return HttpResponse(json.dumps(response), mimetype='application/json')
 

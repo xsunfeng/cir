@@ -4,18 +4,27 @@
 	<li class="workbench-nugget" data-hl-id = {{ highlight.id }}>
 		{% if highlight.is_nugget %}
 			<span> {{ highlight.text }} </span>
-			<a href='javascript:;' class='use-nugget'>use</a> 
-			<span> | </span> 
-			<a href='javascript:;' class='source-nugget'>source</a> 
-			<span> | </span> 
-			<a href='javascript:;' class='delete-nugget'>not useful</a>
+			<div>
+				<a href='javascript:;' class='use-nugget'>use</a> 
+				<span> | </span> 
+				<a href='javascript:;' class='source-nugget'>source</a> 
+				<span> | </span> 
+				<a href='javascript:;' class='delete-nugget'>not useful</a>
+				<span> | </span> 
+				<a href='javascript:;' class='reassign-nugget'>reassign</a>
+			</div>
 		{% else %}
 			<span><del> {{ highlight.text }} </del></span>
 <!-- 			<a href='javascript:;' class='use-nugget'>use</a> 
 			<span> | </span>  -->
-			<a href='javascript:;' class='source-nugget'>source</a> 
+			<div>
+				<a href='javascript:;' class='recover-nugget'>recover</a>
+				<span> | </span> 
+				<a href='javascript:;' class='source-nugget'>source</a> 
+			</div>
 <!-- 			<span> | </span> 
 			<a href='javascript:;' class='delete-nugget'>remove</a> -->
 		{% endif %}
 	</li>
+	<div class="ui divider"></div>
 {% endfor %}

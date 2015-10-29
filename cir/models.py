@@ -219,7 +219,7 @@ class Highlight(models.Model):
     context = models.ForeignKey(Entry, related_name='highlights')
     author = models.ForeignKey(User)
     theme = models.ForeignKey(ClaimTheme, null=True, blank=True)
-    is_nugget = models.BooleanField(default=False)
+    is_nugget = models.BooleanField(default=True)
     text = models.TextField(null=True, blank=True)
 
     def getAttr(self):

@@ -28,6 +28,7 @@ define([
 	};
 	function initLayout() {
 		$('#nav-menu > .item').tab();
+
 		$('.ui.instructions.accordion').accordion();
 		DocumentView.initDocumentView();
 		ClaimView.initClaimView();
