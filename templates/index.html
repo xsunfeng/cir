@@ -15,7 +15,6 @@
 {% endblock %}
 {% block header %}
 <div id="nav-menu" class="ui fixed inverted main menu">
-	<a href="javascript:;" class="item" id="document-toc-btn"><i class="icon sidebar"></i></a>
     <a href="/" class="title item">{{ forum_name }}</a>
     {% if load_error %}
     <div class="item">GeoDeliberator</div>
@@ -23,7 +22,7 @@
     <a href="#" class="blue item {{ phase.document_active }}" data-tab="document-tab"><i class="icon file text outline"></i>Documents</a>
     <a href="#" class="blue item {{ phase.claim_active }}" data-tab="claim-tab"><i class="icon comment outline"></i>Claims</a>
     <!-- workbench -->
-    <a href="#" class="blue item" data-tab="workbench-tab"><i class="icon file text outline"></i>Workbench</a>
+    <a href="/{{ forum_url }}/workbench/" class="blue item"><i class="icon file text outline"></i>Workbench</a>
     {% if phase.show_statement_link %}
     <a href="{{ forum_url }}/statement" class="item">Citizens' Statement</a>
     {% endif %}
@@ -74,10 +73,6 @@
 {% endblock %}
 
 {% block body %}
-<div class="ui custom sidebar inverted vertical menu" id="document-toc" style="padding-top:100px">
-</div>
-        
-<div class="pusher">
 
 <div id="popup-notification" class="ui message hidden"></div>
 	{% if load_error %}
@@ -104,44 +99,6 @@
 </div>
 		{% endif %}
 	{% else %}
-
-<div class="ui main tab" data-tab="workbench-tab">
-	<div id="workbench-container">
-		<div class="ui grid">
-			<div id="workbench-theme-container" class="ui segment sixteen wide column">
-			</div>
-			<div class="ui sixteen wide column" style="height:80vh">
-				<div id="workbench-document-container" class="ui segment">
-					<div class="ui top attached label">Refer document</div>
-					<div id="workbench-document-panel">
-						<div id="workbench-document">
-
-						</div>
-					</div>
-				</div>
-				<div id="workbench-nugget-container" class="ui segment">
-					<div class="ui top attached label">Collect nuggets</div>
-					<div id="workbench-nugget-panel">
-						<div id="workbench-nugget">
-							<div id="workbench-nugget-list"></div>
-							<div id="workbench-nugget-discuss"></div>
-						</div>
-					</div>
-				</div>
-				<div id="workbench-claim-container" class="ui segment">
-					<div class="ui top attached label">Construct Claim</div>
-					<div id="workbench-claim-panel">
-						<div id="workbench-claim">
-							<div id="workbench-claim-textarea"></div>
-							<div id="workbench-claim-list"></div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-
 <div class="ui main tab {{ phase.document_active }}" data-tab="document-tab">
 	<div class="ui grid">
 		<div class="sixteen wide column" style="padding-top:1em">
@@ -241,6 +198,5 @@
 </div>
 	{% endif %}
 
-</div>
 {% endblock %}
 

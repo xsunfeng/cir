@@ -37,6 +37,7 @@ urlpatterns = patterns('',
     url(r'^workbench/api_load_highlights/$', workbench_views.api_load_highlights),
     url(r'^workbench/api_get_claim_by_theme/$', workbench_views.api_get_claim_by_theme),
     url(r'^workbench/api_change_to_nugget/$', workbench_views.api_change_to_nugget),
+    url(r'^workbench/api_change_to_nugget_1/$', workbench_views.api_change_to_nugget_1),
     url(r'^workbench/api_remove_nugget/$', workbench_views.api_remove_nugget),
     url(r'^workbench/api_add_claim/$', workbench_views.api_add_claim),
     url(r'^workbench/api_remove_claim/$', workbench_views.api_remove_claim),
@@ -45,7 +46,8 @@ urlpatterns = patterns('',
     url(r'^workbench/api_edit_claim/$', workbench_views.api_edit_claim),
     url(r'^workbench/api_assign_nugget/$', workbench_views.api_assign_nugget),
     url(r'^workbench/api_load_nugget_list/$', workbench_views.api_load_nugget_list),
-    
+    url(r'^workbench/api_load_nugget_list_partial/$', workbench_views.api_load_nugget_list_partial),
+
     url(r'^api_register_delegator/$', facilitator_views.register_delegator), # include other apps
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^password_reset/', include('password_reset.urls')),
@@ -55,6 +57,7 @@ urlpatterns = patterns('',
 
     # these must be put last!
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum),
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/workbench/?$', forum_views.enter_workbench),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/dashboard/?$', facilitator_views.enter_dashboard),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/statement/?$', forum_views.enter_statement), )
 

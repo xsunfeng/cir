@@ -231,6 +231,8 @@ class Highlight(models.Model):
         attr['context_id'] = self.context.id
         attr['text'] = self.text
         attr['is_nugget'] = self.is_nugget
+        attr['is_used'] = HighlightClaim.objects.filter(highlight_id = self.id).count() > 0
+        attr['author_name'] = self.author.first_name + " " + self.author.last_name
         try:
             tag = Tag.objects.get(highlight_ptr=self)
             attr['content'] = tag.content

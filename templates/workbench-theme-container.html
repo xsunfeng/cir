@@ -1,7 +1,36 @@
+<div class="ui large menu">
+  	<a class="item" href="/{{ forum_url }}/">
+    	{{ forum_name }}
+  	</a>
+  	<a class="item">
+    	Day1
+  	</a>
+  	<a class="item">
+    	Current phase: Claim extraction
+  	</a>
+  	<div class="right menu">
+	    <div class="ui right dropdown item" id="claim-theme-filter-menu">
+	      	Schema: <i class="dropdown icon"></i>
+	      	<div class="menu">
+			{% for theme in themes %}
+	        	<a class="item claim-theme-filter" data-id="{{ theme.id }}">{{ theme.name }}</a>
+	        {% endfor %}
+	      	</div>
+	    </div>
+        <div class="active orange item" id="current-claim-theme-text">All</div>
+  	</div>
+</div>
 
-<h3>Themes</h3>
-{% for theme in themes %}
+<!-- {% for theme in themes %}
 <a class="ui large label claim-theme-filter" data-id="{{ theme.id }}" style="margin-bottom: 0.5em;">
   	{{ theme.name }}
 </a>
-{% endfor %}
+{% endfor %} -->
+
+<!-- <div class="ui secondary menu">
+	{% for theme in themes %}
+	<a class="item claim-theme-filter" data-id="{{ theme.id }}">
+	  	{{ theme.name }}
+	</a>
+	{% endfor %}
+</div> -->
