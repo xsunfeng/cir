@@ -18,6 +18,7 @@
 
 <STYLE title="" type="text/css">
 	html, body {
+		font-size: 16px;
 		width:	100%;
 		height:	100%;
 		padding:	0;
@@ -324,6 +325,101 @@
 <div id="workbench-theme-container" style="margin-top:3em; height:3em;">
 </div>
 
+<div id="chat-room-open-window" class="hidden" style="
+	border: 	1px solid #000;
+	position:	fixed;
+	height:		600px;
+	width:		500px;
+	right: 		5%;
+	bottom: 	-2px;
+	z-index:	100;
+	margin:		0;
+	background:	white;
+
+	transition:			border linear .2s,box-shadow linear .5s;
+	-moz-transition:	border linear .2s,-moz-box-shadow linear .5s;
+	-webkit-transition:	border linear .2s,-webkit-box-shadow linear .5s;
+	outline:			none;
+	border-color:		rgba(0,0,0,.75);
+	box-shadow:			0 0 8px rgba(0,0,0,.5);
+	-moz-box-shadow:	0 0 8px rgba(0,0,0,.5);
+	-webkit-box-shadow:	0 0 8px rgba(0,0,0,3);
+">
+	<DIV class="header2 tableWrapper">
+		<TABLE width="100%" cellspacing="0">
+			<COL class="c1" width="100%">
+			<TR>
+				<TD class="c1">
+					Live chat
+					<a href="javascript:;" id="chat-room-close-btn" style='float:right;'>
+						<i class='inverted angle down icon'></i>
+					</a>
+				</TD>
+			</TR>
+		</TABLE>
+	</DIV>
+	<!-- data: documents content -->	
+	<DIV class="data tableWrapper" style="height:400px;">
+		<DIV class="innerWrapper">
+			<TABLE width="100%" cellspacing="0">
+				<COL class="c1" width="100%">
+				<TR>
+					<TD class="c1">
+						<div id="workbench-nugget-panel" style="
+							overflow-y: auto;
+    						overflow-x: hidden;
+						">
+							<div id="workbench-nugget-discuss">
+							</div>
+						</div>
+					</TD>
+				</TR>
+			</TABLE>
+		</DIV>
+	</DIV>
+	<DIV class="footer tableWrapper">
+		<DIV class="widthTester"></DIV>
+		<TABLE width="100%" cellspacing="0">
+			<COL class="c1">
+			<TR>
+				<TD class="c1">
+					<div class="ui form">
+				  		<div class="field">
+							<textarea rows="2"></textarea>
+						</div>
+						<div id="chat-room-open-add" class="ui button" style="float:right;">Enter</div>
+					 </div>
+				</TD>
+			</TR>
+		</TABLE>
+	</DIV>
+</div>
+
+<div id="chat-room-close-window" style="
+	border: 	1px solid #000;
+	position:	fixed;
+	width:		500px;
+	right: 		5%;
+	bottom: 	0;
+	z-index:	100;
+	margin:		0;
+	background:	white;
+">
+	<DIV class="header2 tableWrapper">
+		<TABLE width="100%" cellspacing="0">
+			<COL class="c1" width="100%">
+			<TR>
+				<TD class="c1">
+					Live chat
+					<a href="javascript:;" id="chat-room-open-btn" style='float:right;'>
+						<i class='inverted angle up icon'></i>
+					</a>
+				</TD>
+			</TR>
+		</TABLE>
+	</DIV>
+</div>
+
 <div id="container">
 
 <!-- left -->
@@ -473,7 +569,6 @@
 									    	<div class="ui large text loader">Preparing nuggets</div>
 									  	</div>
 									</div>
-									<div id="workbench-nugget-discuss"></div>
 								</div>
 							</div>
 						</div>

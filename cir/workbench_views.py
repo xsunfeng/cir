@@ -70,6 +70,18 @@ def api_get_toc(request):
     response['document_toc'] = render_to_string("document-toc.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
+def show_nugget_comment(request):
+    response = {}
+    context = {}
+    context['nugget_comments'] = []
+    forum_id = request.session['forum_id']
+    theme_id = request.REQUEST.get('theme_id')
+    nugget_comments = NuggetComment.objects.filter(forum_id = forum_id, theme_id = theme_id).order_by('created_at')
+    for nugget_comment in nugget_comments:
+        context['nugget_comments'].append(nugget_comment)
+    response['workbench_nugget_comments'] = render_to_string("workbench_nugget_comments.html", context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
 def add_nugget_comment(request):
     response = {}
     context = {}
@@ -79,11 +91,11 @@ def add_nugget_comment(request):
     theme_id = request.REQUEST.get('theme_id')
     content = request.REQUEST.get('content')
     now = timezone.now()
-    nugget_comments = NuggetComment.objects.filter(forum_id = forum_id, theme_id = theme_id).order_by('-created_at')
+    nugget_comments = NuggetComment.objects.filter(forum_id = forum_id, theme_id = theme_id).order_by('created_at')
     if (content != ""):
         newNuggetComment = NuggetComment(author = author, forum_id = forum_id, theme_id = theme_id, content = content, created_at = now)
         newNuggetComment.save()
-        nugget_comments = NuggetComment.objects.filter(forum_id = forum_id, theme_id = theme_id).order_by('-created_at')
+        nugget_comments = NuggetComment.objects.filter(forum_id = forum_id, theme_id = theme_id).order_by('created_at')
     for nugget_comment in nugget_comments:
         context['nugget_comments'].append(nugget_comment)
     response['workbench_nugget_comments'] = render_to_string("workbench_nugget_comments.html", context)
