@@ -38,11 +38,11 @@
 			{% endif %}
 			{% if claim.published %}
 				{% if claim.category == 'pro' %}
-				<a class="ui teal label">Pro</a>
+				<a class="ui teal category label">Pro</a>
 				{% elif claim.category == 'con' %}
-				<a class="ui red label">Con</a>
+				<a class="ui red category label">Con</a>
 				{% elif claim.category == 'finding' %}
-				<a class="ui blue label">Key Finding</a>
+				<a class="ui blue category label">Key Finding</a>
 				{% elif claim.category == 'discarded' %}
 				<a class="ui label">Discarded</a>
 				{% endif %}
@@ -66,6 +66,7 @@
 			<a class="item claim-vote-btn {{ phase.vote_btn }}" data-action="finding"><i class="flag outline icon"></i><span></span></a>
 			<a class="item claim-vote-btn {{ phase.vote_btn }}" data-action="discarded"><i class="trash outline icon"></i><span></span></a>
 			<div class="right menu">
+				{% if not claim.is_merged %}
 				<div class="ui dropdown simple theme item {{ phase.theming_menu }}">
 					Theme
 					<i class="dropdown icon"></i>
@@ -84,6 +85,8 @@
 						<a class="item claim-flag-merge-btn">Flag as "needs merging" / Merge claims</a>
 					</div>
 				</div>
+				<div class="item claim-addstmt-handle {{ phase.addstmt_btn }}">Drag to statement</div>
+				{% endif %}
 				<a class="item claim-gotosrc-btn" title="Reveal in Document"><i class="unhide icon"></i></a>
 				<a class="item claim-fullscreen-btn" title="Show in full screen"><i class="maximize icon"></i></a>
 			</div>

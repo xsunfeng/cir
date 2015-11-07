@@ -69,6 +69,41 @@ def api_get_claim(request):
         response['html'] = render_to_string("claim-navigator.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
+def api_draft_stmt(request):
+    response = {}
+    action = request.REQUEST.get('action')
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    context = {}
+    if action == 'add-to-stmt':
+        new_claim = Claim.objects.get(id=request.REQUEST['claim_id'])
+        order = int(request.REQUEST['order'])
+        # refresh claims one by one
+        claims = Claim.objects.filter(forum=forum, stmt_order__isnull=False, claim_category=new_claim.claim_category)
+        for claim in claims:
+            if claim.stmt_order >= order:
+                claim.stmt_order += 1
+                claim.save()
+        new_claim.stmt_order = order
+        new_claim.save()
+    if action == 'reorder':
+        orders = json.loads(request.REQUEST.get('order'))
+        for claim_id in orders:
+            claim = Claim.objects.get(id=claim_id)
+            claim.stmt_order = orders[claim_id]
+            claim.save()
+    if action == 'destmt':
+        claim = Claim.objects.get(id=request.REQUEST['claim_id'])
+        claim.stmt_order = None
+        claim.save()
+    if action == 'add-to-stmt' or action == 'get-list' or action == 'reorder' or action == 'destmt':
+        context['categories'] = {}
+        response['claims_cnt'] = {'finding': 0, 'pro': 0, 'con': 0}
+        claims = Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False)
+        for category in ['finding', 'pro', 'con']:
+            context['categories'][category] = [claim.getAttr(forum) for claim in claims.filter(claim_category=category).order_by('stmt_order')]
+            response['claims_cnt'][category] += len(context['categories'][category])
+        response['html'] = render_to_string("draft-stmt.html", context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_claim(request):
     response = {}

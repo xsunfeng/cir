@@ -1,0 +1,69 @@
+<div id="draft-stmt">
+    <h3 class="ui header">Preview of Citizens' Statement</h3>
+
+	<div class="ui indicating finding stmt progress">
+		<div class="title">Key Findings</div>
+		<div class="bar"></div>
+		<div class="label"></div>
+	</div>
+	<ol class="ui list finding">
+		{% if categories.finding %}{% for claim in categories.finding %}
+			<li class="item">
+				<div class="description" data-id="{{ claim.id }}">
+					<div class="ui label">Theme: {{ claim.theme }}</div>
+					{{ claim.content }}
+					<div class="ui destmt circular icon red button"><i class="trash icon"></i></div>
+				</div>
+			</li>
+		{% endfor %}{% else %}
+			<div class="item">
+				<div class="content">
+					<div class="description">(No entries yet)</div>
+				</div>
+			</div>
+		{% endif %}
+	</ol>
+	<div class="ui indicating pro stmt progress">
+		<div class="title">Pro Statements</div>
+		<div class="bar"></div>
+		<div class="label"></div>
+	</div>
+	<ol class="ui list pro">
+		{% if categories.pro %}{% for claim in categories.pro %}
+			<li class="item">
+				<div class="description" data-id="{{ claim.id }}">
+					<div class="ui label">Theme: {{ claim.theme }}</div>
+					{{ claim.content }}
+				</div>
+			</li>
+		{% endfor %}{% else %}
+			<div class="item">
+				<div class="content">
+					<div class="description">(No entries yet)</div>
+				</div>
+			</div>
+		{% endif %}
+	</ol>
+	<div class="ui indicating con stmt progress">
+		<div class="title">Con Statements</div>
+		<div class="bar"></div>
+		<div class="label"></div>
+	</div>
+	<ol class="ui list con">
+		{% if categories.con %}{% for claim in categories.con %}
+			<li class="item">
+				<div class="description" data-id="{{ claim.id }}">
+					<div class="ui label">Theme: {{ claim.theme }}</div>
+					{{ claim.content }}
+				</div>
+			</li>
+		{% endfor %}{% else %}
+			<div class="item">
+				<div class="content">
+					<div class="description">(No entries yet)</div>
+				</div>
+			</div>
+		{% endif %}
+	</ol>
+
+</div>

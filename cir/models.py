@@ -270,6 +270,7 @@ class ClaimVersion(Entry):
 class Claim(Entry):
     # for a Claim, its EntryCategory is not used for now -- for further extension of phases
     published = models.BooleanField(default=True)
+    stmt_order = models.IntegerField(null=True, blank=True)
     CATEGORY_CHOICES = (
         ('pro', 'Pro'),
         ('con', 'Con'),

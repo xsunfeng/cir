@@ -9,6 +9,9 @@
 .ui.secondary.menu .dropdown.item > .menu {
     margin-top: 0!important;
 }
+.ui.secondary.menu .claim-addstmt-handle {
+	cursor: move;
+}
 .claim-content {
 	font-size: 1.5em;
     line-height: 1.5em;
@@ -63,7 +66,7 @@ a.claim-vote-btn.unready:hover {
     padding-bottom: 0;
 }
 #claim-pane .claim.menu {
-    margin: 0 -1rem;
+    margin: 0 -1.5em;
 }
 #claim-pane .private.claim.segment {
     opacity: 0.6;
@@ -84,6 +87,62 @@ a.claim-vote-btn.unready:hover {
 #claim-navigator .vertical.menu .claim.item {
 	white-space: nowrap;
 
+}
+#draft-stmt .ui.progress .title {
+	position: absolute;
+	text-align: center;
+	width: 100%;
+	z-index: 2;
+	font-size: 1.1em;
+	font-weight: bold;
+}
+
+#draft-stmt .description {
+	max-height: 6em;
+	cursor: pointer;
+	overflow: hidden;
+	background: #fff;
+}
+#draft-stmt .description:hover .destmt.button {
+	display: block;
+}
+#draft-stmt .description .destmt.button {
+	display: none;
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 2;
+}
+#draft-stmt .description:after {
+	content: "";
+	height: 3em;
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	background: linear-gradient(to bottom, rgba(0, 0, 0, 0), white);
+}
+#draft-stmt .sortable-placeholder {
+	background-color: #a9d5de;
+	height: 7em;
+}
+.claim-stmt-helper {
+	max-width: 25em;
+	max-height: 7em;
+	overflow: hidden;
+	/*background-color: white;*/
+	/*padding: 0.3em;*/
+	/*border: 1px solid #767676;*/
+	/*border-radius: 0.3em;*/
+}
+.claim-stmt-helper:after {
+	content: "";
+	height: 3em;
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	background: linear-gradient(to bottom, rgba(0, 0, 0, 0), white);
 }
 
 /*4:3:3*/

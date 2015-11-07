@@ -15,7 +15,7 @@
             require.config({
                 baseUrl: "{% static 'js' %}",
                 paths: {
-                    'jquery.ui.sortable': 'vendor/jquery-ui-sortable.min',
+                    'jquery.ui': 'vendor/jquery-ui.min',
                     'jquery': '//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min',
                     'semantic-ui': 'http://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.3/semantic.min'
                 },
@@ -30,7 +30,7 @@
             });
         </script>
     </head>
-    <body id="cir" style="font-size: 1.3rem;">
+    <body id="cir" {% if phase %}data-phase="{{ phase.short_name }}"{% endif %} style="font-size: 1.3rem;">
             {% block header %}
             {% endblock %}
 

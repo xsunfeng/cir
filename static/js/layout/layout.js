@@ -2,11 +2,13 @@ define([
 	'document',
 	'claim',
 	'claim-navigator',
+	'draft-stmt',
 	'semantic-ui'
 ], function(
 	DocumentView,
 	ClaimView,
-	ClaimNavigator
+	ClaimNavigator,
+	DraftStmt
 ) {
 	var module = {
 		changeTab: function(dest, callback) {
@@ -25,6 +27,7 @@ define([
 		}
 	};
 	function initLayout() {
+		module.phase = $('body').attr('data-phase');
 		$('#nav-menu > .item').tab();
 
 		$('.ui.instructions.accordion').accordion();
@@ -34,7 +37,11 @@ define([
 	initLayout();
 	DocumentView.updateCategories();
 	ClaimView.updateClaimPane();
-	ClaimNavigator.updateNavigator();
+	if (module.phase == 'improve') {
+		DraftStmt.update();
+	} else{
+		ClaimNavigator.updateNavigator();
+	}
 	return module;
 });
 

@@ -1,5 +1,5 @@
 define([
-	'jquery.ui.sortable'
+	'jquery.ui' // for sortable
 ], function(
 
 ) {

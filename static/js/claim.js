@@ -1,8 +1,11 @@
 define([
 	'claim-navigator',
-	'utils'
+	'draft-stmt',
+	'utils',
+	'jquery.ui' // for draggable & droppable
 ], function(
 	ClaimNavigator,
+	DraftStmt,
 	Utils
 ) {
 	var module = {};
@@ -604,6 +607,9 @@ define([
 				}
 				loadVotes();
 				loadFlags();
+				if ($('body').attr('data-phase') == 'improve') {
+					initStmtHandles();
+				}
 				if (typeof callback == 'function') {
 					callback();
 				}
@@ -658,6 +664,33 @@ define([
 				if (xhr.status == 403) {
 					Utils.notify('error', xhr.responseText);
 				}
+			}
+		});
+	}
+
+	function initStmtHandles() {
+		$('#claim-pane .claim-addstmt-handle').draggable({
+			appendTo: 'body',
+			connectToSortable: '#draft-stmt ol.list',
+			helper: function() {
+				var content = $(this).parents('.claim.segment').find('.claim-content').text();
+				return $("<div class='claim-stmt-helper ui segment'>" + content + "</div>");
+			},
+			revert: 'invalid',
+			start: function() {
+				// hide invalid destinations
+				var category = $(this).parents('.claim.segment').find('.category.label').text();
+				$('#draft-stmt ol.list').hide();
+				if (category == 'Key Finding') {
+					$('#draft-stmt ol.finding.list').show();
+				} else if (category == 'Pro') {
+					$('#draft-stmt ol.pro.list').show();
+				} else if (category == 'Con') {
+					$('#draft-stmt ol.con.list').show();
+				}
+			},
+			stop: function() {
+				$('#draft-stmt ol.list').show();
 			}
 		});
 	}

@@ -8,6 +8,7 @@ PHASE_CONTROL = {
         'prioritize_btn': 'disabled',
         'theming_menu': 'hidden',
         'improve_menu': 'hidden',
+        'addstmt_btn': 'hidden',
     },
     'not_started': {
         'short_name': 'not_started',
@@ -18,6 +19,7 @@ PHASE_CONTROL = {
         'prioritize_btn': 'hidden',
         'theming_menu': 'hidden',
         'improve_menu': 'hidden',
+        'addstmt_btn': 'hidden',
     },
     'tagging': {
         'short_name': 'tagging',
@@ -29,6 +31,7 @@ PHASE_CONTROL = {
         'prioritize_btn': 'hidden',
         'theming_menu': 'hidden',
         'improve_menu': 'hidden',
+        'addstmt_btn': 'hidden',
     },
     'extract': {
         'short_name': 'extract',
@@ -40,6 +43,7 @@ PHASE_CONTROL = {
         'prioritize_btn': 'hidden',
         'theming_menu': 'hidden',
         'improve_menu': 'hidden',
+        'addstmt_btn': 'hidden',
     },
     'categorize': {
         'short_name': 'categorize',
@@ -49,6 +53,7 @@ PHASE_CONTROL = {
         'prioritize_btn': 'hidden',
         'theming_menu': 'hidden',
         'improve_menu': 'hidden',
+        'addstmt_btn': 'hidden',
     },
     'theming': {
         'short_name': 'theming',
@@ -58,6 +63,7 @@ PHASE_CONTROL = {
         'vote_btn': 'disabled',
         'prioritize_btn': 'hidden',
         'improve_menu': 'hidden',
+        'addstmt_btn': 'hidden',
     },
     'improve': {
         'short_name': 'improve',
@@ -77,5 +83,6 @@ PHASE_CONTROL = {
         'prioritize_btn': 'disabled',
         'theming_menu': 'hidden',
         'improve_menu': 'hidden',
+        'addstmt_btn': 'hidden',
     }
 }
