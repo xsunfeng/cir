@@ -79,7 +79,8 @@ define([
 					value: module.stmtCount[category],
 					total: module.stmtLimit[category],
 					text: {
-						active: '{value}/{total} entries'
+						active: '{value}/{total} entries',
+						success: '{value}/{total} entries'
 					}
 				});
 		});
