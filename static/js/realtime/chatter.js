@@ -11,6 +11,7 @@ define([
 		'showMsg': function(msg) {
 			$('#chatter-wrapper').transition('bounce');
 			$('#chatter-wrapper .comments.list').append(getMsgHtml(msg));
+			scrollToBottom();
 		},
 		'loadRecentHistory': function() {
 			$.ajax({
@@ -26,13 +27,16 @@ define([
 					}
 					html += '<div class="ui message">Above are recent messages</div>';
 					$('#chatter-wrapper .comments.list').prepend(html);
-					$('.comments.segment').scrollTop($('.comments.list').height());
+					scrollToBottom();
 				}
 			});
 		}
 	};
 	$('#chatter-wrapper .titlebar').click(function() {
 		$('#chatter-wrapper').toggleClass('minimized');
+		if (!$('#chatter-wrapper').hasClass('minimized')) {
+			$('.comments.segment').scrollTop($('.comments.list').height());
+		}
 	});
 	$('#chatter-wrapper .reply.button').click(function() {
 		var content = $('#chatter-wrapper textarea').val();
@@ -54,6 +58,7 @@ define([
 				require('realtime/socket').emitChat(data);
 				$('#chatter-wrapper textarea').val('');
 				$('#chatter-wrapper .comments.list').append(getMsgHtml(data));
+				scrollToBottom();
 			}
 		});
 	});
@@ -84,6 +89,10 @@ define([
 		return html;
 	}
 
+	function scrollToBottom() {
+
+		$('.comments.segment').scrollTop($('.comments.list').height());
+	}
 	function nowString() {
 		var date = new Date();
 		var hours = date.getHours();

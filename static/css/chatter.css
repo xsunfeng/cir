@@ -10,9 +10,6 @@
 	border-radius: 5px;
 }
 #chatter-wrapper.minimized {
-	width: 37.5%!important;
-	position: fixed;
-	right: 0.5em;
 	bottom: 2em;
 }
 #chatter-wrapper:not(.minimized) {

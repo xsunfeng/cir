@@ -14,6 +14,8 @@ def api_chatter(request):
         ChatMessage.objects.create(source=request.user, content=content, created_at=now)
     if action == 'recent-history':
         forum = Forum.objects.get(id=request.session['forum_id'])
-        messages = ChatMessage.objects.order_by('-created_at')[:25]
-        response['messages'] = [msg.getAttr(forum) for msg in messages]
+        messages = ChatMessage.objects.order_by('-created_at')
+        response['messages'] = []
+        for i in range(24, -1, -1):
+            response['messages'].append(messages[i].getAttr(forum))
     return HttpResponse(json.dumps(response), mimetype='application/json')
