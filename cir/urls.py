@@ -9,6 +9,7 @@ import claim_views
 import facilitator_views
 import tag_views
 import workbench_views
+import chatter_views
 
 
 admin.autodiscover()
@@ -48,6 +49,8 @@ urlpatterns = patterns('',
     url(r'^workbench/api_assign_nugget/$', workbench_views.api_assign_nugget),
     url(r'^workbench/api_load_nugget_list/$', workbench_views.api_load_nugget_list),
     url(r'^workbench/api_load_nugget_list_partial/$', workbench_views.api_load_nugget_list_partial),
+
+    url(r'^api_chatter/$', chatter_views.api_chatter),
 
     url(r'^api_register_delegator/$', facilitator_views.register_delegator), # include other apps
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

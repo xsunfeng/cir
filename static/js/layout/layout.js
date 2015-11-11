@@ -3,7 +3,8 @@ define([
 	'claim',
 	'claim-navigator',
 	'draft-stmt',
-	'semantic-ui'
+	'semantic-ui',
+	'realtime/socket'
 ], function(
 	DocumentView,
 	ClaimView,

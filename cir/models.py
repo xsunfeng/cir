@@ -30,6 +30,7 @@ class Forum(models.Model):
     phase = models.CharField(max_length=100, choices=PHASE_CHOICES, default='not_started')
     contextmap = models.TextField(null=True, blank=True)
     forum_logo = models.ImageField(upload_to='forum_logos', null=True, blank=True, default='forum_logos/default.jpg')
+    stmt_preamble = models.TextField(null=True, blank=True)
 
     def __unicode__(self):  # used for admin site
         return self.full_name
@@ -424,6 +425,29 @@ class Post(Entry):  # in discussion
         if self.target_event:
             attr['parent_name'] = self.target_event.user.get_full_name()
             attr['parent_id'] = self.target_event.id
+        return attr
+
+class ChatMessage(models.Model):
+    source = models.ForeignKey(User, related_name='get_source')
+    target = models.ForeignKey(User, null=True, blank=True)
+    reply_target = models.ForeignKey('self', related_name='replies', null=True, blank=True)
+    content = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField()
+
+    def __unicode__(self):
+        return self.content
+
+    def getAttr(self, forum):
+        attr = {}
+        try:
+            attr['role'] = Role.objects.get(user=self.source, forum=forum).role
+        except:
+            attr['role'] = VISITOR_ROLE
+        attr['id'] = self.id
+        attr['user_id'] = self.source.id
+        attr['user_name'] = self.source.get_full_name()
+        attr['content'] = self.content
+        attr['created_at'] = utils.pretty_date(self.created_at)
         return attr
 
 class HighlightClaim(models.Model):

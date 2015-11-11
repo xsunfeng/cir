@@ -196,6 +196,9 @@
 		{% endif %}
 	</div>
 </div>
+{% if role != 'visitor' %}
+	{% include 'chatter.html' %}
+{% endif %}
 	{% endif %}
 
 {% endblock %}

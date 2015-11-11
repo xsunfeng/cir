@@ -1,6 +1,7 @@
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext
 from django.db.models import Q
+from django.utils import timezone
 
 from cir.models import *
 from cir.phase_control import PHASE_CONTROL
@@ -13,7 +14,6 @@ def home(request):  # access /
         del request.session['actual_user_id']
     request.session['forum_id'] = -1
     if request.user.is_authenticated():
-        # request.session['user_id'] = request.user.id
         context = {
             'user_id': request.user.id,
             'user_name': request.user.get_full_name(),
@@ -90,6 +90,10 @@ def enter_forum(request, forum_url):  # access /forum_name
                 not request.user.is_authenticated() or not Role.objects.filter(user=request.user,
                     forum=forum).exists()):
         context['load_error'] = '403'
+    elif request.user.is_authenticated(): # everything allright
+        # update user's last login time
+        request.user.last_login = timezone.now()
+        request.user.save()
     themes = ClaimTheme.objects.filter(forum=forum)
     context['themes'] = [theme.getAttr() for theme in themes]
     return render(request, 'index.html', context)

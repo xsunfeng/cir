@@ -19,13 +19,7 @@ define([
 					url: '/api_logout/',
 					type: 'post',
 					complete: function() {
-						$("#curr-user-name").html('');
-						sessionStorage.setItem('user_id', '-1');
-						sessionStorage.setItem('user_name', '');
-						sessionStorage.setItem('role', 'visitor');
-						$('#header-facilitator-wrapper').hide();
-						$('#header-member-wrapper').hide();
-						$('#header-visitor-wrapper').show();
+						window.location.reload();
 					}
 				});
 			});
@@ -164,19 +158,7 @@ define([
 						data: $form.form('get values'),
 						type: 'post',
 						success: function(xhr) {
-							sessionStorage.setItem('user_id', xhr.user_id);
-							sessionStorage.setItem('user_name', xhr.user_name);
-							if (xhr.role) {
-								sessionStorage.setItem('role', xhr.role);
-							}
-							$('#header-visitor-wrapper').hide();
-							$('#header-member-wrapper').show();
-							if (sessionStorage.getItem('role') == 'facilitator' || sessionStorage.getItem('role') == 'admin') {
-								$('#header-facilitator-wrapper').show();
-							}
-							$('#header-user-name').text(xhr.user_name);
-							$('#sign-in-form').modal('hide');
-							$('#sign-in-btn').removeClass('loading');
+							window.location.reload();
 						},
 						error: function(xhr) {
 							$form.find('.error.message').text(xhr.responseText);
@@ -229,14 +211,7 @@ define([
 						data: $form.form('get values'),
 						type: 'post',
 						success: function(xhr) {
-							sessionStorage.setItem('user_id', xhr.user_id);
-							sessionStorage.setItem('user_name', xhr.user_name);
-							sessionStorage.setItem('role', xhr.role);
-							$('#header-visitor-wrapper').hide();
-							$('#header-member-wrapper').show();
-							$('#header-user-name').text(xhr.user_name);
-							$('#sign-up-form').modal('hide');
-							$('#register-btn').removeClass('loading');
+							window.location.reload();
 						},
 						error: function(xhr) {
 							$form.find('.error.message').text(xhr.responseText);
