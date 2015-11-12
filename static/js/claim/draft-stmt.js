@@ -14,7 +14,7 @@ define([
 	$('#claim-navigator')
 		.on('click', '#draft-stmt .description', function() {
 			var claim_id = this.getAttribute('data-id');
-			require('claim').jumpTo(claim_id); // without changing display_type
+			require('claim/claim').jumpTo(claim_id); // without changing display_type
 		}).on('click', '#draft-stmt .destmt.button', function(e) {
 			e.stopPropagation();
 			var claim_id = $(this).parents('.description').attr('data-id');

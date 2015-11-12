@@ -1,5 +1,7 @@
 define([
+	'jquery'
 ], function(
+	$
 ) {
 	var module = {
 		'addOnlineUser': function(userinfo) {
@@ -35,7 +37,10 @@ define([
 	$('#chatter-wrapper .titlebar').click(function() {
 		$('#chatter-wrapper').toggleClass('minimized');
 		if (!$('#chatter-wrapper').hasClass('minimized')) {
-			$('.comments.segment').scrollTop($('.comments.list').height());
+			scrollToBottom();
+			setTimeout(function() {
+				$('#chatter-wrapper textarea').focus();
+			}, 0);
 		}
 	});
 	$('#chatter-wrapper .reply.button').click(function() {
@@ -61,6 +66,12 @@ define([
 				scrollToBottom();
 			}
 		});
+	});
+	$('#chatter-wrapper textarea').keydown(function(e) {
+		if (e.keyCode == 13) {
+			$('#chatter-wrapper .reply.button').trigger('click');
+			return false;
+		}
 	});
 
 	function getUserLabel(userinfo) {
@@ -90,7 +101,6 @@ define([
 	}
 
 	function scrollToBottom() {
-
 		$('.comments.segment').scrollTop($('.comments.list').height());
 	}
 	function nowString() {

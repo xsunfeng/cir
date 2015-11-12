@@ -1,15 +1,17 @@
 define([
-	'document',
-	'claim',
-	'claim-navigator',
-	'draft-stmt',
+	'doc/document',
+	'claim/claim',
+	'claim/claim-navigator',
+	'claim/draft-stmt',
+	'doc/qa',
 	'semantic-ui',
 	'realtime/socket'
 ], function(
 	DocumentView,
 	ClaimView,
 	ClaimNavigator,
-	DraftStmt
+	DraftStmt,
+	QA
 ) {
 	var module = {
 		changeTab: function(dest, callback) {
@@ -37,6 +39,7 @@ define([
 	}
 	initLayout();
 	DocumentView.updateCategories();
+	QA.updateQuestionList();
 	ClaimView.updateClaimPane();
 	if (module.phase == 'improve') {
 		DraftStmt.update();

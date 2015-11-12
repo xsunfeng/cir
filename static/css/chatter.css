@@ -11,12 +11,14 @@
 }
 #chatter-wrapper.minimized {
 	bottom: 2em;
+	border: none;
 }
 #chatter-wrapper:not(.minimized) {
 	min-height: 60%;
 }
 #chatter-wrapper .online.users.list {
 	padding: 0.5em;
+	overflow: auto;
 }
 #chatter-wrapper .comments.list {
 	padding: 0.5em;

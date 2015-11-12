@@ -31,7 +31,8 @@ define([
 		// dynamic listeners
 		module.$category_element.on('click', '.open-doc', function(e) {
 			module.doc_id = this.getAttribute('data-id');
-			updateDocument();
+			module.updateDocument()
+				.done(module.reloadHighlights());
 		});
 		module.$content_element.on('click', '.jump-to-section', function(e) {
 			var section_id = this.getAttribute('data-id');
@@ -224,8 +225,11 @@ define([
 			type: module.newHighlight.type
 		});
 
+		// update question panel
+		require('doc/qa').updateQuestionList();
+
 		// switch to highlight type and update
-		updateHighlightFilter({
+		module.updateHighlightFilter({
 			switch: module.newHighlight.type
 		});
 	}
@@ -238,7 +242,7 @@ define([
 		$('#highlight-filter-pane input[val="annotation"]').parent().checkbox('set checked');
 		module.highlightsFilter.showtype = 'annotation';
 		$('#available-tags').show();
-		reloadHighlights()
+		module.reloadHighlights()
 			.done(function() {
 				for (var i = 0; i < newTagsData.length; i++) {
 					var newTag = newTagsData[i];
@@ -253,7 +257,7 @@ define([
 	function initTagControl() {
 		$('#available-tags').on('click', '.toggle.button', function() {
 			$(this).toggleClass('active');
-			updateHighlightFilter();
+			module.updateHighlightFilter();
 		});
 	}
 	function initForms() {
@@ -298,11 +302,16 @@ define([
 				});
 			}
 		});
+		$('#doc-comment-form textarea').keydown(function(e) {
+			if ((e.ctrlKey || e.metaKey) && e.keyCode == 13) {
+				$('#doc-comment-form .doc-anno-submit').trigger('click');
+			}
+		});
 		$('#highlight-filter-pane .showtype.fields .checkbox').checkbox({
 			onChecked: function() {
 				var showtype = this.getAttribute('val');
 				module.highlightsFilter.showtype = showtype;
-				updateHighlightFilter();
+				module.updateHighlightFilter();
 				if (showtype == 'annotation') {
 					$('#available-tags').show();
 				} else {
@@ -333,8 +342,8 @@ define([
 		});
 	}
 
-	function updateDocument() {
-		$.ajax({
+	module.updateDocument = function() {
+		return $.ajax({
 			url: '/api_doc/',
 			type: 'post',
 			data: {
@@ -352,22 +361,7 @@ define([
 				$('#tag-filter-pane').show();
 				$('#highlight-filter-pane .none.checkbox').checkbox('check');
 				module.$content_element.find('abbr').popup();
-				reloadHighlights();
-				$('.main.tab[data-tab="document-tab"] .ui.sticky').sticky({
-					context: '.document.column',
-					offset: 70,
-					// fix bottom position
-					onBottom: function() {
-						$(this)
-							.removeClass('bound')
-							.removeClass('bottom')
-							.addClass('fixed')
-							.addClass('top')
-							.css('margin-top', '70px');
-					}
-				});
 				$('.ui.dropdown').dropdown();
-
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -375,8 +369,9 @@ define([
 				}
 			}
 		});
-	}
-	function updateHighlightFilter(options) {
+	};
+
+	module.updateHighlightFilter = function(options) {
 		var options = options || {};
 		clearHighlights();
 
@@ -406,8 +401,8 @@ define([
 		for (var i = 0; i < items.length; i++) {
 			highlight(items[i]);
 		}
-	}
-	function reloadHighlights() {
+	};
+	module.reloadHighlights = function() {
 		return $.ajax({
 			url: '/api_highlight/',
 			type: 'post',
@@ -428,7 +423,7 @@ define([
 					}
 				}
 				$('#doc-tag-form .tag.dropdown select[multiple]').html(html);
-				updateHighlightFilter();
+				module.updateHighlightFilter();
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -436,7 +431,20 @@ define([
 				}
 			}
 		});
-	}
+	};
+
+	module.jumpToHighlight = function(highlight_id) {
+		var $target = $('u.tk[data-hl-id*="' + highlight_id + '"]');
+		if ($target.length > 0) {
+			var elOffset = $target.offset().top;
+			var windowHeight = $(window).height();
+			$(window).scrollTop(elOffset - (windowHeight / 2));
+			$target.addClass('highlight-found');
+			setTimeout(function() {
+				$target.removeClass('highlight-found');
+			}, 2000);
+		}
+	};
 
 	function highlight(highlight) {
 		// get context document section

@@ -1,6 +1,6 @@
 define([
-	'claim-navigator',
-	'draft-stmt',
+	'claim/claim-navigator',
+	'claim/draft-stmt',
 	'utils',
 	'jquery.ui' // for draggable & droppable
 ], function(

@@ -192,3 +192,25 @@ def api_annotation(request):
         post.save()
         return HttpResponse(json.dumps(response), mimetype='application/json')
 
+def api_qa(request):
+    response = {}
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    action = request.REQUEST.get('action')
+    if action == 'get-all-questions':
+        context = {
+            'questions': []
+        }
+        questions = Post.objects.filter(forum=forum, content_type='question', is_deleted=False)
+        for question in questions:
+            question_info = question.getAttr(forum)
+            question_info['treesize'] = len(question.getTree()) - 1
+            try:
+                docsection = DocSection.objects.get(id=question.highlight.context.id)
+                question_info['doc_name'] = docsection.doc.title
+                question_info['doc_id'] = docsection.doc.id
+                question_info['highlight_id'] = question.highlight.id
+            except:
+                pass
+            context['questions'].append(question_info)
+        response['html'] = render_to_string('qa-panel.html', context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')

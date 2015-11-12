@@ -15,6 +15,10 @@
 }
 .tk {
 	text-decoration: none;
+	-moz-transition: background-color 0.2s;
+	-webkit-transition: background-color 0.2s;
+	-o-transition: background-color 0.2s;
+	transition: background-color 0.2s;
 }
 .tk.n,
 .tk.p,
@@ -73,9 +77,20 @@
 	max-height: 500px;
 	overflow: auto;
 }
+
+#document-rail {
+	position: fixed;
+	top: 3em;
+	bottom: 3em;
+	overflow: auto;
+
+}
 #available-tags {
 	margin-top: 2em;
 }
 #available-tags .ui.toggle.button {
 	margin-bottom: 0.75em;
+}
+#qa-list .description {
+	margin: 0.2em 0;
 }

@@ -1,6 +1,6 @@
 define([
 	'jquery',
-	'cir',
+	'layout/cir',
 ], function(
 	$,
 	CIR

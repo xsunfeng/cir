@@ -35,7 +35,6 @@
         </div>
     </div>
     <div id="header-member-wrapper" class="right menu" style="display:flex">
-        <a href="#" class="item"><i class="mail icon"></i>Messages</a>
         <div class="ui simple dropdown item" tabindex="0">
             <span id="header-user-name" data-id="{{ user_id }}" data-role="{{ role }}">{{ user_name }}</span>
             <i class="icon dropdown" tabindex="0"></i>
@@ -101,22 +100,26 @@
 	{% else %}
 <div class="ui main tab {{ phase.document_active }}" data-tab="document-tab">
 	<div class="ui grid">
-		<div class="sixteen wide column" style="padding-top:1em">
+		<div class="ten wide document column" style="padding-top:0">
 			<div class="ui attached info message">
 				<div class="ui instructions accordion">
 					<div class="ui active title"><i class="dropdown icon"></i>Current phase: {{ phase.full_name }}</div>
 					<div class="active content">
-					{{ phase.instructions }}
+						{{ phase.instructions }}
 					</div>
 				</div>
 			</div>
 			<div id="document-categories" class="ui attached segment"></div>
-		</div>
-		<div class="ten wide document column" style="padding-top:0">
 			<div id="document-pane" class="ui segment">Please select a document from the list.</div>
-			{% include 'doc-tag-filter.html' %}
 		</div>
-
+		<div id="document-rail"  class="six wide column">
+			{% include 'doc-tag-filter.html' %}
+			<div id="qa-wrapper">
+				<h3 class="ui header">Questions on documents</h3>
+				<a class="refresh-list">Refresh list</a>
+				<div id="qa-list"></div>
+			</div>
+		</div>
 	</div>
 	{% include 'doc-highlight-toolbar.html' with phase=phase %}
 	{% include 'doc-thread-popup.html' with phase=phase %}

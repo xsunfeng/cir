@@ -1,5 +1,5 @@
 define([
-	'claim',
+	'claim/claim',
 	'utils'
 ], function(
 	ClaimView,
@@ -297,6 +297,10 @@ define([
 				$(this).addClass('loading');
 				_this.data('filter', this.getAttribute('data-filter'));
 				_this.update();
+			}).on('keydown', '.comment.form textarea', function(e) {
+				if ((e.ctrlKey || e.metaKey) && e.keyCode == 13) {
+					_this.find('.comment.form div.submit').trigger('click');
+				}
 			});
 		} else if (action == 'update') {
 			if (typeof data == 'object') this.data(data);
