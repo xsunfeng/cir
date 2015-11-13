@@ -503,14 +503,15 @@ define([
 			// change display type and update pane
 			_setDisplayType(display_type);
 			if (module.display_type == 'overview') {
-				module.updateClaimPane(function() {
+				module.updateClaimPane().done(function() {
 					var $claim_wrapper = $('#claim-pane .claim.segment[data-id="' + claim_id + '"]');
 					if ($claim_wrapper.length) {
 						window.scrollTo(0, $claim_wrapper.position().top - 20); // navbar width
-						$claim_wrapper.find('.claim-content').addClass('highlight-found');
+						$claim_wrapper.addClass('highlight-found');
 						setTimeout(function() {
-							$claim_wrapper.find('.claim-content').removeClass('highlight-found');
-						}, 1000);window.scrollTo(0, 96.4375 - 20);
+							$claim_wrapper.removeClass('highlight-found');
+						}, 1000);
+						window.scrollTo(0, 96.4375 - 20);
 					} 
 				});
 			}
@@ -525,9 +526,9 @@ define([
 							$claim_wrapper.removeClass('highlight-found');
 						}, 1000);
 					} else {
-						$claim_wrapper.find('.claim-content').addClass('highlight-found');
+						$claim_wrapper.addClass('highlight-found');
 						setTimeout(function() {
-							$claim_wrapper.find('.claim-content').removeClass('highlight-found');
+							$claim_wrapper.removeClass('highlight-found');
 						}, 1000);
 					}
 				}
@@ -538,7 +539,7 @@ define([
 			module.updateClaimPane();
 		}
 	};
-	module.updateClaimPane = function(callback) {
+	module.updateClaimPane = function() {
 		if (module.claimLoader) {
 			module.claimLoader.abort();
 		}
@@ -589,7 +590,7 @@ define([
 							'id': module.claim_id,
 							'filter': filter
 						});
-						loadRatings();
+						//loadRatings();
 						$('#claim-pane .ratings .rating').rating({
 							initialRating: 4,
 							maxRating: 5,
@@ -610,9 +611,6 @@ define([
 				if ($('body').attr('data-phase') == 'improve') {
 					initStmtHandles();
 				}
-				if (typeof callback == 'function') {
-					callback();
-				}
 			},
 			error: function(xhr) {
 				$('#claim-pane > .segment').removeClass('loading');
@@ -621,6 +619,7 @@ define([
 				}
 			}
 		});
+		return module.claimLoader;
 	};
 	function loadRatings() {
 		// TODO load ratings of claim module.claim_id
@@ -669,29 +668,35 @@ define([
 	}
 
 	function initStmtHandles() {
-		$('#claim-pane .claim-addstmt-handle').draggable({
-			appendTo: 'body',
-			connectToSortable: '#draft-stmt ol.list',
-			helper: function() {
-				var content = $(this).parents('.claim.segment').find('.claim-content').text();
-				return $("<div class='claim-stmt-helper ui segment'>" + content + "</div>");
-			},
-			revert: 'invalid',
-			start: function() {
-				// hide invalid destinations
-				var category = $(this).parents('.claim.segment').find('.category.label').text();
-				$('#draft-stmt ol.list').hide();
-				if (category == 'Key Finding') {
-					$('#draft-stmt ol.finding.list').show();
-				} else if (category == 'Pro') {
-					$('#draft-stmt ol.pro.list').show();
-				} else if (category == 'Con') {
-					$('#draft-stmt ol.con.list').show();
-				}
-			},
-			stop: function() {
-				$('#draft-stmt ol.list').show();
+		$('#claim-pane .claim-addstmt-handle').mousedown(function(event) {
+			var $claimsegment = $(this).parents('.claim.segment');
+			var claimcontent = $claimsegment.find('.claim-content').text();
+			DraftStmt.draggingClaimId = $claimsegment.attr('data-id');
+			var $helper = $('<div id="claim-stmt-helper" class="ui segment">' + claimcontent + '</div>');
+			$('body').addClass('noselect');
+
+			// place helper
+			$helper
+				.css('left', event.clientX)
+				.css('top', event.clientY)
+				.appendTo($('body'));
+
+			// hide invalid categories
+			var category = $claimsegment.find('.category.label').text();
+			$('#draft-stmt ol.list').addClass('invalid');
+			if (category == 'Key Finding') {
+				$('#draft-stmt ol.finding.list').removeClass('invalid');
+			} else if (category == 'Pro') {
+				$('#draft-stmt ol.pro.list').removeClass('invalid');
+			} else if (category == 'Con') {
+				$('#draft-stmt ol.con.list').removeClass('invalid');
 			}
+
+			var onTarget = false;
+			// register mousemove & mouseup
+			$(window)
+				.mousemove(DraftStmt.onDrag)
+				.mouseup(DraftStmt.onDragStop);
 		});
 	}
 

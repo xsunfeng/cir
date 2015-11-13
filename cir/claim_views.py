@@ -204,7 +204,7 @@ def api_claim_activities(request):
         if activity == 'all' or activity == 'general':
             posts = claim.comments_of_entry.all()
             for post in posts:
-                for comment in post.getTree():
+                for comment in post.getTree(exclude_root=False):
                     context['entries'].append(comment.getAttr(forum))
         if activity == 'all' or activity == 'categorize':
             votes = Vote.objects.filter(entry=claim).filter(
@@ -213,7 +213,7 @@ def api_claim_activities(request):
                 context['entries'].append(vote.getAttr(forum))
                 posts = vote.comments_of_event.all()
                 for post in posts:
-                    for comment in post.getTree():
+                    for comment in post.getTree(exclude_root=False):
                         context['entries'].append(comment.getAttr(forum))
         if activity == 'all' or activity == 'theming':
             themeassignments = ThemeAssignment.objects.filter(entry=claim)
@@ -221,7 +221,7 @@ def api_claim_activities(request):
                 context['entries'].append(themeassignment.getAttr(forum))
                 posts = themeassignment.comments_of_event.all()
                 for post in posts:
-                    for comment in post.getTree():
+                    for comment in post.getTree(exclude_root=False):
                         context['entries'].append(comment.getAttr(forum))
         if activity == 'all' or activity == 'improve':
             reword_flags = Vote.objects.filter(entry=claim.adopted_version()).filter(vote_type='reword')

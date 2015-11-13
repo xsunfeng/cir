@@ -5,7 +5,6 @@ from django.http import HttpResponse
 from django.utils import timezone
 
 from cir.models import *
-import claim_views
 
 def api_doc(request):
     response = {}
@@ -137,10 +136,11 @@ def api_annotation(request):
         highlight = Highlight.objects.get(id=highlight_id)
         context = {}
         context['forum_phase'] = forum.phase
+        context['source'] = 'highlight'
         context['entries'] = []
         posts = highlight.posts_of_highlight.all()
         for post in posts:
-            for comment in post.getTree():
+            for comment in post.getTree(exclude_root=False):
                 context['entries'].append(comment.getAttr(forum))
         claims = highlight.claim_set.all()
         for claim in claims:
@@ -196,14 +196,30 @@ def api_qa(request):
     response = {}
     forum = Forum.objects.get(id=request.session['forum_id'])
     action = request.REQUEST.get('action')
-    if action == 'get-all-questions':
+    if action == 'load-thread':
+        # given a question, load its discussions
+        question = Post.objects.get(id=request.REQUEST.get('question_id'))
+        context = {
+            'entries': [],
+            'source': 'qa'
+        }
+        for post in question.getTree(exclude_root=True): # don't include root
+            context['entries'].append(post.getAttr(forum))
+        context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'], reverse=True)
+        response['html'] = render_to_string("activity-feed-doc.html", context)
+    if action == 'raise-question':
+        now = timezone.now()
+        content = request.REQUEST.get('content')
+        Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content,
+            created_at=now, updated_at=now, content_type='question')
+    if action == 'get-all-questions' or action == 'raise-question':
         context = {
             'questions': []
         }
         questions = Post.objects.filter(forum=forum, content_type='question', is_deleted=False)
         for question in questions:
             question_info = question.getAttr(forum)
-            question_info['treesize'] = len(question.getTree()) - 1
+            question_info['treesize'] = len(question.getTree(exclude_root=True))
             try:
                 docsection = DocSection.objects.get(id=question.highlight.context.id)
                 question_info['doc_name'] = docsection.doc.title
@@ -212,5 +228,6 @@ def api_qa(request):
             except:
                 pass
             context['questions'].append(question_info)
+        context['questions'] = sorted(context['questions'], key=lambda en: en['created_at_full'], reverse=True)
         response['html'] = render_to_string('qa-panel.html', context)
     return HttpResponse(json.dumps(response), mimetype='application/json')

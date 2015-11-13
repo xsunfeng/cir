@@ -91,6 +91,17 @@
 #available-tags .ui.toggle.button {
 	margin-bottom: 0.75em;
 }
+#qa-wrapper .new.question.segment {
+	width: 100%;
+	left: 1px;
+}
 #qa-list .description {
 	margin: 0.2em 0;
+}
+#qa-list .question.item .content {
+	width: 100%;
+}
+#qa-thread {
+	margin: 0;
+	padding: 1em 0;
 }

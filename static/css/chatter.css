@@ -25,8 +25,9 @@
 }
 #chatter-wrapper.minimized .comments.segment,
 #chatter-wrapper.minimized .online.users.list,
-#chatter-wrapper.minimized .reply.form {
-	display: none;
+#chatter-wrapper.minimized .reply.form,
+#chatter-wrapper.minimized .warning.message {
+	display: none!important;
 }
 #chatter-wrapper .reply.form {
 	padding: 0;

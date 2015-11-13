@@ -45,7 +45,7 @@ define([
 					$('#doc-thread-content').feed('update', {
 						type: 'highlight',
 						id: highlight_ids[i]
-					}, function() {
+					}).done(function() {
 						$('#doc-thread-popup').css('left', e.pageX).css('top', e.pageY);
 					});
 				}
@@ -63,6 +63,7 @@ define([
 			}
 		}).on('mousedown', '.section-content', function(e) {
 			$('#doc-highlight-toolbar').removeAttr('style');
+			$('#doc-thread-popup').removeAttr('style');
 			if ($(e.target).is('u.tk')) {
 				var $target = $(this);
 				$(window).mousemove(function(e2) {

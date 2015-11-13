@@ -1,3 +1,4 @@
+{% if source == 'highlight' %}
 <div class="feed-forms" style="display:none">
 	<form class="ui form comment" style="display:none">
 		<div class="field">
@@ -19,8 +20,9 @@
 		<div class="ui primary submit button">Publish</div>
 	</form>
 </div>
+{% endif %}
 {% if entries %}
-<div class="ui feed">
+<div class="ui feed {{ source }}">
 {% for entry in entries %}
 	<div class="event" data-type="{{ entry.entry_type }}">
 		<div class="user-initial">
@@ -45,12 +47,10 @@
 			<div class="extra text">
 				{{ entry.content }}
 			</div>
-			{% if forum_phase == 'extract' %}
 			<div class="meta">
 				<a class="feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
 				<a class="feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
 			</div>
-			{% endif %}
 		{% elif entry.entry_type == 'claim' %}
 			<div class="summary">
 				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> extracted a claim from the highlighted text.
@@ -68,12 +68,10 @@
 			<div class="extra text">
 				{{ entry.content }}
 			</div>
-			{% if forum_phase == 'extract' %}
 			<div class="meta">
 				<a class="feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
 				<a class="feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
 			</div>
-			{% endif %}
 		{% elif entry.entry_type == 'comment' %}
 			<div class="summary">
 				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> commented on the highlighted text.
@@ -82,12 +80,10 @@
 			<div class="extra text">
 				{{ entry.content }}
 			</div>
-			{% if forum_phase == 'extract' %}
 			<div class="meta">
 				<a class="feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
 				<a class="feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
 			</div>
-			{% endif %}
 		{% endif %}
 		</div>
 	</div>
@@ -96,4 +92,15 @@
 {% else %}
 <div class="ui info message">No activities to show</div>
 {% endif %}
-
+{% if source == 'qa' %}
+	<div class="feed-forms">
+		<form class="ui form comment">
+			<div class="field">
+				<label><span>Add a comment</span> (Ctrl + Enter to publish)</label>
+				<textarea rows="2"></textarea>
+			</div>
+			<div class="ui primary submit button"><i class="send outline icon"></i>Publish</div>
+			<div class="ui reset button"><i class="refresh icon"></i>Reset</div>
+		</form>
+	</div>
+{% endif %}

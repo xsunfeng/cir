@@ -16,10 +16,12 @@
 	font-size: 1.5em;
     line-height: 1.5em;
 	padding-top: 0;
-    -moz-transition: background-color 0.5s;
-    -webkit-transition: background-color 0.5s;
-    -o-transition: background-color 0.5s;
-    transition: background-color 0.5s;
+}
+.claim.segment {
+	-moz-transition: background-color 0.5s;
+	-webkit-transition: background-color 0.5s;
+	-o-transition: background-color 0.5s;
+	transition: background-color 0.5s;
 }
 .claim.segment.accordion {
 	opacity: 0.6;
@@ -65,6 +67,9 @@ a.claim-vote-btn.unready:hover {
 #claim-pane .claim.segment {
     padding-bottom: 0;
 }
+#claim-pane .claim.stmt.segment {
+	background-color: #FFF5D8;
+}
 #claim-pane .claim.menu {
     margin: 0 -1.5em;
 }
@@ -95,14 +100,36 @@ a.claim-vote-btn.unready:hover {
 	font-weight: bold;
 }
 
-#draft-stmt .description {
+#draft-stmt .list.invalid .description {
+	cursor: not-allowed;
+}
+#draft-stmt .item:not(.empty) .description {
 	max-height: 6em;
 	cursor: pointer;
 	overflow: hidden;
 	background: #fff;
 }
+#draft-stmt .item.empty {
+	position: relative;
+	height: 3em;
+}
 #draft-stmt .description:hover .destmt.button {
 	display: block;
+}
+#draft-stmt .item.to-merge:after {
+	background-color: #D9D9D9;
+	width: 100%;
+	height: calc(100% - 4px);
+	content: 'Merge';
+	position: absolute;
+	visibility: visible;
+	z-index: 2;
+	text-align: center;
+	border-radius: 10px;
+	border: 5px dashed #2185D0;
+	font-size: 2em;
+	line-height: 1em;
+	top: 4px;
 }
 #draft-stmt .description .destmt.button {
 	display: none;
@@ -110,6 +137,10 @@ a.claim-vote-btn.unready:hover {
 	top: 0;
 	right: 0;
 	z-index: 2;
+}
+#draft-stmt .description.ui-sortable-helper {
+	background-color: #fff;
+	overflow: hidden;
 }
 #draft-stmt .description:after {
 	content: "";
@@ -120,20 +151,58 @@ a.claim-vote-btn.unready:hover {
 	width: 100%;
 	background: linear-gradient(to bottom, rgba(0, 0, 0, 0), white);
 }
-#draft-stmt .sortable-placeholder {
-	background-color: #a9d5de;
-	height: 7em;
+#draft-stmt .item.empty.to-drop:after {
+	background-color: #D9D9D9;
+	width: 100%;
+	height: 100%;
+	content: 'Drop to add';
+	position: absolute;
+	visibility: visible;
+	z-index: 2;
+	text-align: center;
+	border-radius: 10px;
+	border: 5px dashed #2185D0;
+	font-size: 2em;
+	line-height: 1em;
+	top: 0;
 }
-.claim-stmt-helper {
+#draft-stmt .sortable-placeholder {
+	background-color: #D9D9D9;
+	height: 7em;
+	border-radius: 10px;
+	border: 5px dashed #2185D0;
+}
+#draft-stmt .sortable-placeholder:after {
+	width: 100%;
+	height: 100%;
+	content: 'Drop to reorder';
+	position: absolute;
+	z-index: 2;
+	text-align: center;
+	font-size: 2em;
+	line-height: 2em;
+}
+#draft-stmt .list.invalid {
+	cursor: not-allowed;
+	opacity: 0.7;
+	max-height: 15em;
+	overflow: hidden;
+}
+#draft-stmt .droppable-edge {
+	position: absolute;
+	width: calc(100% - 28px);
+	height: 3px;
+	background-color: #2185D0;
+	display: none;
+	border-radius: 4px;
+}
+#claim-stmt-helper {
 	max-width: 25em;
 	max-height: 7em;
 	overflow: hidden;
-	/*background-color: white;*/
-	/*padding: 0.3em;*/
-	/*border: 1px solid #767676;*/
-	/*border-radius: 0.3em;*/
+	position: fixed;
 }
-.claim-stmt-helper:after {
+#claim-stmt-helper:after {
 	content: "";
 	height: 3em;
 	position: absolute;

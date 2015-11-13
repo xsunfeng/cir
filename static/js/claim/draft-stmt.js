@@ -21,12 +21,100 @@ define([
 			_stmtUpdater({
 				'action': 'destmt',
 				'claim_id': claim_id
-			})
+			});
 		});
 
 	module.update = function(options) {
 		var options = options || {};
 		_stmtUpdater({'action': 'get-list'});
+	};
+
+	module.onDrag = function(e) {
+		// update helper position
+		$('#claim-stmt-helper')
+			.css('left', e.clientX)
+			.css('top', e.clientY);
+
+		//var setting = {};
+		var $target = $('#draft-stmt .list:not(.invalid)');
+		var $items = $target.find('.item');
+		if ($target.length != 1) {
+			return false;
+		}
+		var targetOffset = $target.offset();
+		if (e.pageX > targetOffset.left
+			&& e.pageX < targetOffset.left + $target.width()
+			&& e.pageY > targetOffset.top
+			&& e.pageY < targetOffset.top + $target.height()) {
+			// check if on an entry or between entries
+			if ($items.hasClass('empty')) {
+				$items.addClass('to-drop');
+				module.action = 'insert';
+				module.order = 0;
+			} else {
+				var wrapperTop = $('#draft-stmt').offset().top;
+				for (var i = 0; i < $items.length; i++) {
+					var $item = $target.find('.item').eq(i);
+					var itemY = $item.offset().top;
+					if (e.pageY < itemY + 10) {
+						// insert before this item
+						$('#draft-stmt .droppable-edge')
+							.css('top', itemY - wrapperTop + 14)
+							.show();
+						$items.removeClass('to-merge');
+						module.order = i;
+						module.action = 'insert';
+						return;
+					} else if (e.pageY >= itemY + 10
+						&& e.pageY <= itemY + $item.height() - 10) {
+						// merge with $item
+						$('#draft-stmt .droppable-edge').hide();
+						$item.addClass('to-merge');
+						module.target_id = $item.find('.description').attr('data-id');
+						module.action = 'merge';
+						return;
+					}
+					if (i == $items.length - 1
+						&& e.pageY > itemY + $item.height()) {
+						$('#draft-stmt .droppable-edge')
+							.css('top', itemY - wrapperTop + $item.height() + 14)
+							.show();
+						$items.removeClass('to-merge');
+						module.order = i + 1;
+						module.action = 'insert';
+						return;
+					}
+				}
+			}
+		} else {
+			$items
+				.removeClass('to-merge')
+				.removeClass('to-drop');
+			$('#draft-stmt .droppable-edge').hide();
+		}
+	}
+
+	module.onDragStop = function(e) {
+		if (module.action == 'insert') {
+			_stmtUpdater({
+				'action': 'add-to-stmt',
+				'claim_id': module.draggingClaimId,
+				'order': module.order
+			});
+		} else if (module.action == 'merge') {
+			// TODO mark as needs merge
+		}
+		$('body').removeClass('noselect');
+		$(window)
+			.off('mousemove')
+			.off('mouseup');
+		delete module.draggingClaimId;
+		delete module.order;
+		delete module.action;
+		delete module.target_id;
+
+		$('#claim-stmt-helper').remove();
+		$('#draft-stmt ol.list').removeClass('invalid');
 	};
 
 	function initSortable() {
@@ -36,12 +124,9 @@ define([
 				helper: function(event, ui) {
 					return ui.find('.description').clone();
 				},
+				items: '> li',
 				placeholder: 'sortable-placeholder',
 				stop: function(event, ui) {
-					// don't trigger again if from draggable
-					if ($(this).find('.claim-stmt-helper').length) {
-						return;
-					}
 					// current elements reordered
 					var orders = {};
 					$(this).children().each(function(idx) {
@@ -50,22 +135,6 @@ define([
 					_stmtUpdater({
 						'action': 'reorder',
 						'order': JSON.stringify(orders)
-					});
-				},
-				receive: function(event, ui) {
-					event.stopImmediatePropagation();
-					// new entry added
-					var claim_id = ui.sender.parents('.claim.menu').attr('data-id');
-					// determine order
-					var order = 0;
-					$(this).children().each(function(idx) {
-						if ($(this).hasClass('ui-draggable-dragging'))
-							order = idx;
-					});
-					_stmtUpdater({
-						'action': 'add-to-stmt',
-						'claim_id': claim_id,
-						'order': order
 					});
 				}
 			});

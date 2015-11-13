@@ -1,8 +1,6 @@
 define([
-	'socket.io',
 	'realtime/chatter',
 ], function(
-	io,
 	Chatter
 ) {
 	var socket = {
@@ -21,6 +19,7 @@ define([
 	setTimeout(function() {
 		if (sessionStorage.hasOwnProperty('role') && sessionStorage['role'] !== 'visitor') {
 			try {
+				var io = require(['socket.io']);
 				socket = io('127.0.0.1:443');
 				socket.emit('server:user:logged_in', {
 					'user_id': sessionStorage['user_id'],
@@ -29,6 +28,7 @@ define([
 				});
 			} catch (e) {
 				// node server cannot be reached -- fail silently.
+				$('#chatter-wrapper .warning.message').show();
 			}
 		}
 		socket

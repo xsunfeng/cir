@@ -297,6 +297,7 @@ class Claim(Entry):
         attr['published'] = self.published
         attr['entry_type'] = 'claim'
         attr['category'] = self.claim_category
+        attr['stmt_order'] = self.stmt_order
         if self.theme:
             attr['theme'] = self.theme.name
         if self.newer_versions:
@@ -410,10 +411,12 @@ class Post(Entry):  # in discussion
     )
     content_type = models.CharField(max_length=10, choices=CONTENT_CHOICES)
 
-    def getTree(self):
-        nodes = [self]
+    def getTree(self, exclude_root):
+        nodes = []
+        if not exclude_root and not self.is_deleted:
+            nodes = [self]
         for comment in self.comments_of_entry.all():
-            nodes.extend(comment.getTree())
+            nodes.extend(comment.getTree(exclude_root=False))
         return nodes
 
     def getAttr(self, forum):
