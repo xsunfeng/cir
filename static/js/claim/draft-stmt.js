@@ -87,12 +87,9 @@ define([
 				}
 			}
 		} else {
-			$items
-				.removeClass('to-merge')
-				.removeClass('to-drop');
-			$('#draft-stmt .droppable-edge').hide();
+			clearDropStatus();
 		}
-	}
+	};
 
 	module.onDragStop = function(e) {
 		if (module.action == 'insert') {
@@ -103,20 +100,27 @@ define([
 			});
 		} else if (module.action == 'merge') {
 			// TODO mark as needs merge
+			require('claim/claim').openMergeEditor(module.target_id);
 		}
 		$('body').removeClass('noselect');
 		$(window)
 			.off('mousemove')
 			.off('mouseup');
-		delete module.draggingClaimId;
-		delete module.order;
-		delete module.action;
-		delete module.target_id;
-
+		clearDropStatus();
+		delete module.draggingClaimId; // source claim being dragged
 		$('#claim-stmt-helper').remove();
 		$('#draft-stmt ol.list').removeClass('invalid');
 	};
 
+	function clearDropStatus() {
+		$('#draft-stmt .list:not(.invalid) .item')
+			.removeClass('to-merge')
+			.removeClass('to-drop');
+		delete module.order;
+		delete module.action;
+		delete module.target_id;
+		$('#draft-stmt .droppable-edge').hide();
+	}
 	function initSortable() {
 		if (!$('#draft-stmt ol.list').hasClass('ui-sortable')) { // only initialize once
 			$('#draft-stmt ol.list').sortable({

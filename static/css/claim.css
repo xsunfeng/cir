@@ -67,8 +67,8 @@ a.claim-vote-btn.unready:hover {
 #claim-pane .claim.segment {
     padding-bottom: 0;
 }
-#claim-pane .claim.stmt.segment {
-	background-color: #FFF5D8;
+#claim-pane .stmt.segment {
+	background-color: #FFFAF3;
 }
 #claim-pane .claim.menu {
     margin: 0 -1.5em;
@@ -104,6 +104,7 @@ a.claim-vote-btn.unready:hover {
 	cursor: not-allowed;
 }
 #draft-stmt .item:not(.empty) .description {
+	min-height: 3em;
 	max-height: 6em;
 	cursor: pointer;
 	overflow: hidden;
@@ -204,7 +205,7 @@ a.claim-vote-btn.unready:hover {
 }
 #claim-stmt-helper:after {
 	content: "";
-	height: 3em;
+	height: 2em;
 	position: absolute;
 	left: 0;
 	bottom: 0;

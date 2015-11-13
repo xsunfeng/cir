@@ -10,7 +10,7 @@
 		{% if categories.finding %}{% for claim in categories.finding %}
 			<li class="item">
 				<div class="description" data-id="{{ claim.id }}">
-					<div class="ui label">Theme: {{ claim.theme }}</div>
+					{% if claim.theme %}<div class="ui label">Theme: {{ claim.theme }}</div>{% endif %}
 					{{ claim.content }}
 					<div class="ui destmt circular icon red button"><i class="trash icon"></i></div>
 				</div>

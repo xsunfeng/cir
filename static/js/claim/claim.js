@@ -692,7 +692,6 @@ define([
 				$('#draft-stmt ol.con.list').removeClass('invalid');
 			}
 
-			var onTarget = false;
 			// register mousemove & mouseup
 			$(window)
 				.mousemove(DraftStmt.onDrag)
@@ -726,7 +725,17 @@ define([
 			}
 		});
 	}
-
+	module.openMergeEditor = function(target_id) {
+		var claim_ids = [target_id, DraftStmt.draggingClaimId];
+		var content = [
+			$('#claim-pane .claim.segment[data-id="' + target_id + '" ] .claim-content').text(),
+			'<div class="ui divider"></div>',
+			$('#claim-pane .claim.segment[data-id="' + DraftStmt.draggingClaimId + '" ] .claim-content').text()
+		];
+		$('#claim-merge-editor input').val(claim_ids.join(' '));
+		$('#claim-merge-editor .claim-content').html(content.join(''));
+		$('#claim-merge-editor').modal('show');
+	};
 	function _updateVotingMenu($menu, vote_data) {
 		$menu.find('.claim-vote-btn').each(function() {
 			var vote_type = this.getAttribute('data-action');

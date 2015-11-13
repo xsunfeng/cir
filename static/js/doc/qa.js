@@ -53,12 +53,12 @@ define([
 		}).on('click', '.expand-thread', function() {
 			var question_id = this.getAttribute('data-id');
 			var $content = $(this).parents('.question.item .content');
-			if ($(this).text() == 'Collapse thread') {
+			if ($(this).text() == 'Hide thread') {
 				$('#qa-thread').hide();
-				$(this).text('Expand thread');
+				$(this).text('Show thread');
 			} else {
-				$('#qa-list .expand-thread').text('Expand thread');
-				$(this).text('Collapse thread');
+				$('#qa-list .expand-thread').text('Show thread');
+				$(this).text('Hide thread');
 				$('#qa-thread')
 					.appendTo($content) // place thread under the question
 					.show()
