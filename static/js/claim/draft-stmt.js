@@ -21,6 +21,8 @@ define([
 			_stmtUpdater({
 				'action': 'destmt',
 				'claim_id': claim_id
+			}).done(function() {
+				$('#claim-pane .claim.segment[data-id="' + claim_id + '"]').removeClass('stmt');
 			});
 		});
 
@@ -161,7 +163,7 @@ define([
 
 	function _stmtUpdater(data) {
 		$('#claim-navigator').css('opacity', '0.7');
-		$.ajax({
+		return $.ajax({
 			url: '/api_draft_stmt/',
 			type: 'post',
 			data: data,
