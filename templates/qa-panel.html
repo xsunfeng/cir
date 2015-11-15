@@ -1,21 +1,19 @@
 
 {% if questions %}
-<div class="ui relaxed divided list">
+<div class="ui relaxed list">
 {% for question in questions %}
 	<div class="question item">
-		<i class="help icon"></i>
 		<div class="content">
 			<div class="header">{{ question.content }} ({{ question.treesize }} replies)</div>
 			<div class="description">
 				<a class="user {{ question.author_role }}" data-id="{{ question.author_id }}">{{ entry.author_name }}</a>
 				<abbr title="{{ question.updated_at_full }}">{{ question.updated_at }}</abbr>
-			</div>
+				{% if question.last_reply %}
+				<b>Last reply:</b> {{ question.last_reply }}
+				{% endif %}
 			{% if question.doc_id %}
-			<div class="description">
 				<div class="item">Raised in document <b>{{ question.doc_name }}</b></div>
-			</div>
 			{% endif %}
-			<div class="description">
 				<div class="ui horizontal bulleted list">
 					<a class="item expand-thread" data-id="{{ question.id }}">Show thread</a>
 					{% if question.doc_id %}

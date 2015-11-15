@@ -1,10 +1,35 @@
 #claim-pane .hidden {
     display: none;
 }
+#claim-pane > .ui.segments {
+	border: none;
+}
+#claim-pane > .ui.segments > .merging.segment {
+	padding: 0.5em 0;
+	display: none;
+	border-radius: 0;
+}
+#claim-pane > .ui.empty.segment {
+	height: 10em;
+	border: none;
+	border-radius: 0;
+}
+#claim-pane > .full-screen.segment {
+	border-top: none;
+}
 .claim.column > .ui.menu {
 	-webkit-box-shadow: none;
 	-moz-box-shadow: none;
 	box-shadow: none;
+	background-color: inherit;
+	border-bottom: 1px solid #D4D4D5!important;
+	width: calc(100% + 2px);
+	margin: 0 -1px;
+	border: none;
+
+}
+.claim.column > .ui.menu > .item.active {
+	background-color: #fff;
 }
 .ui.secondary.menu .dropdown.item > .menu {
     margin-top: 0!important;
@@ -31,7 +56,7 @@
     transition: background-color 0.5s;
 }
 .claim.segment.accordion .title {
-	margin: -0.6rem 0;	
+	margin: -0.6rem 0 0 0;
 }
 .highlight-found {
 	background-color: #f2c61f!important;
@@ -66,6 +91,7 @@ a.claim-vote-btn.unready:hover {
 }
 #claim-pane .claim.segment {
     padding-bottom: 0;
+
 }
 #claim-pane .stmt.segment {
 	background-color: #FFFAF3;
@@ -73,8 +99,12 @@ a.claim-vote-btn.unready:hover {
 #claim-pane .stmt.segment .claim-addstmt-handle {
 	display: none;
 }
-#claim-pane .claim.menu {
-    margin: 0 -1.5em;
+#claim-pane .segments .claim.menu {
+    margin: 0 -1em;
+	-webkit-box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
+	-moz-box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
+	box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
+	background-color: #F3F4F5;
 }
 #claim-pane .private.claim.segment {
     opacity: 0.6;
@@ -82,7 +112,7 @@ a.claim-vote-btn.unready:hover {
 #claim-navigator {
 	position: fixed;
 	top: 3em;
-	bottom: 3em;
+	bottom: 1em;
     overflow: auto;
 }
 #claim-navigator .vertical.menu {
@@ -153,7 +183,7 @@ a.claim-vote-btn.unready:hover {
 	left: 0;
 	bottom: 0;
 	width: 100%;
-	background: linear-gradient(to bottom, rgba(0, 0, 0, 0), white);
+	background: linear-gradient(to bottom, rgba(0, 0, 0, 0), #fff);
 }
 #draft-stmt .item.empty.to-drop:after {
 	background-color: #D9D9D9;
@@ -201,7 +231,7 @@ a.claim-vote-btn.unready:hover {
 	border-radius: 4px;
 }
 #claim-stmt-helper {
-	max-width: 25em;
+	width: 25em;
 	max-height: 7em;
 	overflow: hidden;
 	position: fixed;

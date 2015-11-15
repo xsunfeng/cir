@@ -2,7 +2,7 @@
 {% if not claim.published %}
 <div class="ui top attached warning message">This claim is unpublished and only visible to you</div>
 {% endif %}
-<div class="ui attached segment {% if claim.stmt_order %}stmt{% endif %}">
+<div class="ui attached full-screen segment {% if claim.stmt_order != None %}stmt{% endif %}">
 	{% if claim.published %}
 	<div class="ui vertical segment" style="padding-top:0">
 		{% if claim.collective %}<a class="ui teal right ribbon label">Collective</a>{% endif %}

@@ -149,20 +149,20 @@
                     </div>
                 </div>
             </div>
-			<div class="ui menu" style="margin:0 -1px;border:none">
-				<a class="blue item active claim-view-btn" data-type="overview">
+			<div class="ui top attached tabular menu">
+				<a class="item active claim-view-btn" data-type="overview">
 					<i class="align justify icon"></i> Overview
 				</a>
-				<a class="blue item claim-view-btn" data-type="fullscreen">
+				<a class="item claim-view-btn" data-type="fullscreen">
 					<i class="maximize icon"></i> Full-screen Review
 				</a>
 			</div>
 
 			<div id="claim-pane" class="{{ phase.short_name }}">
-				<div class="ui segment" style="height: 10em;"></div>
+				<div class="ui empty segment"></div>
 			</div>
 		</div>
-		<div id="claim-navigator" class="six wide column"></div>
+		<div id="claim-navigator" class="six wide column ui segment"></div>
 		<div id="claim-merge-editor" class="ui modal">
 			<i class="close icon"></i>
 			<div class="content">
@@ -192,12 +192,12 @@
 		</div>
 	</div>
 </div>
-<div class="ui five steps" style="position:fixed;bottom:0;left:0;margin:0">
-	<div class="{% if phase.short_name == 'tagging' %}active {% endif %}step">
-		<div class="title">Tag & Understand</div>
+<div id="fixed-steps" class="ui five small steps">
+	<div class="{% if phase.short_name == 'nugget' %}active {% endif %}step">
+		<div class="title">Extract Nuggets</div>
 	</div>
 	<div class="{% if phase.short_name == 'extract' %}active {% endif %}step">
-		<div class="title">Extract Claims</div>
+		<div class="title">Build Claims</div>
 	</div>
 	<div class="{% if phase.short_name == 'categorize' %}active {% endif %}step">
 		<div class="title">Categorize</div>

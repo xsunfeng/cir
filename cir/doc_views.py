@@ -219,7 +219,11 @@ def api_qa(request):
         questions = Post.objects.filter(forum=forum, content_type='question', is_deleted=False)
         for question in questions:
             question_info = question.getAttr(forum)
-            question_info['treesize'] = len(question.getTree(exclude_root=True))
+            all_replies = question.getTree(exclude_root=True)
+            question_info['treesize'] = len(all_replies)
+            if question_info['treesize'] > 0:
+                last_reply = sorted(all_replies, key=lambda en: en.created_at, reverse=True)[0]
+                question_info['last_reply'] = last_reply.getAttr(forum)['updated_at']
             try:
                 docsection = DocSection.objects.get(id=question.highlight.context.id)
                 question_info['doc_name'] = docsection.doc.title

@@ -40,13 +40,5 @@
             <div class="item">No document for now.</div>
         {% endif %}
         </div>
-		<h3 class="ui header">Tags in the forum</h3>
-	{% if tags %}{% for tag in tags %}
-		<div class="ui label">{{ tag.content }}
-			<div class="detail">{{ tag.count }}</div>
-		</div>
-	{% endfor %}{% else %}
-		<div class="ui label">(No tag for now)</div>
-	{% endif %}
     </div>
 </div>

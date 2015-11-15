@@ -1,5 +1,5 @@
 <div class="ui segments">
-	<div class="ui top attached secondary merging segment" style="padding:0.5em 0;display:none;border-top:1px solid #d4d4d5">
+	<div class="ui top attached secondary merging segment">
 		<div class="ui secondary menu">
 			<a id="claim-label-merge" class="item merge control" title="Suggest that the flagged claims can be merged.">
 				Suggest a merging (<span class="merge count"></span>)
@@ -19,7 +19,7 @@
 		<div class="title"><i class="dropdown icon"></i>This claim has been merged -- click to show.</div>
 		<div class="content">
 	{% else %}
-	<div class="ui attached segment claim {% if claim.stmt_order %}stmt{% endif %} {% if not claim.published %}private{% endif %}" data-id="{{ claim.id }}">
+	<div class="ui attached segment claim {% if claim.stmt_order != None %}stmt{% endif %} {% if not claim.published %}private{% endif %}" data-id="{{ claim.id }}">
 	{% endif %}
 		<a class="ui right teal corner merge label" title="Flagged as to be merged -- click to remove flag" style="display:none">
 			<i class="plus square outline icon"></i>
