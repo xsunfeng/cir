@@ -8,49 +8,58 @@ var io = require('socket.io')(server);
 var socketIds = [];
 
 io.on('connection', function(socket) {
-	socket.on('server:user:logged_in', function(msg) {
-		console.log(msg.role + 'connected as ' + socket.id);
+	socket
+		.on('server:user:logged_in', function(msg) {
+			console.log(msg.role + 'connected as ' + socket.id);
 
-		// join a room according to their role
-		socket.join(msg.role);
+			// join a room according to their role
+			socket.join(msg.role);
 
-		// join socketIds
-		socketIds.push({
-			'user_id': msg.user_id,
-			'user_name': msg.user_name,
-			'role': msg.role,
-			'socket_id': socket.id
-		});
+			// join socketIds
+			socketIds.push({
+				'user_id': msg.user_id,
+				'user_name': msg.user_name,
+				'role': msg.role,
+				'socket_id': socket.id
+			});
 
-		// notify others
-		socket.broadcast.emit('client:someone:connected', {
-			'user_id': msg.user_id,
-			'user_name': msg.user_name,
-			'role': msg.role,
-			'socket_id': socket.id
-		});
+			// notify others
+			socket.broadcast.emit('client:someone:connected', {
+				'user_id': msg.user_id,
+				'user_name': msg.user_name,
+				'role': msg.role,
+				'socket_id': socket.id
+			});
 
-		// return current online users
-		socket.emit('client:users:current_online', socketIds);
-	});
+			// return current online users
+			socket.emit('client:users:current_online', socketIds);
+		}).on('disconnect', function() {
+			console.log('user disconnected: ' + socket.id);
+			for (var i = 0; i < socketIds.length; i++) {
+				if (socketIds[i].socket_id == socket.id) {
 
-	socket.on('disconnect', function() {
-		console.log('user disconnected: ' + socket.id);
-		for (var i = 0; i < socketIds.length; i++) {
-			if (socketIds[i].socket_id == socket.id) {
-
-				socketIds.slice(i, 1);
-				socket.broadcast.emit('client:someone:disconnected', {
-					'user_id': socketIds[i].user_id
-				});
-				break;
+					socketIds.slice(i, 1);
+					socket.broadcast.emit('client:someone:disconnected', {
+						'user_id': socketIds[i].user_id
+					});
+					break;
+				}
 			}
-		}
-	});
+		}).on('server:chat:emit_msg', function(msg) {
+			// except sender
+			socket.broadcast.emit('client:chat:emit_msg', msg);
+		}).on('server:document:add_highlight', function(data) {
+			// except sender
+			socket.broadcast.emit('client:document:add_highlight', data);
+		}).on('server:document:add_question', function(data) {
+			// except sender
+			socket.broadcast.emit('client:document:add_question', data);
+		}).on('server:qa:add_post', function(data) {
+			// except sender
+			socket.broadcast.emit('client:qa:add_post', data);
+		});
 
-	socket.on('server:chat:emit_msg', function(msg) {
-		socket.broadcast.emit('client:chat:emit_msg', msg);
-	});
+
 
 	//// sending to sender-client only
 	//socket.emit('message', "this is a test");

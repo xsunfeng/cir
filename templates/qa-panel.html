@@ -2,17 +2,20 @@
 {% if questions %}
 <div class="ui relaxed list">
 {% for question in questions %}
-	<div class="question item">
+	<div class="question item" data-id="{{ question.id }}">
+		<div class="ui info refresh prompt message">New activities in this thread.</div>
 		<div class="content">
-			<div class="header">{{ question.content }} ({{ question.treesize }} replies)</div>
+			<div class="header">{{ question.content }} (<span class="reply-cnt">{{ question.treesize }}</span> replies)</div>
 			<div class="description">
-				<a class="user {{ question.author_role }}" data-id="{{ question.author_id }}">{{ entry.author_name }}</a>
-				<abbr title="{{ question.updated_at_full }}">{{ question.updated_at }}</abbr>
+				<b>Raised by</b>
+				<a class="user {{ question.author_role }}" data-id="{{ question.author_id }}">{{ question.author_name }}</a>
+				<abbr title="{{ question.updated_at_full }}">{{ question.updated_at }}</abbr><br />
 				{% if question.last_reply %}
-				<b>Last reply:</b> {{ question.last_reply }}
+				<b>Last reply:</b>
+				<abbr title="{{ question.last_reply_full }}">{{ question.last_reply }}</abbr>
 				{% endif %}
 			{% if question.doc_id %}
-				<div class="item">Raised in document <b>{{ question.doc_name }}</b></div>
+				<div>Raised in document <b>{{ question.doc_name }}</b></div>
 			{% endif %}
 				<div class="ui horizontal bulleted list">
 					<a class="item expand-thread" data-id="{{ question.id }}">Show thread</a>

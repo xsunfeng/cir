@@ -174,6 +174,16 @@ define([
 				}, module.newHighlight),
 				success: function(xhr) {
 					afterAddHighlight(xhr.highlight_id);
+					// if it's a new question, dispatch.
+					if (module.newHighlight.type == 'question') {
+						var message = '<b>' + sessionStorage.getItem('user_name')
+							+ '</b> ('
+							+ sessionStorage.getItem('role')
+							+ ') just asked a new question.';
+						require('realtime/socket').dispatchNewQuestion({
+							message: message
+						});
+					}
 				},
 				error: function(xhr) {
 					$('#doc-highlight-toolbar .button').removeClass('loading');
@@ -215,8 +225,7 @@ define([
 		$('#doc-highlight-toolbar .button').removeClass('loading');
 		$('.tk.highlighted').removeClass('highlighted');
 
-		// update current highlights dataset
-		module.highlightsData.push({
+		var newHighlightData = {
 			author_id: sessionStorage.getItem('user_id'),
 			context_id: module.newHighlight.contextId,
 			start: module.newHighlight.start,
@@ -224,7 +233,13 @@ define([
 			id: newHighlightId,
 			text: module.newHighlight.text,
 			type: module.newHighlight.type
-		});
+		};
+
+		// dispatch to other users
+		require('realtime/socket').dispatchNewHighlight(newHighlightData);
+
+		// update current highlights dataset
+		module.highlightsData.push(newHighlightData);
 
 		// update question panel
 		require('doc/qa').updateQuestionList();
@@ -234,6 +249,13 @@ define([
 			switch: module.newHighlight.type
 		});
 	}
+	module.receiveNewHighlight = function(newHighlight) {
+		module.highlightsData.push(newHighlight);
+		if (newHighlight.type == module.highlightsFilter.showtype) {
+			// add the highlight to screen, only if the user is looking at this highlight type
+			highlight(newHighlight);
+		}
+	};
 	function afterAddTag(newTagsData) {
 		$('#doc-tag-form .tag.dropdown').dropdown('clear');
 		$('#doc-highlight-toolbar').removeAttr('style');
@@ -447,6 +469,18 @@ define([
 		}
 	};
 
+	/**
+	 * Required fields:
+	 *
+	 * highlight = {
+	 * 	id:
+	 * 	type:
+	 * 	context_id:
+	 * 	start:
+	 * 	end:
+	 * }
+	 * @param highlight
+	 */
 	function highlight(highlight) {
 		// get context document section
 		var $context = module.$content_element.find('.section-content[data-id="' + highlight.context_id + '"]');

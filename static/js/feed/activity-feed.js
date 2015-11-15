@@ -220,6 +220,11 @@ define([
 					if (_this.data('type') == 'highlight') { // only work for doc view
 						_this.find('.feed-forms .claim.form').hide();
 						_this.find('.feed-forms').hide();
+					} else if (_this.data('type') == 'question') {
+						// activities on QA panel -- dispatch the event
+						require('realtime/socket').dispatchNewPost({
+							'target': _this.data('question_id')
+						});
 					}
 				},
 				error: function(xhr) {

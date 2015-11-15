@@ -49,6 +49,14 @@ define([
 				'content': content
 			}).done(function() {
 				$('#qa-wrapper .new.question.segment').addClass('hidden');
+				// dispatch the event
+				var message = '<b>' + sessionStorage.getItem('user_name')
+					+ '</b> ('
+					+ sessionStorage.getItem('role')
+					+ ') just asked a new question.';
+				require('realtime/socket').dispatchNewQuestion({
+					message: message
+				});
 			});
 		}).on('click', '.expand-thread', function() {
 			var question_id = this.getAttribute('data-id');
@@ -57,6 +65,8 @@ define([
 				$('#qa-thread').hide();
 				$(this).text('Show thread');
 			} else {
+				$(this).parents('.question.item').removeClass('need-refresh');
+				// refresh thread when expanding thread
 				$('#qa-list .expand-thread').text('Show thread');
 				$(this).text('Hide thread');
 				$('#qa-thread')
@@ -75,8 +85,24 @@ define([
 		});
 	};
 
+	module.newQuestionAdded = function(data) {
+		var message = data.message + ' Please refresh this list.';
+		$('#qa-refresh-prompter')
+			.html(message)
+			.removeClass('hidden');
+	};
+
+	module.newReplyAdded = function(data) {
+		var question_id = data.target;
+		var $question = $('#qa-list .question.item[data-id="' + question_id + '"]');
+		$question.addClass('need-refresh');
+		var replies = parseInt($question.find('.reply-cnt').text());
+		$question.find('.reply-cnt').text(replies + 1);
+	};
+
 	function _qaUpdater(data) {
 		$('#qa-list').css('opacity', '0.7');
+		$('#qa-refresh-prompter').addClass('hidden');
 		return $.ajax({
 			url: '/api_qa/',
 			type: 'post',

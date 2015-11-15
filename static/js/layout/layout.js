@@ -11,7 +11,7 @@ define([
 	ClaimView,
 	ClaimNavigator,
 	DraftStmt,
-	QA
+	QAView
 ) {
 	var module = {
 		changeTab: function(dest, callback) {
@@ -39,7 +39,7 @@ define([
 	}
 	initLayout();
 	DocumentView.updateCategories();
-	QA.updateQuestionList();
+	QAView.updateQuestionList();
 	ClaimView.updateClaimPane();
 	if (module.phase == 'improve') {
 		DraftStmt.update();

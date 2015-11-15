@@ -223,7 +223,11 @@ def api_qa(request):
             question_info['treesize'] = len(all_replies)
             if question_info['treesize'] > 0:
                 last_reply = sorted(all_replies, key=lambda en: en.created_at, reverse=True)[0]
-                question_info['last_reply'] = last_reply.getAttr(forum)['updated_at']
+                last_reply_info = last_reply.getAttr(forum)
+                question_info['last_reply'] = last_reply_info['updated_at']
+                question_info['last_reply_full'] = last_reply_info['updated_at_full']
+            else:
+                question_info['last_reply_full'] = question_info['created_at_full']
             try:
                 docsection = DocSection.objects.get(id=question.highlight.context.id)
                 question_info['doc_name'] = docsection.doc.title
@@ -232,6 +236,6 @@ def api_qa(request):
             except:
                 pass
             context['questions'].append(question_info)
-        context['questions'] = sorted(context['questions'], key=lambda en: en['created_at_full'], reverse=True)
+        context['questions'] = sorted(context['questions'], key=lambda en: (en['last_reply_full'], en['created_at_full']), reverse=True)
         response['html'] = render_to_string('qa-panel.html', context)
     return HttpResponse(json.dumps(response), mimetype='application/json')

@@ -1,7 +1,11 @@
 define([
-	'realtime/chatter'
+	'realtime/chatter',
+	'doc/document',
+	'doc/qa',
 ], function(
-	Chatter
+	Chatter,
+	DocumentView,
+	QAView
 ) {
 	var socket = {
 		emit: function() {
@@ -16,6 +20,15 @@ define([
 		online_users: {},
 		emitChat: function(data) {
 			socket.emit('server:chat:emit_msg', data);
+		},
+		dispatchNewHighlight: function(data) {
+			socket.emit('server:document:add_highlight', data);
+		},
+		dispatchNewQuestion: function(data) {
+			socket.emit('server:document:add_question', data);
+		},
+		dispatchNewPost: function(data) {
+			socket.emit('server:qa:add_post', data);
 		}
 	};
 
@@ -57,6 +70,12 @@ define([
 					}
 				}).on('client:chat:emit_msg', function(msg) {
 					Chatter.showMsg(msg);
+				}).on('client:document:add_highlight', function(data) {
+					DocumentView.receiveNewHighlight(data);
+				}).on('client:document:add_question', function(data) {
+					QAView.newQuestionAdded(data);
+				}).on('client:qa:add_post', function(data) {
+					QAView.newReplyAdded(data);
 				});
 		}
 	}, function(err) {
