@@ -3,7 +3,8 @@ define([
 	'facilitation/phase-manager',
 	'facilitation/forum-manager',
 	'facilitation/doc-manager',
-	'semantic-ui'
+	'semantic-ui',
+	'realtime/socket'
 ], function(
 	$,
 	PhaseManager,
@@ -27,6 +28,7 @@ define([
 
 	};
 
+	sessionStorage.setItem('role', 'facilitator');
 	module.initLayout();
 	return module;
 });

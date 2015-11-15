@@ -19,6 +19,9 @@ define([
 				},
 				success: function(xhr) {
 					Utils.notify('success', 'Phase changed.');
+					require('realtime/socket').updatePhase({
+						phase: module.$el.find('.phase.dropdown option:selected').text()
+					});
 				}
 			})
 		});

@@ -57,6 +57,9 @@ io.on('connection', function(socket) {
 		}).on('server:qa:add_post', function(data) {
 			// except sender
 			socket.broadcast.emit('client:qa:add_post', data);
+		}).on('server:facilitation:update_phase', function(data) {
+			// except sender
+			socket.broadcast.emit('client:facilitation:update_phase', data);
 		});
 
 

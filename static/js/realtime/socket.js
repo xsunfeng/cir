@@ -29,6 +29,9 @@ define([
 		},
 		dispatchNewPost: function(data) {
 			socket.emit('server:qa:add_post', data);
+		},
+		updatePhase: function(phase) {
+			socket.emit('server:facilitation:update_phase', phase);
 		}
 	};
 
@@ -76,6 +79,11 @@ define([
 					QAView.newQuestionAdded(data);
 				}).on('client:qa:add_post', function(data) {
 					QAView.newReplyAdded(data);
+				}).on('client:facilitation:update_phase', function(data) {
+					var message = 'Facilitator has changed the phase of this forum to <b>' + data.phase
+						 + '</b>. Please refresh the page as soon as possible.';
+					$('.instructions.accordion').html(message);
+					$('.instructions.accordion').parent().removeClass('info').addClass('error');
 				});
 		}
 	}, function(err) {
