@@ -14,10 +14,10 @@
 }
 #chatter-wrapper.disconnected .disconnected.message {
 	display: block;
+	position: absolute;
+	top: 2em;
 }
-#chatter-wrapper.disconnected .online.users.segment {
-	display: none;
-}
+
 #chatter-wrapper.minimized {
 	bottom: 2em;
 	border: none;
