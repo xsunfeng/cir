@@ -26,14 +26,19 @@ define([
 		// $( window ).resize(function() {
 		// 	adjust_layout();
 		// });
-
+		
+		module.nugget_discussion_timer = setInterval(refresh_nugget_discussion, 3600000); // 1 hour
+		// clearInterval(nugget_discussion_timer);
 	};
 
 	function set_page_loading_progress(number) {
 		$('#page-loading-progress').progress({
 		  	percent: number,
 		  	onSuccess: function () {
-		  		$('#page-loading-progress').find(".label").text("loading completed")
+		  		$('#page-loading-progress').find(".label").text("loading completed");
+				setTimeout(function(){ 
+					$('#page-loading-progress').fadeOut(3000)
+				}, 6000);
 		  	},
 		});
 	}
@@ -273,9 +278,50 @@ define([
 			highlight_ids = $(this).parents(".card").find(".workbench-claim-content").attr("data-id").trim();
 			load_nugget_list_partial(highlight_ids);
 		});
+
+		$("body").on("click", "#chat-room-close-btn", function(){
+			$("#chat-room-open-window").hide();
+			$("#chat-room-close-window").show();
+			clearInterval(module.nugget_discussion_timer);
+		});
+		$("body").on("click", "#chat-room-open-btn", function(){
+			$("#chat-room-close-window").hide();
+			$("#chat-room-open-window").show();
+			$.when(load_nugget_discuss()).done(function(promise) {
+				$("#chat-room-open-window").find(".data").scrollTop(9999);
+			});
+			module.nugget_discussion_timer = setInterval(refresh_nugget_discussion, 1000 * 5);
+		});
+
+		$("body").on("click", "#chat-room-open-add", function(){
+			var content = $("#chat-room-open-window").find('textarea').val();
+			$.ajax({
+				url: '/workbench/add_nugget_comment/',
+				type: 'post',
+				data: {
+					content: content,
+					theme_id: module.currentThemeId,
+				},
+				success: function(xhr) {
+					$("#workbench-nugget-discuss").html(xhr.workbench_nugget_comments);
+					$("#chat-room-open-window").find('textarea').val("");
+					$("#chat-room-open-window").find(".data").scrollTop(9999);
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});
+		});
+
 		increase_page_loading_progress(10);
 	}
 
+	function refresh_nugget_discussion() {
+		load_nugget_discuss();
+		// console.log(Date());
+	}
 
 	function load_nugget_list_partial(highlight_ids) {
 		$.ajax({
@@ -319,9 +365,23 @@ define([
 		});
 	}
 
-
 	function load_nugget_discuss() {
-
+		var promise = $.ajax({
+			url: '/workbench/show_nugget_comment/',
+			type: 'post',
+			data: {
+				theme_id: module.currentThemeId,
+			},
+			success: function(xhr) {
+				$("#workbench-nugget-discuss").html(xhr.workbench_nugget_comments)
+			},
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			}
+		});
+		return promise;
 	}
 
 	function load_claim_list() {
