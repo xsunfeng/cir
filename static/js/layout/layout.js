@@ -4,6 +4,7 @@ define([
 	'claim/claim-navigator',
 	'claim/draft-stmt',
 	'doc/qa',
+	'vis/activity',
 	'semantic-ui',
 	'realtime/socket'
 ], function(
@@ -11,7 +12,8 @@ define([
 	ClaimView,
 	ClaimNavigator,
 	DraftStmt,
-	QAView
+	QAView,
+	VisActivity
 ) {
 	var module = {
 		changeTab: function(dest, callback) {
@@ -36,6 +38,7 @@ define([
 		$('.ui.instructions.accordion').accordion();
 		DocumentView.initDocumentView();
 		ClaimView.initClaimView();
+		VisActivity.init();
 	}
 	initLayout();
 	DocumentView.updateCategories();

@@ -10,6 +10,7 @@ import facilitator_views
 import tag_views
 import workbench_views
 import chatter_views
+import vis_views
 
 
 admin.autodiscover()
@@ -34,6 +35,7 @@ urlpatterns = patterns('',
     url(r'^api_get_flags/$', claim_views.api_get_flags),
     url(r'^api_tag/$', tag_views.api_tag),
     url(r'^api_tag_theme/$', facilitator_views.tag_theme),
+    url(r'^api_vis/$', vis_views.api_vis),
 
     url(r'^workbench/api_load_all_documents/$', workbench_views.api_load_all_documents),
     url(r'^workbench/api_load_all_themes/$', workbench_views.api_load_all_themes),

@@ -1,0 +1,43 @@
+#activities-chart {
+	position: fixed;
+	bottom: 2em;
+	left: 0;
+	right: 0;
+	width: 100%;
+	background-color: #fff;
+	padding: 2em;
+	overflow: auto;
+}
+
+#activities-chart .area {
+	width: 100%;
+}
+
+#activities-chart .vis-grid {
+	stroke: #E6E6E6;
+	stroke-width: 1px;
+}
+
+#activities-chart .vis-bottom {
+	stroke: #000;
+	stroke-width: 1px;
+}
+
+#activities-chart .vis-username {
+	font-size: 14px;
+}
+
+#activities-chart .xaxis line {
+	shape-rendering: crispEdges;
+	stroke: #000;
+}
+
+#activities-chart .xaxis path {
+	display: none;
+}
+
+.vis-tooltip {
+	position: fixed;
+	z-index: 3;
+	visibility: hidden;
+}

@@ -261,6 +261,15 @@ class ClaimVersion(Entry):
         attr['is_adopted'] = self.is_adopted
         return attr
 
+    # get id, author and time only
+    def getAttrSimple(self):
+        return {
+            'id': self.id,
+            'entry_type': 'Claim',
+            'created_at': self.created_at.isoformat(),
+        }
+
+    # for claim navigator
     def getExcerpt(self, forum):
         attr = {}  # for efficiency, don't inherit at all
         attr['version_id'] = self.id
@@ -325,6 +334,7 @@ class ClaimReference(models.Model):  # only for merging relationship!
 
 
 class Event(models.Model):  # the behavior of a user on an entry
+    forum = models.ForeignKey(Forum)
     user = models.ForeignKey(User)
     delegator = models.ForeignKey(User, null=True, blank=True, related_name='delegated_events')
     entry = models.ForeignKey(Entry, related_name='events')
@@ -364,14 +374,25 @@ class Vote(Event):
     vote_type = models.CharField(max_length=20, choices=VOTE_CHOICES)
     reason = models.CharField(max_length=2010, null=True, blank=True)
 
+    def getEntryType(self):
+        if self.vote_type == 'reword' or self.vote_type == 'merge':
+            return 'improve'
+        if self.vote_type == 'pro' or self.vote_type == 'con' or self.vote_type == 'finding' or self.vote_type == 'discarded':
+            return 'categorize'
+        if self.vote_type == 'prioritize' or self.vote_type == 'like':
+            return 'prioritize'
+        return '(unknown)'
+
+    # get id, author and time only
+    def getAttrSimple(self):
+        return {
+            'id': self.id,
+            'entry_type': 'Vote - ' + self.getEntryType(),
+            'created_at': self.created_at.isoformat(),
+        }
     def getAttr(self, forum):
         attr = super(Vote, self).getAttr(forum)
-        if self.vote_type == 'reword' or self.vote_type == 'merge':
-            attr['entry_type'] = 'improve'
-        if self.vote_type == 'pro' or self.vote_type == 'con' or self.vote_type == 'finding' or self.vote_type == 'discarded':
-            attr['entry_type'] = 'categorize'
-        if self.vote_type == 'prioritize':
-            attr['entry_type'] = 'prioritize'
+        attr['entry_type'] = self.getEntryType()
         attr['vote_type'] = self.vote_type
         attr['vote_type_full'] = self.get_vote_type_display()
         if self.reason:
@@ -420,6 +441,13 @@ class Post(Entry):  # in discussion
             nodes.extend(comment.getTree(exclude_root=False))
         return nodes
 
+    # get id, author and time only
+    def getAttrSimple(self):
+        return {
+            'id': self.id,
+            'entry_type': self.content_type,
+            'created_at': self.created_at.isoformat()
+        }
     def getAttr(self, forum):
         attr = super(Post, self).getAttr(forum)
         attr['entry_type'] = self.content_type

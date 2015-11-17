@@ -100,7 +100,8 @@ PIPELINE_CSS = {
         'source_filenames': (
             'css/document.css',
             'css/claim.css',
-            'css/chatter.css'
+            'css/chatter.css',
+            'css/vis.css'
         ),
         'output_filename': 'css/cir_forum.css',
     },
