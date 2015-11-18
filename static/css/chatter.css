@@ -1,13 +1,14 @@
 #chatter-wrapper {
 	width: 37.5%!important;
 	position: fixed;
-	right: 0.5em;
+	right: 0;
 	bottom: 0;
 	-webkit-box-shadow: 0 0 5px 1px #d4d4d5;
 	-moz-box-shadow: 0 0 5px 1px #d4d4d5;
 	box-shadow: 0 0 5px 1px #d4d4d5;
 	border: #bcbdbd 2px solid;
 	border-radius: 5px;
+	z-index: 2;
 }
 #chatter-wrapper .disconnected.message {
 	display: none;

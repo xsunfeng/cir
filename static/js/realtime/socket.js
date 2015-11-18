@@ -47,10 +47,10 @@ define([
 					'user_name': sessionStorage['user_name'],
 					'role': sessionStorage['role']
 				});
-			}
-			initSocketEvents();
+				initSocketEvents();
 
-			Chatter.loadRecentHistory();
+				Chatter.loadRecentHistory();
+			}
 		}, 3000);
 
 		function initSocketEvents() {

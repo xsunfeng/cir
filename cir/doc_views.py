@@ -43,7 +43,7 @@ def api_doc(request):
         tags = sorted(tags_count, key=tags_count.get, reverse=True)
         for tag in tags:
             context['tags'].append({'content': tag, 'count': tags_count[tag]})
-        response['html'] = render_to_string("doc-category.html", context)
+        response['html'] = render_to_string("doc/doc-category.html", context)
         return HttpResponse(json.dumps(response), mimetype='application/json')
         # except:
         #     return HttpResponse('Unknown error.', status=403)
@@ -61,7 +61,7 @@ def api_doc(request):
             unordered_sections = doc.sections.filter(order__isnull=True).order_by('updated_at')
             for section in unordered_sections:
                 context['sections'].append(section.getAttr(forum))
-            response['html'] = render_to_string("doc-content.html", context)
+            response['html'] = render_to_string("doc/doc-content.html", context)
             return HttpResponse(json.dumps(response), mimetype='application/json')
         except:
             return HttpResponse('The document does not exist.', status=403)
@@ -124,7 +124,7 @@ def api_highlight(request):
                     if highlight_info['author_id'] == request.user.id:
                         mytags.add(highlight_info['content'])
                     alltags.add(highlight_info['content'])
-        response['html'] = render_to_string('doc-tag-area.html', {'mytags': mytags, 'alltags': alltags})
+        response['html'] = render_to_string('doc/doc-tag-area.html', {'mytags': mytags, 'alltags': alltags})
         return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_annotation(request):
@@ -146,7 +146,7 @@ def api_annotation(request):
         for claim in claims:
             context['entries'].append(claim.getAttr(forum))
         context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'], reverse=True)
-        response['html'] = render_to_string("activity-feed-doc.html", context)
+        response['html'] = render_to_string("feed/activity-feed-doc.html", context)
         return HttpResponse(json.dumps(response), mimetype='application/json')
     if action == 'create':
         if not request.user.is_authenticated():
@@ -206,7 +206,7 @@ def api_qa(request):
         for post in question.getTree(exclude_root=True): # don't include root
             context['entries'].append(post.getAttr(forum))
         context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'], reverse=True)
-        response['html'] = render_to_string("activity-feed-doc.html", context)
+        response['html'] = render_to_string("feed/activity-feed-doc.html", context)
     if action == 'raise-question':
         now = timezone.now()
         content = request.REQUEST.get('content')
@@ -237,5 +237,5 @@ def api_qa(request):
                 pass
             context['questions'].append(question_info)
         context['questions'] = sorted(context['questions'], key=lambda en: (en['last_reply_full'], en['created_at_full']), reverse=True)
-        response['html'] = render_to_string('qa-panel.html', context)
+        response['html'] = render_to_string('doc/qa-panel.html', context)
     return HttpResponse(json.dumps(response), mimetype='application/json')

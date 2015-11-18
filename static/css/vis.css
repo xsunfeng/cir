@@ -1,14 +1,37 @@
-#activities-chart {
+#activities-wrapper {
 	position: fixed;
 	bottom: 2em;
 	left: 0;
 	right: 0;
 	width: 100%;
-	background-color: #fff;
-	padding: 2em;
+	border-top: 2px solid #00B5AD;
+	background-color: #f9f9f9;
+}
+#activities-wrapper.minimized {
+	top: 100%;
+	bottom: inherit;
+}
+#activities-wrapper .toggle {
+	position: absolute;
+	right: 0;
+	bottom: 100%;
+}
+#activities-wrapper.minimized .toggle {
+	top: -4.5em;
+	bottom: inherit;
+}
+#activities-chart {
+
+	padding: 1em;
 	overflow: auto;
 }
 
+#activities-chart circle {
+	cursor: pointer;
+}
+#activities-chart circle.circle-hover {
+	opacity: 0.3;
+}
 #activities-chart .area {
 	width: 100%;
 }
@@ -22,7 +45,16 @@
 	stroke: #000;
 	stroke-width: 1px;
 }
-
+#activities-chart .vis-nowline {
+	stroke: #000;
+	stroke-width: 1px;
+	cursor: pointer;
+}
+#activities-chart .vis-lastloginline {
+	stroke: #7a7a7a;
+	stroke-width: 1px;
+	cursor: pointer;
+}
 #activities-chart .vis-username {
 	font-size: 14px;
 }
@@ -35,8 +67,11 @@
 #activities-chart .xaxis path {
 	display: none;
 }
+#activities-chart .vis-myself {
+	fill: #f1f1f1;
+}
 
-.vis-tooltip {
+#vis-tooltip {
 	position: fixed;
 	z-index: 3;
 	visibility: hidden;

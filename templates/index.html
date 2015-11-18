@@ -113,7 +113,7 @@
 			<div id="document-pane" class="ui segment">Please select a document from the list.</div>
 		</div>
 		<div id="document-rail"  class="six wide column">
-			{% include 'doc-tag-filter.html' %}
+			{% include 'doc/doc-tag-filter.html' %}
 			<div id="qa-wrapper">
 				<h3 class="ui header">Questions on documents</h3>
 				<div id="qa-refresh-prompter" class="ui info message hidden"></div>
@@ -136,8 +136,8 @@
 			</div>
 		</div>
 	</div>
-	{% include 'doc-highlight-toolbar.html' with phase=phase %}
-	{% include 'doc-thread-popup.html' with phase=phase %}
+	{% include 'doc/doc-highlight-toolbar.html' with phase=phase %}
+	{% include 'doc/doc-thread-popup.html' with phase=phase %}
 </div>
 <div class="ui main tab {{ phase.claim_active }}" data-tab="claim-tab">
 	<div class="ui grid">
@@ -193,7 +193,6 @@
 		</div>
 	</div>
 </div>
-<div id="activities-chart"></div>
 <div id="fixed-steps" class="ui five small steps">
 	<div class="{% if phase.short_name == 'nugget' %}active {% endif %}step">
 		<div class="title">Extract Nuggets</div>
@@ -217,6 +216,7 @@
 </div>
 {% if role != 'visitor' %}
 	{% include 'chatter.html' %}
+	{% include 'vis.html' %}
 {% endif %}
 	{% endif %}
 
