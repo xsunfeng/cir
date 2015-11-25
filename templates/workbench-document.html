@@ -1,0 +1,13 @@
+<h3 style="text-align: center;">{{ doc_name }}</h3>
+{% for section in sections %} 
+	<div class="ui raised segment workbench-documents-column" style="
+		margin:		1em;
+		background:	#E0F1E0;
+	">
+		{% if section.title %}
+			<h3 class="ui header section-header" data-id="{{ section.id }}">{{ section.title }}</h3>
+		{% endif %}
+		<div>{{ section.update_at }}</div>
+		<div class="section-content noselect" data-id="{{ section.id }}">{{ section.segmented_text|safe }}</div>
+	</div>
+{% endfor %}

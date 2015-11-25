@@ -1,5 +1,6 @@
 define([
 	'doc/document',
+	'workbench2',
 	'claim/claim',
 	'claim/claim-navigator',
 	'claim/draft-stmt',
@@ -9,6 +10,7 @@ define([
 	'realtime/socket'
 ], function(
 	DocumentView,
+	WorkbenchView,
 	ClaimView,
 	ClaimNavigator,
 	DraftStmt,
@@ -33,20 +35,22 @@ define([
 	};
 	function initLayout() {
 		module.phase = $('body').attr('data-phase');
-		$('#nav-menu > .item').tab();
-
+		$('#nav-menu > .item').tab();	
+		
 		$('.ui.instructions.accordion').accordion();
-		DocumentView.initDocumentView();
+		// DocumentView.initDocumentView();
 		ClaimView.initClaimView();
 		VisActivity.init();
+		WorkbenchView.initWorkbenchView();
 	}
+	
 	initLayout();
-	DocumentView.updateCategories();
+	// DocumentView.updateCategories();
 	QAView.updateQuestionList();
 	ClaimView.updateClaimPane();
 	if (module.phase == 'improve') {
 		DraftStmt.update();
-	} else{
+} else{
 		ClaimNavigator.updateNavigator();
 	}
 	return module;

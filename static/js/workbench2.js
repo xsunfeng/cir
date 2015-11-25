@@ -7,29 +7,72 @@ define([
 	var module = {};
 	module.initWorkbenchView = function() {
 
+		// $(".document-table tbody").height($( window ).height() - 250);
+		// $(window).resize(function() {
+		// 	$(".document-table tbody").height($( window ).height() - 250);
+		// }).resize();
+
 		set_page_loading_progress(20);
 
-		module.highlightsData = [];
+		// highlighting
 		module.highlightText = {};
+		module.newHighlight = {};
+		module.highlightsData = [];
+		module.isDragging = false;
+		
 		module.currentThemeText = "";
 		module.currentThemeId = "-1";
 		module.claim_category = "finding";
-		$.when(load_theme(), load_all_documents(), load_claim_list()).done(function(promise1, promise2, promise3) {
-		  	load_highlights("-1");
+		module.doc_id = "-1";
+		
+		module.claim_textarea_container = $("#workbench2-claim-textarea-container");
+		module.claim_list_container = $("#workbench2-claim-container");
+		module.nugget_list_container = $("#workbench2-nugget-container");
+		
+		load_toc();
+		$.when(load_theme(), load_claim_list()).done(function(promise1, promise2) {
+		  	// load_highlights("-1");
 		  	increase_page_loading_progress(10);
 		});
 		load_nugget_list();
-		// load_claim_list();
 		init_tk_event();
 		init_button();
-
-		// $( window ).resize(function() {
-		// 	adjust_layout();
-		// });
-		
-		module.nugget_discussion_timer = setInterval(refresh_nugget_discussion, 3600000); // 1 hour
+		initPopup();
+		initTutorial();
+	
+		// module.nugget_discussion_timer = setInterval(refresh_nugget_discussion, 3600000); // 1 hour
 		// clearInterval(nugget_discussion_timer);
 	};
+
+	function initTutorial() {		// tutorial image slider
+		$("body").on("click", ".image-next", getNext);
+		$("body").on("click", ".image-prev", getPrev);
+		$('#slider li').hide().filter(':first').show();
+		$("#slider").css("height", $(".tutorial-image:first img")[0].naturalHeight);
+		$(".image-count").text($(".tutorial-image:first").attr("data-id") + "/" + $(".tutorial-image").length);
+		
+		function getNext() {
+			var $curr = $('.tutorial-image:visible'),
+				$next = ($curr.next().length) ? $curr.next() : $('.tutorial-image').first();
+			transition($curr, $next);
+		}
+		
+		function getPrev() {
+			var $curr = $('.tutorial-image:visible'),
+				$next = ($curr.prev().length) ? $curr.prev() : $('.tutorial-image').last();
+			transition($curr, $next);
+		}
+	
+		function transition($curr, $next) {
+			$next.css('z-index', 2).fadeIn('slow', function () {
+				// $("#slider").animate({
+				// 	"height": $next.height()}, 200);
+				$curr.hide().css('z-index', 0);
+				$next.css('z-index', 1);
+			});
+			$(".image-count").text($next.attr("data-id") + "/" + $(".tutorial-image").length);
+		}
+	}
 
 	function set_page_loading_progress(number) {
 		$('#page-loading-progress').progress({
@@ -49,8 +92,7 @@ define([
 		}
 	}
 
-	function load_all_documents() {
-
+	function load_toc() {
 		$.ajax({
 			url: '/workbench/api_get_toc/',
 			type: 'post',
@@ -62,13 +104,31 @@ define([
 				    popup: '#workbench-document-toc-container',
 				    on    : 'click',
 				    position: "top left", 
-				  })
-				;
+				});
 				$(".document-toc-sec-link").click(function(e) {
-					$("#workbench-document-section").find(".data").animate({scrollTop: 0}, 0);
-					var sec_id = $(this).attr('data-id'); 
-					var tmp = $(".section-header[data-id=" + sec_id + "]").offsetParent().position().top;
-					$("#workbench-document-section").find(".data").animate({scrollTop: tmp}, 0);
+					var sec_id = e.target.getAttribute("data-id");			
+					$.ajax({
+						url: '/workbench/api_get_doc_by_sec_id/',
+						type: 'post',
+						data: {
+							'sec_id': sec_id,
+						},
+						success: function(xhr) {
+							$("#workbench-document").html(xhr.workbench_document);
+					
+							$('#workbench-document-toc').popup('hide');
+							$("#workbench2-document-container").animate({scrollTop: 0}, 0);
+							var tmp = $(".section-header[data-id=" + sec_id + "]").offsetParent().position().top;
+							$("#workbench2-document-container").animate({scrollTop: tmp}, 0);
+							module.doc_id = xhr.doc_id;
+							load_highlights_by_doc();
+						},
+						error: function(xhr) {
+							if (xhr.status == 403) {
+								Utils.notify('error', xhr.responseText);
+							}
+						}
+					});
 				});
 				increase_page_loading_progress(10);
 			},
@@ -77,7 +137,10 @@ define([
 					Utils.notify('error', xhr.responseText);
 				}
 			}
-		});
+		});		
+	}
+
+	function load_all_documents() {
 
 		promise = $.ajax({
 			url: '/workbench/api_load_all_documents/',
@@ -93,39 +156,39 @@ define([
 				}
 			}
 		});
-		return promise
+		return promise;
 	}
 
 	function init_button() {
-		$("#workbench-document-section").on("click", "#workbench-document-back-to-top", function(e) {
-			$("#workbench-document-section").find(".data").animate({scrollTop: 0}, 800);
+		$("body").on("click", "#workbench-document-back-to-top", function(e) {
+			$("#workbench2-document-container").animate({scrollTop: 0}, 800);
 		});
 
-		$("#workbench-nugget-section").on("click", "#workbench-nugget-operation-back", function(e) {
+		module.nugget_list_container.on("click", "#workbench-nugget-operation-back", function(e) {
 			load_nugget_list();
 		});
 
-		$("#workbench-claim-section").on("click", ".workbench-claim-tab", function(e) {
-			$(this).siblings().removeClass("active");
-			$(this).addClass("active");
+		module.claim_textarea_container.on("click", ".workbench-claim-tab", function(e) {
+			$(this).siblings().removeClass("positive");
+			$(this).addClass("positive");
 			module.claim_category = $(this).text().toLowerCase();
 			load_claim_list();
 		});
 
 		// nugget button group
-		$("#workbench-nugget-container").on("click", ".use-nugget", function(e) {
-			var $list_container = $(this).parentsUntil(".card").parent();
+		module.nugget_list_container.on("click", ".use-nugget", function(e) {
+			var $list_container = $(this).parents(".card");
 			var data_hl_id = $list_container.attr('data-hl-id');
 			var content = $list_container.find(".description")[0].textContent.trim();
-			var textarea = $("#workbench-claim-section").find("textarea")
+			var textarea = module.claim_textarea_container.find("textarea")
 			if (textarea.attr("data-id") !== undefined) {
 				textarea.val(textarea.val() + " " + content).attr("data-id", textarea.attr("data-id")  + " " +  data_hl_id);
 			} else {
 				textarea.val(content).attr("data-id", data_hl_id);
 			}
 		});
-		$("#workbench-nugget-container").on("click", ".delete-nugget", function(e) {
-			var $list_container = $(this).parentsUntil(".card").parent();
+		module.nugget_list_container.on("click", ".delete-nugget", function(e) {
+			var $list_container = $(this).parents(".card");
 			var hl_id = $list_container.attr("data-hl-id");
 			$.ajax({
 				url: '/workbench/api_remove_nugget/',
@@ -143,14 +206,44 @@ define([
 				}
 			});
 		});
-		$("#workbench-nugget-container").on("click", ".source-nugget", function(e) {
+		module.nugget_list_container.on("click", ".source-nugget", function(e) {
 			var $list_container = $(this).parents(".card");
-			$("#workbench-document-panel").scrollTop(0);
-			var tmp1 = $($(".tk[data-hl-id*='" + $list_container.attr('data-hl-id') + "']")[0]).position().top; 
-			var tmp2 = $($(".tk[data-hl-id*='" + $list_container.attr('data-hl-id') + "']")[0]).offsetParent().position().top;
-			var tmp = tmp1 + tmp2;
-			$("#workbench-document-section").find(".data").scrollTop(tmp - 50);
-			$($(".tk[data-hl-id*='" + $list_container.attr('data-hl-id') + "']")).fadeIn(100).fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);							
+			var hl_id = $list_container.attr("data-hl-id");
+			$.ajax({
+				url: '/workbench/api_get_doc_by_hl_id/',
+				type: 'post',
+				data: {
+					'hl_id': hl_id,
+				},
+				success: function(xhr) {
+					if (xhr.doc_id == module.doc_id) {
+						_jump();						
+					} else {
+						module.doc_id = xhr.doc_id;	
+						$("#workbench-document").html(xhr.workbench_document);
+						$.when(load_highlights_by_doc()).done(function(promise1) {
+							_jump();
+						});
+					}
+					
+					function _jump() {
+						$("#workbench2-document-container").animate({scrollTop: 0}, 0);
+						var tmp1 = $($(".tk[data-hl-id*='" + $list_container.attr('data-hl-id') + "']")[0]).position().top; 
+						var tmp2 = $($(".tk[data-hl-id*='" + $list_container.attr('data-hl-id') + "']")[0]).offsetParent().position().top;
+						var tmp = tmp1 + tmp2 - 200;
+						$("#workbench2-document-container").animate({scrollTop: tmp}, 0);
+						$($(".tk[data-hl-id*='" + $list_container.attr('data-hl-id') + "']")).css("background-color", "red");	
+						setTimeout(function() {
+							$($(".tk[data-hl-id*='" + $list_container.attr('data-hl-id') + "']")).css("background-color", "#FBBD08");	
+						}, 300);						
+					}
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});						
 		});
 		$("#workbench-nugget-container").on("click", ".reassign-nugget", function(e) {
 			var $list_container = $(this).parents(".card");
@@ -192,7 +285,12 @@ define([
 					}
 				}
 			});
-		});		
+		});	
+		module.nugget_list_container.on("click", ".nugget2claim", function(e) {
+			var hl_id = $(this).parents('.card').attr("data-hl-id");
+			load_claim_list_partial(hl_id);
+		});
+		
 
 
 		// claim list button group
@@ -203,8 +301,8 @@ define([
 		// 	var textarea = '<div class="ui form"><div class="field"><textarea rows="3">' + content + '</textarea></div></div>';
 		// 	var content = $(this).parentsUntil('li').parent().find('.workbench-claim-content').html(textarea);
 		// });
-		$("#workbench-claim-section").on("click", ".workbench-remove-claim", function(e) {
-			var claim_id = $(this).parentsUntil(".card").parent().find(".workbench-claim-content").attr("claim-id");
+		module.claim_list_container.on("click", ".workbench-remove-claim", function(e) {
+			var claim_id = $(this).parents(".card").find(".workbench-claim-content").attr("claim-id");
 			$.ajax({
 				url: '/workbench/api_remove_claim/',
 				type: 'post',
@@ -246,12 +344,12 @@ define([
 		// 		}
 		// 	});
 		// });
-		$("#workbench-claim-section").on("click", ".workbench-clear-claim", function(e) {
-			$("#workbench-claim-section").find("textarea").attr("data-id", "").val("");
+		module.claim_textarea_container.on("click", ".workbench-clear-claim", function(e) {
+			module.claim_textarea_container.find("textarea").attr("data-id", "").val("");
 		});
-		$("#workbench-claim-section").on("click", ".workbench-add-claim", function(e) {
-			var content = $("#workbench-claim-section").find("textarea").val();
-			var data_hl_ids = $("#workbench-claim-section").find("textarea").attr("data-id");
+		module.claim_textarea_container.on("click", ".workbench-add-claim", function(e) {
+			var content = module.claim_textarea_container.find("textarea").val();
+			var data_hl_ids = module.claim_textarea_container.find("textarea").attr("data-id");
 			var category = module.claim_category;
 			// $(this).siblings('ul').append("<li data-id ='" + data_hl_ids + "'>" + content + "</li>");
 			$.ajax({
@@ -264,7 +362,7 @@ define([
 					category: category,
 				},
 				success: function(xhr) {
-					$("#workbench-claim-section").find("textarea").attr("data-id", "").val("");
+					module.claim_textarea_container.find("textarea").attr("data-id", "").val("");
 					load_claim_list();
 				},
 				error: function(xhr) {
@@ -274,8 +372,8 @@ define([
 				}
 			});
 		});
-		$("#workbench-claim-section").on("click", ".workbench-source-claim", function(e) {
-			highlight_ids = $(this).parents(".card").find(".workbench-claim-content").attr("data-id").trim();
+		module.claim_list_container.on("click", ".workbench-source-claim", function(e) {
+			var highlight_ids = $(this).parents(".card").find(".workbench-claim-content").attr("data-id").trim();
 			load_nugget_list_partial(highlight_ids);
 		});
 
@@ -333,8 +431,28 @@ define([
 			},
 			success: function(xhr) {
 				$("#workbench-nugget-list").html(xhr.workbench_nugget_list);
-				var def = '<a id="workbench-nugget-operation-back" class="item">< Go back</a>';
-				$("#workbench-nugget-operation-container").html(def);
+				var def = '<a href="javascript:;" id="workbench-nugget-operation-back" class="item">< Full List</a>';
+				$("#workbench-nugget-list").prepend(def);
+			},			
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			}
+		});
+	}
+	
+	function load_claim_list_partial(highlight_id) {
+		$.ajax({
+			url: '/workbench/api_load_claim_list_partial/',
+			type: 'post',
+			data: {
+				highlight_id: highlight_id,
+			},
+			success: function(xhr) {
+				$("#workbench-claim-list").html(xhr.workbench_claims);
+				var def = '<a href="javascript:;" id="workbench-nugget-operation-back" class="item">< Full List</a>';
+				$("#workbench-claim-list").prepend(def);
 			},			
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -345,7 +463,7 @@ define([
 	}
 
 	function load_nugget_list() {
-		$.ajax({
+		var promise = $.ajax({
 			url: '/workbench/api_load_nugget_list/',
 			type: 'post',
 			data: {
@@ -363,26 +481,9 @@ define([
 				}
 			}
 		});
-	}
-
-	function load_nugget_discuss() {
-		var promise = $.ajax({
-			url: '/workbench/show_nugget_comment/',
-			type: 'post',
-			data: {
-				theme_id: module.currentThemeId,
-			},
-			success: function(xhr) {
-				$("#workbench-nugget-discuss").html(xhr.workbench_nugget_comments)
-			},
-			error: function(xhr) {
-				if (xhr.status == 403) {
-					Utils.notify('error', xhr.responseText);
-				}
-			}
-		});
 		return promise;
 	}
+
 
 	function load_claim_list() {
 		var promise = $.ajax({
@@ -419,6 +520,14 @@ define([
 			},
 			success: function(xhr) {
 				$("#workbench-theme-container").html(xhr.workbench_container);
+				
+				$('#current-phase')
+				.popup({
+					popup : $('#phase-instructions'),
+					on    : 'hover'
+				})
+				;
+
 				// bind click event to theme button
 				$('#claim-theme-filter-menu').dropdown({
 					action: 'combo',
@@ -429,7 +538,7 @@ define([
 						load_nugget_list();
 						load_claim_list();
 						clear_highlights();
-						load_highlights(module.currentThemeId);
+						load_highlights_by_doc();
 	    			}
   				});
   				increase_page_loading_progress(10);
@@ -444,46 +553,205 @@ define([
 	}
 
 	function init_tk_event() {
-		$('.tk.n').popup("destroy");
-		$('.tk.n').popup({
-		    popup: '#workbench-document-operation-container',
-		    on    : 'hover',
-		    hoverable: 		true,
-		    delay: {
-			  	show: 300,
-			}
-	  	});
-		$("#workbench-document-section").on("click", ".tk.n", function(e) {
-			var _this = this;
-			var res = this.textContent;
-			while ($(_this.previousSibling).hasClass("n")) {
-				_this = _this.previousSibling;
-				res = _this.textContent + res;
-			}
-			_this = this;
-			while ($(_this.nextSibling).hasClass("n")) {
-				_this = _this.nextSibling;
-				res = res + _this.textContent;
-			}
-			var data_hl_ids = $(this).attr("data-hl-id");
 
+		$("#workbench-document").on('click', '.tk', function(e) {
+			e.stopPropagation();
+			if ($(this).hasClass('p') || $(this).hasClass('q') || $(this).hasClass('c')) {
+				var highlight_ids = this.getAttribute('data-hl-id').split(' ');
+				for (var i = 0; i < highlight_ids.length; i++) {
+					$('#doc-thread-content').feed('update', {
+						type: 'highlight',
+						id: highlight_ids[i]
+					}).done(function() {
+						$('#doc-thread-popup').css('left', e.pageX).css('top', e.pageY);
+					});
+				}
+			}
+		}).on('mousedown', '.section-content', function(e) {
+			$('#doc-highlight-toolbar').removeAttr('style');
+			$('#doc-thread-popup').removeAttr('style');
+			if ($(e.target).is('u.tk')) {
+				var $target = $(this);
+				$(window).mousemove(function(e2) {
+					if ($(e2.target).hasClass('tk')) {
+						module.isDragging = true;
+						module.newHighlight.end = e2.target.getAttribute('data-id');
+						var min = Math.min(module.newHighlight.start, module.newHighlight.end);
+						var max = Math.max(module.newHighlight.start, module.newHighlight.end);
+						$target.find('.tk').removeClass('highlighted');
+						for (var i = min; i <= max; i++) {
+							$target.find('.tk[data-id="' + i + '"]').addClass('highlighted');
+						}
+						module.newHighlight.contextId = $target.attr('data-id');
+					} else {
+						$target.find('.tk').removeClass('highlighted');
+					}
+				});
+				module.newHighlight.start = e.target.getAttribute('data-id');
+				module.newHighlight.end = e.target.getAttribute('data-id');
+			}
+		}).on('mouseup', '.section-content', function(e) {
+			$(window).off('mousemove');
+			var wasDragging = module.isDragging;
+			module.isDragging = false;
+			if (wasDragging) {
+				var min = Math.min(module.newHighlight.start, module.newHighlight.end);
+				var max = Math.max(module.newHighlight.start, module.newHighlight.end);
+				module.newHighlight.start = min;
+				module.newHighlight.end = max;
+
+				if ($(this).find('.tk.highlighted').length) {
+					var highlights = $(this).find('.tk.highlighted');
+					var text = "";
+					for (var i = 0; i < highlights.length; i ++) {
+						text += highlights[i].textContent;
+					};
+					module.newHighlight.text = text;
+					$('#doc-claim-form').hide();
+					$('#doc-comment-form').parent().hide();
+					$('#doc-highlight-toolbar').css('left', e.pageX).css('top', e.pageY);
+				}
+			} else { // just clicking
+				$('#doc-highlight-toolbar').removeAttr('style');
+				$(this).find('.tk').removeClass('highlighted');
+			}
+		});
+
+	}
+
+	function initPopup() {
+		// popup toolbar
+		$('.doc-anno-btn').click(function(e) {
+			module.newHighlight.type = this.getAttribute('data-action');
+			if (module.newHighlight.type == 'comment') {
+				$('#doc-claim-form').hide();
+				$('#doc-comment-form').show().parent().show();
+				$('#doc-comment-form textarea').focus();
+				$('#doc-comment-form label span').text('Add a comment');
+			} else if (module.newHighlight.type == 'question') {
+				$('#doc-claim-form').hide();
+				$('#doc-comment-form').show().parent().show();
+				$('#doc-comment-form textarea').focus();
+				$('#doc-comment-form label span').text('Raise a question');
+			} else if (module.newHighlight.type == 'claim') {
+				$('#doc-comment-form').hide();
+				$('#doc-claim-form').show().parent().show();
+			}
+		});
+		// submitting posts & comments
+		$('.doc-anno-submit').click(function(e) {
+			var content = $(this).parents('form').find('textarea').val();
+			if ($.trim(content).length == 0) {
+				notify('error', 'Content must not be empty.');
+				return;
+			}
+			$('#doc-highlight-toolbar .button').addClass('loading');
 			$.ajax({
-				url: '/workbench/api_change_to_nugget/',
+				url: '/api_highlight/',
 				type: 'post',
-				data: {
-					data_hl_ids: data_hl_ids,
-				},
+				data: $.extend({
+					action: 'create',
+					content: content,
+				}, module.newHighlight),
 				success: function(xhr) {
-					$("#workbench-nugget-list").html(xhr.workbench_nuggets);
+					afterAddHighlight(xhr.highlight_id);
+					// if it's a new question, dispatch.
+					if (module.newHighlight.type == 'question') {
+						var message = '<b>' + sessionStorage.getItem('user_name')
+							+ '</b> ('
+							+ sessionStorage.getItem('role')
+							+ ') just asked a new question.';
+						require('realtime/socket').dispatchNewQuestion({
+							message: message
+						});
+					}
 				},
 				error: function(xhr) {
+					$('#doc-highlight-toolbar .button').removeClass('loading');
 					if (xhr.status == 403) {
-						Utils.notify('error', xhr.responseText);
+						notify('error', xhr.responseText);
 					}
 				}
 			});
 		});
-		increase_page_loading_progress(10);
+		// actions on highlights
+		$('.doc-thread-btn').click(function(e) {
+			var action = this.getAttribute('data-action');
+			if (action == 'claim' && $('#doc-thread-content .event[data-type="claim"]').length) {
+				Utils.notify('error', 'This highlight is already extracted as a claim');
+				return;
+			}
+			$('#doc-thread-content').feed('switch', {
+				'action': action
+			});
+			if (action == 'claim') {
+				var highlight_id = $('#doc-thread-content').feed('get_id');
+				$('#doc-thread-content .claim.form textarea').val(module.highlightText[highlight_id]).focus();
+			}
+		});
+		
+		$('#doc-claim-form').form({
+			fields: {
+			},
+			onSuccess: function(e) {
+				e.preventDefault();
+				$('#doc-highlight-toolbar .button').addClass('loading');
+				$.ajax({
+					url: '/api_highlight/',
+					type: 'post',
+					data: $.extend({
+						action: 'create',
+						theme_id: $(this).find("select").val(),
+					}, module.newHighlight, $('#doc-claim-form').form('get values')),
+					success: function(xhr) {
+						afterAddHighlight(xhr.highlight_id);
+						$.when(load_nugget_list()).done(function(promise) {
+							$("#workbench2-nugget-container").scrollTop(0);
+						});
+					},
+					error: function(xhr) {
+						$('#doc-highlight-toolbar .button').removeClass('loading');
+						if (xhr.status == 403) {
+							Utils.notify('error', xhr.responseText);
+						}
+					}
+				});
+			}
+		});
+		
+	}
+
+	function afterAddHighlight(newHighlightId) {
+		// reset input boxes
+		$('#doc-claim-form').form('reset');
+		$('#doc-highlight-toolbar').removeAttr('style');
+		$('#doc-highlight-toolbar textarea').val('');
+		$('#doc-highlight-toolbar .button').removeClass('loading');
+		$('.tk.highlighted').removeClass('highlighted');
+
+		var newHighlightData = {
+			author_id: sessionStorage.getItem('user_id'),
+			context_id: module.newHighlight.contextId,
+			start: module.newHighlight.start,
+			end: module.newHighlight.end,
+			id: newHighlightId,
+			text: module.newHighlight.text,
+			type: module.newHighlight.type
+		};
+
+		// dispatch to other users
+		require('realtime/socket').dispatchNewHighlight(newHighlightData);
+
+		// update current highlights dataset
+		module.highlightsData.push(newHighlightData);
+
+		// update question panel
+		require('doc/qa').updateQuestionList();
+
+		// switch to highlight type and update
+		// module.updateHighlightFilter({
+		// 	switch: module.newHighlight.type
+		// });
 	}
 
 	function clear_highlights() {
@@ -510,16 +778,12 @@ define([
 	}
 
 	function load_highlights_by_doc() {
-
-	}
-
-	// theme_id == -1 indicates select all
-	function load_highlights(theme_id, callback) {
-		$.ajax({
+		var promise = $.ajax({
 			url: '/workbench/api_load_highlights/',
 			type: 'post',
 			data: {
-				theme_id: theme_id,
+				theme_id: module.currentThemeId,
+				doc_id: module.doc_id,
 			},
 			success: function(xhr) {
 				module.highlightsData = xhr.highlights;
@@ -549,10 +813,6 @@ define([
 					}
 					module.highlightText[highlight.id] = text.join('');
 				}
-
-				if (typeof callback == 'function') {
-					callback();
-				}
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -560,6 +820,7 @@ define([
 				}
 			}
 		});
+		return promise;
 	}
 
 	return module;

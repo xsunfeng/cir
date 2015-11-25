@@ -69,6 +69,7 @@ def api_doc(request):
 def api_highlight(request):
     response = {}
     action = request.REQUEST.get('action')
+    now = timezone.now()
     if action == 'create':
         if not request.user.is_authenticated():
             return HttpResponse("Please log in first.", status=403)
@@ -80,14 +81,14 @@ def api_highlight(request):
         text = request.REQUEST.get('text')
         # create highlight object
         context = Entry.objects.get(id=context_id)
-        highlight = Highlight(start_pos=start, end_pos=end, context=context, author=request.user, text=text)
+        highlight = Highlight(start_pos=start, end_pos=end, context=context, author=request.user, text=text, created_at = now)
         if (request.REQUEST.get('theme_id')):
             theme_id = request.REQUEST.get('theme_id')
             highlight.theme = ClaimTheme.objects.get(id = theme_id)
         highlight.save()
         response['highlight_id'] = highlight.id
         # then create the content
-        now = timezone.now()
+        
         if 'actual_user_id' in request.session:
             actual_author = User.objects.get(id=request.session['actual_user_id'])
         else:

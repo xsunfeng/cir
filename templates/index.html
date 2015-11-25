@@ -99,42 +99,73 @@
 		{% endif %}
 	{% else %}
 <div class="ui main tab {{ phase.document_active }}" data-tab="document-tab">
-	<div class="ui grid">
-		<div class="ten wide document column" style="padding-top:0">
-			<div class="ui attached info message">
-				<div class="ui instructions accordion">
-					<div class="ui active title"><i class="dropdown icon"></i>Current phase: {{ phase.full_name }}</div>
-					<div class="active content">
-						{{ phase.instructions }}
+	
+	<div class="ui grid" style="margin-top:0;" style="padding-top:0; position:fixed; width:100%; height:100%;">
+		
+		<div class="sixteen wide document column" style="position: fixed; top: 3em; z-index:1;">
+			<div id="workbench-theme-container"></div>
+		</div>
+	
+		<div class="ten wide document column" id="workbench2-document-container">
+			<div id="workbench-document-panel">
+				<div id="workbench-document">
+					{% include 'workbench-tutorial.html' %}
+				</div>
+			</div>
+			<div class="ui orange buttons" style="
+				position: fixed;
+				left: 2%;
+				bottom: 50px;
+				z-index: 1;
+				box-shadow: 0px 0px 16px 0px rgba(0,0,0,0.5);
+				">
+				<div class="ui button" id="workbench-document-toc">Table of Contents</div>
+				<div class="ui button" id="workbench-document-back-to-top">Back to top</div>
+				<div class="ui button" id="workbench-document-filter">Filter</div>
+			</div>		
+		</div>
+		
+		<div class="six wide column" id = "workbench2-nugget-container">
+			<div id="workbench-nugget-container" style="height:50%;">
+				<div id="workbench-nugget-panel">
+					<div id="workbench-nugget">
+						<div id="workbench-nugget-list">
+							<div style="height:500px;">
+							</div>
+							<div style="" class="ui active inverted dimmer">
+								<div class="ui large text loader">Preparing nuggets</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
-			<div id="document-categories" class="ui attached segment"></div>
-			<div id="document-pane" class="ui segment">Please select a document from the list.</div>
 		</div>
-		<div id="document-rail"  class="six wide column">
-			{% include 'doc-tag-filter.html' %}
-			<div id="qa-wrapper">
-				<h3 class="ui header">Questions on documents</h3>
-				<div id="qa-refresh-prompter" class="ui info message hidden"></div>
-				<div class="ui fluid top attached two item blue pointing menu" style="margin-top: 0;">
-					<a class="item refresh-list">Refresh List</a>
-					<a class="item new-question">Raise a question</a>
+		
+		<div class="six wide column shadow1" id = "workbench2-claim-textarea-container">
+			<div class="ui form">
+				<div class="field">
+					<textarea rows="6"></textarea>
 				</div>
-				<div class="ui buttom attached secondary segment new question hidden">
-					<form class="ui form">
-						<div class="ui message">
-							If your question has a context in the document, please ...
-						</div>
-						<div class="field">
-							<textarea rows="3"></textarea>
-						</div>
-						<button class="ui submit button">Submit</button>
-					</form>
+				<div class="ui buttons">
+					<button class="ui positive button workbench-claim-tab">Finding</button>
+					<div class="or"></div>
+					<button class="ui button workbench-claim-tab">Opinion</button>
 				</div>
-				<div id="qa-list"></div>
+				<div class="ui button workbench-add-claim" style="float:right;">Add</div>
+				<div class="ui button workbench-clear-claim" style="float:right;">Clear</div>
+			</div>
+		</div>		
+		
+		<div class="six wide column" id = "workbench2-claim-container">
+			<div id="workbench-claim-list" class="flag">
+				<div style="height:500px;">
+				</div>
+				<div style="" class="ui active inverted dimmer">
+					<div class="ui large text loader">Preparing claims</div>
+				</div>
 			</div>
 		</div>
+		
 	</div>
 	{% include 'doc-highlight-toolbar.html' with phase=phase %}
 	{% include 'doc-thread-popup.html' with phase=phase %}
@@ -193,7 +224,7 @@
 		</div>
 	</div>
 </div>
-<div id="activities-chart"></div>
+<!--<div id="activities-chart"></div>-->
 <div id="fixed-steps" class="ui five small steps">
 	<div class="{% if phase.short_name == 'nugget' %}active {% endif %}step">
 		<div class="title">Extract Nuggets</div>
@@ -215,6 +246,10 @@
 		{% endif %}
 	</div>
 </div>
+
+<div class="ui special popup" id="workbench-document-toc-container">
+</div>
+
 {% if role != 'visitor' %}
 	{% include 'chatter.html' %}
 {% endif %}

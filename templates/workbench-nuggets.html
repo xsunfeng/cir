@@ -1,60 +1,56 @@
-
-{% for highlight in highlights %}
-	<div class="ui card" class="workbench-nugget" data-hl-id = {{ highlight.id }} style="
-		margin: 5% 1%;
-		width:	96%;
-	">
-	  	{% if highlight.is_nugget %}
-	  	<div class="ui top attached label">nugget</div>
-	 	<div class="content">
-	    	<div class="description">
-	      		{{ highlight.text }}
-	    	</div>
-	  	</div>
-	  	<div class="extra content" style="font-size:12px;">
-	  		{% if highlight.is_used %}
-	  		<a><i class="check icon"></i>
-    			used
-    		</a>
-	  		{% endif %}
-			<div class="right floated author">
-		      	collected by {{ highlight.author_name }}
-			</div>
-	  	</div>
-	  	<div class="extra content">
-		  	<div class="ui four buttons">
-		    	<div class="ui basic blue button use-nugget">
-		      		use
-	    		</div>
-	  	    	<div class="ui basic blue button source-nugget">
-		      		source
-	    		</div>
-		    	<div class="ui basic red button delete-nugget">
-		      		not useful
-		    	</div>
-		    	<div class="ui basic blue button reassign-nugget">
-		      		reassign
-		    	</div>
-		  	</div>
-	 	</div>
-	  	{% else %}
-	  	<div class="ui top attached label">nugget marked as not useful</div>
-		<div class="content">
-			<div class="ui dimmable dimmed segment">
-				<div class="ui simple dimmer">{{ highlight.text }}</div>
-			</div>
-	  	</div>
-	  	<div class="extra content">
-			<div class="ui two buttons">
-		    	<div class="ui basic blue button recover-nugget">
-		      		recover
-	    		</div>
-		    	<div class="ui basic blue button source-nugget">
-		      		source
-		    	</div>
-		  	</div>
-	  	</div>
-	  	{% endif %}
-	</div>
-{% endfor %}
+{% if highlights %}
+	{% for highlight in highlights %}
+		<div class="ui card" class="workbench-nugget" data-hl-id = {{ highlight.id }} style="
+			width:	96%; background: PapayaWhip;
+		">
+			{% if highlight.is_nugget %}
+				{% if highlight.is_used %}
+				<a class="ui tiny green right corner label nugget2claim">
+					<i class="icon"></i>
+				</a>
+				{% endif %}
+				<!--<div class="ui top attached label">nugget</div>-->
+				<div class="content">
+					<div class="description">
+						{{ highlight.text }}
+					</div>
+				</div>
+				<div class="extra content">
+					<div class="ui horizontal bulleted list">
+						<a class="item use-nugget">use</a>
+						<a class="item source-nugget">source</a>
+						<a class="item delete-nugget">not useful</a>
+						<a class="item reassign-nugget">reassign</a>
+					</div>	
+					<div class="right floated author">
+						collected by {{ highlight.author_name }}
+					</div>
+				</div>
+			{% else %}
+				<a class="ui tiny red right corner label">
+					<i class="icon"></i>
+				</a>	
+				<div class="content">
+					<div class="ui dimmable dimmed segment">
+						<div class="ui simple dimmer">{{ highlight.text }}</div>
+					</div>
+				</div>
+				<div class="extra content">
+					<div class="ui horizontal bulleted list">
+						<a class="item recover-nugget">recover</a>
+						<a class="item source-nugget">source</a>
+					</div>
+				</div>
+			{% endif %}
+		</div>
+	{% endfor %}
+{% else %}
+		<div class="ui card" style="width:	96%; background: PapayaWhip;">
+				<div class="content">
+					<div class="description">
+						No nuggets yet.
+					</div>
+				</div>
+		</div>
+{% endif %}
 

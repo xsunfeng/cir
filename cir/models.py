@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 
 import utils
 
+import datetime, time
+
 VISITOR_ROLE = 'visitor'
 
 
@@ -223,9 +225,11 @@ class Highlight(models.Model):
     theme = models.ForeignKey(ClaimTheme, null=True, blank=True)
     is_nugget = models.BooleanField(default=True)
     text = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField()
 
     def getAttr(self):
         attr = {}
+        attr['created_at'] = time.mktime(self.created_at.timetuple())
         attr['id'] = self.id
         attr['start'] = self.start_pos
         attr['end'] = self.end_pos

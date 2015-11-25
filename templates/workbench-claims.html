@@ -1,35 +1,32 @@
-
-{% for item in claims %}
-	<div class="ui card" style="margin: 5% 1%; width:	96%;">
-	  	<div class="ui top attached label">claim</div>
-	 	<div class="content">
-	    	<div class="description workbench-claim-content" claim-id="{{ item.id }}" data-id="{{ item.highlight_ids }}">
-	      		{{ item.content }}
-	    	</div>
-	  	</div>
-		<div class="extra content" style="font-size:12px;">
-		    <div class="right floated author">
-		      	{{ item.date }} by {{ item.author_name }}
-<!-- 		      	<img class="ui avatar image" src="http://findicons.com/files/icons/1072/face_avatars/300/i04.png"> Matt
- -->		    </div>
-	  	</div>
-	  	<div class="extra content">
-		  	{% if item.is_author %}
-		  	<div class="ui two buttons">
-	  	    	<div class="ui basic blue button workbench-remove-claim">
-		      		remove
-	    		</div>
-		    	<div class="ui basic red button workbench-source-claim">
-		      		source
-		    	</div>
-		  	</div>
-		  	{% else %}
-			<div class="ui one bottom attached buttons">
-		    	<div class="ui basic red button workbench-source-claim">
-		      		source
-		    	</div>
-		  	</div>
-		  	{% endif %}
-	  	</div>
+{% if claims %} 
+	{% for item in claims %}
+		<div class="ui card" style="width:	96%;">
+			<div class="content">
+				<div class="description workbench-claim-content" claim-id="{{ item.id }}" data-id="{{ item.highlight_ids }}">
+					{{ item.content }}
+				</div>
+			</div>
+			<div class="extra content">
+				<div class="ui horizontal bulleted list">
+					{% if item.is_author %}
+						<a class="item workbench-remove-claim">remove</a>
+						<a class="item workbench-source-claim">source</a>
+					{% else %}
+						<a class="item workbench-source-claim">source</a>
+					{% endif %}
+				</div>	
+				<div class="right floated author">
+					constrcuted by {{ item.author_name }} {{ item.date }}
+				</div>
+			</div>
+		</div>
+	{% endfor %}
+{% else %}
+	<div class="ui card" style="width:	96%;">
+		<div class="content">
+			<div class="description">
+				No claims yet.
+			</div>
+		</div>
 	</div>
-{% endfor %}
+{% endif %}

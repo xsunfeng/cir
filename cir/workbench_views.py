@@ -7,6 +7,7 @@ from django.utils import timezone
 from cir.models import *
 import claim_views
 
+from cir.phase_control import PHASE_CONTROL
 import utils
 
 def api_load_all_documents(request):
@@ -41,6 +42,7 @@ def api_get_toc(request):
     for doc in root_docs:
         m_doc = {}
         m_doc['name'] = doc.title
+        m_doc['id'] = doc.id
         m_doc['content'] = []
         for section in doc.sections.all():
             m_sec = {}
@@ -59,6 +61,7 @@ def api_get_toc(request):
         for doc in docs:
             m_doc = {}
             m_doc['name'] = doc.title
+            m_doc['id'] = doc.id
             m_doc['content'] = []
             for section in doc.sections.all():
                 m_sec = {}
@@ -70,16 +73,47 @@ def api_get_toc(request):
     response['document_toc'] = render_to_string("document-toc.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
-def show_nugget_comment(request):
+def api_get_doc_by_hl_id(request):
+    print "api_get_doc_by_hl_id"
     response = {}
     context = {}
-    context['nugget_comments'] = []
-    forum_id = request.session['forum_id']
-    theme_id = request.REQUEST.get('theme_id')
-    nugget_comments = NuggetComment.objects.filter(forum_id = forum_id, theme_id = theme_id).order_by('created_at')
-    for nugget_comment in nugget_comments:
-        context['nugget_comments'].append(nugget_comment)
-    response['workbench_nugget_comments'] = render_to_string("workbench_nugget_comments.html", context)
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    # retrieve docs in a folder
+    hl_id = request.REQUEST.get("hl_id")
+    hl = Highlight.objects.get(id = hl_id)
+    sec = DocSection.objects.get(id=hl.context.id)
+    doc = sec.doc
+    context['doc_name'] = doc.title
+    context['sections'] = []
+    ordered_sections = doc.sections.filter(order__isnull=False).order_by('order')
+    for section in ordered_sections:
+        context['sections'].append(section.getAttr(forum))
+    unordered_sections = doc.sections.filter(order__isnull=True).order_by('updated_at')
+    for section in unordered_sections:
+        context['sections'].append(section.getAttr(forum))
+    response['workbench_document'] = render_to_string("workbench-document.html", context)
+    response['doc_id'] = doc.id
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def api_get_doc_by_sec_id(request):
+    print "api_get_doc_by_sec_id"
+    response = {}
+    context = {}
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    # retrieve docs in a folder
+    sec_id = request.REQUEST.get("sec_id")
+    sec = DocSection.objects.get(id = sec_id)
+    doc = sec.doc
+    context['doc_name'] = doc.title
+    context['sections'] = []
+    ordered_sections = doc.sections.filter(order__isnull=False).order_by('order')
+    for section in ordered_sections:
+        context['sections'].append(section.getAttr(forum))
+    unordered_sections = doc.sections.filter(order__isnull=True).order_by('updated_at')
+    for section in unordered_sections:
+        context['sections'].append(section.getAttr(forum))
+    response['workbench_document'] = render_to_string("workbench-document.html", context)
+    response['doc_id'] = doc.id
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def add_nugget_comment(request):
@@ -115,30 +149,32 @@ def api_load_all_themes(request):
         c.save()
     for theme in themes:
         context["themes"].append(theme)
+    context["phase"] = PHASE_CONTROL[forum.phase]
     response['workbench_container'] = render_to_string("workbench-theme-container.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_load_highlights(request):
     print "api_load_highlights"
     response = {}
-    docs = Doc.objects.filter(forum_id=request.session['forum_id'])
     response['highlights'] = []
     theme_id = request.REQUEST.get('theme_id')
+    doc_id = request.REQUEST.get('doc_id')
+    doc = Doc.objects.get(id = doc_id)
+    print "theme_id = ", theme_id
+    print "doc_id = ", doc_id
     if theme_id == "-1":
-        for doc in docs:
-            for section in doc.sections.all():
-                highlights = section.highlights.all()
-                for highlight in highlights:
+        for section in doc.sections.all():
+            highlights = section.highlights.all()
+            for highlight in highlights:
+                highlight_info = highlight.getAttr()
+                response['highlights'].append(highlight_info)
+    else:
+        for section in doc.sections.all():
+            highlights = section.highlights.all()
+            for highlight in highlights:
+                if (highlight.theme != None and int(highlight.theme.id) == int(theme_id)):
                     highlight_info = highlight.getAttr()
                     response['highlights'].append(highlight_info)
-    else:
-        for doc in docs:
-            for section in doc.sections.all():
-                highlights = section.highlights.all()
-                for highlight in highlights:
-                    if (highlight.theme != None and int(highlight.theme.id) == int(theme_id)):
-                        highlight_info = highlight.getAttr()
-                        response['highlights'].append(highlight_info)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_remove_claim(request):
@@ -253,6 +289,7 @@ def api_load_nugget_list(request):
                 highlights = section.highlights.all()
             for highlight in highlights:
                 context['highlights'].append(highlight.getAttr())
+    context['highlights'].sort(key = lambda x: x["created_at"], reverse=True)
     response['workbench_nugget_list'] = render_to_string("workbench-nuggets.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
@@ -267,6 +304,34 @@ def api_load_nugget_list_partial(request):
         highlight = Highlight.objects.get(id = highlight_id)
         context['highlights'].append(highlight.getAttr())
     response['workbench_nugget_list'] = render_to_string("workbench-nuggets.html", context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def api_load_claim_list_partial(request):
+    print "api_load_claim_list_partial"
+    response = {}
+    context = {}
+    context['highlights'] = []
+    highlight_id = request.REQUEST.get("highlight_id")
+    print highlight_id
+    highlightClaims = HighlightClaim.objects.filter(highlight_id = highlight_id)
+    context["claims"] = []
+    for highlightClaim in highlightClaims:
+        claim = highlightClaim.claim
+        item = {}
+        item['date'] = utils.pretty_date(claim.updated_at)
+        print type(claim)
+        print type(claim.content)
+        print type(claim.claim_category)
+        item['content'] = unicode(claim) + " (" + claim.claim_category + ")" 
+        item['id'] = claim.id
+        item['author_name'] = claim.author.first_name + " " + claim.author.last_name
+        item['is_author'] = (request.user == claim.author)
+        item['highlight_ids'] = ""
+        for highlight in claim.source_highlights.all():
+            item['highlight_ids'] += (str(highlight.id) + " ")
+        item['highlight_ids'].strip(" ")
+        context["claims"].append(item)
+    response['workbench_claims'] = render_to_string("workbench-claims.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_edit_claim(request):
@@ -294,6 +359,8 @@ def api_get_claim_by_theme(request):
     for claim in claims:
         item = {}
         item['date'] = utils.pretty_date(claim.updated_at)
+        item['created_at'] = utils.pretty_date(claim.created_at)
+        item['created_at_used_for_sort'] = claim.created_at
         item['content'] = claim.content
         item['id'] = claim.id
         item['author_name'] = claim.author.first_name + " " + claim.author.last_name
@@ -303,6 +370,7 @@ def api_get_claim_by_theme(request):
             item['highlight_ids'] += (str(highlight.id) + " ")
         item['highlight_ids'].strip(" ")
         context["claims"].append(item)
+    context['claims'].sort(key = lambda x: x["created_at_used_for_sort"], reverse=True)
     response['workbench_claims'] = render_to_string("workbench-claims.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')   
 
