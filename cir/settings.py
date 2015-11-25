@@ -14,7 +14,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'cir',  # Or path to database file if using sqlite3.
+        'NAME': 'cir_backup',  # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': 'postgres',
         'PASSWORD': 'asdf1234',
@@ -71,7 +71,8 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = os.path.join(PROJECT_PATH, '../cir-static/')
+#STATIC_ROOT = os.path.join(PROJECT_PATH, '../cir-static/')
+STATIC_ROOT = os.path.join(PROJECT_PATH, '../static/geolab/')
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
