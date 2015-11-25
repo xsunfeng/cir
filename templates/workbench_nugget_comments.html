@@ -1,26 +1,26 @@
+{% if not nugget_comments %}
+<div class="ui yellow message">Nothing here yet</div>
+{% else %}
 <div class="ui relaxed divided list">
 	{% for comment in nugget_comments %}
 	<div class="item">
-		<div class="ui avatar image" style="
-			font-size: 1.4em;
-		    padding: 0;
-		    line-height: 30px;
-		    text-align: center;
-		    width: 32px;
-		    height: 32px;
-		    color: white;
-		    background-color: burlywood;">
-			<span style="
-			    display: inline-block;
-			    vertical-align: middle;
-			    line-height: normal;">
-    			{{ comment.author.first_name|slice:":1" }}{{ comment.author.last_name|slice:":1" }}
-    		</span>
+		<div style="
+			float:left;
+			width:48px;
+			height: 48px;
+			border-radius: 24px;
+			background: yellow;
+			line-height:48px;
+			text-align: center;
+			margin-right:10px;
+		">
+			{{ comment.author.first_name|slice:":1" }}{{ comment.author.last_name|slice:":1" }}
 		</div>
-	    <div class="content" style="padding:0; padding-left: 1em;">
+	    <div class="content" style="overflow: hidden;">
 	      	<div>{{ comment.content }}</div>
-	      	<div class="description">posted by {{ comment.author }} at {{ comment.created_at }}</div>
+	      	<div class="description" style="font-size:12px;">posted by {{ comment.author }} at {{ comment.created_at }}</div>
 	    </div>
   	</div>
   	{% endfor %}
 </div>
+{% endif %}

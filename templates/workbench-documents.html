@@ -1,6 +1,9 @@
 {% for doc in docs %} 
 	{% for section in doc.sections %} 
-		<div class="ui segment workbench-documents-column">
+		<div class="ui raised segment workbench-documents-column" style="
+			margin:		1em 0.1em;
+			background:	#E0F1E0;
+		">
 			<div>{{doc.folder.name}} >> {{doc.title}} >> {{section.title}}</div>
 			{% if section.title %}
 				<h3 class="ui header section-header" data-id="{{ section.id }}">{{ section.title }}</h3>

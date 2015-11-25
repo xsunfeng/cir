@@ -1,42 +1,59 @@
+<div class="ui top attached label">Table of contents</div>
+
+<div class="ui list">
   {% for root_doc in root_docs %}
-      <div class="item">
+  <div class="item">
+    <i class="folder icon"></i>
+    <div class="content">
+      <div class="header" style="background: white;" data-id="{{ doc.id }}">{{ root_doc.name }}</div>
+      <!-- <div class="description">Source files for project</div> -->
+      <div class="list">
+      {% for sec in root_doc.content %}
+        <div class="item">
+          <i class="file icon"></i>
           <div class="content">
-              <a style="color:#FFF" class="header" data-id="{{ doc.id }}">{{ root_doc.name }}</a>
-              {% for sec in root_doc.content %}
-              <div class="item">
-                  <div class="content">
-                      <a href="javascript:;" class="document-toc-sec-link" data-id="{{ sec.id }}">{{ sec.name }}</a>
-                  </div>
-              </div>
-              {% endfor %}
+            <a class="header document-toc-sec-link" style="background: white;" data-id="{{ sec.id }}">{{ sec.name }}</a>
+            <!-- <div class="description">Your site's theme</div> -->
           </div>
+        </div>
+      {% endfor %}
       </div>
+    </div>
+  </div>
   {% endfor %}
-
   {% for folder in folders %}
-      <div class="item">
+  <div class="item">
+    <i class="folder icon"></i>
+    <div class="content">
+      <div class="header" style="background: white;">{{ folder.name }}</div>
+      <!-- <div class="description">Source files for project</div> -->
+      <div class="list">
+      {% for doc in folder.content %}
+        <div class="item">
+          <i class="file icon"></i>
           <div class="content">
-              <div class="header">{{ folder.name }}</div>
+            <div class="header" style="background: white;" data-id="{{ doc.id }}">{{ doc.name }}</div>
+            <!-- <div class="description">Your site's theme</div> -->
               <div class="list">
-              {% for doc in folder.content %}
-                  <div class="item">
-                      <div class="content">
-                          <a style="color:#FFF" class="header" data-id="{{ doc.id }}">{{ doc.name }}</a>
-                          {% for sec in doc.content %}
-                          <div class="item">
-                              <div class="content">
-                                  <a href="javascript:;" class="document-toc-sec-link" data-id="{{ sec.id }}">{{ sec.name }}</a>
-                              </div>
-                          </div>
-                          {% endfor %}
-                      </div>
+              {% for sec in doc.content %}
+                <div class="item">
+                  <i class="file icon"></i>
+                  <div class="content">
+                    <a class="header document-toc-sec-link" style="background: white;" data-id="{{ sec.id }}">{{ sec.name }}</a>
+                    <!-- <div class="description">Your site's theme</div> -->
                   </div>
+                </div>
               {% endfor %}
               </div>
           </div>
+        </div>
+      {% endfor %}
       </div>
+    </div>
+  </div>
   {% endfor %}
+</div>
 
-  {% if not folders and not root_docs %}
-      <div class="item">No document for now.</div>
-  {% endif %}
+{% if not folders and not root_docs %}
+    <div class="item">No document for now.</div>
+{% endif %}

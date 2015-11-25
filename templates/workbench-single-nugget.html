@@ -1,9 +1,5 @@
 
-{% for highlight in highlights %}
-	<div class="ui card" class="workbench-nugget" data-hl-id = {{ highlight.id }} style="
-		margin: 5% 1%;
-		width:	96%;
-	">
+		
 	  	{% if highlight.is_nugget %}
 	  	<div class="ui top attached label">nugget</div>
 	 	<div class="content">
@@ -36,10 +32,10 @@
 		      		reassign
 		    	</div>
 		  	</div>
-	 	</div>
+	  	</div>
 	  	{% else %}
 	  	<div class="ui top attached label">nugget marked as not useful</div>
-		<div class="content">
+		<div class="dimmable dimmed content">
 			<div class="ui dimmable dimmed segment">
 				<div class="ui simple dimmer">{{ highlight.text }}</div>
 			</div>
@@ -55,6 +51,5 @@
 		  	</div>
 	  	</div>
 	  	{% endif %}
-	</div>
-{% endfor %}
+
 

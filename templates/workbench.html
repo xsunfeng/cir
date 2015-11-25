@@ -1,0 +1,618 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load compressed %}
+{% block extralib %}
+<script>
+    require([
+        'layout/workbench_layout',
+    ]);
+</script>
+
+<!-- for jquery-layout use -->
+<link type="text/css" rel="stylesheet" href="http://layout.jquery-dev.com/lib/css/layout-default-latest.css" />
+<script type="text/javascript" src="http://layout.jquery-dev.com/lib/js/jquery-latest.js"></script>
+<script type="text/javascript" src="http://layout.jquery-dev.com/lib/js/jquery-ui-latest.js"></script>
+<script type="text/javascript" src="http://layout.jquery-dev.com/lib/js/jquery.layout-latest.js"></script>
+
+</script>
+
+<STYLE title="" type="text/css">
+	html, body {
+		font-size: 16px;
+		width:	100%;
+		height:	100%;
+		padding:	0;
+		margin:	0;
+		overflow:	auto; /* when page gets too small */
+	}
+	#container {
+		height:	calc(100% - 6.5em);
+		width:	100%;
+		margin-top: 0.5em;
+	}
+	.pane {
+	display:	none; /* will appear when layout inits */
+	}
+
+	.hidden {
+		display:	none;
+	}
+
+	.ui-layout-center,
+	.ui-layout-west,
+	.ui-layout-east {
+		padding:		0;
+		overflow:		hidden;
+	}
+
+	/* 
+	 *	STRUCTURAL STYLES - *REQUIRED*
+	 *
+	 *	Just set table-layout:fixed and add scrollbar to data-wrapper
+	 */
+
+	.ui-layout-center,
+	.ui-layout-west,
+	.ui-layout-east {
+		padding:		0;
+		overflow:		hidden;
+		}
+		div.tableWrapper {
+			/* could pad table wrappers if desired */
+			padding:		0;
+			overflow:		hidden;
+			}
+			table {
+				table-layout:	fixed;
+				}
+		div.data { /* <div class="data tableWrapper"> */
+			overflow-y:		scroll; /* FORCE a scrollbar */ 
+			}
+			.data .innerWrapper {
+				/* must contain table so doesn't extend *under* tableWrapper scrollbar */
+				position:	relative;
+				overflow:	hidden;
+				}
+
+	/*
+	 *	COLUMN SIZING - *REQUIRED*
+	 *
+	 *	Any absolute CSS measure can be used (px, em, ex), but NOT percentages!
+	 *	Percentage sizes MUST be hard-coded on COL elements and add up to 100%
+	 *
+	 *	You could hard-code the widths directly on the COL elements,
+	 *	but in this sample I chose to do it in the stylesheet to make it easier
+	 *	to tweak column widths without having to repeat settings on all 3 tables
+	 */
+	table col.c1 { width: 50%; } /* icon  */
+	table col.c2 { width:  50%; } /* Date  */
+
+	/*
+	 *	CELL PADDING & ALIGNMENT
+	 *
+	 *	To ensure perfect header/data column alignment in all browsers
+	 *	use the same left/right padding (and border-width) in the header & data.
+	 *	Each column can be customized as long as the header/data columns match
+	 */
+	/* vertical padding */
+	.header2 td ,
+	.footer td {
+		padding-top:	7px;
+		padding-bottom:	6px;
+	}
+	.data td {
+		padding-top:	4px;
+		padding-bottom:	4px;
+	}
+	/* left-aligned cells (default) */
+	.tableWrapper td {
+		text-align:		left; /* for reference */
+		padding-left:	10px;
+		padding-right:	4px;
+	}
+	/* right-aligned cells */
+	.tableWrapper .c1 { /* icons */
+		text-align:		left;
+	}
+	/* header/footer alignment tweaking */
+	.header2 .c1 { /* Price */
+		text-align:		center; /* data is right-aligned, but center the headings */
+		/* retain same *total padding* as data-columns to assure aligment */
+		padding-left:	7px;
+		padding-right:	7px; /* 7 + 7 = 14px total - same as data-columns */
+	}
+	.footer .c1,
+	{ /* Price */
+		text-align:		center; /* data is right-aligned, but center the headings */
+		/* retain same *total padding* as data-columns to assure aligment */
+		padding-left:	7px;
+		padding-right:	7px; /* 7 + 7 = 14px total - same as data-columns */
+	}
+	/* 
+	 *	CELL WRAPPING / SCROLLING
+	 *
+	 *	Customize wrapping however you wish
+	 *	Use an inner SPAN or DIV if you want cells to scroll,
+	 *	or if you just want to more control over overflow-hiding
+	 *
+	 *	The settings here are just SAMPLES of what can be done
+	 */
+	td { /* in this example, *default* to wrapping */
+		white-space:	normal;
+		overflow:		hidden;
+		}
+		td span { /* cells with an *inner-span* will wrap */
+			white-space:	normal;
+			overflow:		hidden;
+			display:		inline;		/* OPTIONAL: will hide 'overflow' at edge of SPAN instead of TD */
+			text-overflow:	ellipsis;	/* OPTIONAL: show '...' when span overflows - IE, Chrome & Safari */
+		}
+	td span.r3 { /* inner-spans with class='r3' are limted to 3 rows in height */
+		margin: 		-4px 0; /* negate cell-padding as desired */
+		margin-right:	-4px;
+		padding:		3px 0;	/* inner-padding looks nicer */
+		max-height:		3.5em;	/* approximately 3-lines height with this inner-padding */
+		overflow-y:		auto;	/* scrollbar when more than 3-lines high */
+		white-space:	normal;	/* negate default setting */
+		display:		block;	/* needed to have a scrollbar on a SPAN */
+	}
+	
+	/*
+	 *	COSMETIC FORMATTING
+	 *
+	 *	Customize the header/footer/data appearance however you like,
+	 *	just remember to match border-widths for matching columns
+	 */
+	div.header2 {
+		background:		#0099FF;
+	}
+	div.footer {
+		background:		;
+		border-top:		1px solid #999;
+		}
+		.header2 table td ,
+		.footer table td {
+			border-left:	1px solid #FFF;
+		}
+		.header2 table td {
+			color:			#FFF;
+		}
+		.footer table td {
+			padding: 7px;
+		}
+	div.data {
+		background:		#EEE;
+		}
+		.data table tr {
+			background:		#FFF;
+		}
+		.data table tr.alt {
+			background:	;
+			}
+			.data table td {
+				border-right:	1px solid #BBB;
+				border-bottom:	1px solid #BBB;
+				vertical-align:	top;
+			}
+	.tableWrapper table .c1 { /* need sufficient specificity here */
+		border-left:	0; /* no left-border on first cell - all tables */
+	}
+
+
+	.ui-layout-east ,
+	.ui-layout-east .ui-layout-content {
+		padding:		0;
+		overflow:		hidden;
+	}
+	.hidden {
+		display:		none;
+	}
+	.ui-widget-header {
+		padding:		7px 15px 9px;
+	}
+	H2.loading {
+		border:			0;
+		font-size:		24px;
+		font-weight:	normal;
+		margin:			30% 0 0 40%;
+	}
+
+
+
+</STYLE>
+
+
+<SCRIPT type="text/javascript">
+
+	function stripeRows (tableSelector, className, skipAtTop, skipAtBottom) {
+		var
+			$Rows	= $(tableSelector +' tr')
+		,	topRow	= skipAtTop || 0
+		,	lastRow	= $Rows.length - (skipAtBottom || 0)
+		,	alt		= className || 'alt'
+		;
+		for (var i=topRow+1; i < lastRow; i+=2)
+			$Rows.eq(i).addClass( alt );
+	}
+
+	var myLayout;
+
+	$(document).ready(function () {
+		// pad wrapper-divs to match scrollbar width - for perfect header alignment
+		//$('.header, .footer').css('paddingRight', $.layout.getScrollbarWidth() +'px'); // requires RC-30
+		$('div.header2, div.footer').css('paddingRight', $.layout.scrollbarWidth() +'px');
+
+		// create the layout - with data-table wrapper as the layout-content element
+		myLayout = $('#container').layout({
+			center__contentSelector:	'div.data'
+		,	west__contentSelector: 		'div.data'
+		,	east__contentSelector: 		'div.data'
+		,	resizeWhileDragging:		true
+		,	useStateCookie:				true // enable state management
+
+		//	some pane-size settings
+		,	west__minSize:			.3
+		,	west__size:			.4
+		,	center__minSize:			.3		
+		,	east__minSize:			.3	
+		,	south__minSize: 		.07
+		,	south__size: 		.07
+
+		});
+
+		$('body > H2').hide(); // hide Loading msg
+
+		stripeRows('.data table', 'alt'); // add table-row-striping
+
+	});
+
+</SCRIPT>
+
+
+{% endblock %}
+{% block delaylib %}
+{% endblock %}
+{% block extracss %}
+	{% compressed_css 'cir_forum' %}
+{% endblock %}
+{% block header %}
+<div id="nav-menu" class="ui fixed inverted main menu">
+    <div class="title item">GeoDeliberator | Workbench</div>
+    {% if load_error %}
+    <div class="item">GeoDeliberator </div>
+    {% else %}
+    <div id="header-member-wrapper" class="right menu" style="display:flex">
+        <a href="#" class="item"><i class="mail icon"></i>Messages</a>
+        <div class="ui simple dropdown item" tabindex="0">
+            <span id="header-user-name" data-id="{{ user_id }}" data-role="{{ role }}">{{ user_name }}</span>
+            <i class="icon dropdown" tabindex="0"></i>
+            <div class="menu" tabindex="-1">
+                <a href="#" id="edit-profile-btn" class="item"><i class="edit icon"></i>Edit Profile</a>
+                <a href="/" class="item"><i class="list layout icon"></i>Switch Forum</a>
+                <a href="#" class="item"><i class="share alternative icon"></i>Share Forum</a>
+                <a href="#" id="sign-out-btn" class="item"><i class="sign out icon"></i>Sign out</a>
+            </div>
+        </div>
+<!--         <a href="javascript:;" class="item">
+            |
+        </a> -->
+        <a href="{{ forum_url }}/dashboard" target="_blank" class="item">
+            <i class="icon dashboard"></i>
+        </a>
+        <div class="ui simple dropdown item" tabindex="0">
+            <i class="icon spy"></i>
+            <i class="icon dropdown" tabindex="0"></i>
+            <div class="switch user menu" tabindex="-1">
+                <div class="header">Yourself</div>
+                <div class="item" data-id="{{ user_id }}">{{ user_name }}</div>
+                <div class="header">Panelists</div>
+                {% for user in panelists %}
+                <div class="item" data-id="{{ user.id }}">{{ user.name }}</div>
+                {% endfor %}
+                <div class="header">Staff</div>
+                {% for user in staff %}
+                <div class="item" data-id="{{ user.id }}">{{ user.name }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block body %}
+
+<div id="workbench-theme-container" style="margin-top:3em; height:3em;">
+</div>
+
+<div id="chat-room-open-window" class="hidden" style="
+	border: 	1px solid #000;
+	position:	fixed;
+	height:		600px;
+	width:		500px;
+	right: 		5%;
+	bottom: 	-2px;
+	z-index:	100;
+	margin:		0;
+	background:	white;
+
+	transition:			border linear .2s,box-shadow linear .5s;
+	-moz-transition:	border linear .2s,-moz-box-shadow linear .5s;
+	-webkit-transition:	border linear .2s,-webkit-box-shadow linear .5s;
+	outline:			none;
+	border-color:		rgba(0,0,0,.75);
+	box-shadow:			0 0 8px rgba(0,0,0,.5);
+	-moz-box-shadow:	0 0 8px rgba(0,0,0,.5);
+	-webkit-box-shadow:	0 0 8px rgba(0,0,0,3);
+">
+	<DIV class="header2 tableWrapper">
+		<TABLE width="100%" cellspacing="0">
+			<COL class="c1" width="100%">
+			<TR>
+				<TD class="c1">
+					Live chat
+					<a href="javascript:;" id="chat-room-close-btn" style='float:right;'>
+						<i class='inverted angle down icon'></i>
+					</a>
+				</TD>
+			</TR>
+		</TABLE>
+	</DIV>
+	<!-- data: documents content -->	
+	<DIV class="data tableWrapper" style="height:400px;">
+		<DIV class="innerWrapper">
+			<TABLE width="100%" cellspacing="0">
+				<COL class="c1" width="100%">
+				<TR>
+					<TD class="c1">
+						<div id="workbench-nugget-panel" style="
+							overflow-y: auto;
+    						overflow-x: hidden;
+						">
+							<div id="workbench-nugget-discuss">
+							</div>
+						</div>
+					</TD>
+				</TR>
+			</TABLE>
+		</DIV>
+	</DIV>
+	<DIV class="footer tableWrapper">
+		<DIV class="widthTester"></DIV>
+		<TABLE width="100%" cellspacing="0">
+			<COL class="c1">
+			<TR>
+				<TD class="c1">
+					<div class="ui form">
+				  		<div class="field">
+							<textarea rows="2"></textarea>
+						</div>
+						<div id="chat-room-open-add" class="ui button" style="float:right;">Enter</div>
+					 </div>
+				</TD>
+			</TR>
+		</TABLE>
+	</DIV>
+</div>
+
+<div id="chat-room-close-window" style="
+	border: 	1px solid #000;
+	position:	fixed;
+	width:		500px;
+	right: 		5%;
+	bottom: 	0;
+	z-index:	100;
+	margin:		0;
+	background:	white;
+">
+	<DIV class="header2 tableWrapper">
+		<TABLE width="100%" cellspacing="0">
+			<COL class="c1" width="100%">
+			<TR>
+				<TD class="c1">
+					Live chat
+					<a href="javascript:;" id="chat-room-open-btn" style='float:right;'>
+						<i class='inverted angle up icon'></i>
+					</a>
+				</TD>
+			</TR>
+		</TABLE>
+	</DIV>
+</div>
+
+<div id="container">
+
+<!-- left -->
+<div class="pane ui-layout-west" id="workbench-document-section">
+	<!-- header: read document -->
+	<DIV class="header2 tableWrapper">
+		<TABLE width="100%" cellspacing="0">
+			<COL class="c1" width="100%">
+			<TR>
+				<TD class="c1">
+					Read Documents
+				</TD>
+			</TR>
+		</TABLE>
+	</DIV>
+	<!-- data: documents content -->	
+	<DIV class="data tableWrapper">
+		<DIV class="innerWrapper">
+			<TABLE width="100%" cellspacing="0">
+				<COL class="c1" width="100%">
+				<TR>
+					<TD class="c1">
+						<div id="workbench-document-panel">
+							<div id="workbench-document">
+								<div style="height:500px;">
+								</div>
+							  	<div style="" class="ui active inverted dimmer">
+							    	<div class="ui large text loader">Preparing documents</div>
+							  	</div>
+							</div>
+						</div>
+					</TD>
+				</TR>
+			</TABLE>
+		</DIV>
+	</DIV>
+	<DIV class="footer tableWrapper">
+		<DIV class="widthTester"></DIV>
+		<TABLE width="100%" cellspacing="0">
+			<COL class="c1">
+			<TR>
+				<TD class="c1">
+					<div class="ui two item secondary menu" id>
+						<a id="workbench-document-toc" class="item">Table of contents</a>
+  						<a id="workbench-document-back-to-top" class="item">Back to top</a>
+					</div>
+				</TD>
+			</TR>
+		</TABLE>
+	</DIV>
+</div>
+
+<!-- right -->
+<div class="pane ui-layout-east" id="workbench-claim-section">
+	<!-- header: Construct Claims -->
+	<DIV class="header2 tableWrapper">
+		<TABLE width="100%" cellspacing="0">
+			<COL class="c1" width="100%">
+			<TR>
+				<TD class="c1">
+					Construct Claims
+				</TD>
+			</TR>
+		</TABLE>
+	</DIV>
+	<!-- data: claim upper -->	
+	<DIV class="tableWrapper">
+		<TABLE width="100%" cellspacing="0">
+			<COL class="c1">
+			<TR>
+				<TD class="c1" id="workbench-claim-textarea" style="padding:0.5em;">
+					<div class="ui attached segment" style="border: 1px solid #000;">
+						<div class="ui form">
+						  	<div class="field">
+						    	<textarea rows="5" placeholder="Construct a finding by revealing important facts / Construct a claim by expressing its position and corresponding facts"></textarea>
+						  	</div>
+						</div>
+					</div>
+					<div class="ui two bottom attached buttons" style="border: 1px solid #000;">
+					    <div class="ui button workbench-add-claim" style="border-right: 1px solid #000;">Add</div>
+					    <div class="ui button workbench-clear-claim">Clear</div>
+					</div>
+				</TD>
+			</TR>
+		</TABLE>
+	</DIV>
+	<!-- data: claim lower -->	
+	<DIV class="data tableWrapper">
+		<DIV class="innerWrapper">
+			<TABLE width="100%" cellspacing="0">
+				<COL class="c1" width="100%">
+				<TR>
+					<TD class="c1">
+						<div id="workbench-claim-list" class="flag">
+							<div style="height:500px;">
+							</div>
+						  	<div style="" class="ui active inverted dimmer">
+						    	<div class="ui large text loader">Preparing claims</div>
+						  	</div>
+						</div>
+					</TD>
+				</TR>
+			</TABLE>
+		</DIV>
+	</DIV>
+	<DIV class="footer tableWrapper">
+		<DIV class="widthTester"></DIV>
+		<TABLE width="100%" cellspacing="0">
+			<COL class="c1" width="100%">
+			<TR>
+				<TD class="c1">					
+					<div class="ui two item secondary menu">
+						<a class="workbench-claim-tab item active">Finding</a>
+  						<a class="workbench-claim-tab item">Opinion</a>
+					</div>
+				</TD>
+			</TR>
+		</TABLE>
+	</DIV>
+</div>
+
+<!-- center: collect nugget -->
+<div class="pane ui-layout-center" id="workbench-nugget-section">
+	<DIV class="header2 tableWrapper">
+		<TABLE width="100%" cellspacing="0">
+			<COL class="c1" width="100%">
+			<TR>
+				<TD class="c1">
+					Collect nuggets
+				</TD>
+			</TR>
+		</TABLE>
+	</DIV>
+	<DIV class="data tableWrapper">
+		<DIV class="innerWrapper">
+			<TABLE width="100%" cellspacing="0">
+				<COL class="c1" width="100%">
+				<TR>
+					<TD class="c1">
+						<div id="workbench-nugget-container">
+							<div id="workbench-nugget-panel">
+								<div id="workbench-nugget">
+									<div id="workbench-nugget-list">
+										<div style="height:500px;">
+										</div>
+									  	<div style="" class="ui active inverted dimmer">
+									    	<div class="ui large text loader">Preparing nuggets</div>
+									  	</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</TD>
+				</TR>
+			</TABLE>
+		</DIV>
+	</DIV>
+	<DIV class="footer tableWrapper">
+		<DIV class="widthTester"></DIV>
+		<TABLE width="100%" cellspacing="0">
+			<COL class="c1" width="100%">
+			<TR>
+				<TD class="c1">
+					<div class="ui two item secondary menu" id="workbench-nugget-operation-container">
+					</div>
+				</TD>
+			</TR>
+		</TABLE>
+	</DIV>
+</div>
+
+<!-- footer -->
+<div class="pane ui-layout-south">
+	<div class="ui indicating progress" id="page-loading-progress">
+  		<div class="bar"></div>
+  		<div class="label"><div class="ui active small inline loader"></div>loading</div>
+	</div>
+</div>
+
+<div class="ui special popup" id="workbench-document-toc-container" style="
+	height:50%; 
+	min-width:60%;
+	overflow:auto;
+	">
+</div>
+
+<div class="ui special popup" id="workbench-document-operation-container" style="">
+	<div class="ui buttons">
+	  <button class="ui red basic button">Collect</button>
+	  <button class="ui blue basic button">Two</button>
+	</div>
+</div>
+
+</div>
+{% endblock %}
+
