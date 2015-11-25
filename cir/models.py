@@ -7,6 +7,9 @@ import datetime, time
 
 VISITOR_ROLE = 'visitor'
 
+class UserLogin(models.Model):
+    user = models.ForeignKey(User)
+    timestamp = models.DateTimeField()
 
 class Forum(models.Model):
     full_name = models.CharField(max_length=500)  # shown on top page/selection page
@@ -305,6 +308,13 @@ class Claim(Entry):
     def adopted_version(self):
         return self.versions.get(is_adopted=True)
 
+    # get id, author and time only
+    def getAttrSimple(self):
+        return {
+            'id': self.id,
+            'entry_type': 'Claim',
+            'created_at': self.created_at.isoformat(),
+        }
     def getAttr(self, forum):
         attr = self.adopted_version().getAttr(forum)
         attr['id'] = self.id

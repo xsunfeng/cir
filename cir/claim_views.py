@@ -45,7 +45,7 @@ def api_get_claim(request):
                 context['claims_cnt'] += 1
                 context['claims'].append(claim.getAttr(forum))
             context['claims'] = sorted(context['claims'], key=lambda c: c['updated_at_full'], reverse=True)
-            response['html'] = render_to_string("claim-overview.html", context)
+            response['html'] = render_to_string("claim/claim-overview.html", context)
         elif display_type == 'fullscreen':
             # if no claims available, just leave context['claim'] and response['claim_id'] undefined.
             if len(claims) != 0:
@@ -60,13 +60,13 @@ def api_get_claim(request):
                             break
                 context['claim'] = claim_return.getAttr(forum)
                 response['claim_id'] = claim_return.id
-            response['html'] = render_to_string("claim-fullscreen.html", context)
+            response['html'] = render_to_string("claim/claim-fullscreen.html", context)
     if action == 'navigator':
         for claim in claims:
             context['claims_cnt'] += 1
             context['claims'].append(claim.getExcerpt(forum))
         context['claims'] = sorted(context['claims'], key=lambda c: c['updated_at_full'], reverse=True)
-        response['html'] = render_to_string("claim-navigator.html", context)
+        response['html'] = render_to_string("claim/claim-navigator.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_draft_stmt(request):
@@ -102,7 +102,7 @@ def api_draft_stmt(request):
         for category in ['finding', 'pro', 'con']:
             context['categories'][category] = [claim.getAttr(forum) for claim in claims.filter(claim_category=category).order_by('stmt_order')]
             response['claims_cnt'][category] += len(context['categories'][category])
-        response['html'] = render_to_string("draft-stmt.html", context)
+        response['html'] = render_to_string("claim/draft-stmt.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_claim(request):
@@ -260,7 +260,7 @@ def api_claim_activities(request):
                 attribute['entry_type'] = 'claim new version'
                 context['entries'].append(attribute)
         context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'])
-        response['html'] = render_to_string("activity-feed-claim.html", context)
+        response['html'] = render_to_string("feed/activity-feed-claim.html", context)
         return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def _edit_claim(request):
@@ -342,10 +342,10 @@ def api_get_flags(request):
     if action == 'load_single':
         claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
         response['version_id'] = claim.adopted_version().id
-        response['reword_flags'] = render_to_string('claim-tags.html',
+        response['reword_flags'] = render_to_string('claim/claim-tags.html',
             _get_flags(request, claim.adopted_version(), 'reword'))
-        response['merge_flags'] = render_to_string('claim-tags.html', _get_flags(request, claim, 'merge'))
-        response['themes'] = render_to_string('claim-tags.html', _get_flags(request, claim, 'theme'))
+        response['merge_flags'] = render_to_string('claim/claim-tags.html', _get_flags(request, claim, 'merge'))
+        response['themes'] = render_to_string('claim/claim-tags.html', _get_flags(request, claim, 'theme'))
         return HttpResponse(json.dumps(response), mimetype='application/json')
     if action == 'load_all':
         forum = Forum.objects.get(id=request.session['forum_id'])
@@ -353,10 +353,10 @@ def api_get_flags(request):
         for claim in claims:
             version_id = claim.adopted_version().id
             response[version_id] = {
-            'reword_flags': render_to_string('claim-tags.html', _get_flags(request, claim.adopted_version(), 'reword'))}
+            'reword_flags': render_to_string('claim/claim-tags.html', _get_flags(request, claim.adopted_version(), 'reword'))}
             response[claim.id] = {
-                'merge_flags': render_to_string('claim-tags.html', _get_flags(request, claim, 'merge')),
-                'themes': render_to_string('claim-tags.html', _get_flags(request, claim, 'theme'))}
+                'merge_flags': render_to_string('claim/claim-tags.html', _get_flags(request, claim, 'merge')),
+                'themes': render_to_string('claim/claim-tags.html', _get_flags(request, claim, 'theme'))}
         return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def _get_flags(request, entry, action):
@@ -444,7 +444,7 @@ def api_claim_flag(request):
                     if deflag == 'false':
                         Vote.objects.create(user=request.user, entry=claim_version, created_at=now, vote_type='reword',
                             reason=reason)
-            response['html'] = render_to_string("claim-tags.html", _get_flags(request, claim_version, 'reword'))
+            response['html'] = render_to_string("claim/claim-tags.html", _get_flags(request, claim_version, 'reword'))
         elif flag_type == 'merge':
             if deflag == 'false':
                 claim_ids = request.REQUEST.get('claim_ids').split()
@@ -464,7 +464,7 @@ def api_claim_flag(request):
                 else:
                     timestamp = Vote.objects.get(user=request.user, entry=claim, vote_type='merge').created_at
                     Vote.objects.filter(user=request.user, created_at=timestamp).delete()
-                response['html'] = render_to_string("claim-tags.html", _get_flags(request, claim, 'merge'))
+                response['html'] = render_to_string("claim/claim-tags.html", _get_flags(request, claim, 'merge'))
         return HttpResponse(json.dumps(response), mimetype='application/json')
     if action == 'theme':  # thematizing a Claim
         claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
@@ -492,7 +492,7 @@ def api_claim_flag(request):
                         created_at=now, theme=theme)
                 else:
                     ThemeAssignment.objects.create(user=request.user, entry=claim, created_at=now, theme=theme)
-        response['html'] = render_to_string("claim-tags.html", _get_flags(request, claim, 'theme'))
+        response['html'] = render_to_string("claim/claim-tags.html", _get_flags(request, claim, 'theme'))
         return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_claim_vote(request):

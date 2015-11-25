@@ -95,10 +95,13 @@ define([
 
 	module.onDragStop = function(e) {
 		if (module.action == 'insert') {
+			var claim_id = module.draggingClaimId;
 			_stmtUpdater({
 				'action': 'add-to-stmt',
-				'claim_id': module.draggingClaimId,
+				'claim_id': claim_id,
 				'order': module.order
+			}).done(function() {
+				$('#claim-pane .claim.segment[data-id="' + claim_id + '"]').addClass('stmt');
 			});
 		} else if (module.action == 'merge') {
 			// TODO mark as needs merge

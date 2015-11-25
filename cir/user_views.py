@@ -2,11 +2,18 @@ import json
 
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse
+from django.utils import timezone
+from django.contrib.auth.signals import user_logged_in
 
 from cir.models import *
 
 VISITOR_ROLE = 'visitor'
 
+def update_user_login(sender, user, **kwargs):
+    user.userlogin_set.create(timestamp=timezone.now())
+    user.save()
+
+user_logged_in.connect(update_user_login)
 
 def login_view(request):
     response = {}

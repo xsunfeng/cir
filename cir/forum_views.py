@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from cir.models import *
 from cir.phase_control import PHASE_CONTROL
-
+from user_views import update_user_login
 
 VISITOR_ROLE = 'visitor'
 
@@ -91,9 +91,8 @@ def enter_forum(request, forum_url):  # access /forum_name
                     forum=forum).exists()):
         context['load_error'] = '403'
     elif request.user.is_authenticated(): # everything allright
-        # update user's last login time
-        request.user.last_login = timezone.now()
-        request.user.save()
+        # add user login entry
+        update_user_login(None, request.user)
     themes = ClaimTheme.objects.filter(forum=forum)
     context['themes'] = [theme.getAttr() for theme in themes]
     return render(request, 'index.html', context)
