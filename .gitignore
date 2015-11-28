@@ -4,3 +4,4 @@ cir/migrations/*
 **/.DS_STORE
 .settings/**
 .idea/**
+cir/setting.py

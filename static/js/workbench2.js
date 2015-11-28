@@ -168,6 +168,10 @@ define([
 			load_nugget_list();
 		});
 
+		module.claim_list_container.on("click", "#workbench-claim-operation-back", function(e) {
+			load_claim_list();
+		});
+
 		module.claim_textarea_container.on("click", ".workbench-claim-tab", function(e) {
 			$(this).siblings().removeClass("positive");
 			$(this).addClass("positive");
@@ -451,7 +455,7 @@ define([
 			},
 			success: function(xhr) {
 				$("#workbench-claim-list").html(xhr.workbench_claims);
-				var def = '<a href="javascript:;" id="workbench-nugget-operation-back" class="item">< Full List</a>';
+				var def = '<a href="javascript:;" id="workbench-claim-operation-back" class="item">< Full List</a>';
 				$("#workbench-claim-list").prepend(def);
 			},			
 			error: function(xhr) {
