@@ -88,7 +88,7 @@ if DEBUG:
     STATIC_ROOT = os.path.join(PROJECT_PATH, '../cir-static/')
 else:
     STATIC_ROOT = os.path.join(PROJECT_PATH, '../static/geolab/')
-    
+
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = '/static/'
@@ -117,7 +117,8 @@ PIPELINE_CSS = {
             'css/document.css',
             'css/claim.css',
             'css/chatter.css',
-            'css/vis.css'
+            'css/vis.css',
+            'css/workbench.css'
         ),
         'output_filename': 'css/cir_forum.css',
     },
