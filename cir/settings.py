@@ -1,7 +1,12 @@
 # Django settings for cir project.
 import os
+import socket
 
-DEBUG = True
+# automatically determine debug status
+if 'lws-cai01' in socket.getfqdn():
+    DEBUG = False
+else:
+    DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -10,16 +15,23 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+SERVER_HOST =  '130.203.136.141'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'cir_backup',  # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
+        'NAME': 'cir',  # Or path to database file if using sqlite3.
         'USER': 'postgres',
         'PASSWORD': 'asdf1234',
-        'HOST': '130.203.136.141',
-        # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'HOST': SERVER_HOST,
+        'PORT': '',  # Set to empty string for default.
+    },
+    'dev': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'cir_backup',  # Or path to database file if using sqlite3.
+        'USER': 'postgres',
+        'PASSWORD': 'asdf1234',
+        'HOST': SERVER_HOST,
         'PORT': '',  # Set to empty string for default.
     }
 }
@@ -170,6 +182,7 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+DATABASE_ROUTERS = ['cir.user_db_router.UserForumRoleRouter']
 ROOT_URLCONF = 'cir.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.

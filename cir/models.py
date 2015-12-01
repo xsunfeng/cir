@@ -18,8 +18,8 @@ class Forum(models.Model):
     description = models.TextField(null=True, blank=True)
     ACCESS_CHOICES = (
         ('open', 'Open access'),
-        ('panelist', 'Panel only'),
-        ('private', 'Private'),
+        ('panelist', 'Accessible only to the panel'),
+        ('private', 'Visible only to the panel'),
     )
     PHASE_CHOICES = (
         ('paused', 'Paused'),
@@ -32,7 +32,7 @@ class Forum(models.Model):
         ('improve', 'Claim prioritization and improvement'),
         ('finished', 'Finished')
     )
-    access_level = models.CharField(max_length=100, choices=ACCESS_CHOICES, default='open')
+    access_level = models.CharField(max_length=100, choices=ACCESS_CHOICES, default='private')
     phase = models.CharField(max_length=100, choices=PHASE_CHOICES, default='not_started')
     contextmap = models.TextField(null=True, blank=True)
     forum_logo = models.ImageField(upload_to='forum_logos', null=True, blank=True, default='forum_logos/default.jpg')
@@ -52,9 +52,9 @@ class Forum(models.Model):
         if self.access_level == 'open':
             attr['access_level'] = 'Open access'
         elif self.access_level == 'panelist':
-            attr['access_level'] = 'Panel only'
+            attr['access_level'] = 'Accessible only to the panel'
         elif self.access_level == 'private':
-            attr['access_level'] = 'Private'
+            attr['access_level'] = 'Visible only to the panel'
         else:
             attr['access_level'] = self.access_level
         attr['logo_url'] = self.forum_logo.url

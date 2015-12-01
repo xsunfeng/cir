@@ -6,6 +6,9 @@ def user_unicode(self):
     return  u'%s %s (%s)' % (self.first_name, self.last_name, self.email)
 User.__unicode__ = user_unicode
 
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('first_name', 'last_name', 'email', 'date_joined')
+
 class ForumAdmin(admin.ModelAdmin):
     list_display = ('full_name', 'url', 'access_level', 'phase')
 
@@ -101,6 +104,8 @@ class ClaimAdmin(admin.ModelAdmin):
 
 admin.site.register(Forum, ForumAdmin)
 admin.site.register(Role, RoleAdmin)
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
 admin.site.register(Doc, DocAdmin)
 admin.site.register(DocSection, DocSectionAdmin)
 admin.site.register(ClaimTheme, ClaimThemeAdmin)

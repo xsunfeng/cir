@@ -50,7 +50,11 @@ define([
 			params.chartOffset.top -= $(document).scrollTop();
 		},
 		init: function() {
-			var svg = d3.select('#activities-chart')
+			var chartArea = d3.select('#activities-chart');
+
+			if (chartArea.empty()) return; // for visitors, skip everything
+
+			var svg = chartArea
 				.append('svg')
 				.attr('class', 'area');
 
