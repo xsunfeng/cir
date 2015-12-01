@@ -83,8 +83,12 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = os.path.join(PROJECT_PATH, '../cir-static/')
 
+if DEBUG:
+    STATIC_ROOT = os.path.join(PROJECT_PATH, '../cir-static/')
+else:
+    STATIC_ROOT = os.path.join(PROJECT_PATH, '../static/geolab/')
+    
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = '/static/'
