@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block header %}
 <header class="ui fixed inverted main menu">
-	<a href="/" class="item">GeoDeliberator</a>
+	<div href="/" class="item">GeoDeliberator</div>
 	{% if not load_error %}
 	<div id="header-member-wrapper" class="right menu" style="display:flex">
 		<a href="/{{ forum_url }}" class="item" target="_blank">Open full review in new tab</a>
@@ -20,8 +20,7 @@
 	</div>
 </article>
 {% else %}
-<div id="citizens-statement" class="ui centered grid container">
-	<div class="ten wide column">
+<div id="citizens-statement">
 		<h2>Citizen's statement on {{ forum_name }}</h2>
 		<section class="ui segment">
 			{{ stmt_preamble|safe }}
@@ -71,7 +70,6 @@
 			{% endfor %}
 			</ol>
 		</section>
-	</div>
 </div>
 {% endif %}
 {% endblock %}
