@@ -118,8 +118,7 @@ PIPELINE_CSS = {
             'css/claim.css',
             'css/chatter.css',
             'css/vis.css',
-            'css/workbench.css'
-        ),
+            ),
         'output_filename': 'css/cir_forum.css',
     },
     'cir_dashboard': {
@@ -145,7 +144,7 @@ PIPELINE_JS = {
             'js/claim.js',
             'js/activity-feed.js',
             'js/utils.js',
-            'js/workbench.js',
+            'js/workbench2.js',
         ),
         'output_filename': 'js/cir_forum.js',
     },
