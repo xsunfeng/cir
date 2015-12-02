@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from cir.models import *
 from cir.phase_control import PHASE_CONTROL
+from cir.settings import DISPATCHER_URL
 from user_views import update_user_login
 
 VISITOR_ROLE = 'visitor'
@@ -95,6 +96,7 @@ def enter_forum(request, forum_url):  # access /forum_name
         update_user_login(None, request.user)
     themes = ClaimTheme.objects.filter(forum=forum)
     context['themes'] = [theme.getAttr() for theme in themes]
+    context['dispatcher_url'] = DISPATCHER_URL
     return render(request, 'index.html', context)
 
 def enter_workbench(request, forum_url):  # access /forum_name
