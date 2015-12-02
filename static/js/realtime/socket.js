@@ -41,7 +41,9 @@ define([
 		// load realtime module after a while
 		setTimeout(function() {
 			if (sessionStorage.hasOwnProperty('role') && sessionStorage['role'] !== 'visitor') {
-				socket = io('127.0.0.1:443');
+				// hack: get server address from requirejs config
+				var serverAddr = require.s.contexts._.config.paths['socket.io'].split('/')[2]
+				socket = io(serverAddr);
 				socket.emit('server:user:logged_in', {
 					'user_id': sessionStorage['user_id'],
 					'user_name': sessionStorage['user_name'],
