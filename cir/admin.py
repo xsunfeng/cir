@@ -89,6 +89,15 @@ class ClaimAdmin(admin.ModelAdmin):
         if self.delegator:
             return "%s %s" % (self.delegator.first_name, self.delegator.last_name)
         return '(None)'
+
+    def duplicate(modeladmin, request, queryset):
+        for object in queryset:
+            object.id = None
+            object.save()
+
+    duplicate.short_description = "Duplicate selected claim"
+    actions = [duplicate]
+
     author_name.short_description = 'Author of claim'
     claim_content.short_description = 'Content of adopted version'
     claim_content.allow_tags = True

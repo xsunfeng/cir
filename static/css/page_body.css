@@ -86,3 +86,8 @@ iframe[src^="//www.youtube.com"] {
 #fixed-steps > .step {
 	height: 1.2em;
 }
+#citizens-statement .segment,
+#citizens-statement .segment .description{
+	font-size: 16px;
+	line-height: 1.4em;
+}

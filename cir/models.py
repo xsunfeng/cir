@@ -332,6 +332,14 @@ class Claim(Entry):
             attr['merge_of'] = '.'.join([str(claimref.from_claim.id) for claimref in self.older_versions.all()])
         return attr
 
+    def getAttrStmt(self):
+        attr = {}
+        attr['id'] = self.id
+        attr['content'] = self.adopted_version().content
+        if self.theme:
+            attr['theme'] = self.theme.name
+        return attr
+
     def getExcerpt(self, forum):  # used for claim navigator
         attr = self.adopted_version().getExcerpt(forum)
         attr['id'] = self.id

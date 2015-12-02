@@ -32,7 +32,7 @@
 				{{ claim.content|safe }}
 			</div>
 			<div class="claim-metainfo">
-				<a class="user" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a> <abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>
+				<a class="user {{ claim.author_role }}" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a> <abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>
 			{% if claim.theme %}
 				<div class="ui label">Theme: {{ claim.theme }}</div>
 			{% endif %}

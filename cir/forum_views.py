@@ -168,22 +168,21 @@ def enter_statement(request, forum_url):
     context = {}
     context['forum_name'] = forum.full_name
     context['forum_url'] = forum.url
-    if request.user.is_authenticated():
-        try:
-            request.session['role'] = Role.objects.get(user=request.user, forum=forum).role
-        except:
-            pass
-        context['user_id'] = request.user.id
-        context['user_name'] = request.user.get_full_name()
-        context['role'] = request.session['role']
-    else:
-        context['user_id'] = -1
-        context['user_name'] = ''
-        context['role'] = request.session['role']
-    if forum.access_level == 'private' and (
-                not request.user.is_authenticated() or not Role.objects.filter(user=request.user,
-                    forum=forum).exists()):
-        context['load_error'] = '403'
+    context['stmt_preamble'] = forum.stmt_preamble
+    context['claims'] = {
+        'findings': [],
+        'pros': [],
+        'cons': []
+    }
+    findings = Claim.objects.filter(forum=forum, stmt_order__isnull=False, claim_category='finding').order_by('stmt_order')
+    for claim in findings:
+        context['claims']['findings'].append(claim.getAttrStmt())
+    pros = Claim.objects.filter(forum=forum, stmt_order__isnull=False, claim_category='pro').order_by('stmt_order')
+    for claim in pros:
+        context['claims']['pros'].append(claim.getAttrStmt())
+    cons = Claim.objects.filter(forum=forum, stmt_order__isnull=False, claim_category='con').order_by('stmt_order')
+    for claim in cons:
+        context['claims']['cons'].append(claim.getAttrStmt())
     return render(request, 'index_statement.html', context)
 
 def handler500(request):

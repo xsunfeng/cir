@@ -12,6 +12,30 @@ define([
 		initForms();
 	};
 	function initForms() {
+		CKEDITOR.replace('stmt_preamble', {
+			// allow vertical resizing
+			resize_enabled: true,
+			resize_dir: 'vertical',
+
+			// transform blank lines into empty <p> tags
+			fillEmptyBlocks: false,
+
+			// don't encode chars other than & < > and &nbsp;
+			entities: false,
+
+			// knowntags except div and span with attributes (except tyle and class) will be kept
+			pasteFilter: 'semantic-content',
+
+			// toolbar
+			toolbar: [
+				{name: 'document', items: ['Source']},
+				{name: 'basicstyles', items: ['Bold', 'Italic', 'RemoveFormat']},
+				{name: 'paragraph', items: ['NumberedList', 'BulletedList']},
+				{name: 'links', items: ['Link', 'Unlink']},
+				{name: 'insert', items: ['Image']}
+			],
+
+		});
 		$('#forum-option-form').form({
 			fields: {
 				forum_name: {
@@ -33,9 +57,10 @@ define([
 				e.preventDefault();
 				$.ajax({
 					url: '/dashboard/forum/',
-					data: $.extend({
-						'action': 'update-forum-info'
-					}, $('#forum-option-form').form('get values')),
+					data: $.extend({}, $('#forum-option-form').form('get values'), {
+						'action': 'update-forum-info',
+						'stmt_preamble': CKEDITOR.instances.stmt_preamble.getData()
+					}),
 					type: 'post',
 					success: function(xhr) {
 						Utils.notify('success', 'Forum information updated.');

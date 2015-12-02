@@ -62,12 +62,29 @@ define([
 						Utils.notify('error', xhr.responseText);
 					}
 				}
-			})
+			});
 		}).on('click', '.reword.form .reset.button', function() {
 			$('#claim-pane .claim.reword.editor').val('');
 			$('#claim-pane .reword.form').transition('slide down', '500ms');
 		}).on('click', '.claim-merge-btn', function() {
 			Utils.notify('warning', 'Please switch to Overview and try again.');
+		}).on('click', '.claim-duplicate-btn', function() {
+			$.ajax({
+				url: '/api_claim/',
+				type: 'post',
+				data: {
+					action: 'duplicate',
+					claim_id: module.claim_id,
+				},
+				success: function(xhr) {
+					module.updateClaimPane();
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});
 		}).on('click', '.claim-gotosrc-btn', function() {
 
 		}).on('click', '.claim-flag-reword-btn', function() {

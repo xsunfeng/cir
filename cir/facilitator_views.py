@@ -39,6 +39,7 @@ def enter_dashboard(request, forum_url):
     context['forum_name'] = forum.full_name
     context['forum_url'] = forum.url
     context['description'] = forum.description
+    context['stmt_preamble'] = forum.stmt_preamble
     context['access_level'] = forum.access_level
     context['phase'] = forum.phase
     # tag theme
@@ -80,6 +81,7 @@ def admin_forum(request):
     action = request.REQUEST.get('action')
     forum = Forum.objects.get(id=request.session['forum_id'])
     if action == 'update-forum-info':
+        forum.stmt_preamble = request.REQUEST.get('stmt_preamble')
         forum.full_name = request.REQUEST.get('forum_name')
         forum.url = request.REQUEST.get('forum_url')
         forum.description = request.REQUEST.get('description')

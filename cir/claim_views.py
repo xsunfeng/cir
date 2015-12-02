@@ -172,6 +172,15 @@ def api_claim(request):
             newClaim.theme = oldClaim.theme
             newClaim.claim_category = oldClaim.claim_category
         newClaim.save()
+    elif action == 'duplicate':
+        claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
+        version = claim.adopted_version()
+        claim.pk = None
+        claim.save()
+        # duplicate its adopted version
+        version.pk = None
+        version.claim = claim
+        version.save()
     elif action == 'change category':
         claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
         vote_type = request.REQUEST.get('type')
