@@ -38,7 +38,7 @@
 			<div class="ui divided items segment">
 				{% if forums %}{% for forum in forums %}
 				<div class="item">
-					<div class="image"><img src="{{ forum.logo_url }}"></div>
+					<div class="image"><img src="{{ forum.logo_url }}" alt="Default forum picture"></div>
 					<div class="content">
 						<a href="/{{ forum.url }}" class="header">{{ forum.full_name }}</a>
 						<div class="meta">cir.ist.psu.edu/{{ forum.url }}</div>
@@ -52,7 +52,7 @@
 				</div>
 				{% endfor %}{% else %}
 				<div class="item">
-					<div class="image"><img src="/media/generic.png"></div>
+					<div class="image"><img src="/media/generic.png" alt="Image placeholder"></div>
 					<div class="content">
 						<a href="#" class="header">No forums available!</a>
 						<div class="description">Please come back and check again</div>

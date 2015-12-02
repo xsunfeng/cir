@@ -65,7 +65,7 @@ define([
 					},
 					onSuccess: function(e) {
 						e.preventDefault();
-						$('#edit-profile-submit-btn').addClass('loading');
+						$('.edit-profile-submit-btn').addClass('loading');
 						$.ajax({
 							url: '/api_change_info/',
 							data: $.extend({
@@ -76,12 +76,12 @@ define([
 								sessionStorage.setItem('user_name', xhr.user_name);
 								$('#header-user-name').text(xhr.user_name);
 								$form_dlg.modal('hide');
-								$('#edit-profile-submit-btn').removeClass('loading');
+								$('.edit-profile-submit-btn').removeClass('loading');
 							},
 							error: function(xhr) {
 								$form_profile.find('.error.message').text(xhr.responseText);
 								$form_profile.addClass('error');
-								$('#edit-profile-submit-btn').removeClass('loading');
+								$('.edit-profile-submit-btn').removeClass('loading');
 							}
 						});
 					}
@@ -111,7 +111,7 @@ define([
 					},
 					onSuccess: function(e) {
 						e.preventDefault();
-						$('#edit-profile-submit-btn').addClass('loading');
+						$('.edit-profile-submit-btn').addClass('loading');
 						$.ajax({
 							url: '/api_change_info/',
 							data: $.extend({
@@ -120,12 +120,12 @@ define([
 							type: 'post',
 							success: function(xhr) {
 								$form_dlg.modal('hide');
-								$('#edit-profile-submit-btn').removeClass('loading');
+								$('.edit-profile-submit-btn').removeClass('loading');
 							},
 							error: function(xhr) {
 								$form_password.find('.error.message').text(xhr.responseText);
 								$form_password.addClass('error');
-								$('#edit-profile-submit-btn').removeClass('loading');
+								$('.edit-profile-submit-btn').removeClass('loading');
 							}
 						});
 					}
