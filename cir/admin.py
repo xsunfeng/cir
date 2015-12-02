@@ -75,14 +75,6 @@ class ClaimVersionAdmin(admin.ModelAdmin):
     pass
 
 
-class PostAdmin(admin.ModelAdmin):
-    def author_name(self):
-        return "%s %s" % (self.author.first_name, self.author.last_name)
-
-    list_display = ('content', author_name, 'content_type', 'highlight')
-    list_filter = ('forum', 'content_type')
-
-
 class ClaimAdmin(admin.ModelAdmin):
     def author_name(self):
         return "%s %s" % (self.author.first_name, self.author.last_name)
@@ -93,14 +85,52 @@ class ClaimAdmin(admin.ModelAdmin):
     def version_author(self):
         return "%s %s" % (self.adopted_version().author.first_name, self.adopted_version().author.last_name)
 
+    def delegator_name(self):
+        if self.delegator:
+            return "%s %s" % (self.delegator.first_name, self.delegator.last_name)
+        return '(None)'
     author_name.short_description = 'Author of claim'
     claim_content.short_description = 'Content of adopted version'
     claim_content.allow_tags = True
     version_author.short_description = 'Author of adopted version'
-    list_display = (author_name, version_author, claim_content, 'claim_category', 'theme')
+    list_display = (author_name, delegator_name, version_author, claim_content, 'claim_category', 'theme', 'created_at')
     list_filter = ('forum', 'claim_category', 'theme')
-    ordering = ('created_at', )
+    ordering = ('-created_at', )
 
+class PostAdmin(admin.ModelAdmin):
+    def author_name(self):
+        return "%s %s" % (self.author.first_name, self.author.last_name)
+
+    author_name.short_description = 'Author of post'
+    def delegator_name(self):
+        if self.delegator:
+            return "%s %s" % (self.delegator.first_name, self.delegator.last_name)
+        return '(None)'
+    def target(self):
+        if self.highlight:
+            return '<a href="../highlight/%d">Highlight object</a>' % self.highlight.id
+        if self.target_entry:
+            try:
+                post = Post.objects.get(id=self.target_entry.id)
+                return '<a href="../post/%d">Post #%d</a>' % (post.id, post.id)
+            except Post.DoesNotExist:
+                try:
+                    claim = Claim.objects.get(id=self.target_entry.id)
+                    return '<a href="../claim/%d">Claim #%d</a>' % (claim.id, claim.id)
+                except Claim.DoesNotExist:
+                    return 'Unknown entry type'
+        if self.target_event:
+            try:
+                vote = Vote.objects.get(id=self.target_event.id)
+                return '<a href="../vote/%d">Vote #%d (%s)</a>' % (vote.id, vote.id, vote.vote_type)
+            except Vote.DoesNotExist:
+                return 'Unknown event type'
+        return 'Unknown type'
+
+    target.allow_tags = True
+    list_display = (author_name, delegator_name, 'title', 'content', target, 'content_type', 'created_at')
+    list_filter = ('forum', 'content_type')
+    ordering = ('-created_at', )
 
 admin.site.register(Forum, ForumAdmin)
 admin.site.register(Role, RoleAdmin)
