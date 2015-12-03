@@ -16,6 +16,10 @@ def api_chatter(request):
         forum = Forum.objects.get(id=request.session['forum_id'])
         messages = ChatMessage.objects.order_by('-created_at')
         response['messages'] = []
-        for i in range(24, -1, -1):
-            response['messages'].append(messages[i].getAttr(forum))
+        if len(messages) > 25:
+            for i in range(24, -1, -1):
+                response['messages'].append(messages[i].getAttr(forum))
+        else:
+            for message in messages:
+                response['messages'].append(message.getAttr(forum))
     return HttpResponse(json.dumps(response), mimetype='application/json')

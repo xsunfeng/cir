@@ -1,38 +1,75 @@
 {% extends 'base.html' %}
 {% block header %}
-<div class="ui fixed inverted main menu">
-	<div class="container">
-		<a href="/" class="item">GeoDeliberator</a>
-		<a href="/{{ forum_url }}" class="item">Back to Full Review</a>
-		<div id="header-visitor-wrapper" class="right menu" style="display:flex">
-			<div class="item">
-				<div id="login-btn" class="ui button">Log in</div>
-			</div>
-			<div class="item">
-				<div id="signup-btn" class="ui button">Sign up</div>
-			</div>
-		</div>
-		<div id="header-member-wrapper" class="right menu" style="display:flex">
-			<a href="#" class="item"><i class="mail icon"></i>Messages</a>
-			<div class="ui dropdown simple item" tabindex="0">
-				<span id="header-user-name" data-id="{{ user_id }}">{{ user_name }}</span>
-				<i class="icon dropdown" tabindex="0"></i>
-				<div class="menu" tabindex="-1">
-					<a href="#" id="edit-profile-btn" class="item"><i class="edit icon"></i>Edit Profile</a>
-					<a href="#" id="sign-out-btn" class="item"><i class="sign out icon"></i>Sign out</a>
-				</div>
-			</div>
-		</div>
+<header class="ui fixed inverted main menu">
+	<div href="/" class="item">GeoDeliberator</div>
+	{% if not load_error %}
+	<div id="header-member-wrapper" class="right menu" style="display:flex">
+		<a href="/{{ forum_url }}" class="item" target="_blank">Open full review in new tab</a>
 	</div>
-</div>
+	{% endif %}
+</header>
 {% endblock %}
 {% block body %}
-<div class="ui centered grid container">
-	<div class="ten wide column">
-		<div class="ui message">
-			<div class="header">Welcome back!</div>
-			<p>Statement goes here!</p>
+
+{% if load_error and load_error == '404' %}
+<article class="ui two column centered grid">
+	<div class="column" style="top:50px">
+		<div class="ui error message">
+			<div class="header">Forum does not exist; did you enter the correct address?</div>
 		</div>
 	</div>
+</article>
+{% else %}
+<div id="citizens-statement">
+		<h2>Citizen's statement on {{ forum_name }}</h2>
+		<section class="ui segment">
+			{{ stmt_preamble|safe }}
+		</section>
+		<h3>Key Findings</h3>
+		<section class="ui segment">
+			<ol class="ui list">
+			{% for claim in claims.findings %}
+				<li class="item">
+					<div class="description" data-id="{{ claim.id }}">
+						{{ claim.content|safe }}
+						{% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
+					<a class="ui right floated small label">Comment (0)</a>
+					<a class="ui right floated small label">Show thread</a>
+					</div>
+				</li>
+			{% endfor %}
+			</ol>
+		</section>
+		<h3>Proponent Claims</h3>
+		<section class="ui segment">
+			<ol class="ui list">
+			{% for claim in claims.pros %}
+				<li class="item">
+					<div class="description" data-id="{{ claim.id }}">
+						{{ claim.content|safe }}
+						{% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
+					<a class="ui right floated small label">Comment (0)</a>
+					<a class="ui right floated small label">Show thread</a>
+					</div>
+				</li>
+			{% endfor %}
+			</ol>
+		</section>
+		<h3>Opponent Claims</h3>
+		<section class="ui segment">
+			<ol class="ui list">
+			{% for claim in claims.cons %}
+				<li class="item">
+					<div class="description" data-id="{{ claim.id }}">
+						{{ claim.content|safe }}
+						{% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
+					<a class="ui right floated small label">Comment (0)</a>
+					<a class="ui right floated small label">Show thread</a>
+					</div>
+				</li>
+			{% endfor %}
+			</ol>
+		</section>
 </div>
+{% endif %}
 {% endblock %}

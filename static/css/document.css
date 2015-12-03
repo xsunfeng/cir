@@ -187,7 +187,7 @@
 }
 
 #workbench2-claim-container {
-	top: calc(50% + 210px);
+	top: calc(50% - -210px);
 	bottom: 3em;
     overflow: auto;
     position: fixed;

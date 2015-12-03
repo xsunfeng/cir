@@ -17,6 +17,12 @@ MANAGERS = ADMINS
 
 SERVER_HOST =  '130.203.136.141'
 
+# dispatcher url
+if DEBUG:
+    DISPATCHER_URL = '127.0.0.1:443'
+else:
+    DISPATCHER_URL = '130.203.136.141:443'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
@@ -118,8 +124,7 @@ PIPELINE_CSS = {
             'css/claim.css',
             'css/chatter.css',
             'css/vis.css',
-            'css/workbench.css'
-        ),
+            ),
         'output_filename': 'css/cir_forum.css',
     },
     'cir_dashboard': {
@@ -145,7 +150,7 @@ PIPELINE_JS = {
             'js/claim.js',
             'js/activity-feed.js',
             'js/utils.js',
-            'js/workbench.js',
+            'js/workbench2.js',
         ),
         'output_filename': 'js/cir_forum.js',
     },
