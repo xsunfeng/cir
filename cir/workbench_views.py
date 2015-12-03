@@ -159,9 +159,9 @@ def api_load_highlights(request):
     response['highlights'] = []
     theme_id = request.REQUEST.get('theme_id')
     doc_id = request.REQUEST.get('doc_id')
-    doc = Doc.objects.get(id = doc_id)
     print "theme_id = ", theme_id
     print "doc_id = ", doc_id
+    doc = Doc.objects.get(id = doc_id)
     if theme_id == "-1":
         for section in doc.sections.all():
             highlights = section.highlights.all()
@@ -175,6 +175,17 @@ def api_load_highlights(request):
                 if (highlight.theme != None and int(highlight.theme.id) == int(theme_id)):
                     highlight_info = highlight.getAttr()
                     response['highlights'].append(highlight_info)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def api_load_one_highlight(request):
+    print "api_load_one_highlight"
+    response = {}
+    response['highlights'] = []
+    hl_id = request.REQUEST.get('hl_id')
+    print "hl_id = ", hl_id
+    hl = Highlight.objects.get(id = hl_id)
+    highlight_info = hl.getAttr()
+    response['highlight'] = highlight_info
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_remove_claim(request):
@@ -322,7 +333,7 @@ def api_load_claim_list_partial(request):
         print type(claim)
         print type(claim.content)
         print type(claim.claim_category)
-        item['content'] = unicode(claim) + " (" + claim.claim_category + ")" 
+        item['content'] = unicode(ClaimVersion.objects.filter(claim_id = claim.id)[0]) + " (" + claim.claim_category + ")" 
         item['id'] = claim.id
         item['author_name'] = claim.author.first_name + " " + claim.author.last_name
         item['is_author'] = (request.user == claim.author)
@@ -361,7 +372,7 @@ def api_get_claim_by_theme(request):
         item['date'] = utils.pretty_date(claim.updated_at)
         item['created_at'] = utils.pretty_date(claim.created_at)
         item['created_at_used_for_sort'] = claim.created_at
-        item['content'] = claim.content
+        item['content'] = unicode(ClaimVersion.objects.filter(claim_id = claim.id)[0]) 
         item['id'] = claim.id
         item['author_name'] = claim.author.first_name + " " + claim.author.last_name
         item['is_author'] = (request.user == claim.author)

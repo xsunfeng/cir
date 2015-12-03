@@ -12,7 +12,6 @@ define([
 		// 	$(".document-table tbody").height($( window ).height() - 250);
 		// }).resize();
 
-		set_page_loading_progress(20);
 
 		// highlighting
 		module.highlightText = {};
@@ -42,6 +41,9 @@ define([
 	
 		// module.nugget_discussion_timer = setInterval(refresh_nugget_discussion, 3600000); // 1 hour
 		// clearInterval(nugget_discussion_timer);
+		
+		require('doc/qa').updateQuestionList();
+		
 	};
 
 	function initTutorial() {		// tutorial image slider
@@ -121,7 +123,7 @@ define([
 							var tmp = $(".section-header[data-id=" + sec_id + "]").offsetParent().position().top;
 							$("#workbench2-document-container").animate({scrollTop: tmp}, 0);
 							module.doc_id = xhr.doc_id;
-							load_highlights_by_doc();
+							module.load_highlights_by_doc();
 						},
 						error: function(xhr) {
 							if (xhr.status == 403) {
@@ -160,6 +162,20 @@ define([
 	}
 
 	function init_button() {
+		
+		$("body").on("click", "#question_sidebox_tab", function(e) {
+			if ($(this).attr("status") == "close") {
+				$('#question_sidebox_container').animate({'right':0});
+				$('#question_sidebox_tab').animate({'right':$('#question_sidebox_content').width() - 45});
+				$(this).attr("status", "open");			
+			} else if ($(this).attr("status") == "open") {
+				$('#question_sidebox_container').animate({'right':-$('#question_sidebox_content').width()});
+				$('#question_sidebox_tab').animate({'right': -45});
+				$(this).attr("status", "close");			
+			}
+
+		});
+		
 		$("body").on("click", "#workbench-document-back-to-top", function(e) {
 			$("#workbench2-document-container").animate({scrollTop: 0}, 800);
 		});
@@ -225,7 +241,7 @@ define([
 					} else {
 						module.doc_id = xhr.doc_id;	
 						$("#workbench-document").html(xhr.workbench_document);
-						$.when(load_highlights_by_doc()).done(function(promise1) {
+						$.when(module.load_highlights_by_doc()).done(function(promise1) {
 							_jump();
 						});
 					}
@@ -542,7 +558,7 @@ define([
 						load_nugget_list();
 						load_claim_list();
 						clear_highlights();
-						load_highlights_by_doc();
+						module.load_highlights_by_doc();
 	    			}
   				});
   				increase_page_loading_progress(10);
@@ -761,6 +777,11 @@ define([
 	function clear_highlights() {
 		$('#workbench-document [data-hl-id]')
 			.removeClass('n')
+			.removeClass('t')
+			.removeClass('c')
+			.removeClass('p')
+			.removeClass('q')
+			.removeAttr('data-hl-id');
 	}
 
 	function assign_nugget(highlight_id, theme_id){
@@ -781,7 +802,7 @@ define([
 		});
 	}
 
-	function load_highlights_by_doc() {
+	module.load_highlights_by_doc = function() {
 		var promise = $.ajax({
 			url: '/workbench/api_load_highlights/',
 			type: 'post',
@@ -790,6 +811,7 @@ define([
 				doc_id: module.doc_id,
 			},
 			success: function(xhr) {
+				clear_highlights();
 				module.highlightsData = xhr.highlights;
 
 				for (var j = 0; j < module.highlightsData.length; j++) {
@@ -798,9 +820,15 @@ define([
 					var $context = $("#workbench-document").find('.section-content[data-id="' + highlight.context_id + '"]');
 					// assume orginal claims are nuggets now 
 					var className = '';
-					if (highlight.type == 'claim') {
-						className = 'n'; // for 'claim'
-					} 
+					if (highlight.type == 'comment') {
+						className = 'p'; // for 'post'
+					} else if (highlight.type == 'question') {
+						className = 'q'; // for 'question'
+					} else if (highlight.type == 'claim') {
+						className = 'c'; // for 'claim'
+					} else if (highlight.type == 'tag') {
+						className = 't'; // for 'tag
+					}
 					var text = [];
 					// loop over all words in the highlight
 					for (var i = highlight.start; i <= highlight.end; i++) {
