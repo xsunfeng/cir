@@ -42,10 +42,10 @@ define([
 		$("body").on("click", "#question_sidebox_tab", function(e) {
 			if ($(this).attr("status") == "close") {
 				$('#question_sidebox_container').animate({'right':0});
-				$('#question_sidebox_tab').animate({'right':$('#question_sidebox_content').width() - 45});
+				$('#question_sidebox_tab').animate({'right':$('#question_sidebox_container').width() - 45});
 				$(this).attr("status", "open");			
 			} else if ($(this).attr("status") == "open") {
-				$('#question_sidebox_container').animate({'right':-$('#question_sidebox_content').width()});
+				$('#question_sidebox_container').animate({'right':-$('#question_sidebox_container').width()});
 				$('#question_sidebox_tab').animate({'right': -45});
 				$(this).attr("status", "close");			
 			}
