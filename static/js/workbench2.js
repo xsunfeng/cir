@@ -163,19 +163,6 @@ define([
 
 	function init_button() {
 		
-		$("body").on("click", "#question_sidebox_tab", function(e) {
-			if ($(this).attr("status") == "close") {
-				$('#question_sidebox_container').animate({'right':0});
-				$('#question_sidebox_tab').animate({'right':$('#question_sidebox_content').width() - 45});
-				$(this).attr("status", "open");			
-			} else if ($(this).attr("status") == "open") {
-				$('#question_sidebox_container').animate({'right':-$('#question_sidebox_content').width()});
-				$('#question_sidebox_tab').animate({'right': -45});
-				$(this).attr("status", "close");			
-			}
-
-		});
-		
 		$("body").on("click", "#workbench-document-back-to-top", function(e) {
 			$("#workbench2-document-container").animate({scrollTop: 0}, 800);
 		});
