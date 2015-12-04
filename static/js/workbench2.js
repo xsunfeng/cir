@@ -759,6 +759,10 @@ define([
 		// module.updateHighlightFilter({
 		// 	switch: module.newHighlight.type
 		// });
+		
+		clear_highlights();
+		module.load_highlights_by_doc();
+		
 	}
 
 	function clear_highlights() {
