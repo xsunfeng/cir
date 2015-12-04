@@ -11,7 +11,6 @@ from cir.phase_control import PHASE_CONTROL
 import utils
 
 def api_load_all_documents(request):
-    print "api_load_all_documents"
     response = {}
     context = {}
     context["docs"] = []
@@ -49,6 +48,7 @@ def api_get_toc(request):
             m_sec["name"] = section.title
             m_sec["id"] = section.id
             m_doc['content'].append(m_sec)
+        m_doc['content'].sort(key = lambda x: x["id"])
         context['root_docs'].append(m_doc)
     # retrieve docs in a folder
     folders = EntryCategory.objects.filter(forum_id=request.session['forum_id'], category_type='doc')
@@ -68,13 +68,13 @@ def api_get_toc(request):
                 m_sec["name"] = section.title
                 m_sec["id"] = section.id
                 m_doc['content'].append(m_sec)
+            m_doc['content'].sort(key = lambda x: x["id"])
             m_folder['content'].append(m_doc)
         context['folders'].append(m_folder)
     response['document_toc'] = render_to_string("document-toc.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_get_doc_by_hl_id(request):
-    print "api_get_doc_by_hl_id"
     response = {}
     context = {}
     forum = Forum.objects.get(id=request.session['forum_id'])
@@ -96,7 +96,6 @@ def api_get_doc_by_hl_id(request):
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_get_doc_by_sec_id(request):
-    print "api_get_doc_by_sec_id"
     response = {}
     context = {}
     forum = Forum.objects.get(id=request.session['forum_id'])
@@ -115,6 +114,26 @@ def api_get_doc_by_sec_id(request):
     response['workbench_document'] = render_to_string("workbench-document.html", context)
     response['doc_id'] = doc.id
     return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def api_get_doc_by_doc_id(request):
+    response = {}
+    context = {}
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    # retrieve docs in a folder
+    doc_id = request.REQUEST.get("doc_id")
+    doc = Doc.objects.get(id = doc_id)
+    context['doc_name'] = doc.title
+    context['sections'] = []
+    ordered_sections = doc.sections.filter(order__isnull=False).order_by('order')
+    for section in ordered_sections:
+        context['sections'].append(section.getAttr(forum))
+    unordered_sections = doc.sections.filter(order__isnull=True).order_by('updated_at')
+    for section in unordered_sections:
+        context['sections'].append(section.getAttr(forum))
+    response['workbench_document'] = render_to_string("workbench-document.html", context)
+    response['doc_id'] = doc.id
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
 
 def add_nugget_comment(request):
     response = {}
@@ -154,13 +173,10 @@ def api_load_all_themes(request):
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_load_highlights(request):
-    print "api_load_highlights"
     response = {}
     response['highlights'] = []
     theme_id = request.REQUEST.get('theme_id')
     doc_id = request.REQUEST.get('doc_id')
-    print "theme_id = ", theme_id
-    print "doc_id = ", doc_id
     doc = Doc.objects.get(id = doc_id)
     if theme_id == "-1":
         for section in doc.sections.all():
@@ -178,11 +194,9 @@ def api_load_highlights(request):
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_load_one_highlight(request):
-    print "api_load_one_highlight"
     response = {}
     response['highlights'] = []
     hl_id = request.REQUEST.get('hl_id')
-    print "hl_id = ", hl_id
     hl = Highlight.objects.get(id = hl_id)
     highlight_info = hl.getAttr()
     response['highlight'] = highlight_info
@@ -231,7 +245,6 @@ def api_add_claim(request):
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_assign_nugget(request):
-    print "api_assign_nugget"
     highlight_id = request.REQUEST.get("highlight_id")
     theme_id = request.REQUEST.get("theme_id")
     highlight = Highlight.objects.get(id=highlight_id)
@@ -286,7 +299,6 @@ def api_remove_nugget(request):
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_load_nugget_list(request):
-    print "load_nugget_list"
     response = {}
     context = {}
     theme_id = int(request.REQUEST.get("theme_id"))
@@ -305,7 +317,6 @@ def api_load_nugget_list(request):
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_load_nugget_list_partial(request):
-    print "api_load_nugget_list_partial"
     response = {}
     context = {}
     context['highlights'] = []
@@ -318,21 +329,16 @@ def api_load_nugget_list_partial(request):
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_load_claim_list_partial(request):
-    print "api_load_claim_list_partial"
     response = {}
     context = {}
     context['highlights'] = []
     highlight_id = request.REQUEST.get("highlight_id")
-    print highlight_id
     highlightClaims = HighlightClaim.objects.filter(highlight_id = highlight_id)
     context["claims"] = []
     for highlightClaim in highlightClaims:
         claim = highlightClaim.claim
         item = {}
         item['date'] = utils.pretty_date(claim.updated_at)
-        print type(claim)
-        print type(claim.content)
-        print type(claim.claim_category)
         item['content'] = unicode(ClaimVersion.objects.filter(claim_id = claim.id)[0]) + " (" + claim.claim_category + ")" 
         item['id'] = claim.id
         item['author_name'] = claim.author.first_name + " " + claim.author.last_name
@@ -346,7 +352,6 @@ def api_load_claim_list_partial(request):
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_edit_claim(request):
-    print "api_edit_claim"
     claim_id = request.REQUEST.get("claim_id")
     content = request.REQUEST.get("content")
     claim = Claim.objects.get(id = claim_id)
@@ -356,7 +361,6 @@ def api_edit_claim(request):
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_get_claim_by_theme(request):
-    print "api_get_claim_by_theme"
     forum = Forum.objects.get(id=request.session['forum_id'])
     response = {}
     context = {}
