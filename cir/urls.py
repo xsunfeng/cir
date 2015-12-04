@@ -55,6 +55,7 @@ urlpatterns = patterns('',
     url(r'^workbench/api_load_claim_list_partial/$', workbench_views.api_load_claim_list_partial),
     url(r'^workbench/api_get_doc_by_sec_id/$', workbench_views.api_get_doc_by_sec_id),
     url(r'^workbench/api_get_doc_by_hl_id/$', workbench_views.api_get_doc_by_hl_id),
+    url(r'^workbench/api_get_doc_by_doc_id/$', workbench_views.api_get_doc_by_doc_id),
 
     url(r'^api_chatter/$', chatter_views.api_chatter),
 

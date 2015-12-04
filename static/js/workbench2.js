@@ -132,7 +132,29 @@ define([
 						}
 					});
 				});
-				increase_page_loading_progress(10);
+				$(".document-toc-doc-link").click(function(e) {
+					var doc_id = e.target.getAttribute("data-id");			
+					$.ajax({
+						url: '/workbench/api_get_doc_by_doc_id/',
+						type: 'post',
+						data: {
+							'doc_id': doc_id,
+						},
+						success: function(xhr) {
+							$("#workbench-document").html(xhr.workbench_document);
+					
+							$('#workbench-document-toc').popup('hide');
+							$("#workbench2-document-container").animate({scrollTop: 0}, 0);
+							module.doc_id = xhr.doc_id;
+							module.load_highlights_by_doc();
+						},
+						error: function(xhr) {
+							if (xhr.status == 403) {
+								Utils.notify('error', xhr.responseText);
+							}
+						}
+					});
+				});
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {
