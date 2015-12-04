@@ -623,8 +623,10 @@ define([
 				if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (!sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
 					$('#claim-pane .facilitator-only').show();
 				}
-				loadVotes();
-				loadFlags();
+				if (module.claim_id) { // make sure non-empty claim list
+					loadVotes();
+					loadFlags();
+				}
 				if ($('body').attr('data-phase') == 'improve') {
 					initStmtHandles();
 				}
