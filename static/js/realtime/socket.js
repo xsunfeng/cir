@@ -1,10 +1,10 @@
 define([
 	'realtime/chatter',
-	'doc/document',
+	'workbench2',
 	'doc/qa',
 ], function(
 	Chatter,
-	DocumentView,
+	Workbench,
 	QAView
 ) {
 	var socket = {
@@ -76,7 +76,7 @@ define([
 				}).on('client:chat:emit_msg', function(msg) {
 					Chatter.showMsg(msg);
 				}).on('client:document:add_highlight', function(data) {
-					DocumentView.receiveNewHighlight(data);
+					Workbench.receiveNewHighlight(data);
 				}).on('client:document:add_question', function(data) {
 					QAView.newQuestionAdded(data);
 				}).on('client:qa:add_post', function(data) {
