@@ -36,7 +36,7 @@ class HighlightAdmin(admin.ModelAdmin):
     def forum(self):
         return self.context.forum
     list_display = (forum, context_type, context_content, 'author', 'is_nugget', 'created_at')
-    list_filter = (forum, )
+    list_filter = ('context__forum', )
 
 class DocAdmin(admin.ModelAdmin):
     pass
