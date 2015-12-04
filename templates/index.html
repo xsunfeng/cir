@@ -226,14 +226,29 @@
 <div id="question_sidebox_tab" status="close" style="display:;"><b>Questions</b></div>
 <div id="question_sidebox_container" >
 	<div id="question_sidebox_header" style="position:absolute; width: 100%; text-align: center; line-height:2em; background: AliceBlue;">
-		<div id="question_sidebox_container_hide" style="float:left;"><i class="icon angle right"></i></div>
+		<div id="question_sidebox_container_hide" style="float:left;"></i></div>
 		Questions
 	</div>
 	<div id="question_sidebox_content" style="position:absolute; top:2em; bottom:0; overflow: auto;">
 		<div id="qa-wrapper">
-			<div id="qa-list">
+			<div id="qa-refresh-prompter" class="ui info message hidden"></div>
+			<div class="ui fluid top attached two item blue pointing menu" style="margin-top: 0;">
+				<a class="item refresh-list">Refresh List</a>
+				<a class="item new-question">Raise a question</a>
 			</div>
-		</div>	
+			<div class="ui buttom attached secondary segment new question hidden">
+				<form class="ui form">
+					<div class="ui message">
+						If your question has a context in the document, please ...
+					</div>
+					<div class="field">
+						<textarea rows="3"></textarea>
+					</div>
+					<button class="ui submit button">Submit</button>
+				</form>
+			</div>
+			<div id="qa-list"></div>
+		</div>
 	</div>
 </div>
 
