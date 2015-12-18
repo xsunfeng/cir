@@ -1,7 +1,9 @@
 define([
+	'doc/tsd',
 	'utils',
 	'feed/activity-feed'
 ], function(
+	TSDView,
 	Utils
 ) {
 	var module = {};
@@ -23,20 +25,19 @@ define([
 		module.currentThemeId = "-1";
 		module.claim_category = "finding";
 		module.doc_id = "-1";
+		module.tsd_claim_type = "";
 		
 		module.claim_textarea_container = $("#workbench2-claim-textarea-container");
 		module.claim_list_container = $("#workbench2-claim-container");
 		module.nugget_list_container = $("#workbench2-nugget-container");
 		
-		load_toc();
-		$.when(load_theme(), load_claim_list()).done(function(promise1, promise2) {
-		  	// load_highlights("-1");
-		  	increase_page_loading_progress(10);
-		});
-		load_nugget_list();
-		init_tk_event();
+		load_theme()
+	  	load_toc();
+	  	load_tsdclaim_list();
+		// load_nugget_list();
+		// init_tk_event();
 		init_button();
-		initPopup();
+		// initPopup();
 		initTutorial();
 	
 		// module.nugget_discussion_timer = setInterval(refresh_nugget_discussion, 3600000); // 1 hour
@@ -101,12 +102,11 @@ define([
 			data: {
 			},
 			success: function(xhr) {
-				$("#workbench-document-toc-container").html(xhr.document_toc);
-				$('#workbench-document-toc').popup({
-				    popup: '#workbench-document-toc-container',
-				    on    : 'click',
-				    position: "top left", 
+				$("#topic-selection-doc-toc").html(xhr.document_toc);
+				$('#topic-selection-doc-toc').dropdown({
+					    action: 'hide',
 				});
+				
 				$(".document-toc-sec-link").click(function(e) {
 					var sec_id = e.target.getAttribute("data-id");			
 					$.ajax({
@@ -124,6 +124,9 @@ define([
 							$("#workbench2-document-container").animate({scrollTop: tmp}, 0);
 							module.doc_id = xhr.doc_id;
 							module.load_highlights_by_doc();
+
+					    	var text = "&nbsp;&nbsp;" + $("#cur-doc-title").text();
+					    	$("#cur-doc-title2").html("Current topic:<b>" + text + "</b>");
 						},
 						error: function(xhr) {
 							if (xhr.status == 403) {
@@ -147,6 +150,9 @@ define([
 							$("#workbench2-document-container").animate({scrollTop: 0}, 0);
 							module.doc_id = xhr.doc_id;
 							module.load_highlights_by_doc();
+
+					    	var text = "&nbsp;&nbsp;" + $("#cur-doc-title").text();
+					    	$("#cur-doc-title2").html("Current topic:<b>" + text + "</b>");
 						},
 						error: function(xhr) {
 							if (xhr.status == 403) {
@@ -185,8 +191,15 @@ define([
 
 	function init_button() {
 		
+		$('#tsdclaim-type .checkbox').checkbox({
+		    onChecked: function() {
+		  		module.tsd_claim_type = $(this).attr("data-type");
+		  		load_tsdclaim_list();
+		    },
+	  	});
+
 		$("body").on("click", "#workbench-document-back-to-top", function(e) {
-			$("#workbench2-document-container").animate({scrollTop: 0}, 800);
+			$("#workbench2-document-container").animate({scrollTop: 0}, 200);
 		});
 
 		module.nugget_list_container.on("click", "#workbench-nugget-operation-back", function(e) {
@@ -330,6 +343,27 @@ define([
 		// 	var textarea = '<div class="ui form"><div class="field"><textarea rows="3">' + content + '</textarea></div></div>';
 		// 	var content = $(this).parentsUntil('li').parent().find('.workbench-claim-content').html(textarea);
 		// });
+
+		module.claim_list_container.on("click", ".delete-tsdclaim", function(e) {
+			var claim_id = $(this).parents(".card").find(".workbench-claim-content").attr("claim-id");
+			$.ajax({
+				url: '/api_tsd/',
+				type: 'post',
+				data: {
+					action: "delete-tsdclaim",
+					claim_id: claim_id,
+				},
+				success: function(xhr) {
+					load_tsdclaim_list();
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});			
+		});
+
 		module.claim_list_container.on("click", ".workbench-remove-claim", function(e) {
 			var claim_id = $(this).parents(".card").find(".workbench-claim-content").attr("claim-id");
 			$.ajax({
@@ -376,6 +410,30 @@ define([
 		module.claim_textarea_container.on("click", ".workbench-clear-claim", function(e) {
 			module.claim_textarea_container.find("textarea").attr("data-id", "").val("");
 		});
+
+		module.claim_textarea_container.on("click", ".add-tsdclaim", function(e) {
+			var content = module.claim_textarea_container.find("textarea").val();
+			$.ajax({
+				url: '/api_tsd/',
+				type: 'post',
+				data: {
+					action: "add-tsdclaim",
+					theme_id: module.currentThemeId,
+					content: content,
+					tsd_claim_type : module.tsd_claim_type ,
+				},
+				success: function(xhr) {
+					module.claim_textarea_container.find("textarea").val("");
+					load_tsdclaim_list();
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});			
+		});
+
 		module.claim_textarea_container.on("click", ".workbench-add-claim", function(e) {
 			var content = module.claim_textarea_container.find("textarea").val();
 			var data_hl_ids = module.claim_textarea_container.find("textarea").attr("data-id");
@@ -442,7 +500,29 @@ define([
 			});
 		});
 
-		increase_page_loading_progress(10);
+		$("body").on("click", "#claim-theme-add-submit", function(){
+			var topic_name = $("#topic-name").find("textarea").val();
+			$("#topic-name").find("textarea").val("");
+			var topic_description = $("#topic-description").find("textarea").val();
+			$("#topic-description").find("textarea").val("");
+			$.ajax({
+				url: '/workbench/api_add_theme/',
+				type: 'post',
+				data: {
+					topic_name: topic_name,
+					topic_description: topic_description,
+				},
+				success: function(xhr) {
+					Utils.notify('success', 'New topic added.');
+					load_theme();
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});
+		});
 	}
 
 	function refresh_nugget_discussion() {
@@ -451,66 +531,66 @@ define([
 	}
 
 	function load_nugget_list_partial(highlight_ids) {
-		$.ajax({
-			url: '/workbench/api_load_nugget_list_partial/',
-			type: 'post',
-			data: {
-				theme_id: module.currentThemeId,
-				highlight_ids: highlight_ids,
-			},
-			success: function(xhr) {
-				$("#workbench-nugget-list").html(xhr.workbench_nugget_list);
-				var def = '<a href="javascript:;" id="workbench-nugget-operation-back" class="item">< Full List</a>';
-				$("#workbench-nugget-list").prepend(def);
-			},			
-			error: function(xhr) {
-				if (xhr.status == 403) {
-					Utils.notify('error', xhr.responseText);
-				}
-			}
-		});
+		// $.ajax({
+		// 	url: '/workbench/api_load_nugget_list_partial/',
+		// 	type: 'post',
+		// 	data: {
+		// 		theme_id: module.currentThemeId,
+		// 		highlight_ids: highlight_ids,
+		// 	},
+		// 	success: function(xhr) {
+		// 		$("#workbench-nugget-list").html(xhr.workbench_nugget_list);
+		// 		var def = '<a href="javascript:;" id="workbench-nugget-operation-back" class="item">< Full List</a>';
+		// 		$("#workbench-nugget-list").prepend(def);
+		// 	},			
+		// 	error: function(xhr) {
+		// 		if (xhr.status == 403) {
+		// 			Utils.notify('error', xhr.responseText);
+		// 		}
+		// 	}
+		// });
 	}
 	
 	function load_claim_list_partial(highlight_id) {
-		$.ajax({
-			url: '/workbench/api_load_claim_list_partial/',
-			type: 'post',
-			data: {
-				highlight_id: highlight_id,
-			},
-			success: function(xhr) {
-				$("#workbench-claim-list").html(xhr.workbench_claims);
-				var def = '<a href="javascript:;" id="workbench-claim-operation-back" class="item">< Full List</a>';
-				$("#workbench-claim-list").prepend(def);
-			},			
-			error: function(xhr) {
-				if (xhr.status == 403) {
-					Utils.notify('error', xhr.responseText);
-				}
-			}
-		});
+		// $.ajax({
+		// 	url: '/workbench/api_load_claim_list_partial/',
+		// 	type: 'post',
+		// 	data: {
+		// 		highlight_id: highlight_id,
+		// 	},
+		// 	success: function(xhr) {
+		// 		$("#workbench-claim-list").html(xhr.workbench_claims);
+		// 		var def = '<a href="javascript:;" id="workbench-claim-operation-back" class="item">< Full List</a>';
+		// 		$("#workbench-claim-list").prepend(def);
+		// 	},			
+		// 	error: function(xhr) {
+		// 		if (xhr.status == 403) {
+		// 			Utils.notify('error', xhr.responseText);
+		// 		}
+		// 	}
+		// });
 	}
 
 	function load_nugget_list() {
-		var promise = $.ajax({
-			url: '/workbench/api_load_nugget_list/',
-			type: 'post',
-			data: {
-				theme_id: module.currentThemeId,
-			},
-			success: function(xhr) {
-				$("#workbench-nugget-list").html(xhr.workbench_nugget_list);
-				increase_page_loading_progress(10);
-				var def = '<a id="" class="item">button1</a>' + '<a id="" class="item">button2</a>';
-				$("#workbench-nugget-operation-container").html(def);
-			},			
-			error: function(xhr) {
-				if (xhr.status == 403) {
-					Utils.notify('error', xhr.responseText);
-				}
-			}
-		});
-		return promise;
+		// var promise = $.ajax({
+		// 	url: '/workbench/api_load_nugget_list/',
+		// 	type: 'post',
+		// 	data: {
+		// 		theme_id: module.currentThemeId,
+		// 	},
+		// 	success: function(xhr) {
+		// 		$("#workbench-nugget-list").html(xhr.workbench_nugget_list);
+		// 		increase_page_loading_progress(10);
+		// 		var def = '<a id="" class="item">button1</a>' + '<a id="" class="item">button2</a>';
+		// 		$("#workbench-nugget-operation-container").html(def);
+		// 	},			
+		// 	error: function(xhr) {
+		// 		if (xhr.status == 403) {
+		// 			Utils.notify('error', xhr.responseText);
+		// 		}
+		// 	}
+		// });
+		// return promise;
 	}
 
 
@@ -540,6 +620,34 @@ define([
 		return promise;
 	}
 
+	function load_tsdclaim_list() {
+		module.tsd_claim_type = $(".inline.fields").find(":checked").attr("data-type");
+		var content = module.claim_textarea_container.find("textarea").val();
+		var promise = $.ajax({
+			url: '/api_tsd/',
+			type: 'post',
+			data: {
+				action: "load-tsdclaim",
+				theme_id: module.currentThemeId,
+				tsd_claim_type: module.tsd_claim_type,
+				content: content,
+			},
+			success: function(xhr) {
+				$("#workbench-claim-list").html(xhr.workbench_tsdclaims);
+				if ($("#header-user-name").attr("data-role") != "facilitator") {
+					$(".facilitator-only").css("display", "none");
+				}
+			},
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+				$('#tsd-list').css('opacity', '1.0');
+			}
+		});
+		return promise;
+	}
+
 	function load_theme() {
 		
 		var promise = $.ajax({
@@ -557,20 +665,33 @@ define([
 				})
 				;
 
-				// bind click event to theme button
 				$('#claim-theme-filter-menu').dropdown({
 					action: 'combo',
     				onChange: function(value, text, $selectedItem) {
 						module.currentThemeText = text
 						module.currentThemeId = $selectedItem.attr("data-id");
 						$("#current-claim-theme-text").text(text);
-						load_nugget_list();
-						load_claim_list();
-						clear_highlights();
-						module.load_highlights_by_doc();
+						$("#feng1").text("");
+						// load_nugget_list();
+						// load_claim_list();
+						// clear_highlights();
+						// module.load_highlights_by_doc();
+	    			},
+	    			onHide: function($selectedLabels) {
+	    				TSDView.updateQuestionList();
+	    				load_tsdclaim_list();
 	    			}
   				});
-  				increase_page_loading_progress(10);
+
+				$('#claim-theme-add').dropdown({
+					action: 'hide',
+    				onChange: function(value, text, $selectedItem) {
+
+	    			},
+	    			onHide: function($selectedLabels) {
+	    			}
+  				});
+
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -816,56 +937,56 @@ define([
 	}
 
 	module.load_highlights_by_doc = function() {
-		var promise = $.ajax({
-			url: '/workbench/api_load_highlights/',
-			type: 'post',
-			data: {
-				theme_id: module.currentThemeId,
-				doc_id: module.doc_id,
-			},
-			success: function(xhr) {
-				clear_highlights();
-				module.highlightsData = xhr.highlights;
+		// var promise = $.ajax({
+		// 	url: '/workbench/api_load_highlights/',
+		// 	type: 'post',
+		// 	data: {
+		// 		theme_id: module.currentThemeId,
+		// 		doc_id: module.doc_id,
+		// 	},
+		// 	success: function(xhr) {
+		// 		clear_highlights();
+		// 		module.highlightsData = xhr.highlights;
 
-				for (var j = 0; j < module.highlightsData.length; j++) {
-					increase_page_loading_progress(10);
-					var highlight = module.highlightsData[j];
-					var $context = $("#workbench-document").find('.section-content[data-id="' + highlight.context_id + '"]');
-					// assume orginal claims are nuggets now 
-					var className = '';
-					if (highlight.type == 'comment') {
-						className = 'p'; // for 'post'
-					} else if (highlight.type == 'question') {
-						className = 'q'; // for 'question'
-					} else if (highlight.type == 'claim') {
-						className = 'c'; // for 'claim'
-					} else if (highlight.type == 'tag') {
-						className = 't'; // for 'tag
-					}
-					var text = [];
-					// loop over all words in the highlight
-					for (var i = highlight.start; i <= highlight.end; i++) {
-						var $token = $context.find('.tk[data-id="' + i + '"]');
-						text.push($token.text());
-						// (1) add class name
-						// (2) update data-hl-id
-						if (typeof $token.attr('data-hl-id') == 'undefined') { // new highlight for this word
-							$token.addClass(className).attr('data-hl-id', highlight.id);
-						} else {
-							var curr_id = $token.attr('data-hl-id'); // append highlight for this word
-							$token.addClass(className).attr('data-hl-id', curr_id + ' ' + highlight.id);
-						}
-					}
-					module.highlightText[highlight.id] = text.join('');
-				}
-			},
-			error: function(xhr) {
-				if (xhr.status == 403) {
-					Utils.notify('error', xhr.responseText);
-				}
-			}
-		});
-		return promise;
+		// 		for (var j = 0; j < module.highlightsData.length; j++) {
+		// 			increase_page_loading_progress(10);
+		// 			var highlight = module.highlightsData[j];
+		// 			var $context = $("#workbench-document").find('.section-content[data-id="' + highlight.context_id + '"]');
+		// 			// assume orginal claims are nuggets now 
+		// 			var className = '';
+		// 			if (highlight.type == 'comment') {
+		// 				className = 'p'; // for 'post'
+		// 			} else if (highlight.type == 'question') {
+		// 				className = 'q'; // for 'question'
+		// 			} else if (highlight.type == 'claim') {
+		// 				className = 'c'; // for 'claim'
+		// 			} else if (highlight.type == 'tag') {
+		// 				className = 't'; // for 'tag
+		// 			}
+		// 			var text = [];
+		// 			// loop over all words in the highlight
+		// 			for (var i = highlight.start; i <= highlight.end; i++) {
+		// 				var $token = $context.find('.tk[data-id="' + i + '"]');
+		// 				text.push($token.text());
+		// 				// (1) add class name
+		// 				// (2) update data-hl-id
+		// 				if (typeof $token.attr('data-hl-id') == 'undefined') { // new highlight for this word
+		// 					$token.addClass(className).attr('data-hl-id', highlight.id);
+		// 				} else {
+		// 					var curr_id = $token.attr('data-hl-id'); // append highlight for this word
+		// 					$token.addClass(className).attr('data-hl-id', curr_id + ' ' + highlight.id);
+		// 				}
+		// 			}
+		// 			module.highlightText[highlight.id] = text.join('');
+		// 		}
+		// 	},
+		// 	error: function(xhr) {
+		// 		if (xhr.status == 403) {
+		// 			Utils.notify('error', xhr.responseText);
+		// 		}
+		// 	}
+		// });
+		// return promise;
 	}
 
 	return module;

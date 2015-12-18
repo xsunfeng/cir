@@ -452,6 +452,7 @@ class Post(Entry):  # in discussion
     CONTENT_CHOICES = (
         ('question', 'Question'),
         ('comment', 'Comment'),
+        ('discussion', 'Discussion')
     )
     content_type = models.CharField(max_length=10, choices=CONTENT_CHOICES)
 
@@ -480,6 +481,19 @@ class Post(Entry):  # in discussion
             attr['parent_name'] = self.target_event.user.get_full_name()
             attr['parent_id'] = self.target_event.id
         return attr
+
+class tsdPost(Post):
+    theme = models.ForeignKey(ClaimTheme, null=True, blank=True)
+
+class tsdClaim(Post):
+    theme = models.ForeignKey(ClaimTheme, null=True, blank=True)
+    TSD_CONTENT_CHOICES = (
+        ('Document', 'document'),
+        ('Panelist', 'panelist'),
+        ('Expert', 'expert'),
+        ('Framing question', 'framing question')
+    )
+    tsd_claim_type = models.CharField(max_length=20, choices=TSD_CONTENT_CHOICES)
 
 class ChatMessage(models.Model):
     source = models.ForeignKey(User, related_name='get_source')

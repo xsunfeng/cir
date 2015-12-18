@@ -26,6 +26,7 @@ urlpatterns = patterns('',
     url(r'^api_highlight/$', doc_views.api_highlight),
     url(r'^api_annotation/$', doc_views.api_annotation),
     url(r'^api_qa/$', doc_views.api_qa),
+    url(r'^api_tsd/$', doc_views.api_tsd),
     url(r'^api_claim/$', claim_views.api_claim),
     url(r'^api_get_claim/$', claim_views.api_get_claim),
     url(r'^api_draft_stmt/$', claim_views.api_draft_stmt),
@@ -56,6 +57,8 @@ urlpatterns = patterns('',
     url(r'^workbench/api_get_doc_by_sec_id/$', workbench_views.api_get_doc_by_sec_id),
     url(r'^workbench/api_get_doc_by_hl_id/$', workbench_views.api_get_doc_by_hl_id),
     url(r'^workbench/api_get_doc_by_doc_id/$', workbench_views.api_get_doc_by_doc_id),
+    url(r'^workbench/api_add_theme/$', workbench_views.api_add_theme),
+
 
     url(r'^api_chatter/$', chatter_views.api_chatter),
 

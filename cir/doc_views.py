@@ -240,3 +240,104 @@ def api_qa(request):
         context['questions'] = sorted(context['questions'], key=lambda en: (en['last_reply_full'], en['created_at_full']), reverse=True)
         response['html'] = render_to_string('doc/qa-panel.html', context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def api_tsd(request):
+    response = {}
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    action = request.REQUEST.get('action')
+    if action == 'load-thread':
+        # given a question, load its discussions
+        question = tsdPost.objects.get(id=request.REQUEST.get('question_id'))
+        context = {
+            'entries': [],
+            'source': 'qa'
+        }
+        for post in question.getTree(exclude_root=True): # don't include root
+            context['entries'].append(post.getAttr(forum))
+        context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'], reverse=True)
+        response['html'] = render_to_string("feed/activity-feed-doc.html", context)
+    if action == 'raise-question':
+        now = timezone.now()
+        content = request.REQUEST.get('content')
+        theme_id = request.REQUEST.get('theme_id')
+        if theme_id == None or theme_id == "-1":
+            theme_id = ClaimTheme.objects.get(forum=forum, name="Unassigned").id
+            tsdPost.objects.create(forum=forum, author=request.user, content=content, 
+                created_at=now, updated_at=now, content_type='question', theme_id=theme_id)
+        else:
+            tsdPost.objects.create(forum=forum, author=request.user, content=content, 
+                created_at=now, updated_at=now, content_type='question', theme_id=theme_id)
+    if action == 'get-all-questions' or action == 'raise-question':
+        context = {
+            'questions': []
+        }
+        theme_id = request.REQUEST.get('theme_id')
+        if theme_id == None or theme_id == "-1":
+            questions = tsdPost.objects.filter(forum=forum, is_deleted=False)
+        else:
+            questions = tsdPost.objects.filter(forum=forum, theme_id=theme_id, is_deleted=False)
+        for question in questions:
+            question_info = question.getAttr(forum)
+            all_replies = question.getTree(exclude_root=True)
+            question_info['treesize'] = len(all_replies)
+            if question_info['treesize'] > 0:
+                last_reply = sorted(all_replies, key=lambda en: en.created_at, reverse=True)[0]
+                last_reply_info = last_reply.getAttr(forum)
+                question_info['last_reply'] = last_reply_info['updated_at']
+                question_info['last_reply_full'] = last_reply_info['updated_at_full']
+            else:
+                question_info['last_reply_full'] = question_info['created_at_full']
+            try:
+                docsection = DocSection.objects.get(id=question.highlight.context.id)
+                question_info['doc_name'] = docsection.doc.title
+                question_info['doc_id'] = docsection.doc.id
+                question_info['highlight_id'] = question.highlight.id
+            except:
+                pass
+            context['questions'].append(question_info)
+        context['questions'] = sorted(context['questions'], key=lambda en: (en['last_reply_full'], en['created_at_full']), reverse=True)
+        response['html'] = render_to_string('doc/tsd-panel.html', context)
+    if action == 'load-tsdclaim':
+        response = {}
+        context = {}
+        now = timezone.now()
+        forum = Forum.objects.get(id=request.session['forum_id'])
+        theme_id = request.REQUEST.get('theme_id')
+        tsd_claim_type = request.REQUEST.get('tsd_claim_type').lower()
+        if (theme_id == None or theme_id == "-1"):
+            tsdClaims = tsdClaim.objects.filter(tsd_claim_type=tsd_claim_type)
+        else:
+            tsdClaims = tsdClaim.objects.filter(theme_id=theme_id, tsd_claim_type=tsd_claim_type)
+        context["claims"] = []
+        for claim in tsdClaims:
+            print claim
+            item = {}
+            item['date'] = utils.pretty_date(claim.updated_at)
+            item['created_at'] = utils.pretty_date(claim.created_at)
+            item['created_at_used_for_sort'] = claim.created_at
+            item['content'] = claim.content
+            item['id'] = claim.id
+            item['author_name'] = claim.author.first_name + " " + claim.author.last_name
+            item['is_author'] = (request.user == claim.author)
+            context["claims"].append(item)
+        context['claims'].sort(key = lambda x: x["created_at_used_for_sort"], reverse=True)
+        response['workbench_tsdclaims'] = render_to_string("workbench-tsdclaims.html", context)
+    if action == 'add-tsdclaim':
+        response = {}
+        context = {}
+        now = timezone.now()
+        forum = Forum.objects.get(id=request.session['forum_id'])
+        theme_id = request.REQUEST.get('theme_id')
+        content = request.REQUEST.get('content')
+        tsd_claim_type = request.REQUEST.get('tsd_claim_type').lower()
+        print "tsd_claim_type", tsd_claim_type
+        if theme_id == None or theme_id == "-1":
+            theme_id = ClaimTheme.objects.get(forum=forum, name="Unassigned").id
+        tsdclaim = tsdClaim.objects.create(forum=forum, author=request.user, content=content, 
+            created_at=now, updated_at=now, tsd_claim_type=tsd_claim_type, theme_id=theme_id)
+        tsdclaim.save()
+    if action == 'delete-tsdclaim':
+        claim_id = request.REQUEST.get('claim_id')
+        claim = tsdClaim.objects.get(id=claim_id)
+        claim.delete()
+    return HttpResponse(json.dumps(response), mimetype='application/json')  

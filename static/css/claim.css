@@ -237,7 +237,7 @@ a.claim-vote-btn.unready:hover {
 	position: fixed;
 }
 #claim-stmt-helper:after {
-	content: "";
+	content: "helper";
 	height: 2em;
 	position: absolute;
 	left: 0;

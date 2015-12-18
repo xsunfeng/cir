@@ -389,6 +389,16 @@ def api_get_claim_by_theme(request):
     response['workbench_claims'] = render_to_string("workbench-claims.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')   
 
+def api_add_theme(request):
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    response = {}
+    context = {}
+    topic_name = request.REQUEST.get('topic_name')
+    topic_description = request.REQUEST.get('topic_description')
+    theme, created = ClaimTheme.objects.get_or_create(forum=forum, name=topic_name, description=topic_description)
+    theme.save()
+    return HttpResponse(json.dumps(response), mimetype='application/json')  
+
 def api_others(request):  
     response = {}
     action = request.REQUEST.get('action')

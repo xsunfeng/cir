@@ -1,0 +1,27 @@
+{% if claims %} 
+	{% for item in claims %}
+		<div class="ui card" style="width:	96%;">
+			<div class="content">
+				<div class="description workbench-claim-content" claim-id="{{ item.id }}">
+					{{ item.content }}
+				</div>
+			</div>
+			<div class="extra content">
+				<div class="ui horizontal bulleted list">
+					<a class="item delete-tsdclaim facilitator-only">remove</a>
+				</div>	
+				<div class="right floated author">
+					proposed by {{ item.author_name }} {{ item.date }}
+				</div>
+			</div>
+		</div>
+	{% endfor %}
+{% else %}
+	<div class="ui card" style="width:	96%;">
+		<div class="content">
+			<div class="description">
+				No claims yet.
+			</div>
+		</div>
+	</div>
+{% endif %}

@@ -26,7 +26,7 @@ else:
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'cir',  # Or path to database file if using sqlite3.
+        'NAME': 'topic_selection_cir3',  # Or path to database file if using sqlite3.
         'USER': 'postgres',
         'PASSWORD': 'asdf1234',
         'HOST': SERVER_HOST,
@@ -34,7 +34,7 @@ DATABASES = {
     },
     'dev': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'cir_backup',  # Or path to database file if using sqlite3.
+        'NAME': 'topic_selection_cir3',  # Or path to database file if using sqlite3.
         'USER': 'postgres',
         'PASSWORD': 'asdf1234',
         'HOST': SERVER_HOST,

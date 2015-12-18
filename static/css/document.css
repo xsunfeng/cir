@@ -166,7 +166,7 @@
 	top: 8em;
     overflow: auto;
     position: fixed;
-    bottom: 3em;
+    bottom: 0em;
 }
 
 #workbench2-nugget-container {
@@ -178,17 +178,28 @@
 	padding-left: 2em;
 }
 
+#tsd-container {
+	top: 8em;
+	bottom: 50%;
+    overflow: auto;
+    position: fixed;
+    right: 0;
+	padding-left: 2em;
+    background: aliceblue;
+    background-clip: content-box;
+}
+
 #workbench2-claim-textarea-container {
 	top: 50%;
-	height: 210px;
+	height: 170px;
     overflow: auto;
     position: fixed;
     right: 0;
 }
 
 #workbench2-claim-container {
-	top: calc(50% - -210px);
-	bottom: 3em;
+	top: calc(50% - -170px);
+	bottom: 0em;
     overflow: auto;
     position: fixed;
     right: 0;
@@ -275,4 +286,79 @@
    	-webkit-transform: rotate(270deg); /* Safari */
     transform: rotate(270deg);
 	display: block;
+}
+
+
+
+#tsd-wrapper .new.question.segment {
+	width: 100%;
+	left: 1px;
+}
+
+#tsd-list .question.item {
+	border: 1px solid;
+	background-color: #fff;
+	padding: 0;
+	margin:10px;
+}
+#tsd-list .question.item.need-refresh {
+	padding-top: 0;
+}
+#tsd-list .question.item .refresh.prompt {
+	display: none;
+	margin-bottom: 0;
+}
+#tsd-list .question.item.need-refresh .refresh.prompt {
+	display: block;
+}
+#tsd-list .question.item.need-refresh .expand-thread {
+	color: #DB2828;
+}
+#tsd-list .question.item .header {
+	font-weight: inherit;
+	font-size: 1.3rem;
+	line-height: 1.6em;
+	padding: 0.2em 0.5em;
+	border-bottom: 1px solid #e1e2e3;
+}
+#tsd-list .description {
+	background: #f3f4f5;
+	font-size: 1rem;
+	line-height: 2em;
+	padding: 0.2em 0.5em;
+}
+#tsd-list .description .horizontal.list {
+	display: block;
+}
+#tsd-list .question.item .content {
+	width: 100%;
+}
+#tsd-thread {
+	margin: 0;
+	padding: 1em 0.5em;
+}
+
+#tsd-refresh-prompter {
+	margin-bottom: 0;
+}
+#tsd-refresh-prompter:after {
+	position: absolute;
+	content: '';
+	top: 100%;
+	left: 25%;
+	-webkit-transform: translateX(-50%) translateY(-50%) rotate(45deg);
+	-ms-transform: translateX(-50%) translateY(-50%) rotate(45deg);
+	transform: translateX(-50%) translateY(-50%) rotate(45deg);
+	background-color: #F8FFFF;
+	margin: .5px 0 0;
+	width: .57142857em;
+	height: .57142857em;
+	border: none;
+	border-bottom: 1px solid #A9D5DE;
+	border-right: 1px solid #A9D5DE;
+	z-index: 2;
+}
+
+.ui.menu .item:before {
+    width: 0px;
 }

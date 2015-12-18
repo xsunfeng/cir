@@ -5,6 +5,7 @@ define([
 	'claim/claim-navigator',
 	'claim/draft-stmt',
 	'doc/qa',
+	'doc/tsd',
 	'vis/activity',
 	'semantic-ui',
 	'realtime/socket'
@@ -15,6 +16,7 @@ define([
 	ClaimNavigator,
 	DraftStmt,
 	QAView,
+	TSDView,
 	VisActivity
 ) {
 	var module = {
@@ -61,6 +63,7 @@ define([
 	initLayout();
 	// DocumentView.updateCategories();
 	QAView.updateQuestionList();
+	TSDView.updateQuestionList();
 	ClaimView.updateClaimPane();
 	if (module.phase == 'improve') {
 		DraftStmt.update();

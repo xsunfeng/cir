@@ -15,12 +15,12 @@
 {% endblock %}
 {% block header %}
 <header id="nav-menu" class="ui fixed inverted main menu">
-    <a href="/" class="title item">{{ forum_name }}</a>
+    <a class="item" style="left:45%;"><b>Topic Selection for CIR</b></a>
     {% if load_error %}
-    <div class="item">GeoDeliberator</div>
+    <a class="item">GeoDeliberator</a>
     {% else %}
-    <a href="#" class="blue item {{ phase.document_active }}" data-tab="document-tab"><i class="icon file text outline"></i>Documents</a>
-    <a href="#" class="blue item {{ phase.claim_active }}" data-tab="claim-tab"><i class="icon comment outline"></i>Claims</a>
+<!--     <a href="#" class="blue item {{ phase.document_active }}" data-tab="document-tab"><i class="icon file text outline"></i>Documents</a>
+    <a href="#" class="blue item {{ phase.claim_active }}" data-tab="claim-tab"><i class="icon comment outline"></i>Claims</a> -->
     {% if phase.show_statement_link %}
     <a href="{{ forum_url }}/statement" class="item">Citizens' Statement</a>
     {% endif %}
@@ -32,38 +32,40 @@
             <div id="signup-btn" class="ui button">Sign up</div>
         </div>
     </div>
-    <div id="header-member-wrapper" class="right menu" style="display:flex">
-        <div class="ui simple dropdown item" tabindex="0">
-            <span id="header-user-name" data-id="{{ user_id }}" data-role="{{ role }}">{{ user_name }}</span>
-            <i class="icon dropdown" tabindex="0"></i>
-            <div class="menu" tabindex="-1">
-                <a href="#" id="edit-profile-btn" class="item"><i class="edit icon"></i>Edit Profile</a>
-                <a href="/" class="item"><i class="list layout icon"></i>Switch Forum</a>
-                <a href="#" class="item"><i class="share alternative icon"></i>Share Forum</a>
-                <a href="#" id="sign-out-btn" class="item"><i class="sign out icon"></i>Sign out</a>
-            </div>
-        </div>
-    </div>
-    <div id="header-facilitator-wrapper" class="right menu" style="display:flex">
-        <a href="{{ forum_url }}/dashboard" target="_blank" class="item">
-            <i class="icon dashboard"></i>
-        </a>
-        <div class="ui simple dropdown item" tabindex="0">
-            <i class="icon spy"></i>
-            <i class="icon dropdown" tabindex="0"></i>
-            <div class="switch user menu" tabindex="-1">
-                <div class="header">Yourself</div>
-                <div class="item" data-id="{{ user_id }}">{{ user_name }}</div>
-                <div class="header">Panelists</div>
-                {% for user in panelists %}
-                <div class="item" data-id="{{ user.id }}">{{ user.name }}</div>
-                {% endfor %}
-                <div class="header">Staff</div>
-                {% for user in staff %}
-                <div class="item" data-id="{{ user.id }}">{{ user.name }}</div>
-                {% endfor %}
-            </div>
-        </div>
+    <div class="right menu" style="display:flex">
+    	<a id="header-member-wrapper">
+	        <div class="ui simple dropdown item" tabindex="0">
+	            <span id="header-user-name" data-id="{{ user_id }}" data-role="{{ role }}">{{ user_name }}</span>
+	            <i class="icon dropdown" tabindex="0"></i>
+	            <div class="menu" tabindex="-1">
+	                <a href="#" id="edit-profile-btn" class="item"><i class="edit icon"></i>Edit Profile</a>
+	                <a href="/" class="item"><i class="list layout icon"></i>Switch Forum</a>
+	                <a href="#" class="item"><i class="share alternative icon"></i>Share Forum</a>
+	                <a href="#" id="sign-out-btn" class="item"><i class="sign out icon"></i>Sign out</a>
+	            </div>
+	        </div>
+    	</a>
+<!--     	<a id="header-facilitator-wrapper">
+	        <a href="{{ forum_url }}/dashboard" target="_blank" class="item">
+	            <i class="icon dashboard"></i>
+	        </a>
+	        <div class="ui simple dropdown item" tabindex="0">
+	            <i class="icon spy"></i>
+	            <i class="icon dropdown" tabindex="0"></i>
+	            <div class="switch user menu" tabindex="-1">
+	                <div class="header">Yourself</div>
+	                <div class="item" data-id="{{ user_id }}">{{ user_name }}</div>
+	                <div class="header">Panelists</div>
+	                {% for user in panelists %}
+	                <div class="item" data-id="{{ user.id }}">{{ user.name }}</div>
+	                {% endfor %}
+	                <div class="header">Staff</div>
+	                {% for user in staff %}
+	                <div class="item" data-id="{{ user.id }}">{{ user.name }}</div>
+	                {% endfor %}
+	            </div>
+	        </div>    		
+    	</a> -->
     </div>
     {% endif %}
 </header>
@@ -104,57 +106,84 @@
 			<div id="workbench-theme-container"></div>
 		</div>
 	
-		<div class="ten wide document column" id="workbench2-document-container">
+		<div class="nine wide document column" id="workbench2-document-container">
 			<div id="workbench-document-panel">
 				<div id="workbench-document">
 					{% include 'workbench-tutorial.html' %}
 				</div>
 			</div>
-			<div class="ui orange buttons" style="
+			<div class="ui buttons" style="
 				position: fixed;
-				left: 2%;
+				left: 0%;
 				bottom: 50px;
 				z-index: 1;
-				box-shadow: 0px 0px 16px 0px rgba(0,0,0,0.5);
+				box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.5);
 				">
-				<div class="ui button" id="workbench-document-toc">Table of Contents</div>
-				<div class="ui button" id="workbench-document-back-to-top">Back to top</div>
-				<div class="ui button" id="workbench-document-filter">Filter</div>
+				<div class="ui button" id="workbench-document-back-to-top">个</div>
 			</div>		
 		</div>
 		
-		<div class="six wide column" id = "workbench2-nugget-container">
-			<div id="workbench-nugget-container" style="height:50%;">
-				<div id="workbench-nugget-panel">
-					<div id="workbench-nugget">
-						<div id="workbench-nugget-list">
-							<div style="height:500px;">
-							</div>
-							<div style="" class="ui active inverted dimmer">
-								<div class="ui large text loader">Preparing nuggets</div>
-							</div>
-						</div>
-					</div>
+		<div class="seven wide column" id = "tsd-container">
+			<div id="tsd-wrapper">
+				<div id="tsd-refresh-prompter" class="ui info message hidden"></div>
+				<div class="ui fluid top attached two item blue pointing menu" style="margin-top: 0;">
+					<a class="item refresh-list">Refresh List</a>
+					<a class="item new-question">Raise a question</a>
 				</div>
+				<div class="ui buttom attached secondary segment new question hidden">
+					<form class="ui form">
+						<div class="ui message">
+							If your question has a context in the document, please ...
+						</div>
+						<div class="field">
+							<textarea rows="3"></textarea>
+						</div>
+						<button class="ui submit button">Submit</button>
+					</form>
+				</div>
+				<div id="tsd-list"></div>
 			</div>
 		</div>
 
-		<div class="six wide column shadow1" id = "workbench2-claim-textarea-container">
+		<div class="seven wide column shadow1" id = "workbench2-claim-textarea-container">
 			<div class="ui form">
 				<div class="field">
-					<textarea rows="6"></textarea>
+					<textarea rows="4"></textarea>
 				</div>
-				<div class="ui buttons">
-					<button class="ui positive button workbench-claim-tab">Finding</button>
-					<div class="or"></div>
-					<button class="ui button workbench-claim-tab">Opinion</button>
+				<div class="ui form">
+					<div id="tsdclaim-type" class="inline fields">
+						<label></label>
+						<div class="field">
+							<div class="ui radio checkbox">
+								<input type="radio" data-type="Framing question" name="frequency" checked="checked">
+								<label>Framing Issue</label>
+							</div>
+						</div>
+						<div class="field">
+							<div class="ui radio checkbox">
+								<input type="radio" data-type="Document" name="frequency">
+								<label>Document</label>
+							</div>
+						</div>
+						<div class="field">
+							<div class="ui radio checkbox">
+								<input type="radio" data-type="Panelist" name="frequency">
+								<label>Panelist</label>
+							</div>
+						</div>
+						<div class="field">
+							<div class="ui radio checkbox">
+								<input type="radio" data-type="Expert" name="frequency">
+								<label>Expert</label>
+							</div>
+						</div>
+						<div class="ui button add-tsdclaim" style="position: absolute; right: 0;">Add</div>
+					</div>
 				</div>
-				<div class="ui button workbench-add-claim" style="float:right;">Add</div>
-				<div class="ui button workbench-clear-claim" style="float:right;">Clear</div>
 			</div>
 		</div>		
 		
-		<div class="six wide column" id = "workbench2-claim-container">
+		<div class="seven wide column" id = "workbench2-claim-container">
 			<div id="workbench-claim-list" class="flag">
 				<div style="height:500px;">
 				</div>
@@ -223,7 +252,7 @@
 	</div>
 </article>
 
-<div id="question_sidebox_tab" status="close" style="display:;"><b>Questions</b></div>
+<!-- <div id="question_sidebox_tab" status="close" style="display:;"><b>Questions</b></div>
 <div id="question_sidebox_container" >
 	<div id="question_sidebox_header" style="position:absolute; width: 100%; text-align: center; line-height:2em; background: AliceBlue;">
 		<div id="question_sidebox_container_hide" style="float:left;"></i></div>
@@ -250,9 +279,9 @@
 			<div id="qa-list"></div>
 		</div>
 	</div>
-</div>
+</div> -->
 
-<footer id="fixed-steps" class="ui five small steps">
+<!-- <footer id="fixed-steps" class="ui five small steps">
 	<div class="{% if phase.short_name == 'nugget' %}active {% endif %}step">
 		<div class="title">Extract Nuggets</div>
 	</div>
@@ -272,14 +301,14 @@
 			<div class="title">Citizens' Statement</div>
 		{% endif %}
 	</div>
-</footer>
+</footer> -->
 
 <div class="ui special popup" id="workbench-document-toc-container">
 </div>
 
 {% if role != 'visitor' %}
-	{% include 'chatter.html' %}
-	{% include 'vis.html' %}
+<!-- 	{% include 'chatter.html' %}
+	{% include 'vis.html' %} -->
 {% endif %}
 	{% endif %}
 

@@ -12,9 +12,11 @@ define([
 	};
 
 	$('#claim-navigator')
+		// click a claim in draft statemnts and highlight it in claim list
 		.on('click', '#draft-stmt .description', function() {
 			var claim_id = this.getAttribute('data-id');
 			require('claim/claim').jumpTo(claim_id); // without changing display_type
+		// click delete button to remove a claim from draft statements
 		}).on('click', '#draft-stmt .destmt.button', function(e) {
 			e.stopPropagation();
 			var claim_id = $(this).parents('.description').attr('data-id');
@@ -27,6 +29,7 @@ define([
 		});
 
 	module.update = function(options) {
+		// ???
 		var options = options || {};
 		_stmtUpdater({'action': 'get-list'});
 	};
@@ -38,11 +41,13 @@ define([
 			.css('top', e.clientY);
 
 		//var setting = {};
+		// if entity has no category, all statements areas are invalied, return;
 		var $target = $('#draft-stmt .list:not(.invalid)');
-		var $items = $target.find('.item');
 		if ($target.length != 1) {
 			return false;
 		}
+
+		var $items = $target.find('.item');
 		var targetOffset = $target.offset();
 		if (e.pageX > targetOffset.left
 			&& e.pageX < targetOffset.left + $target.width()
@@ -59,6 +64,7 @@ define([
 					var $item = $target.find('.item').eq(i);
 					var itemY = $item.offset().top;
 					if (e.pageY < itemY + 10) {
+						console.log("insert before this item");
 						// insert before this item
 						$('#draft-stmt .droppable-edge')
 							.css('top', itemY - wrapperTop + 14)
@@ -69,6 +75,7 @@ define([
 						return;
 					} else if (e.pageY >= itemY + 10
 						&& e.pageY <= itemY + $item.height() - 10) {
+						console.log("merge with item");
 						// merge with $item
 						$('#draft-stmt .droppable-edge').hide();
 						$item.addClass('to-merge');
@@ -78,6 +85,7 @@ define([
 					}
 					if (i == $items.length - 1
 						&& e.pageY > itemY + $item.height()) {
+						console.log("other");
 						$('#draft-stmt .droppable-edge')
 							.css('top', itemY - wrapperTop + $item.height() + 14)
 							.show();
@@ -126,6 +134,7 @@ define([
 		delete module.target_id;
 		$('#draft-stmt .droppable-edge').hide();
 	}
+
 	function initSortable() {
 		if (!$('#draft-stmt ol.list').hasClass('ui-sortable')) { // only initialize once
 			$('#draft-stmt ol.list').sortable({

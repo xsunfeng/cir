@@ -1,0 +1,39 @@
+
+{% if questions %}
+<div class="ui relaxed list">
+{% for question in questions %}
+	<div class="question item" data-id="{{ question.id }}">
+		<div class="ui info refresh prompt message">New activities in this thread.</div>
+		<div class="content">
+			<div style="padding:1em; ">{{ question.content }} (<span class="reply-cnt">{{ question.treesize }}</span> replies)</div>
+			<div class="description">
+				<a class="ui horizontal bulleted list">
+					<a class="item expand-thread" data-id="{{ question.id }}">show comment(s)</a>
+					{% if question.doc_id %}
+					<!-- <a class="item find-in-doc" data-id="{{ question.doc_id }}" data-highlight-id="{{ question.highlight_id }}">Reveal in document</a> -->
+					{% endif %}
+				</a>
+				<span style="float:right;">
+					<b>Created by</b>
+					<a class="user {{ question.author_role }}" data-id="{{ question.author_id }}">{{ question.author_name }}</a>
+					<abbr title="{{ question.updated_at_full }}">{{ question.updated_at }}</abbr>
+					{% if question.last_reply %}
+					<span>|</span>
+					<b>Last reply:</b>
+					<abbr title="{{ question.last_reply_full }}">{{ question.last_reply }}</abbr>
+					{% endif %}
+				</span>
+			{% if question.doc_id %}
+				<!-- <div>Raised in document <b>{{ question.doc_name }}</b></div> -->
+			{% endif %}
+			</div>
+		</div>
+	</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="ui message">
+	No discussion yet.
+</div>
+{% endif %}
+<div id="tsd-thread" class="ui basic secondary segment" style="display:none"></div>

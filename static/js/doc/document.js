@@ -244,6 +244,8 @@ define([
 		// update question panel
 		require('doc/qa').updateQuestionList();
 
+		require('doc/tsd').updateQuestionList();
+
 		// switch to highlight type and update
 		module.updateHighlightFilter({
 			switch: module.newHighlight.type
