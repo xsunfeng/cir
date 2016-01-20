@@ -705,66 +705,66 @@ define([
 	function init_tk_event() {
 
 		$("#workbench-document").on('click', '.tk', function(e) {
-			e.stopPropagation();
-			if ($(this).hasClass('p') || $(this).hasClass('q') || $(this).hasClass('c')) {
-				var highlight_ids = this.getAttribute('data-hl-id').split(' ');
-				for (var i = 0; i < highlight_ids.length; i++) {
-					$('#doc-thread-content').feed('update', {
-						type: 'highlight',
-						id: highlight_ids[i]
-					}).done(function() {
-						$('#doc-thread-popup').css('left', e.pageX).css('top', e.pageY);
-					});
-				}
-			}
+			// e.stopPropagation();
+			// if ($(this).hasClass('p') || $(this).hasClass('q') || $(this).hasClass('c')) {
+			// 	var highlight_ids = this.getAttribute('data-hl-id').split(' ');
+			// 	for (var i = 0; i < highlight_ids.length; i++) {
+			// 		$('#doc-thread-content').feed('update', {
+			// 			type: 'highlight',
+			// 			id: highlight_ids[i]
+			// 		}).done(function() {
+			// 			$('#doc-thread-popup').css('left', e.pageX).css('top', e.pageY);
+			// 		});
+			// 	}
+			// }
 		}).on('mousedown', '.section-content', function(e) {
-			$('#doc-highlight-toolbar').removeAttr('style');
-			$('#doc-thread-popup').removeAttr('style');
-			if ($(e.target).is('u.tk')) {
-				var $target = $(this);
-				$(window).mousemove(function(e2) {
-					if ($(e2.target).hasClass('tk')) {
-						module.isDragging = true;
-						module.newHighlight.end = e2.target.getAttribute('data-id');
-						var min = Math.min(module.newHighlight.start, module.newHighlight.end);
-						var max = Math.max(module.newHighlight.start, module.newHighlight.end);
-						$target.find('.tk').removeClass('highlighted');
-						for (var i = min; i <= max; i++) {
-							$target.find('.tk[data-id="' + i + '"]').addClass('highlighted');
-						}
-						module.newHighlight.contextId = $target.attr('data-id');
-					} else {
-						$target.find('.tk').removeClass('highlighted');
-					}
-				});
-				module.newHighlight.start = e.target.getAttribute('data-id');
-				module.newHighlight.end = e.target.getAttribute('data-id');
-			}
+			// $('#doc-highlight-toolbar').removeAttr('style');
+			// $('#doc-thread-popup').removeAttr('style');
+			// if ($(e.target).is('u.tk')) {
+			// 	var $target = $(this);
+			// 	$(window).mousemove(function(e2) {
+			// 		if ($(e2.target).hasClass('tk')) {
+			// 			module.isDragging = true;
+			// 			module.newHighlight.end = e2.target.getAttribute('data-id');
+			// 			var min = Math.min(module.newHighlight.start, module.newHighlight.end);
+			// 			var max = Math.max(module.newHighlight.start, module.newHighlight.end);
+			// 			$target.find('.tk').removeClass('highlighted');
+			// 			for (var i = min; i <= max; i++) {
+			// 				$target.find('.tk[data-id="' + i + '"]').addClass('highlighted');
+			// 			}
+			// 			module.newHighlight.contextId = $target.attr('data-id');
+			// 		} else {
+			// 			$target.find('.tk').removeClass('highlighted');
+			// 		}
+			// 	});
+			// 	module.newHighlight.start = e.target.getAttribute('data-id');
+			// 	module.newHighlight.end = e.target.getAttribute('data-id');
+			// }
 		}).on('mouseup', '.section-content', function(e) {
-			$(window).off('mousemove');
-			var wasDragging = module.isDragging;
-			module.isDragging = false;
-			if (wasDragging) {
-				var min = Math.min(module.newHighlight.start, module.newHighlight.end);
-				var max = Math.max(module.newHighlight.start, module.newHighlight.end);
-				module.newHighlight.start = min;
-				module.newHighlight.end = max;
+			// $(window).off('mousemove');
+			// var wasDragging = module.isDragging;
+			// module.isDragging = false;
+			// if (wasDragging) {
+			// 	var min = Math.min(module.newHighlight.start, module.newHighlight.end);
+			// 	var max = Math.max(module.newHighlight.start, module.newHighlight.end);
+			// 	module.newHighlight.start = min;
+			// 	module.newHighlight.end = max;
 
-				if ($(this).find('.tk.highlighted').length) {
-					var highlights = $(this).find('.tk.highlighted');
-					var text = "";
-					for (var i = 0; i < highlights.length; i ++) {
-						text += highlights[i].textContent;
-					};
-					module.newHighlight.text = text;
-					$('#doc-claim-form').hide();
-					$('#doc-comment-form').parent().hide();
-					$('#doc-highlight-toolbar').css('left', e.pageX).css('top', e.pageY);
-				}
-			} else { // just clicking
-				$('#doc-highlight-toolbar').removeAttr('style');
-				$(this).find('.tk').removeClass('highlighted');
-			}
+			// 	if ($(this).find('.tk.highlighted').length) {
+			// 		var highlights = $(this).find('.tk.highlighted');
+			// 		var text = "";
+			// 		for (var i = 0; i < highlights.length; i ++) {
+			// 			text += highlights[i].textContent;
+			// 		};
+			// 		module.newHighlight.text = text;
+			// 		$('#doc-claim-form').hide();
+			// 		$('#doc-comment-form').parent().hide();
+			// 		$('#doc-highlight-toolbar').css('left', e.pageX).css('top', e.pageY);
+			// 	}
+			// } else { // just clicking
+			// 	$('#doc-highlight-toolbar').removeAttr('style');
+			// 	$(this).find('.tk').removeClass('highlighted');
+			// }
 		});
 
 	}
