@@ -11,6 +11,7 @@ import tag_views
 import workbench_views
 import chatter_views
 import vis_views
+import sankey_views
 
 
 admin.autodiscover()
@@ -57,6 +58,8 @@ urlpatterns = patterns('',
     url(r'^workbench/api_get_doc_by_hl_id/$', workbench_views.api_get_doc_by_hl_id),
     url(r'^workbench/api_get_doc_by_doc_id/$', workbench_views.api_get_doc_by_doc_id),
 
+    url(r'^sankey/get_graph/$', sankey_views.get_graph),
+
     url(r'^api_chatter/$', chatter_views.api_chatter),
 
     url(r'^api_register_delegator/$', facilitator_views.register_delegator), # include other apps
@@ -69,6 +72,7 @@ urlpatterns = patterns('',
     # these must be put last!
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/workbench/?$', forum_views.enter_workbench),
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/sankey/?$', forum_views.enter_sankey),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/dashboard/?$', facilitator_views.enter_dashboard),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/statement/?$', forum_views.enter_statement), )
 

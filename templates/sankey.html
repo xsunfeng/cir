@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load compressed %}
+{% block extralib %}
+<script>
+    require([
+        'layout/sankey_layout',
+    ]);
+</script>
+{% endblock %}
+
+{% block delaylib %}
+{% endblock %}
+
+{% block extracss %}
+  {% compressed_css 'cir_forum' %}
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block body %}
+
+<meta charset="utf-8">
+<title>SANKEY Experiment</title>
+<style>
+
+.node rect {
+  cursor: move;
+  fill-opacity: .9;
+  shape-rendering: crispEdges;
+}
+
+.node text {
+  pointer-events: none;
+  text-shadow: 0 1px 0 #fff;
+}
+
+.link {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: .2;
+}
+
+.link:hover {
+  stroke-opacity: .5;
+}
+
+</style>
+
+<body>
+
+<!-- {{ forum_id }}
+ -->
+<p id="chart">
+
+</body>
+
+{% endblock %}
