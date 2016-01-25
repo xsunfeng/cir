@@ -73,6 +73,8 @@ urlpatterns = patterns('',
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/workbench/?$', forum_views.enter_workbench),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/sankey/?$', forum_views.enter_sankey),
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/chord/?$', forum_views.enter_chord),
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/chord2/?$', forum_views.enter_chord2),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/dashboard/?$', facilitator_views.enter_dashboard),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/statement/?$', forum_views.enter_statement), )
 
