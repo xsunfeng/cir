@@ -56,6 +56,7 @@ def enter_forum(request, forum_url):  # access /forum_name
     context = {}
     context['forum_name'] = forum.full_name
     context['forum_url'] = forum.url
+    context['forum_id'] = forum.id
     context['phase'] = PHASE_CONTROL[forum.phase]
 
     if request.user.is_authenticated():
@@ -97,6 +98,7 @@ def enter_forum(request, forum_url):  # access /forum_name
     themes = ClaimTheme.objects.filter(forum=forum)
     context['themes'] = [theme.getAttr() for theme in themes]
     context['dispatcher_url'] = DISPATCHER_URL
+    context['sankey'] = render(request, 'sankey.html', context)
     return render(request, 'index.html', context)
 
 def enter_workbench(request, forum_url):  # access /forum_name

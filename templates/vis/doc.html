@@ -1,0 +1,7 @@
+<h3 class="ui top attached header">{{doc.title}} [Word Cloud]</h3>
+<!-- <div>Desc: {{doc.description}}</div> -->
+<div class="ui attached segment" id="whatever">
+{% for word, count in wordcount %}
+	<a class="wordcount-word" href="javascript:;" rel="{{ count }}">{{ word }} </a>
+{% endfor %}
+</div>

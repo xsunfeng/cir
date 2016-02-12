@@ -1,8 +1,6 @@
 {% if highlights %}
 	{% for highlight in highlights %}
-		<div class="ui card" class="workbench-nugget" data-hl-id = {{ highlight.id }} style="
-			width:	96%; background: PapayaWhip;
-		">
+		<div class="ui card workbench-nugget nugget-related" data-hl-id = {{ highlight.id }} style="background: PapayaWhip;">
 			{% if highlight.is_nugget %}
 				{% if highlight.is_used %}
 				<a class="ui tiny green right corner label nugget2claim">
@@ -11,11 +9,11 @@
 				{% endif %}
 				<!--<div class="ui top attached label">nugget</div>-->
 				<div class="content">
-					<div class="description">
+					<div class="description more" data="{{ highlight.text}}">
 						{{ highlight.text }}
 					</div>
 				</div>
-				<div class="extra content">
+<!-- 				<div class="extra content" style="display:none">
 					<div class="ui horizontal bulleted list">
 						<a class="item use-nugget">use</a>
 						<a class="item source-nugget">source</a>
@@ -25,27 +23,21 @@
 					<div class="right floated author">
 						collected by {{ highlight.author_name }}
 					</div>
-				</div>
+				</div> -->
 			{% else %}
 				<a class="ui tiny red right corner label">
 					<i class="icon"></i>
 				</a>	
 				<div class="content">
-					<div class="ui dimmable dimmed segment">
-						<div class="ui simple dimmer">{{ highlight.text }}</div>
-					</div>
-				</div>
-				<div class="extra content">
-					<div class="ui horizontal bulleted list">
-						<a class="item recover-nugget">recover</a>
-						<a class="item source-nugget">source</a>
+					<div class="description more" data="{{ highlight.text}}">
+						<span style="text-decoration:line-through">{{ highlight.text|truncatewords:20 }}</span>
 					</div>
 				</div>
 			{% endif %}
 		</div>
 	{% endfor %}
 {% else %}
-		<div class="ui card" style="width:	96%; background: PapayaWhip;">
+		<div class="ui card" style="background: PapayaWhip;">
 				<div class="content">
 					<div class="description">
 						No nuggets yet.

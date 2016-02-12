@@ -514,3 +514,11 @@ class NuggetComment(models.Model):
     theme = models.ForeignKey(ClaimTheme, null=True, blank=True)
     content = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField()
+
+class SankeyWorkbench(models.Model):
+    forum = models.ForeignKey(Forum)
+    author = models.ForeignKey(User)
+    content = models.TextField(null=True, blank=True)
+
+class SankeyScreenshot(models.Model):
+    content = models.TextField(null=True, blank=True)

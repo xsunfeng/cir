@@ -4,7 +4,7 @@
 {% block extralib %}
 <script>
     require([
-        'layout/sankey_layout',
+        'layout/sankey_layout'
     ]);
 </script>
 {% endblock %}
@@ -26,7 +26,7 @@
 <style>
 
 .node rect {
-  cursor: move;
+  cursor: context-menu;
   fill-opacity: .9;
   shape-rendering: crispEdges;
 }
@@ -46,13 +46,289 @@
   stroke-opacity: .5;
 }*/
 
+#context-menu-action {
+  position: absolute; 
+  display: none;
+  background: white;
+  margin: 0;
+  padding: 10px;
+}
+
+#context-menu-action .menu {
+  width: 100px;
+}
+
+#context-menu-info{
+  position: absolute; 
+  display: none;
+  background: white;
+  margin: 0;
+  padding: 10px;
+  width: 500px;
+}
+
+#countdown-number {
+  position: fixed; 
+  z-index: 200;
+  right: 20px;
+  bottom: 100px;
+  color: white;
+  font-size: 200px;
+  display: none;
+}
+
+/*.ui.segment {
+  padding: 0;
+}*/
+
+#sankey-element-checkbox-list {
+  position: fixed;
+  z-index: 20;
+  display: none;
+}
+
+#sankey-operations {
+  position: fixed;
+  z-index: 20;
+  display: none;
+}
+
+.ui.checkbox {
+  display: block;
+  padding: 6px;
+}
+
+#container {
+    margin: auto;
+    width: 900px;
+}
+
+/*for barchart*/
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: #00CCFF;
+}
+
+.bar.selected {
+  fill: #0099FF ;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.d3-tip {
+  line-height: 1;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+  z-index: 102;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+
+/*select by frame*/
+.selection {
+    stroke          : gray;
+    stroke-width    : 2px;
+    stroke-dasharray: 4px;
+    stroke-opacity  : 1;
+    fill            : transparent;
+}
+
+.state {
+    stroke  : gray;
+    fill    : white;
+}
+
+
+/*double borders*/
+.borders {
+  background: #f06d06;
+  position: relative;
+  border: 200px solid black;  
+  margin: 20px;
+}
+.borders:after {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  right: -15px;
+  bottom: -15px;
+  background: red;
+  z-index: -1;
+}
+
+#sankey-workbench {
+  float: left;
+  width: 300px;
+  height: 100%;
+  background: white;
+  margin: 0;
+  margin-left:14px;
+}
+
 </style>
 
 <body>
 
-<!-- {{ forum_id }}
- -->
-<p id="chart">
+  
+    <div class="ui segment sankey-related" id="sankey-element-checkbox-list" style="margin:0; padding:0; width:150px;">
+      <div class="ui checkbox" data-value="d">
+        <input type="checkbox" name="public">
+        <label>Document<a class="ui green label" id="doc-num" style="margin-left:10px; float:right;">23</a></label>
+      </div>
+      <div class="ui checkbox" data-value="p">
+        <input type="checkbox" name="public">
+        <label>Person<a class="ui red label" id="person-num" style="margin-left:10px; float:right;">23</a></label>
+      </div>
+      <div class="ui checkbox" data-value="s">
+        <input type="checkbox" name="public">
+        <label>Section<a class="ui blue label" id="section-num" style="margin-left:10px; float:right;">23</a></label>
+      </div>
+      <div class="ui checkbox" data-value="t">
+        <input type="checkbox" name="public">
+        <label>Topic<a class="ui yellow label" id="topic-num" style="margin-left:10px; float:right;">23</a></label>
+      </div>
+      <div class="ui bottom attached basic button" id="update-sankey" style="margin-top: 10px;">Clean/Update</div>
+    </div>
+
+<!--     <div class="sankey-related" id="sankey-operations">
+      <div class="ui vertical white buttons">
+        <button class="ui button" id="sankey-clear-selection">Clear slection</button>
+      </div>
+    </div> -->
+
+    <div class="ui red button" id="close-sankey" style="float:right;">Close</div>
+
+    <div id="sankey-filter-time" class="ui labeled icon button" time-lower-bound="" time-upper-bound=""><i class="remove icon"></i><span>Timespan</span></div>
+    <div id="sankey-filter-theme" class="ui labeled icon button" theme-id="-1"><i class="remove icon"></i><span>theme: all</span></div>
+    <div id="sankey-filter-author" class="ui labeled icon button" author-id="-1"><i class="remove icon"></i><span>theme: all</span></div>
+
+<div style="margin-top:16px;">
+  <div id="sankey-and-barchart" style="float:left;">
+    <div id="sankey" class="ui segment sankey-related" style="width:900px;height:600px;background:white;"></div>
+    <div id="barchart" class="ui segment" style="width:900px;height:250px;background:white;"></div>
+  </div>
+  <div id="sankey-workbench" class="ui segment">
+        <div class="ui list">
+
+          <div class="item">
+            <div class="header">1. How do you jusge the task is completed ?</div>
+            <div class="description">
+              <div class="ui list">
+                
+                <div class="item">
+                  1. The number of nugget
+                  <a><i class="large blue file icon"></i></a>
+                  <a><i class="large red minus square outline icon sankey-workbench-item-remove"></i></a>
+                  <div class="ui divider" style="margin: 1px;"></div>
+                </div>
+
+                <div class="item">
+                  2. The number of nugget
+                  <a><i class="large red minus square outline icon sankey-workbench-item-remove"></i></a>
+                  <div class="ui divider" style="margin: 1px;"></div>
+                </div>
+
+                <div class="item">
+                  <div class="ui form">
+                    <div class="field">
+                      <textarea rows="1"></textarea>
+                    </div>
+                  </div>
+                  <a class="sankey-workbench-item-capture-screenshot"><i class="large yellow photo icon"></i></a>
+                  <a class="sankey-workbench-item-add"><i class="large plus square outline icon"></i></a>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="header">2. How do you jusge the task is completed ?</div>
+            <div class="description">
+              <div class="ui list">
+                
+                <div class="item">
+                  1. The number of nugget
+                  <a class="sankey-workbench-item-remove"><i class="large red minus square outline icon"></i></a>
+                  <div class="ui divider" style="margin: 1px;"></div>
+                </div>
+
+                <div class="item">
+                  2. The number of nugget
+                  <a class="sankey-workbench-item-remove"><i class="large red minus square outline icon"></i></a>
+                  <div class="ui divider" style="margin: 1px;"></div>
+                </div>
+
+                <div class="item">
+                  <div class="ui form">
+                    <div class="field">
+                      <textarea rows="1"></textarea>
+                    </div>
+                  </div>
+                  <a class="sankey-workbench-item-capture-screenshot"><i class="large yellow photo icon"></i></a>
+                  <a class="sankey-workbench-item-add"><i class="large plus square outline icon"></i></a>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+  </div>
+</div>
+
+
+<div class="ui segment sankey-related" id="context-menu-action">
+  <div class="ui secondary vertical menu">
+    <a class="item" id="context-menu-hide">
+      Hide
+    </a>
+    <a class="item" id="context-menu-show">
+      Show
+    </a>
+    <a class="item" id="context-menu-goto">
+      Go to
+    </a>
+    <a class="item" id="context-menu-cancel">
+      Cancel
+    </a>
+  </div>
+</div>
+
+<div class="ui segment sankey-related" id="context-menu-info">
+</div>
+
+<div class="" id="countdown-number">
+</div>
 
 </body>
 

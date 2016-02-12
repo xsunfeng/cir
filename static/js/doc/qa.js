@@ -4,7 +4,7 @@ define([
 	'workbench2',
 	'feed/activity-feed'
 ], function(
-	Utils,
+Utils,
 	Document,
 	Workbench
 ) {

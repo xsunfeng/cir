@@ -20,11 +20,18 @@
                     'semantic-ui': '//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.3/semantic.min',
                     'socket.io': '//{{ dispatcher_url }}/socket.io/socket.io',
 					'd3': '//cdnjs.cloudflare.com/ajax/libs/d3/3.5.8/d3.min',
+                    'd3-tooltip': '//labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3',
                     'sankey': 'vis/sankey',
+                    'dimple': '//dimplejs.org/dist/dimple.v2.1.6.min',
+                    'tagcloud': 'vis/tagcloud'
                 },
                 shim: {
-                    'semantic-ui': ['jquery']
-                }
+                    'semantic-ui': ['jquery'],
+                    'dimple': ['d3'],
+                    'sankey': ['d3'],
+                    'd3-tooltip': ['d3']
+                },
+                waitSeconds: 200,
             });
             require([
                 'layout/header'

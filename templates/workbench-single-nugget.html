@@ -6,38 +6,38 @@
 		</a>
 		{% endif %}
 	 	<div class="content">
-	    	<div class="description">
+	    	<div class="description" data="{{ highlight.text}}">
 	      		{{ highlight.text }}
 	    	</div>
 	  	</div>
-	  	<div class="extra content">
-			<div class="ui horizontal bulleted list">
-				<a class="item use-nugget">use</a>
-				<a class="item source-nugget">source</a>
-				<a class="item delete-nugget">not useful</a>
-				<a class="item reassign-nugget">reassign</a>
-			</div>
-			<div class="right floated author">
-		      	collected by {{ highlight.author_name }}
-			</div>
-	  	</div>
+<!-- 	  	<div class="extra content">
+		<div class="ui horizontal bulleted list">
+			<a class="item use-nugget">use</a>
+			<a class="item source-nugget">source</a>
+			<a class="item delete-nugget">not useful</a>
+			<a class="item reassign-nugget">reassign</a>
+		</div>
+		<div class="right floated author">
+	      	collected by {{ highlight.author_name }}
+		</div>
+  	</div> -->
 	  	{% else %}
 
 		<a class="ui tiny red right corner label">
 			<i class="icon"></i>
 		</a>
 		
-		<div class="dimmable dimmed content">
-			<div class="ui dimmable dimmed segment">
-				<div class="ui simple dimmer">{{ highlight.text }}</div>
+		<div class="content">
+			<div class="description more" data="{{ highlight.text}}">
+				<span style="text-decoration:line-through">{{ highlight.text|truncatewords:20 }}</span>
 			</div>
-	  	</div>
-	  	<div class="extra content">
+		</div>
+<!-- 	  	<div class="extra content">
 			<div class="ui horizontal bulleted list">
 				<a class="item recover-nugget">recover</a>
 				<a class="item source-nugget">source</a>
 			</div>
-	  	</div>
+	  	</div> -->
 	  	{% endif %}
 
 

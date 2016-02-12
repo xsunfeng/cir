@@ -8,6 +8,7 @@ define([
 	'vis/activity',
 	'semantic-ui',
 	'realtime/socket'
+
 ], function(
 	DocumentView,
 	WorkbenchView,

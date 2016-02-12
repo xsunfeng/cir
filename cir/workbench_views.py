@@ -85,6 +85,7 @@ def api_get_doc_by_hl_id(request):
     doc = sec.doc
     context['doc_name'] = doc.title
     context['sections'] = []
+    context['doc_id'] = doc.id
     ordered_sections = doc.sections.filter(order__isnull=False).order_by('order')
     for section in ordered_sections:
         context['sections'].append(section.getAttr(forum))
@@ -105,6 +106,7 @@ def api_get_doc_by_sec_id(request):
     doc = sec.doc
     context['doc_name'] = doc.title
     context['sections'] = []
+    context['doc_id'] = doc.id
     ordered_sections = doc.sections.filter(order__isnull=False).order_by('order')
     for section in ordered_sections:
         context['sections'].append(section.getAttr(forum))
@@ -134,6 +136,25 @@ def api_get_doc_by_doc_id(request):
     response['doc_id'] = doc.id
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
+def api_get_init_doc(request):
+    response = {}
+    context = {}
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    # retrieve docs in a folder
+    doc = Doc.objects.filter(forum_id=request.session['forum_id'], order__isnull=False).order_by('order')[0]
+    doc_id = doc.id
+    context['doc_name'] = doc.title
+    context['doc_id'] = doc_id
+    context['sections'] = []
+    ordered_sections = doc.sections.filter(order__isnull=False).order_by('order')
+    for section in ordered_sections:
+        context['sections'].append(section.getAttr(forum))
+    unordered_sections = doc.sections.filter(order__isnull=True).order_by('updated_at')
+    for section in unordered_sections:
+        context['sections'].append(section.getAttr(forum))
+    response['workbench_document'] = render_to_string("workbench-document.html", context)
+    response['doc_id'] = doc_id
+    return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def add_nugget_comment(request):
     response = {}
@@ -445,4 +466,3 @@ def api_others(request):
                     alltags.add(highlight_info['content'])
         response['html'] = render_to_string('doc-tag-area.html', {'mytags': mytags, 'alltags': alltags})
         return HttpResponse(json.dumps(response), mimetype='application/json')
-

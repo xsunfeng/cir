@@ -1,6 +1,6 @@
 {% if claims %} 
 	{% for item in claims %}
-		<div class="ui card" style="width:	96%;">
+		<div class="ui card workbench-claim-item">
 			<div class="content">
 				<div class="description workbench-claim-content" claim-id="{{ item.id }}" data-id="{{ item.highlight_ids }}">
 					{{ item.content }}
@@ -22,7 +22,7 @@
 		</div>
 	{% endfor %}
 {% else %}
-	<div class="ui card" style="width:	96%;">
+	<div class="ui card workbench-claim-item">
 		<div class="content">
 			<div class="description">
 				No claims yet.

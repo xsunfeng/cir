@@ -4,8 +4,7 @@
 {% block extralib %}
     <script>
         require([
-            'layout/layout',
-            'vis/sankey'
+            'layout/layout'
         ]);
     </script>
 {% endblock %}
@@ -15,6 +14,27 @@
 	{% compressed_css 'cir_forum' %}
 {% endblock %}
 {% block header %}
+
+<div id="sankey-container" style="display:none; position:fixed; left: calc(50% - 600px); right: calc(50% -600px); top: 5%; bottom: 5%;  z-index: 100;">
+	{% include 'sankey.html' %}
+</div>
+<div id="dark-fullscreen" style="display:none; position:fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 99; background-color:black; opacity:0.5;"></div>
+
+<div id="dark-fullscreen-sankey" style="display:none; position:fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 199; background-color:black; opacity:0.7;"></div>
+<div id="white-fullscreen-sankey" style="display:none; position:fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 201; background-color: rgba(0,0,0,0);">
+	<a id="sankey-close-screenshot"><i class="huge icon remove" style="color:white; float:right; margin:50px;"></i></a>
+</div>
+<div id="test" style="    
+	width: 900px;
+    background: white;
+    position: fixed;
+    z-index: 200;
+    right: 0;
+    left: 0;
+    top: 100px;
+    margin: auto;">
+</div>
+
 <header id="nav-menu" class="ui fixed inverted main menu">
     <a href="/" class="title item">{{ forum_name }}</a>
     {% if load_error %}
@@ -101,69 +121,50 @@
 	
 	<div class="ui grid" style="margin-top:0;" style="padding-top:0; position:fixed; width:100%; height:100%;">
 		
-		<div class="sixteen wide document column" style="position: fixed; top: 3em; z-index:40;">
+		<div class="sixteen wide document column" style="z-index:40;">
 			<div id="workbench-theme-container"></div>
 		</div>
 	
-		<div class="ten wide document column" id="workbench2-document-container">
+		<div class="six wide document column document-related" id="workbench2-document-container" style="overflow:auto;">
 			<div id="workbench-document-panel">
-				<div id="workbench-document">
-					{% include 'workbench-tutorial.html' %}
-				</div>
-			</div>
-			<div class="ui orange buttons" style="
-				position: fixed;
-				left: 2%;
-				bottom: 50px;
-				z-index: 1;
-				box-shadow: 0px 0px 16px 0px rgba(0,0,0,0.5);
-				">
-				<div class="ui button" id="workbench-document-toc">Table of Contents</div>
-				<div class="ui button" id="workbench-document-back-to-top">Back to top</div>
-				<div class="ui button" id="workbench-document-filter">Filter</div>
-			</div>		
+				<div id="workbench-document" class="ui segment" style="overflow: auto;">
+<!-- 					{% include 'workbench-tutorial.html' %}
+ -->				</div>
+			</div>	
 		</div>
-		
-		<div class="six wide column" id = "workbench2-nugget-container">
-			<div id="workbench-nugget-container" style="height:50%;">
+
+		<div class="five wide column" id = "workbench2-nugget-container">
+			<div id="workbench-nugget-container">
 				<div id="workbench-nugget-panel">
 					<div id="workbench-nugget">
-						<div id="workbench-nugget-list">
-							<div style="height:500px;">
-							</div>
-							<div style="" class="ui active inverted dimmer">
-								<div class="ui large text loader">Preparing nuggets</div>
-							</div>
+						<div id="workbench-nugget-list" class="ui segment" style="overflow:auto;">
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<div class="six wide column shadow1" id = "workbench2-claim-textarea-container">
-			<div class="ui form">
-				<div class="field">
-					<textarea rows="6"></textarea>
+		<div class="five wide column" style = "padding:0.5em;">
+			<div id = "workbench2-claim-textarea-container" style = "height:230px;" class="ui segment">
+				<div class="ui top attached label">Create claim based on nugget(s) here</div>
+				<div class="ui form">
+					<div class="field">
+						<textarea rows="6"></textarea>
+					</div>
+					<div class="ui buttons">
+						<button class="ui positive button workbench-claim-tab">Finding</button>
+						<div class="or"></div>
+						<button class="ui button workbench-claim-tab">Opinion</button>
+					</div>
+					<div class="ui button workbench-add-claim" style="float:right;">Add</div>
+					<div class="ui button workbench-clear-claim" style="float:right;">Clear</div>
 				</div>
-				<div class="ui buttons">
-					<button class="ui positive button workbench-claim-tab">Finding</button>
-					<div class="or"></div>
-					<button class="ui button workbench-claim-tab">Opinion</button>
+			</div>
+			<div id = "workbench2-claim-container" >
+				<div id="workbench-claim-list" class="flag ui segment" style="overflow:auto;">
 				</div>
-				<div class="ui button workbench-add-claim" style="float:right;">Add</div>
-				<div class="ui button workbench-clear-claim" style="float:right;">Clear</div>
 			</div>
 		</div>		
-		
-		<div class="six wide column" id = "workbench2-claim-container">
-			<div id="workbench-claim-list" class="flag">
-				<div style="height:500px;">
-				</div>
-				<div style="" class="ui active inverted dimmer">
-					<div class="ui large text loader">Preparing claims</div>
-				</div>
-			</div>
-		</div>
 		
 	</div>
 	{% include 'doc/doc-highlight-toolbar.html' with phase=phase %}
@@ -275,7 +276,25 @@
 	</div>
 </footer>
 
-<div class="ui special popup" id="workbench-document-toc-container">
+
+<div class="ui raised segment nugget-related" id="nugget-operations-green">
+	<div class="ui top attached label">Actions</div>
+  	<div class="ui secondary vertical menu" style="width:80px;">
+	    <a class="item use-nugget"> Use </a>
+	    <a class="item source-nugget"> Source </a>
+	    <a class="item delete-nugget"> Delete </a>
+	    <a class="item reassign-nugget"> Reassign </a>
+  	</div>
+</div>
+<div class="ui raised segment nugget-related" id="nugget-operations-red">
+	<div class="ui top attached label">Action</div>
+  	<div class="ui secondary vertical menu" style="width:80px;">
+	    <a class="item recover-nugget"> Recover </a>
+  	</div>
+</div>
+
+
+<div class="ui raised segment document-related" id="workbench-document-toc-container">
 </div>
 
 {% if role != 'visitor' %}

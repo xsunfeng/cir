@@ -57,8 +57,15 @@ urlpatterns = patterns('',
     url(r'^workbench/api_get_doc_by_sec_id/$', workbench_views.api_get_doc_by_sec_id),
     url(r'^workbench/api_get_doc_by_hl_id/$', workbench_views.api_get_doc_by_hl_id),
     url(r'^workbench/api_get_doc_by_doc_id/$', workbench_views.api_get_doc_by_doc_id),
+    url(r'^workbench/api_get_init_doc/$', workbench_views.api_get_init_doc),
 
     url(r'^sankey/get_graph/$', sankey_views.get_graph),
+    url(r'^sankey/get_barchart/$', sankey_views.get_barchart),
+    url(r'^sankey/get_doc/$', sankey_views.get_doc),
+    url(r'^sankey/get_screenshot/$', sankey_views.get_screenshot),
+    url(r'^sankey/put_screenshot/$', sankey_views.put_screenshot),
+    url(r'^sankey/get_workbench/$', sankey_views.get_workbench),
+    url(r'^sankey/put_workbench/$', sankey_views.put_workbench),
 
     url(r'^api_chatter/$', chatter_views.api_chatter),
 
@@ -73,8 +80,6 @@ urlpatterns = patterns('',
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/workbench/?$', forum_views.enter_workbench),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/sankey/?$', forum_views.enter_sankey),
-    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/chord/?$', forum_views.enter_chord),
-    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/chord2/?$', forum_views.enter_chord2),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/dashboard/?$', facilitator_views.enter_dashboard),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/statement/?$', forum_views.enter_statement), )
 

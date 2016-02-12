@@ -163,42 +163,84 @@
 }
 
 #workbench2-document-container {
-	top: 8em;
+/*	top: 8em;
     overflow: auto;
     position: fixed;
-    bottom: 3em;
+    bottom: 3em;*/
 }
 
 #workbench2-nugget-container {
-	top: 8em;
+/*	top: 8em;
 	bottom: 50%;
     overflow: auto;
     position: fixed;
     right: 0;
-	padding-left: 2em;
+	padding-left: 2em;*/
 }
 
-#workbench2-claim-textarea-container {
-	top: 50%;
-	height: 210px;
-    overflow: auto;
-    position: fixed;
-    right: 0;
+a {
+    color: #0254EB
+}
+a:visited {
+    color: #0254EB
+}
+a.morelink {
+    text-decoration:none;
+    outline: none;
+}
+.morecontent span {
+    display: none;
+}
+
+.ui.card {
+	width: 100%;
+}
+
+#nugget-operations-red, #nugget-operations-green {
+  position: fixed;
+  z-index: 99999;
+  display: none;
+  padding: 8px;
+  padding-bottom: 2px;
+  margin: 0;
+}
+ 
+#workbench2-claim-textarea-container, #workbench2-document-container, #workbench2-nugget-container {
+	padding: 0.5em;
 }
 
 #workbench2-claim-container {
-	top: calc(50% - -210px);
+	padding: 0;
+}
+
+#workbench2-claim-textarea-container {
+/*	top: 50%;
+	height: 210px;
+    overflow: auto;
+    position: fixed;
+    right: 0;*/
+}
+
+#workbench2-claim-container {
+/*	top: calc(50% - -210px);
 	bottom: 3em;
     overflow: auto;
     position: fixed;
     right: 0;
-	padding-left: 2em;
+	padding-left: 2em;*/
+}
+
+.ui.card.workbench-claim-item {
+	background-color: #e5f5f9;
 }
 
 #workbench-document-toc-container{
-	height:450px; 
-	min-width:100%; 
-	overflow:auto;
+	position:fixed; 
+	display:none; 
+	z-index:99999;
+	height: 600px;
+	width: 400px;
+	overflow: auto;
 }
 
 #workbench-document-toc-container .header {
