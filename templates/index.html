@@ -15,10 +15,10 @@
 {% endblock %}
 {% block header %}
 
-<div id="sankey-container" style="display:none; position:fixed; left: calc(50% - 600px); right: calc(50% -600px); top: 5%; bottom: 5%;  z-index: 100;">
+<div id="sankey-container" style="display:none; position:fixed; left: 5em; right: 5em; top: 5%; bottom: 5%;  z-index: 100;">
 	{% include 'sankey.html' %}
 </div>
-<div id="dark-fullscreen" style="display:none; position:fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 99; background-color:black; opacity:0.5;"></div>
+<div id="dark-fullscreen" style="display:none; position:fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 99; background-color:white; opacity:1;"></div>
 
 <div id="dark-fullscreen-sankey" style="display:none; position:fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 199; background-color:black; opacity:0.7;"></div>
 <div id="white-fullscreen-sankey" style="display:none; position:fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 201; background-color: rgba(0,0,0,0);">
@@ -296,6 +296,27 @@
 
 <div class="ui raised segment document-related" id="workbench-document-toc-container">
 </div>
+
+
+<!-- <div class="ui segment sankey-related" id="sankey-element-checkbox-list" style="margin:0; padding:0; width:150px; z-index:105;">
+  <div class="ui checkbox" data-value="d">
+    <input type="checkbox" name="public">
+    <label>Document<a class="ui green label" id="doc-num" style="margin-left:10px; float:right;"></a></label>
+  </div>
+  <div class="ui checkbox" data-value="p">
+    <input type="checkbox" name="public">
+    <label>Person<a class="ui red label" id="person-num" style="margin-left:10px; float:right;"></a></label>
+  </div>
+  <div class="ui checkbox" data-value="s">
+    <input type="checkbox" name="public">
+    <label>Section<a class="ui blue label" id="section-num" style="margin-left:10px; float:right;"></a></label>
+  </div>
+  <div class="ui checkbox" data-value="t">
+    <input type="checkbox" name="public">
+    <label>Topic<a class="ui yellow label" id="topic-num" style="margin-left:10px; float:right;"></a></label>
+  </div>
+  <div class="ui bottom attached basic button" id="update-sankey" style="margin-top: 10px;">Clean/Update</div>
+</div> -->
 
 {% if role != 'visitor' %}
 	{% include 'chatter.html' %}

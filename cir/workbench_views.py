@@ -183,7 +183,7 @@ def api_load_all_themes(request):
     context['forum_url'] = forum.url    
     themes = ClaimTheme.objects.filter(forum_id=request.session['forum_id'])
     context["themes"] = []
-    unassigned_theme = ClaimTheme.objects.filter(forum_id = "22", name__iexact="unassigned")
+    unassigned_theme = ClaimTheme.objects.filter(forum_id = request.session['forum_id'], name__iexact="unassigned")
     if not unassigned_theme:
         c = ClaimTheme.objects.create(forum_id=request.session['forum_id'], name="Unassigned")
         c.save()

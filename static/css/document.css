@@ -318,3 +318,302 @@ a.morelink {
     transform: rotate(270deg);
 	display: block;
 }
+
+
+
+
+
+/*sankey*/
+.node rect {
+  cursor: context-menu;
+  fill-opacity: .9;
+  shape-rendering: crispEdges;
+}
+
+.node text {
+  pointer-events: none;
+  text-shadow: 0 1px 0 #fff;
+}
+
+.link {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: .2;
+}
+
+/*.link:hover {
+  stroke-opacity: .5;
+}*/
+
+#context-menu-action {
+  position: absolute; 
+  display: none;
+  background: white;
+  margin: 0;
+  padding: 10px;
+}
+
+#context-menu-action .menu {
+  width: 100px;
+}
+
+#context-menu-info{
+  position: absolute; 
+  display: none;
+  background: white;
+  margin: 0;
+  padding: 10px;
+  width: 300px;
+}
+
+#countdown-number {
+  position: fixed; 
+  z-index: 200;
+  right: 20px;
+  bottom: 100px;
+  color: white;
+  font-size: 200px;
+  display: none;
+}
+
+/*.ui.segment {
+  padding: 0;
+}*/
+
+#sankey-element-checkbox-list {
+  position: fixed;
+  z-index: 20;
+  display: none;
+}
+
+#sankey-operations {
+  position: fixed;
+  z-index: 20;
+  display: none;
+}
+
+.ui.checkbox {
+  display: block;
+  padding: 6px;
+}
+
+#container {
+    margin: auto;
+    width: 900px;
+}
+
+/*for barchart*/
+/*.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.bar2 {
+  fill: orange;
+}
+
+.bar2:hover {
+  fill: red ;
+}
+
+.bar {
+  fill: #00CCFF;
+}
+
+.bar:hover {
+  fill: #0099FF ;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.d3-tip {
+  line-height: 1;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+  z-index: 102;
+}
+*/
+
+
+body {
+  font: 16px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: steelblue;
+}
+
+.x.axis path {
+  display: none;
+}
+
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+
+/*select by frame*/
+.selection {
+    stroke          : gray;
+    stroke-width    : 2px;
+    stroke-dasharray: 4px;
+    stroke-opacity  : 1;
+    fill            : transparent;
+}
+
+.state {
+    stroke  : gray;
+    fill    : white;
+}
+
+
+/*double borders*/
+.borders {
+  background: #f06d06;
+  position: relative;
+  border: 200px solid black;  
+  margin: 20px;
+}
+.borders:after {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  right: -15px;
+  bottom: -15px;
+  background: red;
+  z-index: -1;
+}
+
+#sankey-workbench {
+  float: left;
+  width: 300px;
+  height: 100%;
+  background: white;
+  margin: 0;
+  margin-left:14px;
+  display: none;
+}
+
+/*sankey toolbar*/
+.select-author, .select-theme, .select-document {
+	margin-bottom: 1em;
+}
+
+.select-toolbar > :last-child { 
+	margin-bottom: 0 !important;
+}
+
+body {
+    padding:30px;
+    font:normal 12px/1.5 Arial, sans-serif;
+}
+
+/**
+ * Tooltip Styles
+ */
+
+/* Add this attribute to the element that needs a tooltip */
+[data-tooltip] {
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+}
+
+/* Hide the tooltip content by default */
+[data-tooltip]:before,
+[data-tooltip]:after {
+  visibility: hidden;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+  filter: progid: DXImageTransform.Microsoft.Alpha(Opacity=0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Position tooltip above the element */
+[data-tooltip]:before {
+  position: absolute;
+  bottom: 150%;
+  left: 50%;
+  margin-bottom: 5px;
+  margin-left: -80px;
+  padding: 7px;
+  width: 160px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  background-color: #000;
+  background-color: hsla(0, 0%, 20%, 0.9);
+  color: #fff;
+  content: attr(data-tooltip);
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+/* Triangle hack to make tooltip look like a speech bubble */
+[data-tooltip]:after {
+  position: absolute;
+  bottom: 150%;
+  left: 50%;
+  margin-left: -5px;
+  width: 0;
+  border-top: 5px solid #000;
+  border-top: 5px solid hsla(0, 0%, 20%, 0.9);
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+  content: " ";
+  font-size: 0;
+  line-height: 0;
+}
+
+/* Show tooltip content on hover */
+[data-tooltip]:hover:before,
+[data-tooltip]:hover:after {
+  visibility: visible;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+  filter: progid: DXImageTransform.Microsoft.Alpha(Opacity=100);
+  opacity: 1;
+}
+
+/*color*/
+.blue-s {
+	background-color: #C0E7F3;
+}
+
+.blue-m {
+	background-color: #67C7E2;
+}
+
+.blue-l {
+	background-color: #25A0C5;
+}

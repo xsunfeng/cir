@@ -67,6 +67,7 @@ class Role(models.Model):
         ('expert', 'Subject Matter Expert'),
         ('facilitator', 'Facilitator'),
         ('analyst', 'Analyst'),
+        ('visitor', 'Visitor'),
     )
     user = models.ForeignKey(User, related_name="role")
     forum = models.ForeignKey(Forum, related_name="members")

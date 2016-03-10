@@ -4,74 +4,182 @@ define([
   'sankey',
   'jquery',
   'semantic-ui',
-  'tagcloud',
   'utils',
-  'workbench2'
+  'workbench2',
+  'nouislider'
 ], function(
   d3,
   tip,
   sankey_module,
   $,
   semantic,
-  tagcloud,
   Utils,
-  workbench_module
+  workbench_module,
+  noUiSlider
 ) {
 
-  // initiate module
   var module = {};
-  module["focusNode"];
-  module["nodeStyle"] = {};
-  module.time_lower_bound = "1970 01 01 00 00 00";
-  module.time_upper_bound = "2100 01 01 00 00 00";
-  var barchart_ajax;
 
-  var nodeMap = {};
+  module.init = function() {
+    barchart_size = {width: 700, height:230};
+    sankey_size = {width: 700, height:600}
+    timerange_num_interval = 40;
+    module.focus_node = "";
 
-
-  module.get_barchart = function () {
-
-    if (barchart_ajax) barchart_ajax.abort();
+    module["focusNode"];
+    module["nodeStyle"] = {};
+    module.time_lower_bound = "1970 01 01 00 00 00";
+    module.time_upper_bound = "2100 01 01 00 00 00";
     
-    // for barchart
-    $("#barchart").html(
-    '<div class="ui active inverted dimmer">' +
-    '<div class="ui text loader">drawing, pleae wait...</div>' +
-    '</div>' +
-    '<p></p>'
-    );
-    var theme_id = $("#sankey-filter-theme").attr("theme-id");
-    var author_id = $("#sankey-filter-author").attr("author-id");
-    
-    barchart_ajax = $.ajax({
+    module.barchart_ajax;
+    module.nodeMap = {};
+    module.time_bound_list = [];
+
+    module["relation"] = $("#sankey-relation .item.active").attr("data-value");
+
+    module.coverage_map = {}
+    module.coverage_map_filtered = {}
+    module.coverage_map_selected = {};
+
+    isDown = false;   // Tracks status of mouse button
+    $(document).mousedown(function() {
+      isDown = true;      // When mouse goes down, set isDown to true
+    })
+    .mouseup(function() {
+      isDown = false;    // When mouse goes up, set isDown to false
+    });
+
+    hide_rec();
+    init_slider();
+    add_selection_elements();
+    module.get_sankey();
+    module.get_barchart();
+    init_eventhandlers();
+
+    $('#sankey-relation .item').tab();
+  }
+
+  // update bar chart
+  module.update_barchart = function () {
+    var selected = $(".node.active").attr("data-id");
+    var filter = get_filter();
+    module.barchart_ajax = $.ajax({
       url: '/sankey/get_barchart/',
       type: 'post',
       data: {
-        theme_id: theme_id,
-        author_id: author_id
+        "time_lower_bound": filter.time_lower_bound,
+        "time_upper_bound": filter.time_upper_bound,
+        "doc_ids": filter.doc_ids,
+        "author_ids": filter.author_ids,
+        "theme_ids": filter.theme_ids,
+        "selected": selected
       },
       success: function(xhr) {
+
+        var data = xhr.data;
+        var ageNames = ["num_nugget_ind", "num_nugget_sel"];
+        data.forEach(function(d) {
+          d.ages = ageNames.map(function(name) { 
+            return {name: name, value: +d[name]}; 
+          });
+        });
+        var svg = d3.select("#barchart").select("svg")
+        var state = svg.selectAll(".state")
+            .data(data);
+
+        var margin = {top: 20, right: 20, bottom: 30, left: 40},
+            width = barchart_size.width - margin.left - margin.right,
+            height = barchart_size.height - margin.top - margin.bottom;
+
+        state.selectAll("rect")
+            .data(function(d) { return d.ages; })
+            .attr("width", function(d) {
+              return sankey_x1.rangeBand();
+            })
+            .attr("x", function(d) { return sankey_x1(d.name); })
+            .attr("y", function(d) { 
+              return sankey_y(d.value); 
+            })
+            .attr("height", function(d) { 
+              return height - sankey_y(d.value); 
+            });
+
+      },
+      error: function(xhr) {
+        if (xhr.status == 403) {
+          Utils.notify('error', xhr.responseText);
+        }
+      }
+    });
+  }
+
+  // enter bar chart
+  module.get_barchart = function () {
+
+    if (module.barchart_ajax) module.barchart_ajax.abort();
+    var loader_str = '<div class="ui segment" style="height:' + barchart_size.height + 'px;">' +
+      '<div class="ui inverted dimmer active">' +
+      '<div class="ui large text loader">Loading</div>' +
+      '</div><p></p><p></p><p></p></div>';
+    $("#barchart").html(loader_str);
+
+    var selected = "" | $(".node.active").attr("data-id");
+    var filter = get_filter();
+    module.barchart_ajax = $.ajax({
+      url: '/sankey/get_barchart/',
+      type: 'post',
+      data: {
+        "time_lower_bound": filter.time_lower_bound,
+        "time_upper_bound": filter.time_upper_bound,
+        "doc_ids": filter.doc_ids,
+        "author_ids": filter.author_ids,
+        "theme_ids": filter.theme_ids,
+        "selected": selected
+      },
+      success: function(xhr) {
+
         $("#barchart").html("");
         var data = xhr.data;
 
-        var margin = {top: 20, right: 20, bottom: 30, left: 40},
-            width = 900 - margin.left - margin.right,
-            height = 230 - margin.top - margin.bottom;
+        // initiate once, set time range
+        if ($(timerange_lower_value).attr("data-value") === "0") {
+          var xs = data[0].time_lower_bound;
+          var xl = data[data.length - 1].time_upper_bound;
+          var min_time = date2number(xs);
+          var max_time = date2number(xl);
+          var interval = Math.ceil((max_time - min_time) / (timerange_num_interval - 1));
+          for(var i = 0; i < timerange_num_interval; i++) {
+              timerange_arr[i] = min_time + i * interval;
+          }
+          $(timerange_lower_value).attr("data-value", min_time);
+          $(timerange_upper_value).attr("data-value", max_time);
+          $(timerange_lower_value).text(number2date_pretty(min_time));
+          $(timerange_upper_value).text(number2date_pretty(max_time));
+        }
 
-        var x = d3.scale.ordinal()
+        var margin = {top: 20, right: 20, bottom: 30, left: 40},
+            width = barchart_size.width - margin.left - margin.right,
+            height = barchart_size.height - margin.top - margin.bottom;
+
+        sankey_x0 = d3.scale.ordinal()
             .rangeRoundBands([0, width], .1);
 
-        var y = d3.scale.linear()
+        sankey_x1 = d3.scale.ordinal();
+
+        sankey_y = d3.scale.linear()
             .range([height, 0]);
 
+        var color = d3.scale.ordinal()
+            .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
         var xAxis = d3.svg.axis()
-            .scale(x)
+            .scale(sankey_x0)
             .orient("bottom");
 
         var yAxis = d3.svg.axis()
-            .scale(y)
+            .scale(sankey_y)
             .orient("left")
-            .ticks(1, "");
+            .tickFormat(d3.format(".2s"));
 
         var svg = d3.select("#barchart").append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -79,19 +187,23 @@ define([
           .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        var tip = d3.tip()
-          .attr('class', 'd3-tip')
-          .offset([-10, 0])
-          .html(function(d) {
-            var res = "<div>from: <span>" + d.time_lower_bound + "</span></div>" 
-              + "<div>to: <span>" + d.time_upper_bound + "</span></div>" 
-              + "<div>#nuggets: <span>" + d.num_nugget + "</span></div>";
-            return res;
-          })
-        svg.call(tip);
+          var ageNames = ["num_nugget_ind", "num_nugget_sel"];
 
-          x.domain(data.map(function(d) { return d.time; }));
-          y.domain([0, d3.max(data, function(d) { return d.num_nugget; })]);
+          data.forEach(function(d) {
+            d.ages = ageNames.map(function(name) { 
+              return {name: name, value: +d[name]}; 
+            });
+          });
+
+          sankey_x0.domain(data.map(function(d) { 
+            return d.time; 
+          }));
+          sankey_x1.domain(ageNames).rangeRoundBands([0, sankey_x0.rangeBand()]);
+          sankey_y.domain([0, d3.max(data, function(d) { 
+            return d3.max(d.ages, function(d) { 
+              return d.value; 
+            }); 
+          })]);
 
           svg.append("g")
               .attr("class", "x axis")
@@ -106,123 +218,50 @@ define([
               .attr("y", 6)
               .attr("dy", ".71em")
               .style("text-anchor", "end")
-              .text("Num_nugget");
+              .text("#nuggets");
 
-          svg.selectAll(".bar")
+          var state = svg.selectAll(".state")
               .data(data)
+            .enter().append("g")
+              .attr("class", "state")
+              .attr("transform", function(d) { return "translate(" + sankey_x0(d.time) + ",0)"; });
+
+          state.selectAll("rect")
+              .data(function(d) { return d.ages; })
             .enter().append("rect")
-              .attr("class", "bar nugget-bar")
-              .attr("time-upper-bound", function(d) {
-                return d.time_upper_bound; 
-              }).attr("time-lower-bound", function(d) {
-                return d.time_lower_bound; 
-              }).attr("num-nugget", function(d) {
-                return d.num_nugget; 
-              })
-              .attr("x", function(d) {
-                return x(d.time); 
-              })
-              .attr("width", x.rangeBand())
-              .attr("y", function(d) { return y(d.num_nugget); })
-              .attr("height", function(d) { return height - y(d.num_nugget); })
-              .on("mousedown", function(d){
-                time_bound_list = []
-                time_bound_list.push(d.time_lower_bound);
-                time_bound_list.push(d.time_upper_bound);
+              .attr("width", function(d) { return sankey_x1.rangeBand(); })
+              .attr("x", function(d) { return sankey_x1(d.name); })
+              .attr("y", function(d) { return sankey_y(d.value); })
+              .attr("height", function(d) { return height - sankey_y(d.value); })
+              .style("fill", function(d) { 
+                if (d.name === ageNames[0]) return "#C0E7F3";
+                if (d.name === ageNames[1]) return "#67C7E2";
+              });
 
-                d3.selectAll(".nugget-bar.selected").classed("selected", false);
-                d3.select(this).classed("selected", true);
+          var legend = svg.selectAll(".legend")
+              .data(ageNames.slice().reverse())
+            .enter().append("g")
+              .attr("class", "legend")
+              .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
-                var p = d3.mouse(this);
-                svg.append( "rect")
-                .attr({
-                    rx      : 6,
-                    ry      : 6,
-                    class   : "selection",
-                    x       : p[0],
-                    y       : p[1],
-                    width   : 0,
-                    height  : 0
-                })  
-              })
-              .on('mouseover', function(d){
-                tip.show(d);
-                if(isDown) {        // Only change css if mouse is down
-                  d3.select(this).classed("selected", true);
-                  time_bound_list.push(d.time_lower_bound);
-                  time_bound_list.push(d.time_upper_bound);
-                }
-              })
-              .on('mouseout', tip.hide)
-              .on("mousemove", function(d){
-                    var s = svg.select( "rect.selection");
-                    if( !s.empty()) {
-                        var p = d3.mouse(this),
-                            d = {
-                                x       : parseInt( s.attr( "x"), 10),
-                                y       : parseInt( s.attr( "y"), 10),
-                                width   : parseInt( s.attr( "width"), 10),
-                                height  : parseInt( s.attr( "height"), 10)
-                            },
-                            move = {
-                                x : p[0] - d.x,
-                                y : p[1] - d.y
-                            }
-                        ;
+          legend.append("rect")
+              .attr("x", width - 18)
+              .attr("width", 18)
+              .attr("height", 18)
+              .style("fill", function(d){
+                if (d === ageNames[0]) return "#C0E7F3";
+                if (d === ageNames[1]) return "#67C7E2";
+              });
 
-                        if( move.x < 1 || (move.x*2<d.width)) {
-                            d.x = p[0];
-                            d.width -= move.x;
-                        } else {
-                            d.width = move.x;       
-                        }
-
-                        if( move.y < 1 || (move.y*2<d.height)) {
-                            d.y = p[1];
-                            d.height -= move.y;
-                        } else {
-                            d.height = move.y;       
-                        }
-                       
-                        s.attr( d);
-                        //console.log( d);
-                    }
-              })
-              .on("click", function(e){
-                // if (! d3.select(this).classed("selected")) {
-                //   d3.select(".nugget-bar.selected").classed("selected", false);
-                //   d3.select(this).classed("selected", true);                
-                // } else {
-                //   d3.select(".nugget-bar.selected").classed("selected", false);
-                // }
-              }).on( "mouseup", function() {
-                d3.selectAll(".selection").remove();
-                var res = max_min_string(time_bound_list);
-                $("#sankey-filter-time").attr("time-lower-bound", res[0]);
-                $("#sankey-filter-time").attr("time-upper-bound", res[1]);
-                var a1 = res[0].split(" "), a2 = res[1].split(" ");
-                var text =  a1[0] + "/" + a1[1] + "/" + a1[2] + " " + a1[3] + ":" + a1[4] + ":" + a1[5] + " -- "
-                          + a2[0] + "/" + a2[1] + "/" + a2[2] + " " + a2[3] + ":" + a2[4] + ":" + a2[5];
-                $("#sankey-filter-time").find("span").text(text);
-                module.get_sankey(module["relation"]);
-              })
-
-              d3.selectAll(".nugget-bar").classed("selected", true);
-
-        function type(d) {
-          d.num_nugget = +d.num_nugget;
-          return d;
-        }
-
-        function max_min_string(string_list) {
-          var max = "1970 01 01 00 00 00";
-          var min = "2100 01 01 00 00 00";
-          string_list.forEach(function(item) {
-            if (item < min) min = item;
-            if (item > max) max = item;
-          })
-          return [min, max];
-        }
+          legend.append("text")
+              .attr("x", width - 24)
+              .attr("y", 9)
+              .attr("dy", ".35em")
+              .style("text-anchor", "end")
+              .text(function(d) { 
+                if (d === ageNames[0]) return "filtered";
+                if (d === ageNames[1]) return "selected";
+              });
 
       },
       error: function(xhr) {
@@ -233,29 +272,32 @@ define([
     });
   }
 
-  module.get_sankey = function(relation) {
-    var time_lower_bound = $("#sankey-filter-time").attr("time-lower-bound");
-    var time_upper_bound = $("#sankey-filter-time").attr("time-upper-bound");
-    time_lower_bound = time_lower_bound || "1970 01 01 00 00 00";
-    time_upper_bound = time_upper_bound || "2100 01 01 00 00 00";
+  // sankey
+  module.get_sankey = function() {   
+    
+    if (module.sankey_ajax) module.sankey_ajax.abort();
 
-    $("#sankey").html(
-      '<div class="ui active inverted dimmer">' +
-      '<div class="ui text loader">drawing, pleae wait...</div>' +
-      '</div>' +
-      '<p></p>'
-      );
-    var promise = $.ajax({
+    var loader_str = '<div class="ui segment" style="height:' + sankey_size.height + 'px;">' +
+      '<div class="ui inverted dimmer active">' +
+      '<div class="ui large text loader">Loading</div>' +
+      '</div><p></p><p></p><p></p></div>';
+    $("#sankey").html(loader_str);
+
+    filter = get_filter();
+    var sankey_ajax = $.ajax({
       url: '/sankey/get_graph/',
       type: 'post',
       data: {
-        relation: relation,
-        time_lower_bound: time_lower_bound,
-        time_upper_bound: time_upper_bound
+        "time_lower_bound": filter.time_lower_bound,
+        "time_upper_bound": filter.time_upper_bound,
+        "doc_ids": filter.doc_ids,
+        "author_ids": filter.author_ids,
+        "theme_ids": filter.theme_ids,
+        "relation": module["relation"]
       },
       success: function(xhr) {
         $("#sankey").html("");
-        init(xhr);
+        init_sankey(xhr);
         // $("svg").attr("class", "ui segment");
       },
       error: function(xhr) {
@@ -263,27 +305,23 @@ define([
           Utils.notify('error', xhr.responseText);
         }
       }
-    });  
-    return promise;
+    });
   }
 
-  $(".sankey-related").hover(function(){
-    $("#sankey-element-checkbox-list").css("left", $("#sankey").offset().left - $("#sankey-element-checkbox-list").css("width").slice(0, -2) + 10);
-    $("#sankey-element-checkbox-list").css("top", $("#sankey").offset().top + 10);
-    $("#sankey-element-checkbox-list").show();
+  function init_sankey(xhr){
 
-    // $("#sankey-operations").css("left", $("#sankey").offset().left - $("#sankey-operations").css("width").slice(0, -2) + 10);
-    // $("#sankey-operations").css("top", $("#sankey-element-checkbox-list").css("top").slice(0, -2) - - $("#sankey-element-checkbox-list").height() + 10);
-    // $("#sankey-operations").show();
-  },function(){
-    $("#sankey-element-checkbox-list").hide();
-    // $("#sankey-operations").hide();
-  });
+        var units = "Nuggets";
+         
+        var margin = {top: 30, right: 30, bottom: 30, left: 30},
+            width = sankey_size.width - margin.left - margin.right,
+            height = sankey_size.height - margin.top - margin.bottom;
+         
+        var formatNumber = d3.format(",.0f"),    // zero decimal places
+            format = function(d) { 
+              return formatNumber(d) + " " + units; 
+            },
+            color = d3.scale.category20b();
 
-  init_eventhandlers();
-
-
-  function init(xhr){
         // append the svg canvas to the page
         var svg = d3.select("#sankey").append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -306,12 +344,12 @@ define([
         graph["nodes"] = xhr["nodes"]
 
         // convert source/target type from string to object
-        nodeMap = {};
-        graph.nodes.forEach(function(x) { nodeMap[x.name] = x; });
+        module.nodeMap = {};
+        graph.nodes.forEach(function(x) { module.nodeMap[x.name] = x; });
         graph.links = graph.links.map(function(x) {
           return {
-            source: nodeMap[x.source],
-            target: nodeMap[x.target],
+            source: module.nodeMap[x.source],
+            target: module.nodeMap[x.target],
             value: x.value
           };
         });
@@ -346,6 +384,7 @@ define([
               // thus name has to follow format 'type-id'
               return d.name;
             })
+            .attr("num-nugget", function(d){ return d.value; })
             .attr("transform", function(d) { 
             return "translate(" + d.x + "," + d.y + ")"; });
           // .call(d3.behavior.drag()
@@ -355,123 +394,111 @@ define([
           //   .on("dragstart", function() { 
           //   this.parentNode.appendChild(this); })
           //   .on("drag", dragmove));
-        
-
-        // add dummy class to dummy nodes
-        node.classed("dummy-node", function(d) {
-          if(d.name.includes("dummy")) return true;
-          else return false;
-        });
-        link.classed("dummy-link", function(l) {
-          if(l.source.name.includes("dummy") || l.target.name.includes("dummy")) return true;
-          else return false;
-        });
 
         node.classed("doc-node", function(d) {
-          if(d.name.includes("doc")) {
-            return true;
-          } else {
-            return false;
-          }
+          if(d.name.includes("doc")) return true;
+          else return false;
         });
         node.classed("section-node", function(d) {
-          if(d.name.includes("section")) {
-            return true;
-          } else {
-            return false;
-          }
+          if(d.name.includes("section")) return true;
+          else return false;
         });
         node.classed("author-node", function(d) {
-          if(d.name.includes("author")) {
-            return true;
-          } else {
-            return false;
-          }
+          if(d.name.includes("author")) return true;
+          else return false;
         });
         node.classed("theme-node", function(d) {
-          if(d.name.includes("theme")) {
-            return true;
-          } else {
-            return false;
-          }
+          if(d.name.includes("theme")) return true;
+          else return false;
         });
 
         // mouseover and mouseout events on node
-        node.on('mouseover', function(d) {
-          var focusLinkSet = new Set();
-          var focusNodeSet = new Set();
-
-          if (d.name.includes("doc")) {
-            // from doc --> doc --> theme
-            focusNodeSet.add(d);
-            link.style('', function(l) {
-              if (d === l.source) {
-                focusLinkSet.add(l);
-                focusNodeSet.add(l.target);
-              }
-            });
-            link.style('', function(l) {
-              if (d === l.source) {
-                focusNodeSet.has(l.source);
-                focusLinkSet.add(l);
-              }
-            });
+        node.on('click', function(d) {
+          if (d3.select(this).classed("active")) {
+            d3.select(this).classed("active", false);
             link.style('stroke-opacity', function(l) {
               var opacity = 0.2;
-              if(focusNodeSet.has(l.source)) {
-                opacity = 0.5;
-              }
-              return opacity;
-            });
-          } else if (d.name.includes("theme")) {
-            // from theme --> section --> doc
-            focusNodeSet.add(d);
-            link.style('', function(l) {
-              if (d === l.target) {
-                focusLinkSet.add(l);
-                focusNodeSet.add(l.source);
-              }
-            });
-            link.style('', function(l) {
-              if (d === l.target) {
-                focusNodeSet.has(l.target);
-                focusLinkSet.add(l);
-              }
-            });
-            link.style('stroke-opacity', function(l) {
-              var opacity = 0.2;
-              if(focusNodeSet.has(l.target)) {
-                opacity = 0.5;
-              }
               return opacity;
             });
           } else {
+
+            d3.selectAll(".node.active").classed("active",false)
             link.style('stroke-opacity', function(l) {
               var opacity = 0.2;
-            if (d === l.source || d === l.target) {
-              opacity = 0.5;
-            }
               return opacity;
-            });           
-          }
-          clear_dummy();
-        });
-        node.on('mouseout', function(d) {
-          link.style('stroke-opacity', function(l) {
-            var opacity = 0.2;
-            return opacity;
-          });
-          clear_dummy();
-        });
+            });
+            d3.select(this).classed("active", true);
 
-        // mouseover and mouseout events on links
-        $(".link").on("mouseover",function(){
-          this.style["stroke-opacity"] = 0.5;
-          clear_dummy();
-        });
-        $(".link").on("mouseout",function(){
-          this.style["stroke-opacity"] = 0.2;
-          clear_dummy();
+            if (d.name.startsWith("doc")){
+              module.focus_node = d.name;
+              get_doc_bar();
+            } else {
+              if (module.focus_node === "") {
+                get_doc_bar();
+              } else {
+                var doc_id = module.focus_node.split("-")[1];
+                get_doc_bar();    
+              }
+            }
+
+            var focusLinkSet = new Set();
+            var focusNodeSet = new Set();
+
+            if (d.name.includes("doc")) {
+              // from doc --> doc --> theme
+              focusNodeSet.add(d);
+              link.style('', function(l) {
+                if (d === l.source) {
+                  focusLinkSet.add(l);
+                  focusNodeSet.add(l.target);
+                }
+              });
+              link.style('', function(l) {
+                if (d === l.source) {
+                  focusNodeSet.has(l.source);
+                  focusLinkSet.add(l);
+                }
+              });
+              link.style('stroke-opacity', function(l) {
+                var opacity = 0.2;
+                if(focusNodeSet.has(l.source)) {
+                  opacity = 0.5;
+                }
+                return opacity;
+              });
+            } else if (d.name.includes("theme")) {
+              // from theme --> section --> doc
+              focusNodeSet.add(d);
+              link.style('', function(l) {
+                if (d === l.target) {
+                  focusLinkSet.add(l);
+                  focusNodeSet.add(l.source);
+                }
+              });
+              link.style('', function(l) {
+                if (d === l.target) {
+                  focusNodeSet.has(l.target);
+                  focusLinkSet.add(l);
+                }
+              });
+              link.style('stroke-opacity', function(l) {
+                var opacity = 0.2;
+                if(focusNodeSet.has(l.target)) {
+                  opacity = 0.5;
+                }
+                return opacity;
+              });
+            } else {
+              link.style('stroke-opacity', function(l) {
+                var opacity = 0.2;
+              if (d === l.source || d === l.target) {
+                opacity = 0.5;
+              }
+                return opacity;
+              });           
+            }
+          }
+          module.update_barchart();
         });
 
         // add the rectangles for the nodes
@@ -493,16 +520,14 @@ define([
               }
               return d.color = color(d.name.replace(/ .*/, ""));
             })
-            .style("fill-opacity", function(d) { 
-              return Math.random();
-            })
-            .style("stroke", function(d) { 
-              return d3.rgb(d.color).darker(2); })
+            .style("fill-opacity", function(d) { return 0.5;})
+            .style("stroke-width", function(d) { return "0"; })
           .append("title")
             .text(function(d) { 
+              // return d.text + "\n" + format(d.value);
               return d.text + "\n" + format(d.value); 
             });
-       
+
         // add in the title for the nodes
         node.append("text")
             .attr("x", -6)
@@ -511,42 +536,20 @@ define([
             .attr("text-anchor", "end")
             .attr("transform", null)
             .text(function(d) {
-              if (d.text.length > 25) {
-                return d.text.slice(0, 25) + "...";
+              // if (d.text.length > 25) {
+              //   return d.text.slice(0, 25) + "...";
+              // } else {
+              //   return d.text; 
+              // }
+              if (d.name.includes("author")) {
+                return "P" + d.name.split("-")[1];
               } else {
-                return d.text; 
+                return d.text;
               }
             })
           .filter(function(d) { return d.x < width / 2; })
             .attr("x", 6 + sankey.nodeWidth())
             .attr("text-anchor", "start");
-
-        // save all nodes styles
-        var normal_nodes = $(".node").find("rect");
-        for (var i = 0; i < normal_nodes.length; i ++) {
-          var key = $(normal_nodes[i].parentNode).attr("data-id");
-          module["nodeStyle"][key] = {}
-          module["nodeStyle"][key]["fill"] = normal_nodes[i].style["fill"];
-          module["nodeStyle"][key]["fill-opacity"] = normal_nodes[i].style["fill-opacity"];
-          module["nodeStyle"][key]["stroke"] = normal_nodes[i].style["stroke"];
-        }
-      
-        // clear dummy nodes and links
-        function clear_dummy() {
-          // dummy nodes
-          $(".dummy-node").attr("font-size","0");
-          var dummy_nodes = $(".dummy-node").find("rect");
-          for (var i = 0; i < dummy_nodes.length; i ++) {
-            dummy_nodes[i].style["fill"] = "black";
-            dummy_nodes[i].style["fill-opacity"] = "0.05";
-            dummy_nodes[i].style["stroke"] = "";
-          }
-          var dummy_links = $(".dummy-link");
-          for (var i = 0; i < dummy_links.length; i ++) {
-            dummy_links[i].style["stroke-opacity"] = "0.05";
-          }
-        };
-        clear_dummy();
 
         // the function for moving the nodes
         function dragmove(d) {
@@ -556,52 +559,68 @@ define([
           sankey.relayout();
           link.attr("d", path);
         }
-
-        function hide_node(focus_node) {
-          d3.selectAll('.link:not(.dummy-link)').classed("dummy-link", function(l) {
-            if (focus_node === l.source || focus_node === l.target) return true;
-            else return false;
-          }); 
-          d3.selectAll('.node:not(.dummy-node)').classed("dummy-node", function(n) {
-            if (n === focus_node) return true;
-            else return false;
-          }); 
-        };
-
-        function show_node(focus_node) {
-          d3.selectAll('.dummy-link').classed("dummy-link", function(l) {
-            if (focus_node === l.source || focus_node === l.target) return false;
-            else return true;
-          });
-          var normal_links = $(".link");
-          for (var i = 0; i < normal_links.length; i ++) {
-            normal_links[i].style["stroke-opacity"] = "0.2";
-          }     
-          d3.selectAll('.dummy-node').classed("dummy-node", function(n) {
-            if (focus_node === n) return false;
-            else return true;
-          });
-          var p = $(".node[data-id='" + focus_node.name + "']");
-          p.find("rect")[0].style["fill"] = module["nodeStyle"][focus_node.name]["fill"];
-          p.find("rect")[0].style["fill-opacity"] = module["nodeStyle"][focus_node.name]["fill-opacity"];
-          p.find("rect")[0].style["stroke"] = module["nodeStyle"][focus_node.name]["stroke"];
-        }
-
   }
 
-  function clear_filters() {
-    $("#sankey-filter-time").attr("time-lower-bound", "");
-    $("#sankey-filter-time").attr("time-upper-bound", "");
-    $("#sankey-filter-time").find("span").text("timespan: all");
-
-    $("#sankey-filter-theme").attr("theme-id", "-1");
-    $("#sankey-filter-theme").find("span").text("theme: all");
-    
-    $("#sankey-filter-author").attr("author-id", "-1");
-    $("#sankey-filter-author").find("span").text("author: all");
+  function get_doc_preview(doc_id) {
+    $.ajax({
+      url: '/workbench/api_get_doc_by_doc_id/',
+      type: 'post',
+      data: {
+        'doc_id': doc_id,
+      },
+      success: function(xhr) {
+        $("#sankey-document").html(xhr.workbench_document);
+        $("#sankey-document").height(800);
+        $("#sankey-document-container").animate({scrollTop: 0}, 0);
+        workbench_module.doc_id = xhr.doc_id;
+        // workbench_module.load_highlights_by_doc();
+        var doc_id = xhr.doc_id;
+        $("#sankey-document .section-content").each(function(){
+          var sec_id = $(this).attr("data-id");
+          var tks = $(this).find(".tk");
+          for (var i = 0; i < tks.length; i++) {
+            if (module.coverage_map_selected[doc_id][sec_id][i]) {
+              $(tks[i]).addClass( "blue-m" );
+            } else if (module.coverage_map_filtered[doc_id][sec_id][i]) {
+              $(tks[i]).addClass( "blue-s" );
+            }
+          }
+        })
+      },
+      error: function(xhr) {
+        if (xhr.status == 403) {
+          Utils.notify('error', xhr.responseText);
+        }
+      }
+    });
   }
 
   function init_eventhandlers() {
+
+    $("body").on("click", ".doc-bar-elem", function(e) {
+      var data_id = $(this).parents(".doc-bar").attr("data-id");
+      module.focus_node = data_id;
+      get_doc_bar();
+    })
+
+    $("body").on("click", ".select-sort", function(e){
+      $(".select-sort").removeClass("active");
+      $(this).addClass("active");
+    })    
+
+    $("body").on("click", ".select-element", function(e){
+
+      if ($(this).hasClass("active")) {
+        $(this).removeClass("green").removeClass("active");
+      } else {
+        $(this).addClass("green").addClass("active");
+      }
+
+      get_doc_bar();
+      hide_rec();
+      module.update_barchart();
+      module.get_sankey();
+    })
 
     $("body").on("click", "#sankey-close-screenshot", function() {
            $("#dark-fullscreen-sankey").hide();
@@ -690,103 +709,16 @@ define([
     //   var evidence = '<a data-id=""><i class="large blue file icon"></i></a>'
     // });
 
-
-    $("body").on("mouseenter", ".author-node", function(e){
-      if ($("#sankey-filter-time").attr("time-lower-bound") == "") {
-        clear_filters();
-        var author_id = $(this).attr("data-id").split("-")[1];
-        module["focusNode"] = nodeMap["author-" + author_id];
-        $("#sankey-filter-author").attr("author-id", author_id);
-        $("#sankey-filter-author").find("span").text("author:" + $(this).find("text").text());
-        module.get_barchart();
-      }
-    }).on("mouseleave", ".author-node", function(e){
-      if ($("#sankey-filter-time").attr("time-lower-bound") == "") {
-        clear_filters();
-        module.get_barchart();       
-      }
-    });
-
-    $("body").on("mouseenter", ".theme-node", function(e){
-      if ($("#sankey-filter-time").attr("time-lower-bound") == "") {
-        clear_filters();
-        var theme_id = $(this).attr("data-id").split("-")[1];
-        module["focusNode"] = nodeMap["theme-" + theme_id];
-        $("#sankey-filter-theme").attr("theme-id", theme_id);
-        $("#sankey-filter-theme").find("span").text("theme:" + $(this).find("text").text());
-        module.get_barchart();
-      }
-    }).on("mouseleave", ".theme-node", function(e){
-      if ($("#sankey-filter-time").attr("time-lower-bound") == "") {
-        clear_filters();
-        module.get_barchart();       
-      }
-    });
-
     $("body").on("click", "#update-sankey", function(e){
+      $(".select-toolbar.active .select-element.active").click();
+      hide_rec();
       clear_filters();
-      supported_relations = ["dt", "dst", "dpt"];
-      if (supported_relations.includes(module["relation"])) {
-        module.get_sankey(module["relation"]); 
-      } else {
-        Utils.notify("error", "this relation not supported");
-      }
+      module.get_sankey();
       module.get_barchart();
     });
 
-    $("body").on("click", ".doc-node", function(e){
-      $('#context-menu-info').html("");
-      // $('#context-menu-action').css('left', e.pageX).css('top', e.pageY).show();
-      $('#context-menu-action').css('left', e.pageX - $("#sankey-container").offset().left).css('top', e.pageY - $("#sankey-container").offset().top).show();
-
-      var context_menu_action_right = Number.parseInt($('#context-menu-action').css('left')) 
-                                    + Number.parseInt($('#context-menu-action').css('width')) + 10 + "px";
-      $('#context-menu-info').css('left', context_menu_action_right).css('top', e.pageY - $("#sankey-container").offset().top).show();
-      var doc_id = $(this).attr("data-id").split("-")[1];
-      module["focusNode"] = nodeMap["doc-" + doc_id];
-      $.ajax({
-        url: '/sankey/get_doc/',
-        type: 'post',
-        data: {
-          doc_id: doc_id,
-        },
-        success: function(xhr) {
-          $('#context-menu-info').html(xhr.html);
-          $.fn.tagcloud.defaults = {
-            size: {start: 10, end: 20, unit: 'pt'},
-            color: {start: '#ff2222', end: '#2222ff'}
-          };
-
-          $(function () {
-            $('#whatever a').tagcloud();
-            $('.wordcount-word').each(function(){
-              $(this).popup({
-                  title    : this.text,
-                  content  : "freq.: " + $(this).attr("rel")
-              });
-            });
-          });
-        },
-        error: function(xhr) {
-          if (xhr.status == 403) {
-            Utils.notify('error', xhr.responseText);
-          }
-        }
-      });
-      if (this.classList.contains("dummy-node")) {
-        $('#context-menu-show').show();
-        $('#context-menu-hide').hide(); 
-        $('#context-menu-info').hide();        
-      } else {
-        $('#context-menu-hide').show();
-        $('#context-menu-show').hide();
-        $('#context-menu-info').show();  
-      }
-      return false;
-    });
-
     $("body").on("click", "#context-menu-goto", function(e){
-      var doc_id = module["focusNode"].name.split("-")[1];
+      var doc_id = module.focus_node.split("-")[1];
       $("#loading-status").show();
         $.ajax({
           url: '/workbench/api_get_doc_by_doc_id/',
@@ -811,81 +743,17 @@ define([
             }
           }
         });
-    }).on("click", "#context-menu-cancel", function(e){
-      $('#context-menu-action').hide();
-      $('#context-menu-info').hide();
-    }).on("click", "#context-menu-hide", function(e){
-      hide_node(module["focusNode"]);
-      $('#context-menu-action').hide();
-      $('#context-menu-info').hide();
-      module["focusNode"] = null;
-      clear_dummy();
-    }).on("click", "#context-menu-show", function(e){
-      show_node(module["focusNode"]);
-      $('#context-menu-action').hide();
-      $('#context-menu-info').hide();
-      module["focusNode"] = null;
-      clear_dummy();
     });
 
-    $('#sankey-element-checkbox-list .checkbox')
-      .checkbox({
-        // Fire on load to set parent value
-        fireOnInit : true,
-        // Change parent state on each child checkbox change
-        onChange   : function() {
-          var
-            $listGroup      = $(this).closest('#sankey-element-checkbox-list'),
-            $checkbox       = $listGroup.find('.checkbox');
-          // check to see if all other siblings are checked or unchecked
-          module["relation"] = "";
-          $checkbox.each(function() {
-              if ($(this).checkbox('is checked')) {
-                var cur = $(this).attr("data-value");
-                module["relation"] = module["relation"] + cur;
-              }
-          });
-        }
-      })
-    ;
-
+    $("body").on("click", "#sankey-relation .item.active", function(e){
+      module["relation"] = $("#sankey-relation .item.active").attr("data-value");
+      hide_rec();
+      clear_filters();
+      add_selection_elements();
+      module.get_sankey();
+      module.get_barchart();
+    })
   };
-
-  var time_bound_list = [];
-
-  var isDown = false;   // Tracks status of mouse button
-
-  $(document).mousedown(function() {
-    isDown = true;      // When mouse goes down, set isDown to true
-  })
-  .mouseup(function() {
-    isDown = false;    // When mouse goes up, set isDown to false
-  });
-
-  module.get_barchart();
-
-  // for sankey
-  // by default -- dst
-  module["relation"] = "dpt";
-  module.get_sankey(module["relation"]);
-  var l = module["relation"].split("");
-  l.forEach(function(e) {
-    $(".checkbox[data-value='" + e + "']").checkbox("set checked");
-  });
-
-  get_workbench();
-
-  var units = "Nuggets";
-   
-  var margin = {top: 30, right: 30, bottom: 30, left: 30},
-      width = 900 - margin.left - margin.right,
-      height = 600 - margin.top - margin.bottom;
-   
-  var formatNumber = d3.format(",.0f"),    // zero decimal places
-      format = function(d) { 
-        return formatNumber(d) + " " + units; 
-      },
-      color = d3.scale.category20b();
 
   function put_workbench(){
     $.ajax({
@@ -909,9 +777,6 @@ define([
     $.ajax({
       url: '/sankey/get_workbench/',
       type: 'post',
-      data: {
-
-      },
       success: function(xhr) {
         if (xhr.workbench_html != null && xhr.workbench_html.length > 0) {
           $("#sankey-workbench").html(xhr.workbench_html);
@@ -925,6 +790,269 @@ define([
     });
   };
 
+  function get_filter() {
+    var res = {}
+    res["time_lower_bound"] = "0";
+    res["time_upper_bound"] = "1489003465486";   
+    if ($(timerange_lower_value).attr("data-value") !== "0") {
+      res["time_lower_bound"] = $(timerange_lower_value).attr("data-value");
+      res["time_upper_bound"] = $(timerange_upper_value).attr("data-value");
+    }
+    res["theme_ids"] = ""
+    $(".select-toolbar.active .select-theme-elements .select-element.active").each(function(){
+      res["theme_ids"] = res["theme_ids"] + " " + $(this).attr("data-id").split("-")[1];
+    });
+    res["doc_ids"] = ""
+    $(".select-toolbar.active .select-document-elements .select-element.active").each(function(){
+      res["doc_ids"] = res["doc_ids"] + " " + $(this).attr("data-id").split("-")[1];
+    })
+    res["author_ids"] = ""
+    $(".select-toolbar.active .select-author-elements .select-element.active").each(function(){
+      res["author_ids"] = res["author_ids"] + " " + $(this).attr("data-id").split("-")[1];
+    })
+    res["theme_ids"] = res["theme_ids"].trim();
+    res["doc_ids"] = res["doc_ids"].trim();
+    res["author_ids"] = res["author_ids"].trim();
+    return res;
+  }
+
+  function get_doc_bar() {
+
+    var selected = $(".node.active").attr("data-id");
+    var filter = get_filter();
+    $.ajax({
+      url: '/sankey/get_doc_coverage/',
+      data: {
+        "time_lower_bound": filter.time_lower_bound,
+        "time_upper_bound": filter.time_upper_bound,
+        "doc_ids": filter.doc_ids,
+        "author_ids": filter.author_ids,
+        "theme_ids": filter.theme_ids,
+        "selected": selected 
+      },
+      type: 'post',
+      success: function(xhr) {
+        module.coverage_map = xhr.coverage_map;
+        module.coverage_map_filtered = xhr.coverage_map_filtered;
+        module.coverage_map_selected = xhr.coverage_map_selected;
+        if (module.focus_node !== "") {
+          var doc_id = module.focus_node.split("-")[1];
+          get_doc_preview(doc_id);
+        }
+
+        var reverse = $("#select-sort-descending").hasClass("active");
+        $('#doc-bar-container').empty();
+        $(".select-toolbar.active .select-document-elements .select-element").each(function(){
+          var doc_id = $(this).attr("data-id").split("-")[1];
+          var html = ""
+          html = html + '<div class="doc-bar" style="margin:0 10px;float:left;" data-id="' + $(this).attr("data-id") + '">';
+          // html = html + '<div style="width:30px; background: white;">' + doc_id + '</div>';
+          for (var key in xhr.coverage_map[doc_id]) {
+            if (key !== undefined) {
+              for (var i = 0; i < xhr.coverage_map[doc_id][key].length; i++) {
+                if (xhr.author_map_filtered[doc_id][key][i]) {
+                  html = html + '<div class="latest-activity doc-bar-elem" data-id="' + xhr.author_map_filtered[doc_id][key][i] + '" style="width:30px; background-color:#25A0C5; height:0.1px;"></div>';
+                } else if (xhr.coverage_map_selected[doc_id][key][i]) {
+                  html = html + '<div class="doc-bar-elem" style="width:30px; background-color: #67C7E2; height:0.1px;"></div>';
+                } else if (xhr.coverage_map_filtered[doc_id][key][i]) {
+                  html = html + '<div class="doc-bar-elem" style="width:30px; background-color: #C0E7F3; height:0.1px;"></div>';
+                } else {
+                  html = html + '<div class="doc-bar-elem" style="width:30px; background-color: Azure; height:0.1px;"></div>';
+                }
+              }
+            }
+            html = html + '<div style="width:30px; background: white; height:5px;"></div>';
+          }
+
+          html = html + "</div>";
+          $('#doc-bar-container').append(html);
+        });
+
+        // add bar wrapper
+        if (module.focus_node !== "") {
+          $(".doc-bar").css("border", "");
+          $(".doc-bar[data-id=" + module.focus_node + "]").css("border", "solid 3px red");   
+          $node = $(".doc-node[data-id='" + module.focus_node + "']")
+          $("#sankey-doc-arrow").show();
+          $("#sankey-doc-arrow").css("left", $node.offset().left - 25).css("top", $node.offset().top - 15);   
+        }
+
+        // add author lastest activity
+        $(".latest-activity").each(function(){
+            var author_id = $(this).attr("data-id");
+            var tooltip = "P" + author_id + " recently worked on " + xhr.author_theme_map[author_id];
+            var arrow = '<div class="latest-activity-arrow" data-tooltip="' + tooltip + '" data-id="' + author_id + '" style="position:fixed;">' +
+                    '<i class="icon big red caret right"></i>' +
+              '</div>';
+            $(this).append(arrow);
+            $(".latest-activity-arrow[data-id=" + author_id +  "]").css("left", $(this).offset().left - 20).css("top", $(this).offset().top - 10);
+        })
+      },
+      error: function(xhr) {
+        if (xhr.status == 403) {
+          Utils.notify('error', xhr.responseText);
+        }
+      }
+    });
+  }
+
+  function getSorted(selector, attrName, reverse) {
+    return $($(selector).toArray().sort(function(a, b){
+        var aVal = parseInt(a.getAttribute(attrName)),
+            bVal = parseInt(b.getAttribute(attrName));
+        return reverse ? bVal - aVal : aVal - bVal;
+    }));
+  }
+
+  function add_selection_elements() {
+    $.ajax({
+      url: '/sankey/get_entities/',
+      type: 'post',
+      success: function(xhr) {
+        var reverse = $("#select-sort-descending").hasClass("active");
+        if ($(".select-document").length !== 0) {
+          $(".select-document-elements").empty();
+          for (var i = 0; i < xhr.docs.length; i ++) {
+            var num = "0"
+            if ($(".doc-node[data-id='" + xhr.docs[i].id + "']").length === 1) {
+              num = $(".doc-node[data-id='" + xhr.docs[i].id + "']").attr("num-nugget");
+            }
+            $(".select-document-elements").append('<a class="ui label select-element active green" data-id="' + xhr.docs[i].id + '"> ' 
+              + xhr.docs[i].name + '</a>');
+          }   
+          $(".doc-labels").find("span").text($(".select-toolbar.active .select-document-elements .select-element").length);
+        }
+
+        if ($(".select-author").length !== 0) {
+          $(".select-author-elements").empty();
+          for (var i = 0; i < xhr.authors.length; i ++) {
+            var num = "0"
+            if ($(".author-node[data-id='" + xhr.authors[i] + "']").length === 1) {
+              num = $(".author-node[data-id='" + xhr.authors[i] + "']").attr("num-nugget");
+            }
+            $(".select-author-elements").append('<a class="ui label select-element active green" data-id="' + xhr.authors[i].id + '"> ' 
+              + xhr.authors[i].name + '</a>');
+          }   
+          $(".author-labels").find("span").text($(".select-toolbar.active .select-author-elements .select-element").length);
+        } 
+
+        if ($(".select-theme").length !== 0) {
+          $(".select-theme-elements").empty();
+          for (var i = 0; i < xhr.themes.length; i ++) {
+            var num = "0"
+            if ($(".theme-node[data-id='" + xhr.themes[i] + "']").length === 1) {
+              num = $(".theme-node[data-id='" + xhr.themes[i] + "']").attr("num-nugget");
+            }
+            $(".select-theme-elements").append('<a class="ui label select-element active green" data-id="' + xhr.themes[i].id + '"> ' 
+              + xhr.themes[i].name + '</a>');
+          }   
+          $(".theme-labels").find("span").text($(".select-toolbar.active .select-theme-elements .select-element").length);
+        }
+
+        get_doc_bar();
+      },
+      error: function(xhr) {
+        if (xhr.status == 403) {
+          Utils.notify('error', xhr.responseText);
+        }
+      }
+    });
+  }
+
+// --------------------------------------------------------
+// -------------- Time range slider control ---------------
+// --------------------------------------------------------
+
+function init_slider() {
+  slider_timerange = document.getElementById('sankey-timerange-slider');
+  timerange_lower_value = document.getElementById('sankey-timerange-lower-value');
+  timerange_upper_value = document.getElementById('sankey-timerange-upper-value');
+  timerange_arr = [];
+  for(var i = 0; i < timerange_num_interval; i++) {
+      timerange_arr.push(0);
+  }
+
+  noUiSlider.create(slider_timerange, {
+    start: [0, timerange_num_interval],
+    connect: true,
+    step: 1,
+    range: {
+      'min': 0,
+      'max': timerange_num_interval - 1
+    }
+  }); 
+
+  slider_timerange.noUiSlider.on('update', function( values, handle ) {
+    var date = new Date();
+    if ( !handle ) {
+      var num = timerange_arr[Number(values[0])];
+      $(timerange_lower_value).text(number2date_pretty(num));
+      $(timerange_lower_value).attr("data-value", num);
+    } else {
+      var num = timerange_arr[Number(values[1])];
+      $(timerange_upper_value).text(number2date_pretty(num));
+      $(timerange_upper_value).attr("data-value", num);
+    }
+  });
+
+  slider_timerange.noUiSlider.on('change', function(){
+    module.get_sankey();
+    module.get_barchart();
+    hide_rec();
+    get_doc_bar();
+  });
+
+  $("#sankey-document").bind('scroll', function() {
+    if (module.focus_node.split("-")[0] === "doc") {
+      var perc = ($("#sankey-document").scrollTop() + $("#sankey-document").height() / 2) / $("#sankey-document .workbench-doc-item").height();
+      var index = Math.floor(($(".doc-bar[data-id='" + module.focus_node + "']").children().length - 1) * perc);
+      var elem = $(".doc-bar[data-id='" + module.focus_node + "']").children()[index];
+      $("#doc-bar-arrow").show();
+      $("#doc-bar-arrow").css("left", $(elem).offset().left - 25).css("top", $(elem).offset().top - 15);
+    }
+  });
+}
+
+function hide_rec() {
+  $("#doc-bar-arrow").hide();
+  $(".doc-bar").css("border", "");
+}
+
+function number2date(num) {
+    var offset = 0;
+    var date = new Date(Number(num) + offset * 3600 * 1000);
+    var res = date.getFullYear() + " " 
+      + ("0" + (date.getMonth() + 1)).slice(-2) + " " 
+      + ("0" + date.getDate()).slice(-2) + " " 
+      + ("0" + date.getHours()).slice(-2) + " " 
+      + ("0" + date.getMinutes()).slice(-2) + " " 
+      + ("0" + date.getSeconds()).slice(-2);
+    return res;
+}
+
+function number2date_pretty(num) {
+    var offset = 0;
+    var date = new Date(Number(num) + offset * 3600 * 1000);
+    var res = date.getFullYear() + "/" 
+      + ("0" + (date.getMonth() + 1)).slice(-2) + "/" 
+      + ("0" + date.getDate()).slice(-2) + " " 
+      + ("0" + date.getHours()).slice(-2) + ":" 
+      + ("0" + date.getMinutes()).slice(-2) + ":" 
+      + ("0" + date.getSeconds()).slice(-2);
+    return res;
+}
+
+function date2number(str) {
+    var date = new Date();  
+    var arr = str.split(" ")
+    date.setYear(arr[0]);
+    date.setMonth(arr[1] - 1);
+    date.setDate(arr[2]);
+    date.setHours(arr[3]);
+    date.setMinutes(arr[4]);
+    date.setSeconds(arr[5]);
+    return date.getTime();
+}
   return module;
 
 });

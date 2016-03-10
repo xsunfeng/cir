@@ -123,7 +123,7 @@ PIPELINE_CSS = {
             'css/document.css',
             'css/claim.css',
             'css/chatter.css',
-            'css/vis.css',
+            'css/vis.css'
             ),
         'output_filename': 'css/cir_forum.css',
     },

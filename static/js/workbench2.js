@@ -40,7 +40,7 @@ define([
 		init_tk_event();
 		init_button();
 		initPopup();
-		initTutorial();
+		// initTutorial();
 	
 		// module.nugget_discussion_timer = setInterval(refresh_nugget_discussion, 3600000); // 1 hour
 		// clearInterval(nugget_discussion_timer);

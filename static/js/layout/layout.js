@@ -1,6 +1,7 @@
 define([
 	'doc/document',
 	'workbench2',
+	'layout/sankey_layout',
 	'claim/claim',
 	'claim/claim-navigator',
 	'claim/draft-stmt',
@@ -12,6 +13,7 @@ define([
 ], function(
 	DocumentView,
 	WorkbenchView,
+	SankeyView,
 	ClaimView,
 	ClaimNavigator,
 	DraftStmt,
@@ -57,6 +59,7 @@ define([
 		ClaimView.initClaimView();
 		VisActivity.init();
 		WorkbenchView.initWorkbenchView();
+		SankeyView.init();
 	}
 	
 	initLayout();

@@ -66,7 +66,10 @@ urlpatterns = patterns('',
     url(r'^sankey/put_screenshot/$', sankey_views.put_screenshot),
     url(r'^sankey/get_workbench/$', sankey_views.get_workbench),
     url(r'^sankey/put_workbench/$', sankey_views.put_workbench),
-
+    url(r'^sankey/get_doc_length/$', sankey_views.get_doc_length),
+    url(r'^sankey/get_doc_coverage/$', sankey_views.get_doc_coverage),
+    url(r'^sankey/get_entities/$', sankey_views.get_entities),
+    
     url(r'^api_chatter/$', chatter_views.api_chatter),
 
     url(r'^api_register_delegator/$', facilitator_views.register_delegator), # include other apps
