@@ -470,7 +470,7 @@ def get_entities(request):
 		author = role.user
 		item = {}
 		item["id"] = "author-" + str(author.id)
-		item["name"] = "P" + str(author.id)
+		item["name"] = "P" + str(author.id) + ":" + str(author.last_name)
 		response["authors"].append( item )
 	return HttpResponse(json.dumps(response), content_type='application/json')
 
