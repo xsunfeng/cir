@@ -162,7 +162,7 @@ define([
             height = barchart_size.height - margin.top - margin.bottom;
 
         sankey_x0 = d3.scale.ordinal()
-            .rangeRoundBands([0, width], .1);
+            .rangeRoundBands([0, width], .2);
 
         sankey_x1 = d3.scale.ordinal();
 
