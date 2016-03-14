@@ -918,8 +918,10 @@ define([
           $bar = $(".doc-bar[data-id=" + module.focus_node + "]")
           $("#doc-bar-indicator").css("left", $bar.offset().left - 10).css("top", $bar.offset().top - 10);
           $node = $(".doc-node[data-id='" + module.focus_node + "']")
-          $("#sankey-doc-arrow").show();
-          $("#sankey-doc-arrow").css("left", $node.offset().left - 20).css("top", $node.offset().top - 10);   
+          if ($node.length !== 0) {
+            $("#sankey-doc-arrow").show();
+            $("#sankey-doc-arrow").css("left", $node.offset().left - 20).css("top", $node.offset().top - 10);            
+          }
         }
 
         // add author lastest activity

@@ -392,7 +392,7 @@ def get_doc_coverage(request):
 	viewlogs = ViewLog.objects.all()
 	viewlogs = viewlogs.filter(created_at__lte = day_chooser_upper).filter(created_at__gte = day_chooser_lower)
 	# for realtime heatmap
-	viewlogs = viewlogs.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound)
+	# viewlogs = viewlogs.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound)
 	if (author_ids[0] != ""):
 		viewlogs = viewlogs.filter(author_id__in = author_ids)
 	if (theme_ids[0] != ""):
