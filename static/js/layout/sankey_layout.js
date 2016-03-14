@@ -716,6 +716,11 @@ define([
       module.get_sankey();
       module.get_barchart();
     });
+    $("body").on("click", "#refresh-sankey", function(e){
+      module.get_sankey();
+      module.get_barchart();
+      get_doc_bar();
+    });
 
     $("body").on("click", "#context-menu-goto", function(e){
       var doc_id = module.focus_node.split("-")[1];
@@ -842,49 +847,97 @@ define([
 
         var reverse = $("#select-sort-descending").hasClass("active");
         $('#doc-bar-container').empty();
+
+        // get unit height
+        var doc_length_map = {}
+        var doc_max_length = 0;
         $(".select-toolbar.active .select-document-elements .select-element").each(function(){
           var doc_id = $(this).attr("data-id").split("-")[1];
+          var count = 0;
+          for (var key in xhr.coverage_map[doc_id]) {
+            if (key !== undefined) {
+              count = count + xhr.coverage_map[doc_id][key].length;
+            }
+            // html = html + '<div style="width:30px; background: white; height:5px;"></div>';
+          }
+          if (count > doc_max_length) { doc_max_length = count };
+        });
+        var nugget_map_unit = 800 / doc_max_length;
+
+        var doc_length_map = {}
+        $(".select-toolbar.active .select-document-elements .select-element").each(function(){
+          var doc_id = $(this).attr("data-id").split("-")[1];
+          var count = 0;
           var html = ""
-          html = html + '<div class="doc-bar" style="margin:0 10px;float:left;" data-id="' + $(this).attr("data-id") + '">';
-          // html = html + '<div style="width:30px; background: white;">' + doc_id + '</div>';
+          html = html + '<div class="doc-bar" style="margin-left:20px;float:left;" data-id="' + $(this).attr("data-id") + '">';
           for (var key in xhr.coverage_map[doc_id]) {
             if (key !== undefined) {
               for (var i = 0; i < xhr.coverage_map[doc_id][key].length; i++) {
                 if (xhr.author_map_filtered[doc_id][key][i]) {
-                  html = html + '<div class="latest-activity doc-bar-elem" data-id="' + xhr.author_map_filtered[doc_id][key][i] + '" style="width:30px; background-color:#25A0C5; height:0.1px;"></div>';
+                  html = html + '<div class="latest-activity doc-bar-elem blue-l" data-id="' + xhr.author_map_filtered[doc_id][key][i] + '" style="width:30px; background-color:#25A0C5; height:' + nugget_map_unit + 'px;"></div>';
                 } else if (xhr.coverage_map_selected[doc_id][key][i]) {
-                  html = html + '<div class="doc-bar-elem" style="width:30px; background-color: #67C7E2; height:0.1px;"></div>';
+                  html = html + '<div class="doc-bar-elem blue-m" style="width:30px; height:' + nugget_map_unit + 'px;"></div>';
                 } else if (xhr.coverage_map_filtered[doc_id][key][i]) {
-                  html = html + '<div class="doc-bar-elem" style="width:30px; background-color: #C0E7F3; height:0.1px;"></div>';
+                  html = html + '<div class="doc-bar-elem blue-s" style="width:30px; height:' + nugget_map_unit + 'px;"></div>';
                 } else {
-                  html = html + '<div class="doc-bar-elem" style="width:30px; background-color: Azure; height:0.1px;"></div>';
+                  html = html + '<div class="doc-bar-elem" style="width:30px; background-color: Azure; height:' + nugget_map_unit + 'px;"></div>';
                 }
               }
+              count = count + xhr.coverage_map[doc_id][key].length;
             }
-            html = html + '<div style="width:30px; background: white; height:5px;"></div>';
+            // html = html + '<div style="width:30px; background: white; height:5px;"></div>';
           }
-
           html = html + "</div>";
           $('#doc-bar-container').append(html);
+          doc_length_map[doc_id] = count
+        });
+
+        $(".doc-bar").each(function(){
+          var doc_id = $(this).attr("data-id").split("-")[1]
+          var height = $(this).height();
+          if (height === 0) {
+            heatmap_unit = nugget_map_unit * doc_length_map[doc_id] / 100;
+          } else {
+            heatmap_unit = height / 100;
+          }
+          var html = "";
+          html = html + '<div class="doc-heatmap" style="margin:0; float:left;">';
+          if (doc_id in xhr.heatmap) {
+            for (var i = 0; i < 100; i++) {
+              html = html + '<div class="color-' + (xhr.heatmap[doc_id][i] + 1) + '" style="width:10px; height:' + heatmap_unit + 'px;"></div>';
+            }
+            html = html + "</div>";
+            $(this).after(html);        
+          }
         });
 
         // add bar wrapper
         if (module.focus_node !== "") {
-          $(".doc-bar").css("border", "");
-          $(".doc-bar[data-id=" + module.focus_node + "]").css("border", "solid 3px red");   
+
+          $("#doc-bar-indicator").show();
+          $bar = $(".doc-bar[data-id=" + module.focus_node + "]")
+          $("#doc-bar-indicator").css("left", $bar.offset().left - 10).css("top", $bar.offset().top - 10);
           $node = $(".doc-node[data-id='" + module.focus_node + "']")
           $("#sankey-doc-arrow").show();
-          $("#sankey-doc-arrow").css("left", $node.offset().left - 25).css("top", $node.offset().top - 15);   
+          $("#sankey-doc-arrow").css("left", $node.offset().left - 20).css("top", $node.offset().top - 10);   
         }
 
         // add author lastest activity
+        var your_id = $("#header-user-name").attr("data-id");
         $(".latest-activity").each(function(){
             var author_id = $(this).attr("data-id");
-            var tooltip = "P" + author_id + " recently worked on " + xhr.author_theme_map[author_id];
-            var arrow = '<div class="latest-activity-arrow" data-tooltip="' + tooltip + '" data-id="' + author_id + '" style="position:fixed;">' +
-                    '<i class="icon big red caret right"></i>' +
-              '</div>';
-            $(this).append(arrow);
+            if (your_id === author_id) {
+              var tooltip = "You recently worked on " + xhr.author_theme_map[author_id];
+              var arrow = '<div class="latest-activity-arrow" data-tooltip="' + tooltip + '" data-id="' + author_id + '" style="position:fixed;">' +
+                  '<i class="icon big olive user"></i>' +
+                '</div>';       
+            } else {
+              var tooltip = "P" + author_id + " recently worked on " + xhr.author_theme_map[author_id];
+              var arrow = '<div class="latest-activity-arrow" data-tooltip="' + tooltip + '" data-id="' + author_id + '" style="position:fixed;">' +
+                      '<i class="icon big red user"></i>' +
+                '</div>';  
+            }
+          $(this).append(arrow);
             $(".latest-activity-arrow[data-id=" + author_id +  "]").css("left", $(this).offset().left - 20).css("top", $(this).offset().top - 10);
         })
       },
@@ -1015,7 +1068,7 @@ function init_slider() {
 
 function hide_rec() {
   $("#doc-bar-arrow").hide();
-  $(".doc-bar").css("border", "");
+  $("#doc-bar-indicator").hide();
 }
 
 function number2date(num) {
@@ -1053,6 +1106,47 @@ function date2number(str) {
     date.setSeconds(arr[5]);
     return date.getTime();
 }
+
+  // activity heatmap
+  idleTime = 0
+  idleInterval = setInterval(function() {
+    idleTime = idleTime + 1;
+    // console.log(idleTime);
+    if (idleTime < 2 && $(".workbench-doc-item").is(":visible") && !$("#sankey-container").is(":visible")) { // 30s
+      var upper = $("#workbench-document").scrollTop();
+      var lower = $("#workbench-document").scrollTop() + $("#workbench-document").height();
+      var height = $("#workbench-document .workbench-doc-item").height();
+      var doc_id = $(".workbench-doc-item").attr("data-id");
+      var author_id = $("#header-user-name").attr("data-id");
+      $.ajax({
+        url: '/sankey/put_heatmap/',
+        type: 'post',
+        data: {
+          "doc_id": doc_id,
+          "lower": lower,
+          "upper": upper,
+          "height": height,
+          "theme_id": workbench_module.currentThemeId,
+          "author_id": author_id
+        },
+        success: function(xhr) {
+
+        },
+        error: function(xhr) {
+          if (xhr.status == 403) {
+            Utils.notify('error', xhr.responseText);
+          }
+        }
+      });
+    }
+  }, 3000); // 1 minute
+
+  //Zero the idle timer on mouse movement.
+  $("body").on("mousemove", "#workbench2-document-container", function(e){
+    idleTime = 0;
+  })
+
+
   return module;
 
 });

@@ -1,6 +1,7 @@
 import json
 import re
 import math
+import numpy as np
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils.timezone import localtime
@@ -92,7 +93,6 @@ def get_graph(request):
 		for doc in docs:
 			graph["nodes"].append({"name": "doc-" + str(doc.id), "text":  str(doc.title)})
 	elif (relation == "dt"):
-		print "111"
 		pair_set = []
 		for h in highlights:
 			if (h.context != None and h.theme != None and DocSection.objects.get(id=h.context.id).forum_id == forum_id):
@@ -118,7 +118,6 @@ def get_graph(request):
 							item["value"] = item["value"] + 1
 							break
 	elif (relation == "dpt"):
-		print "222"
 		doc_author_pair_set = []
 		author_theme_pair_set = []
 		for h in highlights:
@@ -159,7 +158,6 @@ def get_graph(request):
 							item["value"] = item["value"] + 1
 							break
 	elif (relation == "dp"):
-		print "333"
 		doc_author_pair_set = []
 		for h in highlights:
 			if (h.context != None and DocSection.objects.get(id=h.context.id).forum_id == forum_id):
@@ -389,6 +387,37 @@ def get_doc_coverage(request):
 				doc_id = DocSection.objects.get(id=hl[0].context.id).doc.id
 				response["author_map_filtered"][doc_id][section_id][hl[0].start_pos] = author_id
 				response["author_theme_map"][author_id] = hl[0].theme.name
+	# initialize
+	num_category = 5
+	viewlogs = ViewLog.objects.all()
+	viewlogs = viewlogs.filter(created_at__lte = day_chooser_upper).filter(created_at__gte = day_chooser_lower)
+	# for realtime heatmap
+	viewlogs = viewlogs.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound)
+	if (author_ids[0] != ""):
+		viewlogs = viewlogs.filter(author_id__in = author_ids)
+	if (theme_ids[0] != ""):
+		viewlogs = viewlogs.filter(theme_id__in = theme_ids)
+	if (doc_ids[0] != ""):
+		viewlogs = viewlogs.filter(doc_id__in = doc_ids)
+	# get max view log number
+	m = 0
+	for doc in Doc.objects.filter(forum = forum):
+		if (viewlogs.filter(doc_id = doc.id).count() > 0):
+			viewlog = viewlogs.filter(doc_id = doc.id).order_by("-created_at")[0]
+			arr = viewlog.heatmap.split(",")
+			arr = [int(x) for x in arr]
+			l = np.array(arr)
+			if ( l.max() > m ): m = l.max()
+	unit = m / (num_category - 1)
+	response["heatmap"] = {}
+	for doc_id in doc_ids:
+		if (viewlogs.filter(doc_id = doc_id).count() > 0):
+			viewlog = viewlogs.filter(doc_id = doc_id).order_by("-created_at")[0]
+			arr = viewlog.heatmap.split(",")
+			arr = [int(x) for x in arr]
+			l = np.array(arr)
+			l = l / unit
+			response["heatmap"][str(doc_id)] = l.tolist()
 	return HttpResponse(json.dumps(response), content_type='application/json')
 
 def put_workbench(request):
@@ -444,6 +473,35 @@ def get_doc_length(request):
 		section_segmented_text = section.getAttr(forum)["segmented_text"]
 		length = length + len(section_segmented_text)
 	response['length'] = length
+	return HttpResponse(json.dumps(response), content_type='application/json')
+
+def put_heatmap(request):
+	response = {}
+	context = {}
+	forum_id = request.session['forum_id']
+	forum = Forum.objects.get(id = forum_id)
+	upper = request.REQUEST.get('upper')
+	lower = request.REQUEST.get('lower')
+	height = request.REQUEST.get('height')
+	doc_id = request.REQUEST.get('doc_id')
+	theme_id = request.REQUEST.get('theme_id')
+	author_id = request.REQUEST.get('author_id')
+	if theme_id != "-1":
+		print doc_id
+		print author_id
+		viewlogs = ViewLog.objects.filter(doc_id = doc_id, author_id = author_id, theme_id = theme_id)
+		if (viewlogs.count() > 1):
+			viewlog_latest = viewlogs.order_by("-created_at")[0]
+			heatmap = viewlog_latest.heatmap.split(",")
+			heatmap = [int(x) for x in heatmap]
+		else:
+			heatmap = [0] * 100
+		left = int(round(100 * (float)(upper) / (float)(height)))
+		right = int(round(100 * (float)(lower) / (float)(height)))
+		for i in range(left, right):
+			heatmap[i] = heatmap[i] + 1
+		heatmap = ",".join(str(x) for x in heatmap)
+		ViewLog.objects.create(doc_id = doc_id, author_id = author_id, theme_id = theme_id, created_at = timezone.now(), heatmap = heatmap)
 	return HttpResponse(json.dumps(response), content_type='application/json')
 
 def get_entities(request):

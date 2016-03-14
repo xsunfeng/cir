@@ -178,7 +178,6 @@ class Doc(models.Model):
             pass
         return attr
 
-
 class DocSection(Entry):
     title = models.TextField(null=True, blank=True)
     order = models.IntegerField(null=True, blank=True)
@@ -523,3 +522,10 @@ class SankeyWorkbench(models.Model):
 
 class SankeyScreenshot(models.Model):
     content = models.TextField(null=True, blank=True)
+
+class ViewLog(models.Model):
+    heatmap = models.TextField(null=True, blank=True)
+    doc = models.ForeignKey(Doc, related_name='viewlogs') 
+    author = models.ForeignKey(User)
+    theme = models.ForeignKey(ClaimTheme, null=True, blank=True)
+    created_at = models.DateTimeField(null=True, blank=True)

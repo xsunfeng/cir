@@ -30,7 +30,8 @@
     </div>
     <div class="item" style="padding:0;">
       <div class="ui buttons">
-        <button id="update-sankey" class="ui button">Clear</button>
+        <button id="update-sankey" class="ui button">clear</button>
+        <button id="refresh-sankey" class="ui button">refresh</button>
       </div>
     </div>
   </div>
@@ -111,7 +112,7 @@
   </div>
   <div id="doc-bar-container" style="float:left;"></div>
   <!-- <div id="sankey-word-cloud" style="float:left;width:300px;"></div> -->
-  <div id="sankey-document-container" style="position: absolute; overflow: auto; right: 0; left: 920px;">
+  <div id="sankey-document-container" style="position: absolute; overflow: auto; right: 0; left: 960px;">
     <div id="sankey-document" class="ui segment" style="overflow: auto;">
     </div>
     <button id="context-menu-goto" class="ui button" style="float:right;">goto</button>
@@ -194,12 +195,15 @@
 <div class="" id="countdown-number">
 </div>
 
-<div id="sankey-doc-arrow" style="position:fixed;">
-  <i class="icon big olive caret right"></i>
+<div id="sankey-doc-arrow" style="position:fixed; display:none;">
+  <i class="icon big blue check circle outline"></i>
+</div>
+<div id="doc-bar-indicator" style="position:fixed; display:none;">
+  <i class="icon big blue check circle outline"></i>
 </div>
 
 <div id="doc-bar-arrow" style="position:fixed;">
-  <i class="icon big olive caret right"></i>
+  <i class="icon big blue caret right"></i>
 </div>
 
 <i id="close-sankey" class="circular inverted red remove icon" style="position:fixed;right:1em;top:4em;"></i>

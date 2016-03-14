@@ -125,6 +125,7 @@ def api_get_doc_by_doc_id(request):
     doc_id = request.REQUEST.get("doc_id")
     doc = Doc.objects.get(id = doc_id)
     context['doc_name'] = doc.title
+    context['doc_id'] = doc.id
     context['sections'] = []
     ordered_sections = doc.sections.filter(order__isnull=False).order_by('order')
     for section in ordered_sections:
