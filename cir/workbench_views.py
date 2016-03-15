@@ -162,10 +162,10 @@ def api_load_all_themes(request):
     context['forum_url'] = forum.url    
     themes = ClaimTheme.objects.filter(forum_id=request.session['forum_id'])
     context["themes"] = []
-    unassigned_theme = ClaimTheme.objects.filter(forum_id = "22", name__iexact="unassigned")
-    if not unassigned_theme:
-        c = ClaimTheme.objects.create(forum_id=request.session['forum_id'], name="Unassigned")
-        c.save()
+    # unassigned_theme = ClaimTheme.objects.filter(forum_id = "22", name__iexact="unassigned")
+    # if not unassigned_theme:
+    #     c = ClaimTheme.objects.create(forum_id=request.session['forum_id'], name="Unassigned")
+    #     c.save()
     for theme in themes:
         context["themes"].append(theme)
     context["phase"] = PHASE_CONTROL[forum.phase]

@@ -180,7 +180,7 @@
 
 #tsd-container {
 	top: 8em;
-	bottom: 50%;
+	bottom: 0;
     overflow: auto;
     position: fixed;
     right: 0;

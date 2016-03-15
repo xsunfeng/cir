@@ -1,7 +1,7 @@
-<h3 id="cur-doc-title" style="display:none">{{ doc_name }}</h3>
+<!-- <h3 id="cur-doc-title">{{ doc_name }}</h3>
 {% for section in sections %} 
 	<div class="ui raised segment workbench-documents-column" style="
-		margin:		1em;
+		font-size:		20px;
 		background:	#E0F1E0;
 	">
 		{% if section.title %}
@@ -10,4 +10,29 @@
 		<div>{{ section.update_at }}</div>
 		<div class="section-content" data-id="{{ section.id }}">{{ section.segmented_text|safe }}</div>
 	</div>
-{% endfor %}
+{% endfor %} -->
+<div class="ui segment">In mid-April we will hold a Community Issue Review among 24 panelists. These panelists will focus their attention on the issue that is framed below. Selected documents and experts will be used as resources as the panelists summarize the issue into a 20 statement document that will be shared in the Centre Daily Times and inform participants in an in-person deliberation about this issue. We aim to use the statement and deliberation to inform decision-makers about this issue. 
+Please review the content below, each section provides an explanation of how it will be used by panelists in this review. If you have suggestions for changes, modifications, or if you would simply like to comment on this content, you may leave a comment on right of this page. 
+</div>
+
+<div class="ui styled accordion" style="width:100%; font-size:20px;">
+	{% for section in sections %} 
+	    {% if forloop.first %}
+			<div class="title active section-header" data-id="{{ section.id }}">
+			<i class="dropdown icon"></i>
+			{{ section.title }}
+			</div>
+			<div class="content active section-content" data-id="{{ section.id }}">
+			<p class="transition visible" style="display: block !important;">{{ section.segmented_text|safe }}</p>
+			</div>
+	    {% else %}
+	    	<div class="title section-header" data-id="{{ section.id }}">
+			<i class="dropdown icon"></i>
+			{{ section.title }}
+			</div>
+			<div class="content section-content" data-id="{{ section.id }}">
+			<p class="transition visible" style="display: block !important;">{{ section.segmented_text|safe }}</p>
+			</div>
+    	{% endif %}
+  {% endfor %}
+</div>

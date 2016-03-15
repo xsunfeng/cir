@@ -45,6 +45,7 @@ define([
 		
 		require('doc/qa').updateQuestionList();
 		
+		get_doc("27");
 	};
 
 	function initTutorial() {		// tutorial image slider
@@ -191,6 +192,26 @@ define([
 
 	function init_button() {
 		
+		$("body").on("click", ".section-header", function(){
+			var sec_id = $(this).attr("data-id");
+			var theme_id = "-1";
+			switch(sec_id) {
+				case "4387":
+				    theme_id = "37";
+				    break;
+				case "4388":
+				    theme_id = "38";
+				    break;
+				case "4389":
+				    theme_id = "39";
+				    break;
+				case "4390":
+				    theme_id = "40";
+				    break;
+			}
+			$(".claim-theme-filter[data-id=" + theme_id + "]").click();
+		})
+
 		$('#tsdclaim-type .checkbox').checkbox({
 		    onChecked: function() {
 		  		module.tsd_claim_type = $(this).attr("data-type");
@@ -621,31 +642,31 @@ define([
 	}
 
 	function load_tsdclaim_list() {
-		module.tsd_claim_type = $(".inline.fields").find(":checked").attr("data-type");
-		var content = module.claim_textarea_container.find("textarea").val();
-		var promise = $.ajax({
-			url: '/api_tsd/',
-			type: 'post',
-			data: {
-				action: "load-tsdclaim",
-				theme_id: module.currentThemeId,
-				tsd_claim_type: module.tsd_claim_type,
-				content: content,
-			},
-			success: function(xhr) {
-				$("#workbench-claim-list").html(xhr.workbench_tsdclaims);
-				if ($("#header-user-name").attr("data-role") != "facilitator") {
-					$(".facilitator-only").css("display", "none");
-				}
-			},
-			error: function(xhr) {
-				if (xhr.status == 403) {
-					Utils.notify('error', xhr.responseText);
-				}
-				$('#tsd-list').css('opacity', '1.0');
-			}
-		});
-		return promise;
+		// module.tsd_claim_type = $(".inline.fields").find(":checked").attr("data-type");
+		// var content = module.claim_textarea_container.find("textarea").val();
+		// var promise = $.ajax({
+		// 	url: '/api_tsd/',
+		// 	type: 'post',
+		// 	data: {
+		// 		action: "load-tsdclaim",
+		// 		theme_id: module.currentThemeId,
+		// 		tsd_claim_type: module.tsd_claim_type,
+		// 		content: content,
+		// 	},
+		// 	success: function(xhr) {
+		// 		$("#workbench-claim-list").html(xhr.workbench_tsdclaims);
+		// 		if ($("#header-user-name").attr("data-role") != "facilitator") {
+		// 			$(".facilitator-only").css("display", "none");
+		// 		}
+		// 	},
+		// 	error: function(xhr) {
+		// 		if (xhr.status == 403) {
+		// 			Utils.notify('error', xhr.responseText);
+		// 		}
+		// 		$('#tsd-list').css('opacity', '1.0');
+		// 	}
+		// });
+		// return promise;
 	}
 
 	function load_theme() {
@@ -657,7 +678,7 @@ define([
 			},
 			success: function(xhr) {
 				$("#workbench-theme-container").html(xhr.workbench_container);
-				
+
 				$('#current-phase')
 				.popup({
 					popup : $('#phase-instructions'),
@@ -672,10 +693,6 @@ define([
 						module.currentThemeId = $selectedItem.attr("data-id");
 						$("#current-claim-theme-text").text(text);
 						$("#feng1").text("");
-						// load_nugget_list();
-						// load_claim_list();
-						// clear_highlights();
-						// module.load_highlights_by_doc();
 	    			},
 	    			onHide: function($selectedLabels) {
 	    				TSDView.updateQuestionList();
@@ -691,6 +708,7 @@ define([
 	    			onHide: function($selectedLabels) {
 	    			}
   				});
+  				$(".claim-theme-filter[data-id=37]").click();
 
 			},
 			error: function(xhr) {
@@ -988,6 +1006,34 @@ define([
 		// });
 		// return promise;
 	}
+	function get_doc(doc_id) {
+		$.ajax({
+			url: '/workbench/api_get_doc_by_doc_id/',
+			type: 'post',
+			data: {
+				'doc_id': doc_id,
+			},
+			success: function(xhr) {
+				$("#workbench-document").html(xhr.workbench_document);
+		
+				$('#workbench-document-toc').popup('hide');
+				$("#workbench2-document-container").animate({scrollTop: 0}, 0);
+				module.doc_id = xhr.doc_id;
+				module.load_highlights_by_doc();
+
+		    	var text = "&nbsp;&nbsp;" + $("#cur-doc-title").text();
+		    	$("#cur-doc-title2").html("Current document:<b>" + text + "</b>");
+		    	$('.ui.accordion').accordion();
+
+			},
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			}
+		});
+	}
+						
 
 	return module;
 });

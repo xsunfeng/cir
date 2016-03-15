@@ -24,16 +24,13 @@
     {% if phase.show_statement_link %}
     <a href="{{ forum_url }}/statement" class="item">Citizens' Statement</a>
     {% endif %}
-    <div id="header-visitor-wrapper" class="right menu" style="display:flex">
-        <div class="item">
-            <div id="login-btn" class="ui button">Log in</div>
-        </div>
-        <div class="item">
-            <div id="signup-btn" class="ui button">Sign up</div>
-        </div>
+    <div id="header-visitor-wrapper" class="right menu" style="display:flex; position: absolute;right: 0;">
+            <div class="item" id="login-btn">Log in</div>
+            <div class="item">|</div>
+            <div class="item" id="signup-btn">Sign up</div>
     </div>
-    <div class="right menu" style="display:flex">
-    	<a id="header-member-wrapper">
+    <div class="right menu" id="header-member-wrapper">
+    	<a >
 	        <div class="ui simple dropdown item" tabindex="0">
 	            <span id="header-user-name" data-id="{{ user_id }}" data-role="{{ role }}">{{ user_name }}</span>
 	            <i class="icon dropdown" tabindex="0"></i>
@@ -144,55 +141,6 @@
 				<div id="tsd-list"></div>
 			</div>
 		</div>
-
-		<div class="seven wide column shadow1" id = "workbench2-claim-textarea-container">
-			<div class="ui form">
-				<div class="field">
-					<textarea rows="4"></textarea>
-				</div>
-				<div class="ui form">
-					<div id="tsdclaim-type" class="inline fields">
-						<label></label>
-						<div class="field">
-							<div class="ui radio checkbox">
-								<input type="radio" data-type="Framing question" name="frequency" checked="checked">
-								<label>Framing Issue</label>
-							</div>
-						</div>
-						<div class="field">
-							<div class="ui radio checkbox">
-								<input type="radio" data-type="Document" name="frequency">
-								<label>Document</label>
-							</div>
-						</div>
-						<div class="field">
-							<div class="ui radio checkbox">
-								<input type="radio" data-type="Panelist" name="frequency">
-								<label>Panelist</label>
-							</div>
-						</div>
-						<div class="field">
-							<div class="ui radio checkbox">
-								<input type="radio" data-type="Expert" name="frequency">
-								<label>Expert</label>
-							</div>
-						</div>
-						<div class="ui button add-tsdclaim" style="position: absolute; right: 0;">Add</div>
-					</div>
-				</div>
-			</div>
-		</div>		
-		
-		<div class="seven wide column" id = "workbench2-claim-container">
-			<div id="workbench-claim-list" class="flag">
-				<div style="height:500px;">
-				</div>
-				<div style="" class="ui active inverted dimmer">
-					<div class="ui large text loader">Preparing claims</div>
-				</div>
-			</div>
-		</div>
-		
 	</div>
 	{% include 'doc/doc-highlight-toolbar.html' with phase=phase %}
 	{% include 'doc/doc-thread-popup.html' with phase=phase %}
