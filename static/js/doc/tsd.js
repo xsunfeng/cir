@@ -135,7 +135,8 @@ define([
 				'content': content,
 				'theme_id': theme_id,
 			}).done(function() {
-				$('#tsd-wrapper .new.question.segment').addClass('hidden');
+				// $('#tsd-wrapper .new.question.segment').addClass('hidden');
+				$('#tsd-wrapper .new.question textarea').val("");
 				// dispatch the event
 				var message = '<b>' + sessionStorage.getItem('user_name')
 					+ '</b> ('

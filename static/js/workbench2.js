@@ -45,6 +45,7 @@ define([
 		
 		require('doc/qa').updateQuestionList();
 		
+		$(".new-question").click();
 		get_doc("27");
 	};
 
@@ -210,6 +211,7 @@ define([
 				    break;
 			}
 			$(".claim-theme-filter[data-id=" + theme_id + "]").click();
+			$(".refresh-list").click();
 		})
 
 		$('#tsdclaim-type .checkbox').checkbox({
