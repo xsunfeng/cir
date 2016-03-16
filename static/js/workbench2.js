@@ -45,8 +45,8 @@ define([
 		
 		require('doc/qa').updateQuestionList();
 		
-		$(".new-question").click();
 		get_doc("27");
+		$('#tsd-wrapper .new.question.segment').removeClass('hidden');
 	};
 
 	function initTutorial() {		// tutorial image slider
