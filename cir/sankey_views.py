@@ -11,8 +11,8 @@ from datetime import datetime, date, time, timedelta
 
 from . import preprocessing
 
-day_chooser_lower = date(2016, 3, 10)
-day_chooser_upper = date(2016, 3, 12)
+day_chooser_lower = date(2016, 3, 14)
+day_chooser_upper = date(2016, 3, 20)
 
 def get_graph(request):
 	relation = request.REQUEST.get('relation')
