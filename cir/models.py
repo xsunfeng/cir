@@ -221,6 +221,8 @@ class ClaimTheme(models.Model):
         return self.name
 
 class Highlight(models.Model):
+    upper_bound = models.FloatField(null=True, blank=True)
+    lower_bound = models.FloatField(null=True, blank=True)
     start_pos = models.IntegerField()
     end_pos = models.IntegerField()
     context = models.ForeignKey(Entry, related_name='highlights')
@@ -526,6 +528,12 @@ class SankeyScreenshot(models.Model):
 class ViewLog(models.Model):
     heatmap = models.TextField(null=True, blank=True)
     doc = models.ForeignKey(Doc, related_name='viewlogs') 
-    author = models.ForeignKey(User)
-    theme = models.ForeignKey(ClaimTheme, null=True, blank=True)
+    author = models.ForeignKey(User, related_name='viewlogs')
+    created_at = models.DateTimeField(null=True, blank=True)
+
+class NuggetMap(models.Model):
+    distribution = models.TextField(null=True, blank=True)
+    doc = models.ForeignKey(Doc, related_name='nuggetmaps') 
+    author = models.ForeignKey(User, related_name='nuggetmaps')
+    theme = models.ForeignKey(ClaimTheme, related_name='nuggetmaps')
     created_at = models.DateTimeField(null=True, blank=True)

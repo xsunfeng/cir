@@ -21,19 +21,20 @@ define([
   var module = {};
 
   module.init = function() {
-    barchart_size = {width: 700, height:230};
-    sankey_size = {width: 700, height:600}
-    timerange_num_interval = 40;
+    barchart_size = {width: $(window).width() * 0.9, height:180};
+    sankey_size = {width: 500, height:600}
+    timerange_num_interval = 100;
     module.focus_node = "";
 
     module["focusNode"];
     module["nodeStyle"] = {};
-    module.time_lower_bound = "1970 01 01 00 00 00";
-    module.time_upper_bound = "2100 01 01 00 00 00";
+    module.time_lower_bound = new Date(2010, 1, 1, 0, 0, 0);
+    module.time_upper_bound = new Date(2020, 12, 31, 23, 59, 59);
     
     module.barchart_ajax;
     module.nodeMap = {};
     module.time_bound_list = [];
+    module.focus_threshold = 24;
 
     module["relation"] = $("#sankey-relation .item.active").attr("data-value");
 
@@ -50,7 +51,6 @@ define([
     });
 
     hide_rec();
-    init_slider();
     add_selection_elements();
     module.get_sankey();
     module.get_barchart();
@@ -59,209 +59,232 @@ define([
     $('#sankey-relation .item').tab();
   }
 
-  // update bar chart
-  module.update_barchart = function () {
-    var selected = $(".node.active").attr("data-id");
-    var filter = get_filter();
-    module.barchart_ajax = $.ajax({
-      url: '/sankey/get_barchart/',
-      type: 'post',
-      data: {
-        "time_lower_bound": filter.time_lower_bound,
-        "time_upper_bound": filter.time_upper_bound,
-        "doc_ids": filter.doc_ids,
-        "author_ids": filter.author_ids,
-        "theme_ids": filter.theme_ids,
-        "selected": selected
-      },
-      success: function(xhr) {
-
-        var data = xhr.data;
-        var ageNames = ["num_nugget_ind", "num_nugget_sel"];
-        data.forEach(function(d) {
-          d.ages = ageNames.map(function(name) { 
-            return {name: name, value: +d[name]}; 
-          });
-        });
-        var svg = d3.select("#barchart").select("svg")
-        var state = svg.selectAll(".state")
-            .data(data);
-
-        var margin = {top: 20, right: 20, bottom: 30, left: 40},
-            width = barchart_size.width - margin.left - margin.right,
-            height = barchart_size.height - margin.top - margin.bottom;
-
-        state.selectAll("rect")
-            .data(function(d) { return d.ages; })
-            .attr("width", function(d) {
-              return sankey_x1.rangeBand();
-            })
-            .attr("x", function(d) { return sankey_x1(d.name); })
-            .attr("y", function(d) { 
-              return sankey_y(d.value); 
-            })
-            .attr("height", function(d) { 
-              return height - sankey_y(d.value); 
-            });
-
-      },
-      error: function(xhr) {
-        if (xhr.status == 403) {
-          Utils.notify('error', xhr.responseText);
-        }
-      }
-    });
-  }
-
   // enter bar chart
   module.get_barchart = function () {
-
-    if (module.barchart_ajax) module.barchart_ajax.abort();
-    var loader_str = '<div class="ui segment" style="height:' + barchart_size.height + 'px;">' +
-      '<div class="ui inverted dimmer active">' +
-      '<div class="ui large text loader">Loading</div>' +
-      '</div><p></p><p></p><p></p></div>';
-    $("#barchart").html(loader_str);
-
-    var selected = "" | $(".node.active").attr("data-id");
-    var filter = get_filter();
-    module.barchart_ajax = $.ajax({
-      url: '/sankey/get_barchart/',
+    $.ajax({
+      url: '/sankey/get_highlights2/',
       type: 'post',
       data: {
-        "time_lower_bound": filter.time_lower_bound,
-        "time_upper_bound": filter.time_upper_bound,
-        "doc_ids": filter.doc_ids,
-        "author_ids": filter.author_ids,
-        "theme_ids": filter.theme_ids,
-        "selected": selected
       },
       success: function(xhr) {
 
-        $("#barchart").html("");
-        var data = xhr.data;
+        filter = get_filter();
+        var timeFormat = d3.time.format("%Y %m %d %H %M");
+        xhr.highlights.forEach(function(p) {
+          p.date = timeFormat.parse(p.date);
+        });
+        var cf_highlight = crossfilter(xhr.highlights);
 
-        // initiate once, set time range
-        if ($(timerange_lower_value).attr("data-value") === "0") {
-          var xs = data[0].time_lower_bound;
-          var xl = data[data.length - 1].time_upper_bound;
-          var min_time = date2number(xs);
-          var max_time = date2number(xl);
-          var interval = Math.ceil((max_time - min_time) / (timerange_num_interval - 1));
-          for(var i = 0; i < timerange_num_interval; i++) {
-              timerange_arr[i] = min_time + i * interval;
+        var cf_highlight_by_theme_id = cf_highlight.dimension(function(p) { return p.theme_id; });
+        var theme_ids = filter.theme_ids.split(" ");
+        cf_highlight_by_theme_id.filter(function(d){
+          return theme_ids.indexOf(d.toString()) > -1;
+        });
+
+        var cf_highlight_by_author_id = cf_highlight.dimension(function(p) { return p.author_id; });
+        var author_ids = filter.author_ids.split(" ");
+        cf_highlight_by_author_id.filter(function(d){
+          return author_ids.indexOf(d.toString()) > -1;
+        });
+
+        var cf_highlight_by_doc_id = cf_highlight.dimension(function(p) { return p.doc_id; });
+        var doc_ids = filter.doc_ids.split(" ");
+        cf_highlight_by_doc_id.filter(function(d){
+          return doc_ids.indexOf(d.toString()) > -1;
+        });
+
+        var cf_highlight_by_date = cf_highlight.dimension(function(p) { return p.date; });
+        data = []
+        cf_highlight_by_date.group().all().forEach(function(p, i) {
+          item = {};
+          item.date = p.key;
+          item.count = p.value;
+          // item.count2 = p.value;
+          // item.count3 = p.value;
+          data.push(item);
+        });
+
+
+        // sizing information, including margins so there is space for labels, etc
+        var margin =  { top: 70, right: 30, bottom: 20, left: 30 },
+            width = barchart_size.width - margin.left - margin.right,
+            height = barchart_size.height - margin.top - margin.bottom,
+            marginOverview = { top: 0, right: margin.right, bottom: 150,  left: margin.left },
+            heightOverview = barchart_size.height - marginOverview.top - marginOverview.bottom;
+
+        // set up a date parsing function for future use
+        var parseDate = d3.time.format("%Y %m %d %H %M").parse;
+
+        // some colours to use for the bars
+        var colour = d3.scale.ordinal()
+                            .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+        // mathematical scales for the x and y axes
+        var x = d3.time.scale()
+                        .range([0, width]);
+        var y = d3.scale.linear()
+                        .range([height, 0]);
+        var xOverview = d3.time.scale()
+                        .range([0, width]);
+        var yOverview = d3.scale.linear()
+                        .range([heightOverview, 0]);
+
+        // rendering for the x and y axes
+        var xAxis = d3.svg.axis()
+                        .scale(x)
+                        .orient("bottom");
+        var yAxis = d3.svg.axis()
+                        .scale(y)
+                        .orient("left")
+                        .tickFormat(d3.format("d"));
+        var xAxisOverview = d3.svg.axis()
+                        .scale(xOverview)
+                        .orient("bottom");
+
+        // something for us to render the chart into
+        $("#brush").html("");
+        var svg = d3.select("#brush")
+                        .append("svg") // the overall space
+                            .attr("width", width + margin.left + margin.right)
+                            .attr("height", height + margin.top + margin.bottom);
+        var main = svg.append("g")
+                        .attr("class", "main")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        var overview = svg.append("g")
+                            .attr("class", "overview")
+                            .attr("transform", "translate(" + marginOverview.left + "," + marginOverview.top + ")");
+
+        // brush tool to let us zoom and pan using the overview chart
+        var brush = d3.svg.brush()
+                            .x(xOverview)
+                            .on("brush", brushed);
+
+        // setup complete, let's get some data!
+        // by habit, cleaning/parsing the data and return a new object to ensure/clarify data object structure
+        data.forEach(function(d) {
+            d.date = d.date;
+            var y0 = 0;
+            d.counts = ["count"].map(function(name) {
+                return { name: name,
+                         y0: y0,
+                         // add this count on to the previous "end" to create a range, and update the "previous end" for the next iteration
+                         y1: y0 += +d[name]
+                       };
+            });
+            d.total = d.counts[d.counts.length - 1].y1;
+        });
+
+        // data ranges for the x and y axes
+        x.domain(d3.extent([
+          timeFormat.parse(xhr.time_lower_bound), 
+          timeFormat.parse(xhr.time_upper_bound)]));
+        y.domain([0, d3.max(data, function(d) { return d.total; })]);
+        xOverview.domain(x.domain());
+        yOverview.domain(y.domain());
+
+        module.time_lower_bound = xOverview.domain()[0];
+        module.time_upper_bound = xOverview.domain()[1];
+        $("#sankey-timerange-lower-value").text(module.time_lower_bound);
+        $("#sankey-timerange-upper-value").text(module.time_upper_bound);
+
+        // data range for the bar colours
+        // (essentially maps attribute names to colour values)
+        colour.domain(d3.keys(data[0]));
+
+        // draw the axes now that they are fully set up
+        main.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+        main.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
+        overview.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + heightOverview + ")")
+            .call(xAxisOverview);
+
+        // draw the bars
+        main.append("g")
+                .attr("class", "bars")
+            // a group for each stack of bars, positioned in the correct x position
+            .selectAll(".bar.stack")
+            .data(data)
+            .enter().append("g")
+                .attr("class", "bar stack")
+                .attr("transform", function(d) { return "translate(" + x(d.date) + ",0)"; })
+            // a bar for each value in the stack, positioned in the correct y positions
+            .selectAll("rect")
+            .data(function(d) { 
+              return d.counts; 
+            })
+            .enter().append("rect")
+                .attr("class", "bar")
+                .attr("width", 6)
+                .attr("y", function(d) { return y(d.y1); })
+                .attr("height", function(d) { return y(d.y0) - y(d.y1); })
+                .style("fill", function(d) { return colour(d.name); });
+
+        overview.append("g")
+                    .attr("class", "bars")
+            .selectAll(".bar")
+            .data(data)
+            .enter().append("rect")
+                .attr("class", "bar")
+                .attr("x", function(d) { return xOverview(d.date) - 3; })
+                .attr("width", 6)
+                .attr("y", function(d) { return yOverview(d.total); })
+                .attr("height", function(d) { return heightOverview - yOverview(d.total); });
+
+        // add the brush target area on the overview chart
+        overview.append("g")
+                    .attr("class", "x brush")
+                    .call(brush)
+                    .selectAll("rect")
+                        // -6 is magic number to offset positions for styling/interaction to feel right
+                        .attr("y", -6)
+                        // need to manually set the height because the brush has
+                        // no y scale, i.e. we should see the extent being marked
+                        // over the full height of the overview chart
+                        .attr("height", heightOverview + 7);  // +7 is magic number for styling
+
+    // zooming/panning behaviour for overview chart
+        function brushed() {
+          // update the main chart's x axis data range
+          x.domain(brush.empty() ? xOverview.domain() : brush.extent());
+          // redraw the bars on the main chart
+          main.selectAll(".bar.stack")
+                  .attr("transform", function(d) { return "translate(" + x(d.date) + ",0)"; })
+          // redraw the x axis of the main chart
+          main.select(".x.axis").call(xAxis);
+
+          // change filter
+          if (!d3.event.sourceEvent) return; // only transition after input
+          if (brush.empty()) {
+            module.time_lower_bound = xOverview.domain()[0];
+            module.time_upper_bound = xOverview.domain()[1];
+          } else {
+            var extent0 = brush.extent(),
+                extent1 = extent0.map(d3.time.minute.round);
+                module.time_lower_bound = extent0[0];
+                module.time_upper_bound = extent0[1];
+            // if empty when rounded, use floor & ceil instead
+            if (extent1[0] >= extent1[1]) {
+              extent1[0] = d3.time.minute.floor(extent0[0]);
+              extent1[1] = d3.time.minute.ceil(extent0[1]);
+              module.time_lower_bound = extent1[0];
+              module.time_upper_bound = extent1[1];
+            }           
           }
-          $(timerange_lower_value).attr("data-value", min_time);
-          $(timerange_upper_value).attr("data-value", max_time);
-          $(timerange_lower_value).text(number2date_pretty(min_time));
-          $(timerange_upper_value).text(number2date_pretty(max_time));
+          $("#sankey-timerange-lower-value").text(module.time_lower_bound);
+          $("#sankey-timerange-upper-value").text(module.time_upper_bound);
         }
 
-        var margin = {top: 20, right: 20, bottom: 30, left: 40},
-            width = barchart_size.width - margin.left - margin.right,
-            height = barchart_size.height - margin.top - margin.bottom;
-
-        sankey_x0 = d3.scale.ordinal()
-            .rangeRoundBands([0, width], .2);
-
-        sankey_x1 = d3.scale.ordinal();
-
-        sankey_y = d3.scale.linear()
-            .range([height, 0]);
-
-        var color = d3.scale.ordinal()
-            .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
-
-        var xAxis = d3.svg.axis()
-            .scale(sankey_x0)
-            .orient("bottom");
-
-        var yAxis = d3.svg.axis()
-            .scale(sankey_y)
-            .orient("left")
-            .tickFormat(d3.format(".2s"));
-
-        var svg = d3.select("#barchart").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-          .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-          var ageNames = ["num_nugget_ind", "num_nugget_sel"];
-
-          data.forEach(function(d) {
-            d.ages = ageNames.map(function(name) { 
-              return {name: name, value: +d[name]}; 
-            });
-          });
-
-          sankey_x0.domain(data.map(function(d) { 
-            return d.time; 
-          }));
-          sankey_x1.domain(ageNames).rangeRoundBands([0, sankey_x0.rangeBand()]);
-          sankey_y.domain([0, d3.max(data, function(d) { 
-            return d3.max(d.ages, function(d) { 
-              return d.value; 
-            }); 
-          })]);
-
-          svg.append("g")
-              .attr("class", "x axis")
-              .attr("transform", "translate(0," + height + ")")
-              .call(xAxis);
-
-          svg.append("g")
-              .attr("class", "y axis")
-              .call(yAxis)
-            .append("text")
-              .attr("transform", "rotate(-90)")
-              .attr("y", 6)
-              .attr("dy", ".71em")
-              .style("text-anchor", "end")
-              .text("#nuggets");
-
-          var state = svg.selectAll(".state")
-              .data(data)
-            .enter().append("g")
-              .attr("class", "state")
-              .attr("transform", function(d) { return "translate(" + sankey_x0(d.time) + ",0)"; });
-
-          state.selectAll("rect")
-              .data(function(d) { return d.ages; })
-            .enter().append("rect")
-              .attr("width", function(d) { return sankey_x1.rangeBand(); })
-              .attr("x", function(d) { return sankey_x1(d.name); })
-              .attr("y", function(d) { return sankey_y(d.value); })
-              .attr("height", function(d) { return height - sankey_y(d.value); })
-              .style("fill", function(d) { 
-                if (d.name === ageNames[0]) return "#C0E7F3";
-                if (d.name === ageNames[1]) return "#67C7E2";
-              });
-
-          var legend = svg.selectAll(".legend")
-              .data(ageNames.slice().reverse())
-            .enter().append("g")
-              .attr("class", "legend")
-              .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
-
-          legend.append("rect")
-              .attr("x", width - 18)
-              .attr("width", 18)
-              .attr("height", 18)
-              .style("fill", function(d){
-                if (d === ageNames[0]) return "#C0E7F3";
-                if (d === ageNames[1]) return "#67C7E2";
-              });
-
-          legend.append("text")
-              .attr("x", width - 24)
-              .attr("y", 9)
-              .attr("dy", ".35em")
-              .style("text-anchor", "end")
-              .text(function(d) { 
-                if (d === ageNames[0]) return "filtered";
-                if (d === ageNames[1]) return "selected";
-              });
+        brush.on("brushend", function() {
+          module.get_sankey();
+          hide_rec();
+          get_doc_bar();
+        });
 
       },
       error: function(xhr) {
@@ -412,15 +435,21 @@ define([
           else return false;
         });
 
-        // mouseover and mouseout events on node
         node.on('click', function(d) {
           if (d3.select(this).classed("active")) {
+            // unclick
+            // change legend
+            d3.selectAll(".legend").filter(function(d) { return d === "num_nugget_sel"; }).attr("display", "none").select("text").text("");
+
             d3.select(this).classed("active", false);
             link.style('stroke-opacity', function(l) {
               var opacity = 0.2;
               return opacity;
             });
           } else {
+            // click
+            // change legend
+            d3.selectAll(".legend").filter(function(d) { return d === "num_nugget_sel"; }).attr("display", "block").select("text").text("#nuggets for " + d.text + " is selected");
 
             d3.selectAll(".node.active").classed("active",false)
             link.style('stroke-opacity', function(l) {
@@ -498,7 +527,6 @@ define([
               });           
             }
           }
-          module.update_barchart();
         });
 
         // add the rectangles for the nodes
@@ -570,22 +598,65 @@ define([
       },
       success: function(xhr) {
         $("#sankey-document").html(xhr.workbench_document);
-        $("#sankey-document").height(800);
+        $("#sankey-document").height(600);
         $("#sankey-document-container").animate({scrollTop: 0}, 0);
         workbench_module.doc_id = xhr.doc_id;
-        // workbench_module.load_highlights_by_doc();
+        // load highlights, selected can only be author or theme
+        var selected = $(".node.active").attr("data-id");
+        var filter = get_filter();
         var doc_id = xhr.doc_id;
-        $("#sankey-document .section-content").each(function(){
-          var sec_id = $(this).attr("data-id");
-          var tks = $(this).find(".tk");
-          for (var i = 0; i < tks.length; i++) {
-            if (module.coverage_map_selected[doc_id][sec_id][i]) {
-              $(tks[i]).addClass( "blue-m" );
-            } else if (module.coverage_map_filtered[doc_id][sec_id][i]) {
-              $(tks[i]).addClass( "blue-s" );
+        $.ajax({
+          url: '/sankey/get_highlights/',
+          type: 'post',
+          data: {
+            "time_lower_bound": filter.time_lower_bound,
+            "time_upper_bound": filter.time_upper_bound,
+            "author_ids": filter.author_ids,
+            "theme_ids": filter.theme_ids,
+            "selected": selected,
+            "doc_id": doc_id
+          },
+          success: function(xhr) {
+            var highlightsData = xhr.highlights;
+
+            for (var j = 0; j < highlightsData.length; j++) {
+              var highlight = highlightsData[j];
+              var $context = $("#sankey-document").find('.section-content[data-id="' + highlight.context_id + '"]');
+              // assume orginal claims are nuggets now 
+              var className = '';
+              if (highlight.author_id == sessionStorage.getItem('user_id')) {
+                if (highlight.type == 'comment') {
+                  className = 'my_comment';
+                } else {
+                  className = 'my_nugget';
+                }
+              } else {
+                if (highlight.type == 'comment') {
+                  className = 'other_comment';
+                } else {
+                  className = 'other_nugget';
+                }
+              }
+              var text = [];
+              // loop over all words in the highlight
+              for (var i = highlight.start; i <= highlight.end; i++) {
+                var $token = $context.find('.tk[data-id="' + i + '"]');
+                text.push($token.text());
+                if (typeof $token.attr('data-hl-id') == 'undefined') { // new highlight for this word
+                  $token.addClass(className).attr('data-hl-id', highlight.id);
+                } else {
+                  var curr_id = $token.attr('data-hl-id'); // append highlight for this word
+                  $token.addClass(className).attr('data-hl-id', curr_id + ' ' + highlight.id);
+                }
+              }
+            }
+          },
+          error: function(xhr) {
+            if (xhr.status == 403) {
+              Utils.notify('error', xhr.responseText);
             }
           }
-        })
+        });
       },
       error: function(xhr) {
         if (xhr.status == 403) {
@@ -615,99 +686,11 @@ define([
       } else {
         $(this).addClass("green").addClass("active");
       }
-
       get_doc_bar();
       hide_rec();
-      module.update_barchart();
+      module.get_barchart();
       module.get_sankey();
     })
-
-    $("body").on("click", "#sankey-close-screenshot", function() {
-           $("#dark-fullscreen-sankey").hide();
-           $("#test").html("").hide();
-           $("#white-fullscreen-sankey").hide();
-    });
-
-    $('#sankey-workbench').on('click', '.sankey-workbench-item-remove', function(e) {
-      $(this).closest(".item").remove();
-      put_workbench();
-    }).on('click', '.sankey-workbench-item-add', function(e) {
-      var content = $(this).closest(".item").find("textarea").val();
-      var operation = '<a class="sankey-workbench-item-remove"><i class="large red minus square outline icon"></i></a>';
-      $(this).closest(".item").find(".sankey-workbench-item-show-screenshot").each(function(){
-        operation = this.outerHTML + operation;
-      });
-      var divider = '<div class="ui divider" style="margin: 1px;"></div>';
-      var new_item = '<div class="item">' + content + operation + divider + '</div>';
-      $(this).closest(".item").before(new_item);
-      $(this).closest(".item").find("textarea").val("");
-      $(this).closest(".item").find(".sankey-workbench-item-show-screenshot").remove();
-      put_workbench();
-    }).on('click', '.sankey-workbench-item-capture-screenshot', function(e) {
-      $("#countdown-number").show();
-      var self = this;
-      self.count=6;
-      self.counter=setInterval(timer, 1000); //1000 will  run it every 1 second
-      function timer()
-      {
-        self.count=self.count-1;
-        if (self.count <= 0)
-        {
-            clearInterval(self.counter);
-            $("#countdown-number").text("");
-            $("#countdown-number").hide();
-            //counter ended, do something here
-
-            var screenshot = $("#sankey-and-barchart").html();
-            $.ajax({
-              url: '/sankey/put_screenshot/',
-              type: 'post',
-              data: {
-                screenshot_html: screenshot,
-              },
-              success: function(xhr) {
-                var screenshot_id = xhr.screenshot_id;
-                var screenshot_btn = '<a class="sankey-workbench-item-show-screenshot" data-id="' + screenshot_id + '"><i class="large blue file icon"></i></a>'
-                $(self).before(screenshot_btn);
-              },
-              error: function(xhr) {
-                if (xhr.status == 403) {
-                  Utils.notify('error', xhr.responseText);
-                }
-              }
-            });
-           return;
-        }
-        $("#countdown-number").text(self.count);
-      }
-    }).on('click', '.sankey-workbench-item-show-screenshot', function(e) {
-      $.ajax({
-        url: '/sankey/get_screenshot/',
-        type: 'post',
-        data: {
-          screenshot_id: $(this).attr("data-id"),
-        },
-        success: function(xhr) {
-           $("#dark-fullscreen-sankey").show();
-           $("#test").html(xhr.screenshot_html).show();
-           $("#white-fullscreen-sankey").show();
-        },
-        error: function(xhr) {
-          if (xhr.status == 403) {
-            Utils.notify('error', xhr.responseText);
-          }
-        }
-      });
-    });
-
-    // $('body').on('contextmenu', '#sankey-container', function(e) {
-    //   e.preventDefault();
-    //   $('#context-menu-screenshot').css('left', e.pageX).css('top', e.pageY).show();
-    // }).on('click', function(e) {
-    //   $('#context-menu-screenshot').hide();
-    // }).on('click', '#context-menu-screenshot', function(e) {
-    //   var evidence = '<a data-id=""><i class="large blue file icon"></i></a>'
-    // });
 
     $("body").on("click", "#update-sankey", function(e){
       $(".select-toolbar.active .select-element.active").click();
@@ -741,6 +724,8 @@ define([
             $("#workbench2-document-container").animate({scrollTop: 0}, 0);
             workbench_module.doc_id = xhr.doc_id;
             workbench_module.load_highlights_by_doc();
+            workbench_module.get_viewlog();
+            workbench_module.get_nuggetmap();
           },
           error: function(xhr) {
             if (xhr.status == 403) {
@@ -760,49 +745,10 @@ define([
     })
   };
 
-  function put_workbench(){
-    $.ajax({
-      url: '/sankey/put_workbench/',
-      type: 'post',
-      data: {
-        workbench_html: $("#sankey-workbench").html(),
-      },
-      success: function(xhr) {
-
-      },
-      error: function(xhr) {
-        if (xhr.status == 403) {
-          Utils.notify('error', xhr.responseText);
-        }
-      }
-    });
-  };
-
-  function get_workbench(){
-    $.ajax({
-      url: '/sankey/get_workbench/',
-      type: 'post',
-      success: function(xhr) {
-        if (xhr.workbench_html != null && xhr.workbench_html.length > 0) {
-          $("#sankey-workbench").html(xhr.workbench_html);
-        }
-      },
-      error: function(xhr) {
-        if (xhr.status == 403) {
-          Utils.notify('error', xhr.responseText);
-        }
-      }
-    });
-  };
-
   function get_filter() {
     var res = {}
-    res["time_lower_bound"] = "0";
-    res["time_upper_bound"] = "1489003465486";   
-    if ($(timerange_lower_value).attr("data-value") !== "0") {
-      res["time_lower_bound"] = $(timerange_lower_value).attr("data-value");
-      res["time_upper_bound"] = $(timerange_upper_value).attr("data-value");
-    }
+    res["time_lower_bound"] = date_format(module.time_lower_bound);
+    res["time_upper_bound"] = date_format(module.time_upper_bound);
     res["theme_ids"] = ""
     $(".select-toolbar.active .select-theme-elements .select-element.active").each(function(){
       res["theme_ids"] = res["theme_ids"] + " " + $(this).attr("data-id").split("-")[1];
@@ -848,75 +794,85 @@ define([
         var reverse = $("#select-sort-descending").hasClass("active");
         $('#doc-bar-container').empty();
 
-        // get unit height
-        var doc_length_map = {}
-        var doc_max_length = 0;
-        $(".select-toolbar.active .select-document-elements .select-element").each(function(){
-          var doc_id = $(this).attr("data-id").split("-")[1];
-          var count = 0;
-          for (var key in xhr.coverage_map[doc_id]) {
-            if (key !== undefined) {
-              count = count + xhr.coverage_map[doc_id][key].length;
-            }
-            // html = html + '<div style="width:30px; background: white; height:5px;"></div>';
-          }
-          if (count > doc_max_length) { doc_max_length = count };
-        });
-        var nugget_map_unit = 800 / doc_max_length;
+        for (var i = 0; i < Object.keys(xhr.nuggetmaps).length; i++) {
+          key = Object.keys(xhr.nuggetmaps)[i];
+          data = xhr.nuggetmaps[key];
+          html = '<div id="sankey-document-nuggetmap-' + i + '" class="sankey-document-nuggetmap" doc-id="' + key + '" style="position:absolute; top:0; left:' + 50 * i + 'px"></div>';
+          $("#doc-bar-container").append(html);
+          function cell_dim(total, cells) { return Math.floor(total/cells) }
+          var total_height = 4 * data.length;
+          var total_width = 30;
+          var rows = data.length; // 1hr split into 5min blocks
+          var cols = 1; // 24hrs in a day
+          var row_height = cell_dim(total_height, rows);
+          var col_width = cell_dim(total_width, cols);
 
-        var doc_length_map = {}
-        $(".select-toolbar.active .select-document-elements .select-element").each(function(){
-          var doc_id = $(this).attr("data-id").split("-")[1];
-          var count = 0;
-          var html = ""
-          html = html + '<div class="doc-bar" style="margin-left:20px;float:left;" data-id="' + $(this).attr("data-id") + '">';
-          for (var key in xhr.coverage_map[doc_id]) {
-            if (key !== undefined) {
-              for (var i = 0; i < xhr.coverage_map[doc_id][key].length; i++) {
-                if (xhr.author_map_filtered[doc_id][key][i]) {
-                  html = html + '<div class="latest-activity doc-bar-elem blue-l" data-id="' + xhr.author_map_filtered[doc_id][key][i] + '" style="width:30px; background-color:#25A0C5; height:' + nugget_map_unit + 'px;"></div>';
-                } else if (xhr.coverage_map_selected[doc_id][key][i]) {
-                  html = html + '<div class="doc-bar-elem blue-m" style="width:30px; height:' + nugget_map_unit + 'px;"></div>';
-                } else if (xhr.coverage_map_filtered[doc_id][key][i]) {
-                  html = html + '<div class="doc-bar-elem blue-s" style="width:30px; height:' + nugget_map_unit + 'px;"></div>';
-                } else {
-                  html = html + '<div class="doc-bar-elem" style="width:30px; background-color: Azure; height:' + nugget_map_unit + 'px;"></div>';
-                }
-              }
-              count = count + xhr.coverage_map[doc_id][key].length;
-            }
-            // html = html + '<div style="width:30px; background: white; height:5px;"></div>';
-          }
-          html = html + "</div>";
-          $('#doc-bar-container').append(html);
-          doc_length_map[doc_id] = count
-        });
+          $("#sankey-document-nuggetmap-" + i).html("");
+          var color_chart = d3.select("#sankey-document-nuggetmap-" + i)
+                            .append("svg")
+                            .attr("class", "chart")
+                            .attr("width", col_width * cols)
+                            .attr("height", row_height * rows);
 
-        $(".doc-bar").each(function(){
-          var doc_id = $(this).attr("data-id").split("-")[1]
-          var height = $(this).height();
-          if (height === 0) {
-            heatmap_unit = nugget_map_unit * doc_length_map[doc_id] / 100;
-          } else {
-            heatmap_unit = height / 100;
-          }
-          var html = "";
-          html = html + '<div class="doc-heatmap" style="margin:0; float:left;">';
-          if (doc_id in xhr.heatmap) {
-            for (var i = 0; i < 100; i++) {
-              html = html + '<div class="color-' + (xhr.heatmap[doc_id][i] + 1) + '" style="width:10px; height:' + heatmap_unit + 'px;"></div>';
-            }
-            html = html + "</div>";
-            $(this).after(html);        
-          }
-        });
+          var color = d3.scale.linear()
+                    .domain([0, 1])
+                    .range(["Azure", "#C0E7F3"]);
 
-        // add bar wrapper
-        if (module.focus_node !== "") {
+          color_chart.selectAll("rect")
+                  .data(data)
+                  .enter()
+                  .append("rect")
+                  .attr("x", function(d,i) { return Math.floor(i / rows) * col_width; })
+                  .attr("y", function(d,i) { return i % rows * row_height; })
+                  .attr("width", col_width)
+                  .attr("height", row_height)
+                  .attr("fill", color)
+                  .attr("data-id", function(d) { return d; });
+        }
 
+        for (var i = 0; i < Object.keys(xhr.viewlogs).length; i++) {
+          key = Object.keys(xhr.viewlogs)[i];
+          data = xhr.viewlogs[key];
+          html = '<div id="sankey-document-viewlog-' + i + '" style="position:absolute; top:0; left:' + (30 + 50 * i) + 'px"></div>';
+          $("#doc-bar-container").append(html);
+          function cell_dim(total, cells) { return Math.floor(total/cells) }
+          var total_height = 4 * data.length;
+          var total_width = 10;
+          var rows = data.length; // 1hr split into 5min blocks
+          var cols = 1; // 24hrs in a day
+          var row_height = cell_dim(total_height, rows);
+          var col_width = cell_dim(total_width, cols);
+
+          $("#sankey-document-viewlog-" + i).html("");
+          var color_chart = d3.select("#sankey-document-viewlog-" + i)
+                            .append("svg")
+                            .attr("class", "chart")
+                            .attr("width", col_width * cols)
+                            .attr("height", row_height * rows);
+
+          var color = d3.scale.linear()
+                    .domain([0, module.focus_threshold])
+                    .range(["yellow", "red"]);
+
+          color_chart.selectAll("rect")
+                  .data(data)
+                  .enter()
+                  .append("rect")
+                  .attr("x", function(d,i) { return Math.floor(i / rows) * col_width; })
+                  .attr("y", function(d,i) { return i % rows * row_height; })
+                  .attr("width", col_width)
+                  .attr("height", row_height)
+                  .attr("fill", color)
+                  .attr("data-id", function(d) { return d; });
+        }
+
+
+        // add star
+        if (module.focus_node !== "" && module.focus_node.split("-")[0] === "doc") {
+          var doc_id = module.focus_node.split("-")[1];
           $("#doc-bar-indicator").show();
-          $bar = $(".doc-bar[data-id=" + module.focus_node + "]")
-          $("#doc-bar-indicator").css("left", $bar.offset().left - 10).css("top", $bar.offset().top - 10);
+          $bar = $(".sankey-document-nuggetmap[doc-id=" + doc_id + "]")
+          $("#doc-bar-indicator").css("left", $bar.offset().left).css("top", $bar.offset().top - 10);
           $node = $(".doc-node[data-id='" + module.focus_node + "']")
           if ($node.length !== 0) {
             $("#sankey-doc-arrow").show();
@@ -924,23 +880,39 @@ define([
           }
         }
 
+
+
+        // $(".sankey-document-nuggetmap[doc-id=59]").find("rect")[104]
+        for (var i = 0; i < Object.keys(xhr.author_activity_map).length; i++) {
+          var author_id = Object.keys(xhr.author_activity_map)[i],
+              data = xhr.author_activity_map[author_id],
+              doc_id = data.doc_id,
+              work_on = data.work_on,
+              author_name = data.author_name;
+          $($(".sankey-document-nuggetmap[doc-id=" + doc_id + "]").find("rect")[work_on])
+            .attr("class", "latest-activity")
+            .attr("author-id",author_id)
+            .attr("author-name",author_name);
+        }
+
         // add author lastest activity
         var your_id = $("#header-user-name").attr("data-id");
         $(".latest-activity").each(function(){
-            var author_id = $(this).attr("data-id");
+            var author_id = $(this).attr("author-id");
+            var author_name = $(this).attr("author-name");
             if (your_id === author_id) {
-              var tooltip = "You recently worked on " + xhr.author_theme_map[author_id];
-              var arrow = '<div class="latest-activity-arrow" data-tooltip="' + tooltip + '" data-id="' + author_id + '" style="position:fixed;">' +
-                  '<i class="icon big olive user"></i>' +
+              var tooltip = "You recently worked at this place";
+              var arrow = '<div class="latest-activity-arrow" data-tooltip="' + tooltip + '" author-id="' + author_id + '" style="position:fixed;">' +
+                  '<i class="icon big red user"></i>' +
                 '</div>';       
             } else {
-              var tooltip = "P" + author_id + " recently worked on " + xhr.author_theme_map[author_id];
-              var arrow = '<div class="latest-activity-arrow" data-tooltip="' + tooltip + '" data-id="' + author_id + '" style="position:fixed;">' +
-                      '<i class="icon big red user"></i>' +
+              var tooltip = author_name + " recently worked at this place";
+              var arrow = '<div class="latest-activity-arrow" data-tooltip="' + tooltip + '" author-id="' + author_id + '" style="position:fixed;">' +
+                      '<i class="icon big olive user"></i>' +
                 '</div>';  
             }
-          $(this).append(arrow);
-            $(".latest-activity-arrow[data-id=" + author_id +  "]").css("left", $(this).offset().left - 20).css("top", $(this).offset().top - 10);
+            $("#latest-activity-container").append(arrow);
+            $(".latest-activity-arrow[author-id=" + author_id +  "]").css("left", $(this).offset().left - 20).css("top", $(this).offset().top - 10);
         })
       },
       error: function(xhr) {
@@ -1003,7 +975,6 @@ define([
           }   
           $(".theme-labels").find("span").text($(".select-toolbar.active .select-theme-elements .select-element").length);
         }
-
         get_doc_bar();
       },
       error: function(xhr) {
@@ -1014,77 +985,32 @@ define([
     });
   }
 
-// --------------------------------------------------------
-// -------------- Time range slider control ---------------
-// --------------------------------------------------------
-
-function init_slider() {
-  slider_timerange = document.getElementById('sankey-timerange-slider');
-  timerange_lower_value = document.getElementById('sankey-timerange-lower-value');
-  timerange_upper_value = document.getElementById('sankey-timerange-upper-value');
-  timerange_arr = [];
-  for(var i = 0; i < timerange_num_interval; i++) {
-      timerange_arr.push(0);
+$("#sankey-document").bind('scroll', function() {
+  if (module.focus_node !== "" && module.focus_node.split("-")[0] === "doc") {
+    var doc_id = module.focus_node.split("-")[1];
+    var perc = ($("#sankey-document").scrollTop() + $("#sankey-document").height() / 2) / $("#sankey-document .workbench-doc-item").height();
+    $bar = $(".sankey-document-nuggetmap[doc-id=" + doc_id + "]");
+    $("#doc-bar-arrow").show();
+    $("#doc-bar-arrow").css("left", $bar.offset().left - 15).css("top", perc * $bar.height() + $bar.offset().top);
   }
-
-  noUiSlider.create(slider_timerange, {
-    start: [0, timerange_num_interval],
-    connect: true,
-    step: 1,
-    range: {
-      'min': 0,
-      'max': timerange_num_interval - 1
-    }
-  }); 
-
-  slider_timerange.noUiSlider.on('update', function( values, handle ) {
-    var date = new Date();
-    if ( !handle ) {
-      var num = timerange_arr[Number(values[0])];
-      $(timerange_lower_value).text(number2date_pretty(num));
-      $(timerange_lower_value).attr("data-value", num);
-    } else {
-      var num = timerange_arr[Number(values[1])];
-      $(timerange_upper_value).text(number2date_pretty(num));
-      $(timerange_upper_value).attr("data-value", num);
-    }
-  });
-
-  slider_timerange.noUiSlider.on('change', function(){
-    module.get_sankey();
-    module.get_barchart();
-    hide_rec();
-    get_doc_bar();
-  });
-
-  $("#sankey-document").bind('scroll', function() {
-    if (module.focus_node.split("-")[0] === "doc") {
-      var perc = ($("#sankey-document").scrollTop() + $("#sankey-document").height() / 2) / $("#sankey-document .workbench-doc-item").height();
-      var index = Math.floor(($(".doc-bar[data-id='" + module.focus_node + "']").children().length - 1) * perc);
-      var elem = $(".doc-bar[data-id='" + module.focus_node + "']").children()[index];
-      $("#doc-bar-arrow").show();
-      $("#doc-bar-arrow").css("left", $(elem).offset().left - 25).css("top", $(elem).offset().top - 15);
-    }
-  });
-}
+});
 
 function hide_rec() {
   $("#doc-bar-arrow").hide();
   $("#doc-bar-indicator").hide();
 }
 
-function number2date(num) {
-    var offset = 0;
-    var date = new Date(Number(num) + offset * 3600 * 1000);
+// convert from timestamp to date in format "2010 12 07 01 01 01"
+function date_format(date) {
     var res = date.getFullYear() + " " 
       + ("0" + (date.getMonth() + 1)).slice(-2) + " " 
       + ("0" + date.getDate()).slice(-2) + " " 
       + ("0" + date.getHours()).slice(-2) + " " 
-      + ("0" + date.getMinutes()).slice(-2) + " " 
-      + ("0" + date.getSeconds()).slice(-2);
+      + ("0" + date.getMinutes()).slice(-2);
     return res;
 }
 
+// convert from timestamp to date for pretty
 function number2date_pretty(num) {
     var offset = 0;
     var date = new Date(Number(num) + offset * 3600 * 1000);
@@ -1097,6 +1023,8 @@ function number2date_pretty(num) {
     return res;
 }
 
+// from server to front end, time is in format "2010 12 07 01 01 01"
+// convert from "2010 12 07 01 01 01" to timestamp
 function date2number(str) {
     var date = new Date();  
     var arr = str.split(" ")
@@ -1108,45 +1036,6 @@ function date2number(str) {
     date.setSeconds(arr[5]);
     return date.getTime();
 }
-
-  // activity heatmap
-  idleTime = 0
-  idleInterval = setInterval(function() {
-    idleTime = idleTime + 1;
-    // console.log(idleTime);
-    if (idleTime < 2 && $(".workbench-doc-item").is(":visible") && !$("#sankey-container").is(":visible")) { // 30s
-      var upper = $("#workbench-document").scrollTop();
-      var lower = $("#workbench-document").scrollTop() + $("#workbench-document").height();
-      var height = $("#workbench-document .workbench-doc-item").height();
-      var doc_id = $(".workbench-doc-item").attr("data-id");
-      var author_id = $("#header-user-name").attr("data-id");
-      $.ajax({
-        url: '/sankey/put_heatmap/',
-        type: 'post',
-        data: {
-          "doc_id": doc_id,
-          "lower": lower,
-          "upper": upper,
-          "height": height,
-          "theme_id": workbench_module.currentThemeId,
-          "author_id": author_id
-        },
-        success: function(xhr) {
-
-        },
-        error: function(xhr) {
-          if (xhr.status == 403) {
-            Utils.notify('error', xhr.responseText);
-          }
-        }
-      });
-    }
-  }, 3000); // 1 minute
-
-  //Zero the idle timer on mouse movement.
-  $("body").on("mousemove", "#workbench2-document-container", function(e){
-    idleTime = 0;
-  })
 
 
   return module;

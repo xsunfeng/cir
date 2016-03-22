@@ -163,19 +163,36 @@
 }
 
 #workbench2-document-container {
-/*	top: 8em;
+	top: 10em;
     overflow: auto;
     position: fixed;
-    bottom: 3em;*/
+    bottom: 3em;
+    width: 800px;
+    position: fixed;
+    right: 100px;
+}
+#workbench2-document-container p, #workbench2-document-container ul {
+	font-size: 16px;
+}
+#workbench2-document-viewlog {
+	position: fixed;
+	width: 10px;
+    right: 50px;
+    top: 11em;
+}
+#workbench2-document-nuggetmap {
+	position: fixed;
+	width: 30px;
+    right: 60px;
+    top: 11em;
 }
 
 #workbench2-nugget-container {
-/*	top: 8em;
-	bottom: 50%;
+	top: 10em;
     overflow: auto;
     position: fixed;
-    right: 0;
-	padding-left: 2em;*/
+    right: 900px;
+    left: 20px;
 }
 
 a {
@@ -636,4 +653,40 @@ body {
 }
 .color-5 {
 	background-color: #FF0000
+}
+
+.tk.my_nugget {
+	background-color: rgb(0, 204, 255);
+}
+.tk.my_comment {
+	background-color: rgba(0, 255, 255, 0.5);
+}
+.tk.other_nugget {
+	background-color: rgb(0, 204, 0);
+}
+.tk.other_comment {
+	background-color: rgba(0, 255, 0, 0.5);
+}
+
+
+svg {
+  font: 10px sans-serif;
+}
+
+.area {
+  fill: steelblue;
+  clip-path: url(#clip);
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
 }

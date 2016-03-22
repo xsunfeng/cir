@@ -99,20 +99,26 @@
     <div id="sankey-filter-author" class="ui labeled icon button" author-id="-1"><i class="remove icon"></i><span>theme: all</span></div>
   </div>
 <!-- filter end -->
-<div id="sankey-timerange">
+<div id="sankey-timerange" style="text-align: center;">
   <div id="sankey-timerange-slider"> </div>
   <span id="sankey-timerange-lower-value" data-value="0"></span> ~
   <span id="sankey-timerange-upper-value" data-value="0"></span>
 </div>
 
+<div id="brush"></div>
+<div class="ui divider"></div>
 <div style="margin-top:16px;">
   <div id="sankey-and-barchart" style="float:left;">
-    <div id="sankey" class="sankey-related" style="width:700px;height:600px;background:white;"></div>
-    <div id="barchart" style="min-width: 700px; height: 200px; margin: 0 auto"></div>
+    <div id="sankey-legend" style="width:500px;height:100%;background:white;">
+      <div style="float:left;width:100px;">Documents</div>
+      <div style="float:right;width:70px;">Themes</div>
+      <div style="margin:0 auto;width:50px;">Panelists</div>
+    </div>
+    <div id="sankey" class="sankey-related" style="width:500px;height:600px;background:white;"></div>
   </div>
-  <div id="doc-bar-container" style="float:left;"></div>
+  <div id="doc-bar-container" style="position:relative; float:left;"></div>
   <!-- <div id="sankey-word-cloud" style="float:left;width:300px;"></div> -->
-  <div id="sankey-document-container" style="position: absolute; overflow: auto; right: 0; left: 960px;">
+  <div id="sankey-document-container" style="position: absolute; overflow: auto; right: 0; left: 700px;">
     <div id="sankey-document" class="ui segment" style="overflow: auto;">
     </div>
     <button id="context-menu-goto" class="ui button" style="float:right;">goto</button>
@@ -192,18 +198,17 @@
 <div class="ui segment sankey-related" id="context-menu-info">
 </div>
 
-<div class="" id="countdown-number">
-</div>
-
 <div id="sankey-doc-arrow" style="position:fixed; display:none;">
-  <i class="icon big blue check circle outline"></i>
+  <i class="icon big yellow star "></i>
 </div>
 <div id="doc-bar-indicator" style="position:fixed; display:none;">
-  <i class="icon big blue check circle outline"></i>
+  <i class="icon big yellow star"></i>
 </div>
 
 <div id="doc-bar-arrow" style="position:fixed;">
   <i class="icon big blue caret right"></i>
 </div>
 
-<i id="close-sankey" class="circular inverted red remove icon" style="position:fixed;right:1em;top:4em;"></i>
+<div id="latest-activity-container"></div>
+<div><i id="close-sankey" class="huge arrow red circle outline left icon" style="position:fixed;right:1em;top:4em;"></i></div>
+<div id="sankey-document-nuggetmaps" style="position:fixed; left:0; top:0;"></div>
