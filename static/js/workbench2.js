@@ -783,7 +783,7 @@ define([
 						// load_claim_list();
 						clear_highlights();
 						module.load_highlights_by_doc();
-						get_nuggetmap();
+						module.get_nuggetmap();
 	    			}
   				});
 			},
@@ -968,7 +968,7 @@ define([
 						"theme_id":		$(this).find("select").val()
 					},
 					success: function(xhr) {
-						get_nuggetmap();
+						module.get_nuggetmap();
 					},
 					error: function(xhr) {
 						$('#doc-highlight-toolbar .button').removeClass('loading');
