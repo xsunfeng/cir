@@ -487,14 +487,15 @@ class ChatMessage(models.Model):
     reply_target = models.ForeignKey('self', related_name='replies', null=True, blank=True)
     content = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField()
+    forum = models.ForeignKey(Forum, null=True, blank=True)
 
     def __unicode__(self):
         return self.content
 
-    def getAttr(self, forum):
+    def getAttr(self):
         attr = {}
         try:
-            attr['role'] = Role.objects.get(user=self.source, forum=forum).role
+            attr['role'] = Role.objects.get(user=self.source, forum=self.forum).role
         except:
             attr['role'] = VISITOR_ROLE
         attr['id'] = self.id

@@ -42,7 +42,7 @@
             });
         </script>
     </head>
-    <body id="cir" {% if phase %}data-phase="{{ phase.short_name }}"{% endif %}>
+    <body id="cir" {% if forum_id %}forum-id="{{ forum_id }}" {% endif %}{% if phase %}data-phase="{{ phase.short_name }}"{% endif %}>
             {% block header %}
             {% endblock %}
 
