@@ -74,7 +74,7 @@ define([
 	idleInterval = setInterval(function() {
 		idleTime = idleTime + 1;
 		if (idleTime < 2 && $(".workbench-doc-item").is(":visible") && !$("#sankey-container").is(":visible")) { // 30s
-		  console.log(idleTime);
+		  if ($("#header-user-name").attr("data-role") !== "panelist") return;
 		  var upper = $("#workbench-document").scrollTop();
 		  var lower = $("#workbench-document").scrollTop() + $("#workbench-document").height();
 		  var height = $("#workbench-document .workbench-doc-item").height();
@@ -108,6 +108,7 @@ define([
 	})
 
 	module.get_nuggetmap = function() {
+		if ($("#header-user-name").attr("data-role") !== "panelist") return;
 		$.ajax({
 			url: '/sankey/get_nuggetmap/',
 			type: 'post',
@@ -158,6 +159,7 @@ define([
 	}
 
 	module.get_viewlog = function() {
+		if ($("#header-user-name").attr("data-role") !== "panelist") return;
 		$.ajax({
 			url: '/sankey/get_viewlog/',
 			type: 'post',

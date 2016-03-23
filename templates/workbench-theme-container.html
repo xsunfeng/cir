@@ -55,3 +55,12 @@
 
 <button class="ui loading red button" style="float:right;" id="loading-status">Loading...</button>
 <button class="ui blue button" id="show-sankey">NuggetLens</button>
+
+  <div class="ui secondary pointing compact menu">
+    <a class="active item">
+      All
+    </a>
+    {% for theme in themes %}
+      <a class="item" data-id="{{ theme.id }}">{{ theme.name }}</a>
+    {% endfor %}
+  </div>
