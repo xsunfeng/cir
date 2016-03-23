@@ -183,32 +183,7 @@ def get_graph(request):
 	return HttpResponse(json.dumps(graph), content_type='application/json')
 
 def get_doc(request):
-	time_upper_bound = request.REQUEST.get('time_upper_bound')
-	time_upper_bound = datetime.strptime(time_upper_bound, "%Y %m %d %H %M")
-	time_lower_bound = request.REQUEST.get('time_lower_bound')
-	time_lower_bound = datetime.strptime(time_lower_bound, "%Y %m %d %H %M")
 	response = {}
-	context = {}
-	doc_id = request.REQUEST.get('doc_id')
-	doc = Doc.objects.get(id=doc_id)
-	context["doc"] = doc
-
-	forum_id = request.session['forum_id']
-	forum = Forum.objects.get(id = forum_id)
-	wordcount={}
-	for section in doc.sections.all():
-		section_segmented_text = section.getAttr(forum)["segmented_text"]
-		section_list = preprocessing.preprocess_pipeline(section_segmented_text, "english", "SnowballStemmer", False, True, True)
-		for sentence_list in section_list:
-			for word in sentence_list:
-				if word not in wordcount:
-					wordcount[word] = 1
-				else:
-					wordcount[word] += 1
-	wordcount = {k:wordcount[k] for k in wordcount if wordcount[k] > 2}
-	wordcount = sorted(wordcount.items(), key=lambda x: x[1], reverse=True)
-	context["wordcount"] = wordcount
-	response['word_cloud'] = render_to_string("vis/doc.html", context)
 	return HttpResponse(json.dumps(response), content_type='application/json')
 
 def get_viewlog(request):
