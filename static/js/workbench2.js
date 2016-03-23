@@ -35,6 +35,7 @@ define([
 
 		load_toc();
 		// module.doc_id = $("#default-doc-id").attr("data-id");
+
 		module.doc_id = "";
 		if (module.doc_id == "") {
 			$.when(load_theme(), load_nugget_list()).done(function(promise1, promise2) {
