@@ -519,7 +519,7 @@ def get_entities(request):
 	for doc in root_docs:
 		item = {}
 		item["id"] = "doc-" + str(doc.id)
-		item["name"] = "doc-" + str(doc.title)
+		item["name"] = str(doc.title)
 		response["docs"].append( item )
 	response["themes"] = []
 	themes = ClaimTheme.objects.filter(forum=forum)
@@ -533,7 +533,7 @@ def get_entities(request):
 		author = role.user
 		item = {}
 		item["id"] = "author-" + str(author.id)
-		item["name"] = "P" + str(author.id) + ":" + str(author.last_name)
+		item["name"] = "P" + str(author.id) + ":" + str(author.first_name) + " " + str(author.last_name)
 		response["authors"].append( item )
 	return HttpResponse(json.dumps(response), content_type='application/json')
 

@@ -39,7 +39,7 @@ class Forum(models.Model):
     stmt_preamble = models.TextField(null=True, blank=True)
 
     def __unicode__(self):  # used for admin site
-        return self.full_name
+        return self.full_name + '(' + self.url + ')'
 
     def getAttr(self):
         attr = {}
