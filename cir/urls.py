@@ -69,6 +69,7 @@ urlpatterns = patterns('',
     url(r'^sankey/get_highlights/$', sankey_views.get_highlights),
     url(r'^sankey/get_highlights2/$', sankey_views.get_highlights2),
     url(r'^sankey/get_timerange/$', sankey_views.get_timerange),
+    url(r'^sankey/nuggetlens/$', sankey_views.nuggetlens),
 
     url(r'^api_chatter/$', chatter_views.api_chatter),
 

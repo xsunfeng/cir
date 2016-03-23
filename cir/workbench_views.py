@@ -184,10 +184,6 @@ def api_load_all_themes(request):
     context['forum_url'] = forum.url    
     themes = ClaimTheme.objects.filter(forum_id=request.session['forum_id'])
     context["themes"] = []
-    unassigned_theme = ClaimTheme.objects.filter(forum_id = request.session['forum_id'], name__iexact="unassigned")
-    if not unassigned_theme:
-        c = ClaimTheme.objects.create(forum_id=request.session['forum_id'], name="Unassigned")
-        c.save()
     for theme in themes:
         context["themes"].append(theme)
     context["phase"] = PHASE_CONTROL[forum.phase]
@@ -235,9 +231,6 @@ def api_add_claim(request):
     response = {}
     content = request.REQUEST.get('content')
     theme_id = request.REQUEST.get('theme_id')
-    if (int(theme_id) < 0):
-        forum_id = request.session['forum_id']
-        theme_id = ClaimTheme.objects.get(forum_id = forum_id, name__iexact="unassigned").id
     data_hl_ids = request.REQUEST.get('data_hl_ids')
     category = request.REQUEST.get('category')
     now = timezone.now()

@@ -34,7 +34,7 @@ define([
     module.barchart_ajax;
     module.nodeMap = {};
     module.time_bound_list = [];
-    module.focus_threshold = 300;
+    workbench_module.threshold = 300;
 
     module["relation"] = $("#sankey-relation .item.active").attr("data-value");
 
@@ -52,7 +52,6 @@ define([
 
     hide_rec();
     add_selection_elements();
-    module.get_sankey();
     module.get_barchart();
     init_eventhandlers();
 
@@ -186,6 +185,8 @@ define([
         module.time_upper_bound = xOverview.domain()[1];
         $("#sankey-timerange-lower-value").text(module.time_lower_bound);
         $("#sankey-timerange-upper-value").text(module.time_upper_bound);
+
+        module.get_sankey();
 
         // data range for the bar colours
         // (essentially maps attribute names to colour values)
@@ -668,6 +669,30 @@ define([
 
   function init_eventhandlers() {
 
+    $("body").on("mouseover", "#sankey-document-container", function(e) {
+      $("#sankey-container").css("overflow", "hidden");
+    }).on("mouseout", "#sankey-document-container", function(e) {
+      $("#sankey-container").css("overflow", "auto");
+    });
+
+    $("body").on("click", ".sankey-document-nuggetmap", function(e) {
+      module.focus_node = "doc-" + $(this).attr("doc-id");
+      if (module.focus_node !== "" && module.focus_node.split("-")[0] === "doc") {
+        var doc_id = module.focus_node.split("-")[1];
+        $("#doc-bar-indicator").show();
+        $bar = $(".sankey-document-nuggetmap[doc-id=" + doc_id + "]")
+        $("#doc-bar-indicator").css("left", $bar.offset().left).css("top", $bar.offset().top - 10);
+        $node = $(".doc-node[data-id='" + module.focus_node + "']")
+        if ($node.length !== 0) {
+          $("#sankey-doc-arrow").show();
+          $("#sankey-doc-arrow").css("left", $node.offset().left - 20).css("top", $node.offset().top - 10);            
+        } else {
+          $("#sankey-doc-arrow").hide();
+        }
+        get_doc_preview($(this).attr("doc-id"));
+      }
+    });
+
     $("body").on("click", ".doc-bar-elem", function(e) {
       var data_id = $(this).parents(".doc-bar").attr("data-id");
       module.focus_node = data_id;
@@ -689,18 +714,15 @@ define([
       get_doc_bar();
       hide_rec();
       module.get_barchart();
-      module.get_sankey();
     })
 
     $("body").on("click", "#update-sankey", function(e){
       $(".select-toolbar.active .select-element.active").click();
       hide_rec();
       clear_filters();
-      module.get_sankey();
       module.get_barchart();
     });
     $("body").on("click", "#refresh-sankey", function(e){
-      module.get_sankey();
       module.get_barchart();
       get_doc_bar();
     });
@@ -740,7 +762,6 @@ define([
       hide_rec();
       clear_filters();
       add_selection_elements();
-      module.get_sankey();
       module.get_barchart();
     })
   };
@@ -796,7 +817,8 @@ define([
 
         for (var i = 0; i < Object.keys(xhr.nuggetmaps).length; i++) {
           key = Object.keys(xhr.nuggetmaps)[i];
-          data = xhr.nuggetmaps[key];
+          data = xhr.nuggetmaps[key].distribution;
+          doc_name = xhr.nuggetmaps[key].doc_name;
           html = '<div id="sankey-document-nuggetmap-' + i + '" class="sankey-document-nuggetmap" doc-id="' + key + '" style="position:absolute; top:0; left:' + 50 * i + 'px"></div>';
           $("#doc-bar-container").append(html);
           function cell_dim(total, cells) { return Math.floor(total/cells) }
@@ -813,6 +835,15 @@ define([
                             .attr("class", "chart")
                             .attr("width", col_width * cols)
                             .attr("height", row_height * rows);
+
+          var n = d3.select("#sankey-document-nuggetmap-" + i).insert("svg")
+            .attr("width", 100)
+            .attr("height", 500)
+            .insert("g")
+            .attr("transform","translate(0, 0) rotate(90)");
+          n.insert("text")
+            .attr("font-size", "10px")
+            .text(doc_name);
 
           var color = d3.scale.linear()
                     .domain([0, 1])
@@ -851,7 +882,7 @@ define([
                             .attr("height", row_height * rows);
 
           var color = d3.scale.linear()
-                    .domain([0, module.focus_threshold])
+                    .domain([0, workbench_module.threshold ])
                     .range(["white", "red"]);
 
           color_chart.selectAll("rect")
@@ -877,10 +908,13 @@ define([
           if ($node.length !== 0) {
             $("#sankey-doc-arrow").show();
             $("#sankey-doc-arrow").css("left", $node.offset().left - 20).css("top", $node.offset().top - 10);            
+          } else {
+            $("#sankey-doc-arrow").hide();
           }
         }
 
-
+        $(".latest-activity").attr("class", "");
+        $(".latest-activity-arrow").remove();
 
         // $(".sankey-document-nuggetmap[doc-id=59]").find("rect")[104]
         for (var i = 0; i < Object.keys(xhr.author_activity_map).length; i++) {
@@ -912,7 +946,7 @@ define([
                 '</div>';  
             }
             $("#latest-activity-container").append(arrow);
-            $(".latest-activity-arrow[author-id=" + author_id +  "]").css("left", $(this).offset().left - 20).css("top", $(this).offset().top - 10);
+            $(".latest-activity-arrow[author-id=" + author_id +  "]").css("left", $(this).offset().left).css("top", $(this).offset().top - 10);
         })
       },
       error: function(xhr) {
@@ -989,7 +1023,7 @@ $("#sankey-document").bind('scroll', function() {
   if (module.focus_node !== "" && module.focus_node.split("-")[0] === "doc") {
     var doc_id = module.focus_node.split("-")[1];
     var perc = ($("#sankey-document").scrollTop() + $("#sankey-document").height() / 2) / $("#sankey-document .workbench-doc-item").height();
-    $bar = $(".sankey-document-nuggetmap[doc-id=" + doc_id + "]");
+    $bar = $(".sankey-document-nuggetmap[doc-id=" + doc_id + "]").find(".chart");
     $("#doc-bar-arrow").show();
     $("#doc-bar-arrow").css("left", $bar.offset().left - 15).css("top", perc * $bar.height() + $bar.offset().top);
   }

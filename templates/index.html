@@ -15,7 +15,7 @@
 {% endblock %}
 {% block header %}
 
-<div id="sankey-container" style="display:none; overflow: scroll; position:fixed; top: 5%; width:100%; z-index: 100;">
+<div id="sankey-container" style="display:none; overflow: scroll; position:fixed; top: 5%; bottom:0; width:100%; z-index: 100;">
 	{% include 'sankey.html' %}
 </div>
 <div id="dark-fullscreen" style="display:none; position:fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 99; background-color:white; opacity:1;"></div>
@@ -41,7 +41,6 @@
     <div class="item">GeoDeliberator</div>
     {% else %}
     <a href="#" class="blue item {{ phase.document_active }}" data-tab="document-tab"><i class="icon file text outline"></i>Documents</a>
-    <a href="#" class="blue item {{ phase.claim_active }}" data-tab="claim-tab"><i class="icon comment outline"></i>Claims</a>
     {% if phase.show_statement_link %}
     <a href="{{ forum_url }}/statement" class="item">Citizens' Statement</a>
     {% endif %}
@@ -268,7 +267,9 @@
 
 <div class="document-related" id="workbench2-document-container" style="overflow:auto;">
 	<div id="workbench-document-panel">
-		<div id="workbench-document" class="ui segment" style="overflow: auto;"></div>
+		<div id="workbench-document" class="ui segment" style="overflow: auto;">
+			<h1>Please select a document from table of contents to start.</h1>
+		</div>
 	</div>	
 </div>
 
