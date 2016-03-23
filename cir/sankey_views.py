@@ -8,6 +8,7 @@ from django.utils import timezone
 from cir.models import *
 from datetime import datetime, date, timedelta
 import time
+import pytz
 
 from . import preprocessing
 
@@ -28,11 +29,16 @@ def get_graph(request):
 	forum = Forum.objects.get(id = forum_id)
 	highlights = Highlight.objects.all()
 	print "-------------------", highlights.count()
+	print time_upper_bound
+	print time_lower_bound
 	highlights = highlights.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound)
+	print "-------------------", highlights.count()
 	if (author_ids[0] != ""):
 		highlights = highlights.filter(author_id__in = author_ids)
+		print "1-------------------", highlights.count()
 	if (theme_ids[0] != ""):
 		highlights = highlights.filter(theme_id__in = theme_ids)
+		print "2-------------------", highlights.count()
 	print "-------------------", highlights.count()
 	graph = {}
 	graph["nodes"] = []
@@ -318,8 +324,10 @@ def get_highlights2(request):
 		time_upper_bound = viewlogs.order_by("-created_at")[0].created_at
 		time_lower_bound = viewlogs.order_by("created_at")[0].created_at
 	else:
-		time_upper_bound = datetime.datetime(2020, 1, 1)
-		time_lower_bound = datetime.datetime(2010, 1, 1)
+		time_upper_bound = datetime(2011, 8, 15, 8, 15, 12, 0, pytz.UTC)
+		time_lower_bound = datetime(2021, 8, 15, 8, 15, 12, 0, pytz.UTC)
+	print time_upper_bound
+	print time_lower_bound
 	time_upper_bound = timezone.localtime(time_upper_bound).strftime("%Y %m %d %H %M")
 	time_lower_bound = timezone.localtime(time_lower_bound).strftime("%Y %m %d %H %M")
 	response["time_upper_bound"] = time_upper_bound
@@ -382,6 +390,8 @@ def get_doc_coverage(request):
 						response["coverage_map_selected"][doc.id][section.id][i] = 1
 	# add author arrow
 	response["author_activity_map"] = {}
+	print doc_ids
+	print author_ids
 	for author_id in author_ids:
 		print author_id
 		viewlogs = ViewLog.objects.filter(doc_id__in = doc_ids, author_id = author_id)
@@ -396,8 +406,12 @@ def get_doc_coverage(request):
 				print l
 				item = {}
 				item["doc_id"] = viewlogs.order_by("-created_at")[0].doc_id
-				item["work_on"] = l.index(1)
+				first = l.index(1)
+				last = len(l) - l[::-1].index(1) - 1
+				item["work_on"] = (first + last) / 2
 				item["author_name"] = User.objects.get(id = author_id).last_name
+				print item["author_name"]
+				print item["doc_id"]
 				response["author_activity_map"][author_id] = item
 	# nuggetmap
 	nuggetmaps = NuggetMap.objects.all()
@@ -416,7 +430,9 @@ def get_doc_coverage(request):
 					arr = nuggetmaps3.order_by("-created_at")[0].distribution.split(",")
 					l = np.array([int(x) for x in arr])
 					distribution = distribution + l
-		response["nuggetmaps"][str(doc_id)] = distribution.tolist()
+		response["nuggetmaps"][str(doc_id)] = {}
+		response["nuggetmaps"][str(doc_id)]["distribution"] = distribution.tolist()
+		response["nuggetmaps"][str(doc_id)]["doc_name"] = Doc.objects.get(id = doc_id).title
 	# viewlog
 	viewlogs = ViewLog.objects.all()
 	viewlogs = viewlogs.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound)
@@ -445,6 +461,7 @@ def put_viewlog(request):
 	lower = request.REQUEST.get('lower')
 	height = request.REQUEST.get('height')
 	doc_id = request.REQUEST.get('doc_id')
+	print doc_id
 	author_id = request.REQUEST.get('author_id')
 	viewlogs = ViewLog.objects.filter(doc_id = doc_id, author_id = author_id)
 	if (viewlogs.count() > 1):
@@ -481,8 +498,10 @@ def get_timerange(request):
 		time_upper_bound = viewlogs.order_by("-created_at")[0].created_at
 		time_lower_bound = viewlogs.order_by("created_at")[0].created_at
 	else:
-		time_upper_bound = datetime.datetime(2020, 1, 1)
-		time_lower_bound = datetime.datetime(2010, 1, 1)
+		time_upper_bound = datetime(2020, 1, 1, 1, 1)
+		time_lower_bound = datetime(2010, 1, 1, 1, 1)
+	print time_upper_bound
+	print time_lower_bound
 	time_upper_bound = timezone.localtime(time_upper_bound).strftime("%Y %m %d %H %M %S")
 	time_lower_bound = timezone.localtime(time_lower_bound).strftime("%Y %m %d %H %M %S")
 	response = {}
@@ -516,6 +535,16 @@ def get_entities(request):
 		item["id"] = "author-" + str(author.id)
 		item["name"] = "P" + str(author.id) + ":" + str(author.last_name)
 		response["authors"].append( item )
+	return HttpResponse(json.dumps(response), content_type='application/json')
+
+def nuggetlens(request):
+	response = {}
+	forum = Forum.objects.get(id = request.session['forum_id'])
+	is_open = request.REQUEST.get('is_open')
+	author_id = request.REQUEST.get('author_id')
+	if is_open == "true": is_open = True
+	else: is_open = False
+	NuggetLensInteraction.objects.create(is_open = is_open, author_id = author_id, created_at = timezone.now(), forum = forum)
 	return HttpResponse(json.dumps(response), content_type='application/json')
 
 def get_doc_length(forum, doc_id):

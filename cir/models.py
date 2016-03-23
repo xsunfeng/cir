@@ -538,3 +538,9 @@ class NuggetMap(models.Model):
     author = models.ForeignKey(User, related_name='nuggetmaps')
     theme = models.ForeignKey(ClaimTheme, related_name='nuggetmaps')
     created_at = models.DateTimeField(null=True, blank=True)
+
+class NuggetLensInteraction(models.Model):
+    author = models.ForeignKey(User)
+    created_at = models.DateTimeField(null=True, blank=True)
+    is_open = models.BooleanField(default=False)
+    forum = models.ForeignKey(Forum, null=True, blank=True)
