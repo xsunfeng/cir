@@ -34,7 +34,6 @@ define([
 
 		load_toc();
 		// module.doc_id = $("#default-doc-id").attr("data-id");
-		module.doc_id = "67";
 		if (!module.doc_id) {
 			load_init_doc;
 		}
