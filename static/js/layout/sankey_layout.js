@@ -34,7 +34,7 @@ define([
     module.barchart_ajax;
     module.nodeMap = {};
     module.time_bound_list = [];
-    module.focus_threshold = 24;
+    module.focus_threshold = 300;
 
     module["relation"] = $("#sankey-relation .item.active").attr("data-value");
 
