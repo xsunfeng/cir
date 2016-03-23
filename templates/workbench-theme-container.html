@@ -1,9 +1,12 @@
-<button class="ui loading red button" style="float:right;" id="loading-status">Loading...</button>
-<button class="ui blue button" id="show-sankey">NuggetLens</button>
-
-<div class="ui secondary pointing compact menu" id="claim-theme-filter-menu">
-  <a class="active item claim-theme-filter" data-id="-1">All</a>
+<div class="ui secondary  menu">
   {% for theme in themes %}
-    <a class="item claim-theme-filter" data-id="{{ theme.id }}">{{ theme.name }}</a>
+  <a class="item theme-desc" data-content="{{ theme.description }}" data-id="{{ theme.id }}">{{ theme.name }}</a>
   {% endfor %}
+  <div class="right menu">
+    <a class="ui red button" id="show-sankey">
+      NuggetLens
+    </a>
+  </div>
 </div>
+
+<button class="ui loading red button" style="float:right;" id="loading-status">Loading...</button>
