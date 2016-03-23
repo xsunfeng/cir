@@ -343,6 +343,12 @@ define([
 
 	function init_button() {
 
+		$("body").on("click", ".claim-theme-filter", function(e) {
+			e.stopPropagation();
+			$(this).siblings().removeClass("active");
+			$(this).addClass("active");
+		});
+
 		$("#workbench-document").on('click', '.tk', function(e) {
 			e.stopPropagation();
 			if ($(this).hasClass('my_nugget') || $(this).hasClass('my_comment') || $(this).hasClass('other_nugget') || $(this).hasClass('other_comment')) {
@@ -356,7 +362,7 @@ define([
 					});
 				}
 			}
-		})
+		});
 
 		$("#workbench-document").bind('scroll', function() {
 			var perc = ($("#workbench-document").scrollTop() + $("#workbench-document").height() / 2) / $("#workbench-document .workbench-doc-item").height();
