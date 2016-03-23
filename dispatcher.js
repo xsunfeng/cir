@@ -10,7 +10,7 @@ var socketIds = [];
 io.on('connection', function(socket) {
 	socket
 		.on('server:user:logged_in', function(msg) {
-			console.log(msg.role + 'connected as ' + socket.id);
+			console.log(msg.role + ' connected as ' + socket.id + ' joined forum ' + msg.forum_id);
 
 			// join a room according to their role
 			socket.join(msg.role);
@@ -20,7 +20,8 @@ io.on('connection', function(socket) {
 				'user_id': msg.user_id,
 				'user_name': msg.user_name,
 				'role': msg.role,
-				'socket_id': socket.id
+				'socket_id': socket.id,
+				'forum_id': msg.forum_id,
 			});
 
 			// notify others
@@ -28,7 +29,8 @@ io.on('connection', function(socket) {
 				'user_id': msg.user_id,
 				'user_name': msg.user_name,
 				'role': msg.role,
-				'socket_id': socket.id
+				'socket_id': socket.id,
+				'forum_id': msg.forum_id,
 			});
 
 			// return current online users

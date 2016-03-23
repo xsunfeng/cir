@@ -3,7 +3,7 @@ import os
 import socket
 
 # automatically determine debug status
-if 'lws-cai01' in socket.getfqdn():
+if 'cai' in socket.getfqdn():
     DEBUG = False
 else:
     DEBUG = False 

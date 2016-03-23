@@ -1,57 +1,9 @@
-<!-- <div class="ui large menu">
-  	<div class="item">
-  		<img src="/media/forum_logos/default.jpg" style="width:5em">
-  	</div>
-  	<a class="item" href="/{{ forum_url }}/">
-    	{{ forum_name }}
-  	</a>
-  	<a class="item" href="javascript:;">
-    	Day1
-  	</a>
-  	<a class="item" href="javascript:;" id="current-phase">
-    	Current phase: {{ phase.full_name }}
-  	</a>
-  	<div class="right menu">
-	    <div class="ui right dropdown item" id="claim-theme-filter-menu">
-	      	Current Topic: <i class="dropdown icon"></i>
-	      	<div class="menu">
-				  <div class="item claim-theme-filter active selected" data-id="-1">All</div>
-				{% for theme in themes %}
-					<a class="item claim-theme-filter" data-id="{{ theme.id }}">{{ theme.name }}</a>
-				{% endfor %}
-	      	</div>
-	    </div>
-        <div class="active orange item" id="current-claim-theme-text">All</div>
-  	</div>
-</div>
-
-<div class="ui special popup" id="phase-instructions">
-    {{ phase.instructions }}
-</div> -->
-
-<!-- <div class="ui large menu">
-  <div class="ui left dropdown item" id="claim-theme-filter-menu">
-    Current Topic: <i class="dropdown icon"></i>
-    <div class="menu">
-      <div class="item claim-theme-filter active selected" data-id="-1">All</div>
-      {% for theme in themes %}
-        <a class="item claim-theme-filter" data-id="{{ theme.id }}">{{ theme.name }}</a>
-      {% endfor %}
-    </div>
-  </div>
-  <div class="active orange item" id="current-claim-theme-text">All</div>
-</div> -->
-
-<div class="ui floating labeled icon dropdown button" id="claim-theme-filter-menu">
-  <i class="theme icon"></i>
-  <span class="text">All</span>
-  <div class="menu">
-    <div class="item claim-theme-filter active selected" data-id="-1">All</div>
-    {% for theme in themes %}
-      <a class="item claim-theme-filter" data-id="{{ theme.id }}">{{ theme.name }}</a>
-    {% endfor %}
-  </div>
-</div>
-
 <button class="ui loading red button" style="float:right;" id="loading-status">Loading...</button>
 <button class="ui blue button" id="show-sankey">NuggetLens</button>
+
+<div class="ui secondary pointing compact menu" id="claim-theme-filter-menu">
+  <a class="active item claim-theme-filter" data-id="-1">All</a>
+  {% for theme in themes %}
+    <a class="item claim-theme-filter" data-id="{{ theme.id }}">{{ theme.name }}</a>
+  {% endfor %}
+</div>

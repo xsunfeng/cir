@@ -34,7 +34,6 @@ define([
 
 		load_toc();
 		// module.doc_id = $("#default-doc-id").attr("data-id");
-		module.doc_id = "67";
 		if (!module.doc_id) {
 			load_init_doc;
 		}
@@ -74,7 +73,7 @@ define([
 	idleInterval = setInterval(function() {
 		idleTime = idleTime + 1;
 		if (idleTime < 2 && $(".workbench-doc-item").is(":visible") && !$("#sankey-container").is(":visible")) { // 30s
-		  console.log(idleTime);
+		  if ($("#header-user-name").attr("data-role") !== "panelist") return;
 		  var upper = $("#workbench-document").scrollTop();
 		  var lower = $("#workbench-document").scrollTop() + $("#workbench-document").height();
 		  var height = $("#workbench-document .workbench-doc-item").height();
@@ -108,6 +107,7 @@ define([
 	})
 
 	module.get_nuggetmap = function() {
+		if ($("#header-user-name").attr("data-role") !== "panelist") return;
 		$.ajax({
 			url: '/sankey/get_nuggetmap/',
 			type: 'post',
@@ -158,6 +158,7 @@ define([
 	}
 
 	module.get_viewlog = function() {
+		if ($("#header-user-name").attr("data-role") !== "panelist") return;
 		$.ajax({
 			url: '/sankey/get_viewlog/',
 			type: 'post',
@@ -341,6 +342,12 @@ define([
 
 	function init_button() {
 
+		$("body").on("click", ".claim-theme-filter", function(e) {
+			e.stopPropagation();
+			$(this).siblings().removeClass("active");
+			$(this).addClass("active");
+		});
+
 		$("#workbench-document").on('click', '.tk', function(e) {
 			e.stopPropagation();
 			if ($(this).hasClass('my_nugget') || $(this).hasClass('my_comment') || $(this).hasClass('other_nugget') || $(this).hasClass('other_comment')) {
@@ -354,7 +361,7 @@ define([
 					});
 				}
 			}
-		})
+		});
 
 		$("#workbench-document").bind('scroll', function() {
 			var perc = ($("#workbench-document").scrollTop() + $("#workbench-document").height() / 2) / $("#workbench-document .workbench-doc-item").height();

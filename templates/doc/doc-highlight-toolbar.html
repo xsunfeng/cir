@@ -25,7 +25,6 @@
 					<label>Please assign a theme</label>
 					<select class="ui fluid dropdown" name="theme">
 						{% if themes %}
-							<option value="">(not decided)</option>
 							{% for theme in themes %}
 								<option value="{{ theme.id }}">{{ theme.name }}</option>
 							{% endfor %}

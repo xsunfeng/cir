@@ -58,7 +58,8 @@ define([
 					'user_name': sessionStorage['user_name'],
 					'role': sessionStorage['role'],
 					'content': content,
-					'created_at': nowString()
+					'created_at': nowString(),
+					'forum_id': $('body').attr('forum-id')
 				};
 				require('realtime/socket').emitChat(data);
 				$('#chatter-wrapper textarea').val('');

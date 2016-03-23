@@ -34,7 +34,7 @@ define([
     module.barchart_ajax;
     module.nodeMap = {};
     module.time_bound_list = [];
-    module.focus_threshold = 24;
+    module.focus_threshold = 300;
 
     module["relation"] = $("#sankey-relation .item.active").attr("data-value");
 
@@ -852,7 +852,7 @@ define([
 
           var color = d3.scale.linear()
                     .domain([0, module.focus_threshold])
-                    .range(["yellow", "red"]);
+                    .range(["white", "red"]);
 
           color_chart.selectAll("rect")
                   .data(data)
