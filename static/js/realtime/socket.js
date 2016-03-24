@@ -47,7 +47,8 @@ define([
 				socket.emit('server:user:logged_in', {
 					'user_id': sessionStorage['user_id'],
 					'user_name': sessionStorage['user_name'],
-					'role': sessionStorage['role']
+					'role': sessionStorage['role'],
+					'forum_id': $('body').attr('forum-id')
 				});
 				initSocketEvents();
 
@@ -72,13 +73,16 @@ define([
 						if (!module['online_users'].hasOwnProperty(users[i].user_id)
 							&& users[i].forum_id == $('body').attr('forum-id')) {
 							module['online_users'][users[i].user_id] = users[i];
-							if ($('body').attr('forum-id') == msg.forum_id) {
+							if ($('body').attr('forum-id') == users[i].forum_id) {
 								Chatter.addOnlineUser(users[i]);
 							}
 						}
 					}
 				}).on('client:chat:emit_msg', function(msg) {
+					if (msg.forum_id == $('body').attr('forum-id')) {
+					
 					Chatter.showMsg(msg);
+					}
 				}).on('client:document:add_highlight', function(data) {
 					Workbench.receiveNewHighlight(data);
 				}).on('client:document:add_question', function(data) {

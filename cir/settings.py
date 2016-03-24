@@ -6,7 +6,7 @@ import socket
 if 'cai' in socket.getfqdn():
     DEBUG = False
 else:
-    DEBUG = True
+    DEBUG = False 
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
