@@ -378,7 +378,25 @@ def get_doc_coverage(request):
 	response["author_map_filtered"] = {}
 	forum = Forum.objects.get(id = request.session['forum_id'])
 	docs = Doc.objects.filter(forum=forum)
-	# assign values
+	if (author_ids[0] == ""): 
+		author_ids = []
+		roles = Role.objects.filter(forum = forum, role = "panelist")
+		for role in roles:
+			author_ids.append(role.user.id)
+	print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	if (theme_ids[0] == ""):
+		theme_ids = []
+		themes = ClaimTheme.objects.filter(forum = forum)
+		for theme in themes:
+			theme_ids.append(theme.id)
+	if (doc_ids[0] == ""):
+		doc_ids = []
+		docs = Doc.objects.filter(forum=forum)
+		for doc in docs:
+			doc_ids.append(doc.id)
+	print doc_ids
+	print author_ids
+	print theme_ids
 	for doc in docs:
 		response["coverage_map"][doc.id] = {}
 		response["coverage_map_filtered"][doc.id] = {}
@@ -415,10 +433,9 @@ def get_doc_coverage(request):
 						response["coverage_map_selected"][doc.id][section.id][i] = 1
 	# add author arrow
 	response["author_activity_map"] = {}
-	print doc_ids
+	print "-------------1----------"
 	print author_ids
 	for author_id in author_ids:
-		print author_id
 		viewlogs = ViewLog.objects.filter(doc_id__in = doc_ids, author_id = author_id)
 		if viewlogs.count() >= 2:
 			print "viewlogs.count()", viewlogs.count()
@@ -442,6 +459,9 @@ def get_doc_coverage(request):
 	nuggetmaps = NuggetMap.objects.all()
 	nuggetmaps = nuggetmaps.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound)
 	response["nuggetmaps"] = {}
+	print "-----------2------------"
+	print author_ids
+	print theme_ids
 	for doc_id in doc_ids:
 		nuggetmaps2 = nuggetmaps.filter(doc_id = doc_id)
 		forum = Forum.objects.get(id = request.session['forum_id'])

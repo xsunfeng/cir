@@ -719,7 +719,6 @@ define([
     $("body").on("click", "#update-sankey", function(e){
       $(".select-toolbar.active .select-element.active").click();
       hide_rec();
-      clear_filters();
       module.get_barchart();
     });
     $("body").on("click", "#refresh-sankey", function(e){
@@ -763,8 +762,13 @@ define([
       clear_filters();
       add_selection_elements();
       module.get_barchart();
+      module.get_sankey();
     })
   };
+
+  function clear_filters() {
+    $(".select-toolbar.active .select-element.active").removeClass("active").removeClass("green");
+  }
 
   function get_filter() {
     var res = {}
@@ -971,7 +975,7 @@ define([
       type: 'post',
       success: function(xhr) {
         var reverse = $("#select-sort-descending").hasClass("active");
-        if ($(".select-document").length !== 0) {
+        if ($(".select-toolbar.active").find(".select-document").length !== 0) {
           $(".select-document-elements").empty();
           for (var i = 0; i < xhr.docs.length; i ++) {
             var num = "0"
@@ -984,7 +988,7 @@ define([
           $(".doc-labels").find("span").text($(".select-toolbar.active .select-document-elements .select-element").length);
         }
 
-        if ($(".select-author").length !== 0) {
+        if ($(".select-toolbar.active").find(".select-author").length !== 0) {
           $(".select-author-elements").empty();
           for (var i = 0; i < xhr.authors.length; i ++) {
             var num = "0"
@@ -997,7 +1001,7 @@ define([
           $(".author-labels").find("span").text($(".select-toolbar.active .select-author-elements .select-element").length);
         } 
 
-        if ($(".select-theme").length !== 0) {
+        if ($(".select-toolbar.active").find(".select-theme").length !== 0) {
           $(".select-theme-elements").empty();
           for (var i = 0; i < xhr.themes.length; i ++) {
             var num = "0"
