@@ -138,6 +138,7 @@ def api_annotation(request):
         highlight = Highlight.objects.get(id=highlight_id)
         if (highlight.is_nugget):
             context['theme'] = highlight.theme
+            context['author'] = highlight.author
         context['forum_phase'] = forum.phase
         context['source'] = 'highlight'
         context['entries'] = []
