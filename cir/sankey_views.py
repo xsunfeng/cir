@@ -411,7 +411,7 @@ def get_doc_coverage(request):
 	print "-------------1----------"
 	print author_ids
 	for author_id in author_ids:
-		viewlogs = ViewLog.objects.filter(doc_id__in = doc_ids, author_id = author_id)
+		viewlogs = ViewLog.objects.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound).filter(doc_id__in = doc_ids, author_id = author_id)
 		if viewlogs.count() >= 2:
 			print "viewlogs.count()", viewlogs.count()
 			arr1 = viewlogs.order_by("-created_at")[0].heatmap.split(",")

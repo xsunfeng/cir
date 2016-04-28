@@ -5,8 +5,7 @@ define([
   'jquery',
   'semantic-ui',
   'utils',
-  'workbench2',
-  'nouislider'
+  'workbench2'
 ], function(
   d3,
   tip,
@@ -14,8 +13,7 @@ define([
   $,
   semantic,
   Utils,
-  workbench_module,
-  noUiSlider
+  workbench_module
 ) {
 
   var module = {};
@@ -946,7 +944,7 @@ define([
             } else {
               var tooltip = author_name + " recently worked at this place";
               var arrow = '<div class="latest-activity-arrow" data-tooltip="' + tooltip + '" author-id="' + author_id + '" style="position:fixed;">' +
-                      '<i class="icon big olive user"></i>' +
+                      '<i class="icon big olive user"><b>' + author_name + '</b></i>' +
                 '</div>';  
             }
             $("#latest-activity-container").append(arrow);

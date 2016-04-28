@@ -4,9 +4,10 @@ import socket
 
 # automatically determine debug status
 if 'cai' in socket.getfqdn():
-    DEBUG = False
+    DEBUG = True
 else:
     DEBUG = True
+
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
