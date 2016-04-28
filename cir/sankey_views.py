@@ -4,15 +4,15 @@ import math
 import numpy as np
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from django.utils.timezone import localtime
 from django.utils import timezone
 from cir.models import *
-from datetime import datetime, date, time, timedelta
+from datetime import datetime, date, timedelta
+import time
+import pytz
 
 from . import preprocessing
 
-day_chooser_lower = date(2016, 3, 14)
-day_chooser_upper = date(2016, 3, 20)
+num_word_for_each_unit = 50
 
 def get_graph(request):
 	relation = request.REQUEST.get('relation')
@@ -20,23 +20,26 @@ def get_graph(request):
 	author_ids = request.REQUEST.get('author_ids').split(" ")
 	theme_ids = request.REQUEST.get('theme_ids').split(" ")
 	doc_ids = request.REQUEST.get('doc_ids').split(" ")
-	xl = request.REQUEST.get('time_upper_bound')
-	time_upper_bound = datetime.fromtimestamp(float(xl) / 1000.0)
-	xs = request.REQUEST.get('time_lower_bound')
-	time_lower_bound = datetime.fromtimestamp(float(xs) /1000.0)
-	xl = int(xl)
-	xs = int(xs)
+	time_upper_bound = request.REQUEST.get('time_upper_bound')
+	time_upper_bound = datetime.strptime(time_upper_bound, "%Y %m %d %H %M")
+	time_lower_bound = request.REQUEST.get('time_lower_bound')
+	time_lower_bound = datetime.strptime(time_lower_bound, "%Y %m %d %H %M")
 	# initialize
 	forum_id = request.session['forum_id']
 	forum = Forum.objects.get(id = forum_id)
 	highlights = Highlight.objects.all()
-	highlights = highlights.filter(created_at__lte = day_chooser_upper).filter(created_at__gte = day_chooser_lower)
+	print "-------------------", highlights.count()
+	print time_upper_bound
+	print time_lower_bound
 	highlights = highlights.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound)
+	print "-------------------", highlights.count()
 	if (author_ids[0] != ""):
 		highlights = highlights.filter(author_id__in = author_ids)
+		print "1-------------------", highlights.count()
 	if (theme_ids[0] != ""):
 		highlights = highlights.filter(theme_id__in = theme_ids)
-
+		print "2-------------------", highlights.count()
+	print "-------------------", highlights.count()
 	graph = {}
 	graph["nodes"] = []
 	graph["links"] = []
@@ -185,133 +188,151 @@ def get_graph(request):
 	# graph["doc_length_map"] = doc_length_map
 	return HttpResponse(json.dumps(graph), content_type='application/json')
 
-def get_barchart(request):
-	# filters
-	author_ids = request.REQUEST.get('author_ids').split(" ")
-	theme_ids = request.REQUEST.get('theme_ids').split(" ")
-	doc_ids = request.REQUEST.get('doc_ids').split(" ")
-	selected = request.REQUEST.get('selected')
-	xl = request.REQUEST.get('time_upper_bound')
-	time_upper_bound = datetime.fromtimestamp(float(xl) / 1000.0)
-	xs = request.REQUEST.get('time_lower_bound')
-	time_lower_bound = datetime.fromtimestamp(float(xs) /1000.0)
-	xl = int(xl)
-	xs = int(xs)
-	# initialize
+def get_doc(request):
 	response = {}
-	highlight_arr = []
-	highlight_response = {}
-	highlight_response_num = 20 # 0 ~ highlight_response_num
-	forum_id = request.session['forum_id']
-	forum = Forum.objects.get(id=forum_id)
-
-	highlights = Highlight.objects.all()
-	highlights = highlights.filter(created_at__lte = day_chooser_upper).filter(created_at__gte = day_chooser_lower)
-	highlights = highlights.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound)
-	# there are filters
-	if (author_ids[0] != "" or theme_ids[0] != ""):
-		print "not first time, no filters~~~~~~~~~~"
-		response["data"] = []
-		interval = int(math.ceil((xl - xs) / highlight_response_num));
-		for i in range(0, highlight_response_num):
-			item = {}
-			item["time_lower_bound"] = xs + i * interval
-			item["time_upper_bound"] = xs + (i + 1) * interval - 1
-			ll = datetime.fromtimestamp(float(item["time_lower_bound"]) / 1000.0)
-			uu = datetime.fromtimestamp(float(item["time_upper_bound"]) / 1000.0)
-			hh = highlights.filter(created_at__lte = uu).filter(created_at__gte = ll)
-			item["num_nugget"] = hh.count()
-			if (author_ids[0] != ""):
-				hh = hh.filter(author_id__in = author_ids)
-			if (theme_ids[0] != ""):
-				hh = hh.filter(theme_id__in = theme_ids)
-			item["num_nugget_ind"] = hh.count()
-			item["num_nugget_sel"] = 0
-			if (selected != None):
-				if (selected.startswith("doc")):
-					section_ids = []
-					for section in DocSection.objects.filter(forum = forum).filter(doc_id=selected.split("-")[1]):
-						section_ids.append(section.id)
-					hh = hh.filter(context_id__in=section_ids)
-				elif (selected.startswith("author")):
-					hh = hh.filter(author_id=selected.split("-")[1])
-				elif (selected.startswith("theme")):
-					hh = hh.filter(theme_id=selected.split("-")[1])
-				item["num_nugget_sel"] = hh.count()
-			response["data"].append(item)
-			item["time"] = str(ll.hour) + " " + str(ll.minute)
-	# first time, no filters
-	else:
-		print "first time, no filters----------"
-		for h in highlights:
-			if (h.context != None and h.theme != None and DocSection.objects.get(id=h.context.id).forum_id == forum_id):
-				highlight_arr.append({"id":h.id, "created_at":localtime(h.created_at)});
-		if (len(highlight_arr) > 0):
-			highlight_arr = sorted(highlight_arr, key=lambda k:k['created_at'])
-			highlight_response_interval = ((highlight_arr[len(highlight_arr) - 1]["created_at"] - highlight_arr[0]["created_at"]).total_seconds() + 1) / highlight_response_num
-			highlight_bar = [0] * (highlight_response_num + 1)
-			for item in highlight_arr:
-				key = int(((item["created_at"] - highlight_arr[0]["created_at"]).total_seconds()) / highlight_response_interval)
-				highlight_bar[key] = highlight_bar[key] + 1
-				# print ((item["created_at"] - highlight_arr[0]["created_at"]).total_seconds() - key * highlight_response_interval)
-			highlight_line = [0] * (highlight_response_num + 1)
-			highlight_line[0] = highlight_bar[0]
-			for i in range(1, highlight_response_num + 1):
-				highlight_line[i] = highlight_line[i - 1] + highlight_bar[i]
-			highlight_time = []
-			highlight_time_upper_bound = []
-			highlight_time_lower_bound = []
-			for i in range(0, highlight_response_num):
-				time_lower_bound = highlight_arr[0]["created_at"] +  timedelta(seconds=(i) * highlight_response_interval)
-				time_upper_bound = highlight_arr[0]["created_at"] +  timedelta(seconds=(i + 1) * highlight_response_interval - 1)
-				highlight_time_lower_bound.append(time_lower_bound.strftime("%Y %m %d %H %M %S"))
-				highlight_time_upper_bound.append(time_upper_bound.strftime("%Y %m %d %H %M %S"))
-				highlight_time.append(time_lower_bound.strftime("%H:%M"))
-			highlight_bar.pop()
-			highlight_line.pop()
-			response["data"] = []
-			count = 0
-			for i in range (0, len(highlight_time)):
-				item = {}
-				item["time"] = highlight_time[i]
-				item["time_upper_bound"] = highlight_time_upper_bound[i]
-				item["time_lower_bound"] = highlight_time_lower_bound[i]
-				item["num_nugget"] = highlight_bar[i]
-				item["num_nugget_ind"] = highlight_bar[i]
-				item["num_nugget_sel"] = 0
-				item["num_nugget_acc"] = highlight_bar[i]
-				count = item["num_nugget_acc"]
-				response["data"].append(item)
 	return HttpResponse(json.dumps(response), content_type='application/json')
 
-def get_doc(request):
-	xl = request.REQUEST.get('time_upper_bound')
-	time_upper_bound = datetime.fromtimestamp(float(xl) / 1000.0)
-	xs = request.REQUEST.get('time_lower_bound')
-	time_lower_bound = datetime.fromtimestamp(float(xs) /1000.0)
+def get_viewlog(request):
+	# filters
+	my_id = request.REQUEST.get('my_id')
+	doc_id = request.REQUEST.get('doc_id')
+	viewlogs = ViewLog.objects.filter(author_id = my_id, doc_id = doc_id)
+	if (viewlogs.count() == 0):
+		forum = Forum.objects.get(id = request.session['forum_id'])
+		length = 0
+		for section in Doc.objects.get(id = doc_id).sections.all():
+			section_segmented_text = section.getAttr(forum)["segmented_text"]
+			length = length + len(re.findall(r"data-id", section_segmented_text))
+		length = length / num_word_for_each_unit  # length was the numebr of chars
+		heatmap = [0] * length
+		heatmap = ",".join(str(x) for x in heatmap)
+		ViewLog.objects.create(doc_id = doc_id, author_id = my_id, created_at = timezone.now(), heatmap = heatmap)
+	viewlog = viewlogs.order_by("-created_at")[0]
+	arr = viewlog.heatmap.split(",")
+	arr = [int(x) for x in arr]
+	l = np.array(arr)
+	response = {}
+	response["my_viewlog"] = l.tolist()
+	return HttpResponse(json.dumps(response), content_type='application/json')
+
+def put_nuggetmap(request):
+	upper_bound = request.REQUEST.get('upper_bound')
+	lower_bound = request.REQUEST.get('lower_bound')
+	doc_id = request.REQUEST.get('doc_id')
+	author_id = request.REQUEST.get('author_id')
+	theme_id = request.REQUEST.get('theme_id')
 	response = {}
 	context = {}
-	doc_id = request.REQUEST.get('doc_id')
-	doc = Doc.objects.get(id=doc_id)
-	context["doc"] = doc
-
 	forum_id = request.session['forum_id']
 	forum = Forum.objects.get(id = forum_id)
-	wordcount={}
-	for section in doc.sections.all():
-		section_segmented_text = section.getAttr(forum)["segmented_text"]
-		section_list = preprocessing.preprocess_pipeline(section_segmented_text, "english", "SnowballStemmer", False, True, True)
-		for sentence_list in section_list:
-			for word in sentence_list:
-				if word not in wordcount:
-					wordcount[word] = 1
-				else:
-					wordcount[word] += 1
-	wordcount = {k:wordcount[k] for k in wordcount if wordcount[k] > 2}
-	wordcount = sorted(wordcount.items(), key=lambda x: x[1], reverse=True)
-	context["wordcount"] = wordcount
-	response['word_cloud'] = render_to_string("vis/doc.html", context)
+	nuggetmaps = NuggetMap.objects.filter(doc_id = doc_id, author_id = author_id, theme_id = theme_id)
+	if (nuggetmaps.count() > 1):
+		nuggetmap_latest = nuggetmaps.order_by("-created_at")[0]
+		distribution = nuggetmap_latest.distribution.split(",")
+		distribution = [int(x) for x in distribution]
+		length = len(distribution)
+	else:
+		length = get_doc_length(forum, doc_id)
+		length = length / num_word_for_each_unit
+		distribution = [0] * length
+	left = int(round(length * (float)(upper_bound)))
+	right = int(round(length * (float)(lower_bound)))
+	if (left == right):
+		if (right == length): left = left - 1
+		elif (left == 0): right = right + 1
+		else: left = left - 1
+	for i in range(left, right): # include start and exclude end
+		distribution[i] = 1
+	distribution = ",".join(str(x) for x in distribution)
+	NuggetMap.objects.create(doc_id = doc_id, author_id = author_id, theme_id = theme_id, created_at = timezone.now(), distribution = distribution)
 	return HttpResponse(json.dumps(response), content_type='application/json')
+
+def get_nuggetmap(request):
+	# filters
+	my_id = request.REQUEST.get('my_id')
+	doc_id = request.REQUEST.get('doc_id')
+	theme_id = request.REQUEST.get('theme_id')
+	if theme_id == "-1":
+		nuggetmaps = NuggetMap.objects.filter(author_id = my_id, doc_id = doc_id)
+	else:
+		nuggetmaps = NuggetMap.objects.filter(author_id = my_id, doc_id = doc_id, theme_id = theme_id)
+	if (nuggetmaps.count() == 0):
+		forum = Forum.objects.get(id = request.session['forum_id'])
+		length = get_doc_length(forum, doc_id)
+		length = length / num_word_for_each_unit
+		distribution = [0] * length
+		distribution = ",".join(str(x) for x in distribution)
+		themes = ClaimTheme.objects.filter(forum = forum)
+		for theme in themes:
+			NuggetMap.objects.create(theme = theme, doc_id = doc_id, author_id = my_id, created_at = timezone.now(), distribution = distribution)
+	nuggetmap = nuggetmaps.order_by("-created_at")[0]
+	arr = nuggetmap.distribution.split(",")
+	arr = [int(x) for x in arr]
+	l = np.array(arr)
+	response = {}
+	response["my_nuggetmap"] = l.tolist()
+	return HttpResponse(json.dumps(response), content_type='application/json')
+
+def get_highlights(request):
+	# filters
+	selected = request.REQUEST.get("selected")
+	doc_id = request.REQUEST.get('doc_id')
+	author_ids = request.REQUEST.get('author_ids').split(" ")
+	theme_ids = request.REQUEST.get('theme_ids').split(" ")
+	time_upper_bound = request.REQUEST.get('time_upper_bound')
+	time_upper_bound = datetime.strptime(time_upper_bound, "%Y %m %d %H %M")
+	time_lower_bound = request.REQUEST.get('time_lower_bound')
+	time_lower_bound = datetime.strptime(time_lower_bound, "%Y %m %d %H %M")
+	response = {}
+	response['highlights'] = []
+	sections_queryset = Doc.objects.get(id = doc_id).sections
+	highlights = Highlight.objects.all()
+	highlights = highlights.filter(context_id__in = sections_queryset.values('id'))
+	highlights = highlights.filter(author_id__in = author_ids, theme_id__in = theme_ids)
+	highlights = highlights.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound)
+	for highlight in highlights:
+		highlight_info = highlight.getAttr()
+		response['highlights'].append(highlight_info)
+	return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def get_highlights2(request):
+	# filters
+	forum = Forum.objects.get(id = request.session['forum_id'])
+	theme_ids = ClaimTheme.objects.filter(forum = forum).values("id")
+	highlights = Highlight.objects.filter(theme_id__in = theme_ids, is_nugget = True)
+	response = {}
+	response['highlights'] = []
+	for highlight in highlights:
+		highlight_info = {}
+		highlight_info["id"] = highlight.id
+		highlight_info["date"] = timezone.localtime(highlight.created_at).strftime("%Y %m %d %H %M")
+		highlight_info["doc_id"] = DocSection.objects.get(id = highlight.context.id).doc.id
+		highlight_info["theme_id"] = highlight.theme.id
+		highlight_info["author_id"] = highlight.author.id
+		response['highlights'].append(highlight_info)
+	# we only consider root docs by this moment
+	root_docs = Doc.objects.filter(forum=forum, folder__isnull=True).order_by("order")
+	nuggetmaps = NuggetMap.objects.filter(doc_id__in = root_docs.values('id'))
+	viewlogs = ViewLog.objects.filter(doc_id__in = root_docs.values('id'))
+	if (nuggetmaps.count() != 0 and viewlogs.count() != 0):
+		time_upper_bound = max(nuggetmaps.order_by("-created_at")[0].created_at, viewlogs.order_by("-created_at")[0].created_at)
+		time_lower_bound = min(nuggetmaps.order_by("created_at")[0].created_at, viewlogs.order_by("created_at")[0].created_at)
+	elif nuggetmaps.count() != 0:
+		time_upper_bound = nuggetmaps.order_by("-created_at")[0].created_at
+		time_lower_bound = nuggetmaps.order_by("created_at")[0].created_at
+	elif viewlogs.count() != 0:
+		time_upper_bound = viewlogs.order_by("-created_at")[0].created_at
+		time_lower_bound = viewlogs.order_by("created_at")[0].created_at
+	else:
+		time_upper_bound = datetime(2011, 8, 15, 8, 15, 12, 0, pytz.UTC)
+		time_lower_bound = datetime(2021, 8, 15, 8, 15, 12, 0, pytz.UTC)
+	print time_upper_bound
+	print time_lower_bound
+	time_upper_bound = timezone.localtime(time_upper_bound).strftime("%Y %m %d %H %M")
+	time_lower_bound = timezone.localtime(time_lower_bound).strftime("%Y %m %d %H %M")
+	response["time_upper_bound"] = time_upper_bound
+	response["time_lower_bound"] = time_lower_bound
+	return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def get_doc_coverage(request):
 	# filters
@@ -319,10 +340,10 @@ def get_doc_coverage(request):
 	author_ids = request.REQUEST.get('author_ids').split(" ")
 	theme_ids = request.REQUEST.get('theme_ids').split(" ")
 	doc_ids = request.REQUEST.get('doc_ids').split(" ")
-	xl = request.REQUEST.get('time_upper_bound')
-	time_upper_bound = datetime.fromtimestamp(float(xl) / 1000.0)
-	xs = request.REQUEST.get('time_lower_bound')
-	time_lower_bound = datetime.fromtimestamp(float(xs) /1000.0)
+	time_upper_bound = request.REQUEST.get('time_upper_bound')
+	time_upper_bound = datetime.strptime(time_upper_bound, "%Y %m %d %H %M")
+	time_lower_bound = request.REQUEST.get('time_lower_bound')
+	time_lower_bound = datetime.strptime(time_lower_bound, "%Y %m %d %H %M")
 	# initialize
 	response = {}
 	context = {}
@@ -332,7 +353,25 @@ def get_doc_coverage(request):
 	response["author_map_filtered"] = {}
 	forum = Forum.objects.get(id = request.session['forum_id'])
 	docs = Doc.objects.filter(forum=forum)
-	# assign values
+	if (author_ids[0] == ""): 
+		author_ids = []
+		roles = Role.objects.filter(forum = forum, role = "panelist")
+		for role in roles:
+			author_ids.append(role.user.id)
+	print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	if (theme_ids[0] == ""):
+		theme_ids = []
+		themes = ClaimTheme.objects.filter(forum = forum)
+		for theme in themes:
+			theme_ids.append(theme.id)
+	if (doc_ids[0] == ""):
+		doc_ids = []
+		docs = Doc.objects.filter(forum=forum)
+		for doc in docs:
+			doc_ids.append(doc.id)
+	print doc_ids
+	print author_ids
+	print theme_ids
 	for doc in docs:
 		response["coverage_map"][doc.id] = {}
 		response["coverage_map_filtered"][doc.id] = {}
@@ -348,7 +387,6 @@ def get_doc_coverage(request):
 			highlights = section.highlights.all()
 			# filters
 			highlights = highlights.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound)
-			highlights = highlights.filter(created_at__lte = day_chooser_upper).filter(created_at__gte = day_chooser_lower)
 			for h in highlights:
 				for i in range(h.start_pos, h.end_pos):
 					response["coverage_map"][doc.id][section.id][i] = 1
@@ -369,113 +407,72 @@ def get_doc_coverage(request):
 					for i in range(h.start_pos, h.end_pos):
 						response["coverage_map_selected"][doc.id][section.id][i] = 1
 	# add author arrow
-	response["author_theme_map"] = {}
-	if (author_ids[0] != ""):
-		section_ids = []
-		for section in DocSection.objects.filter(forum = forum):
-			section_ids.append(section.id)
-		hls = Highlight.objects.filter(context_id__in=section_ids)
-		if (theme_ids[0] != ""):
-			hls = hls.filter(theme_id__in = theme_ids)
-		hls = hls.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound)
-		hls = hls.filter(created_at__lte = day_chooser_upper).filter(created_at__gte = day_chooser_lower)
-		for author_id in author_ids:
-			hl = hls.filter(author_id = str(author_id)).order_by("-created_at")
-			if (hl.count() > 0):
-				print hl[0].created_at
-				section_id = hl[0].context.id
-				doc_id = DocSection.objects.get(id=hl[0].context.id).doc.id
-				response["author_map_filtered"][doc_id][section_id][hl[0].start_pos] = author_id
-				response["author_theme_map"][author_id] = hl[0].theme.name
-	# initialize
-	num_category = 5
-	viewlogs = ViewLog.objects.all()
-	viewlogs = viewlogs.filter(created_at__lte = day_chooser_upper).filter(created_at__gte = day_chooser_lower)
-	# for realtime heatmap
-	# viewlogs = viewlogs.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound)
-	if (author_ids[0] != ""):
-		viewlogs = viewlogs.filter(author_id__in = author_ids)
-	if (theme_ids[0] != ""):
-		viewlogs = viewlogs.filter(theme_id__in = theme_ids)
-	if (doc_ids[0] != ""):
-		viewlogs = viewlogs.filter(doc_id__in = doc_ids)
-	# get max view log number
-	m = 0
-	for doc in Doc.objects.filter(forum = forum):
-		if (viewlogs.filter(doc_id = doc.id).count() > 0):
-			viewlog = viewlogs.filter(doc_id = doc.id).order_by("-created_at")[0]
-			arr = viewlog.heatmap.split(",")
-			arr = [int(x) for x in arr]
-			l = np.array(arr)
-			if ( l.max() > m ): m = l.max()
-	unit = m / (num_category - 1)
-	response["heatmap"] = {}
+	response["author_activity_map"] = {}
+	print "-------------1----------"
+	print author_ids
+	for author_id in author_ids:
+		viewlogs = ViewLog.objects.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound).filter(doc_id__in = doc_ids, author_id = author_id)
+		if viewlogs.count() >= 2:
+			print "viewlogs.count()", viewlogs.count()
+			arr1 = viewlogs.order_by("-created_at")[0].heatmap.split(",")
+			arr2 = viewlogs.order_by("-created_at")[1].heatmap.split(",")
+			if len(arr1) == len(arr2):
+				l1 = np.array([int(x) for x in arr1])
+				l2 = np.array([int(x) for x in arr2])
+				l = (l1 - l2).tolist()
+				print l
+				item = {}
+				item["doc_id"] = viewlogs.order_by("-created_at")[0].doc_id
+				first = l.index(1)
+				last = len(l) - l[::-1].index(1) - 1
+				item["work_on"] = (first + last) / 2
+				item["author_name"] = User.objects.get(id = author_id).last_name
+				print item["author_name"]
+				print item["doc_id"]
+				response["author_activity_map"][author_id] = item
+	# nuggetmap
+	nuggetmaps = NuggetMap.objects.all()
+	nuggetmaps = nuggetmaps.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound)
+	response["nuggetmaps"] = {}
+	print "-----------2------------"
+	print author_ids
+	print theme_ids
 	for doc_id in doc_ids:
-		if (viewlogs.filter(doc_id = doc_id).count() > 0):
-			viewlog = viewlogs.filter(doc_id = doc_id).order_by("-created_at")[0]
-			arr = viewlog.heatmap.split(",")
-			arr = [int(x) for x in arr]
-			l = np.array(arr)
-			l = l / unit
-			response["heatmap"][str(doc_id)] = l.tolist()
+		nuggetmaps2 = nuggetmaps.filter(doc_id = doc_id)
+		forum = Forum.objects.get(id = request.session['forum_id'])
+		length = get_doc_length(forum, doc_id)
+		length = length / num_word_for_each_unit  # length was the numebr of chars
+		distribution = np.array([0] * length)
+		for author_id in author_ids:
+			for theme_id in theme_ids:
+				nuggetmaps3 = nuggetmaps2.filter(author_id = author_id, theme_id = theme_id);
+				if (nuggetmaps3.count() != 0):
+					arr = nuggetmaps3.order_by("-created_at")[0].distribution.split(",")
+					l = np.array([int(x) for x in arr])
+					distribution = distribution + l
+		response["nuggetmaps"][str(doc_id)] = {}
+		response["nuggetmaps"][str(doc_id)]["distribution"] = distribution.tolist()
+		response["nuggetmaps"][str(doc_id)]["doc_name"] = Doc.objects.get(id = doc_id).title
+	# viewlog
+	viewlogs = ViewLog.objects.all()
+	viewlogs = viewlogs.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound)
+	response["viewlogs"] = {}
+	for doc_id in doc_ids:
+		viewlogs2 = viewlogs.filter(doc_id = doc_id)
+		forum = Forum.objects.get(id = request.session['forum_id'])
+		length = get_doc_length(forum, doc_id)
+		length = length / num_word_for_each_unit  # length was the numebr of chars
+		heatmap = np.array([0] * length)
+		for author_id in author_ids:
+			viewlogs3 = viewlogs2.filter(author_id = author_id);
+			if (viewlogs3.count() != 0):
+				arr = viewlogs3.order_by("-created_at")[0].heatmap.split(",")
+				l = np.array([int(x) for x in arr])
+				heatmap = heatmap + l
+		response["viewlogs"][str(doc_id)] = heatmap.tolist()
 	return HttpResponse(json.dumps(response), content_type='application/json')
 
-def put_workbench(request):
-	user = request.user
-	forum_id = request.session['forum_id']
-	workbench_html = request.REQUEST.get('workbench_html')
-	workbench, created = SankeyWorkbench.objects.get_or_create(author=user, forum_id=forum_id, 
-		defaults={'content': ""})
-	workbench.content = workbench_html
-	workbench.save()
-	response = {}
-	return HttpResponse(json.dumps(response), content_type='application/json')
-
-def get_workbench(request):
-	user = request.user
-	forum_id = request.session['forum_id']
-	workbench_html = request.REQUEST.get('workbench_html')
-	workbench, created = SankeyWorkbench.objects.get_or_create(author=user, forum_id=forum_id,
-		defaults={'content': ""})
-	response = {}
-	response["workbench_html"] = workbench.content
-	return HttpResponse(json.dumps(response), content_type='application/json')
-
-def put_screenshot(request):
-	screenshot_html = request.REQUEST.get('screenshot_html')
-	screenshot = SankeyScreenshot.objects.create(content=screenshot_html)
-	screenshot.save()
-	response = {}
-	response["screenshot_id"] = screenshot.id
-	return HttpResponse(json.dumps(response), content_type='application/json')
-
-def get_screenshot(request):
-	screenshot_id = request.REQUEST.get('screenshot_id')
-	screenshot = SankeyScreenshot.objects.get(id=screenshot_id)
-	response = {}
-	response["screenshot_html"] = screenshot.content
-	return HttpResponse(json.dumps(response), content_type='application/json')
-
-def get_item_by_more(dic, more):
-	for item in dic:
-		if (item["more"] == more):
-			return item
-
-def get_doc_length(request):
-	response = {}
-	context = {}
-	doc_id = request.REQUEST.get('doc_id')
-	doc = Doc.objects.get(id=doc_id)
-	forum_id = request.session['forum_id']
-	forum = Forum.objects.get(id = forum_id)
-	length = 0
-	for section in doc.sections.all():
-		section_segmented_text = section.getAttr(forum)["segmented_text"]
-		length = length + len(section_segmented_text)
-	response['length'] = length
-	return HttpResponse(json.dumps(response), content_type='application/json')
-
-def put_heatmap(request):
+def put_viewlog(request):
 	response = {}
 	context = {}
 	forum_id = request.session['forum_id']
@@ -484,24 +481,52 @@ def put_heatmap(request):
 	lower = request.REQUEST.get('lower')
 	height = request.REQUEST.get('height')
 	doc_id = request.REQUEST.get('doc_id')
-	theme_id = request.REQUEST.get('theme_id')
+	print doc_id
 	author_id = request.REQUEST.get('author_id')
-	if theme_id != "-1":
-		print doc_id
-		print author_id
-		viewlogs = ViewLog.objects.filter(doc_id = doc_id, author_id = author_id, theme_id = theme_id)
-		if (viewlogs.count() > 1):
-			viewlog_latest = viewlogs.order_by("-created_at")[0]
-			heatmap = viewlog_latest.heatmap.split(",")
-			heatmap = [int(x) for x in heatmap]
-		else:
-			heatmap = [0] * 100
-		left = int(round(100 * (float)(upper) / (float)(height)))
-		right = int(round(100 * (float)(lower) / (float)(height)))
-		for i in range(left, right):
-			heatmap[i] = heatmap[i] + 1
-		heatmap = ",".join(str(x) for x in heatmap)
-		ViewLog.objects.create(doc_id = doc_id, author_id = author_id, theme_id = theme_id, created_at = timezone.now(), heatmap = heatmap)
+	viewlogs = ViewLog.objects.filter(doc_id = doc_id, author_id = author_id)
+	if (viewlogs.count() > 1):
+		viewlog_latest = viewlogs.order_by("-created_at")[0]
+		heatmap = viewlog_latest.heatmap.split(",")
+		heatmap = [int(x) for x in heatmap]
+		length = len(heatmap)
+	else:
+		length = get_doc_length(forum, doc_id)
+		length = length / num_word_for_each_unit
+		heatmap = [0] * length
+	left = int(round(length * (float)(upper) / (float)(height)))
+	right = int(round(length * (float)(lower) / (float)(height)))
+	for i in range(left, right): # include start and exclude end
+		heatmap[i] = heatmap[i] + 1
+	heatmap = ",".join(str(x) for x in heatmap)
+	ViewLog.objects.create(doc_id = doc_id, author_id = author_id, created_at = timezone.now(), heatmap = heatmap)
+	return HttpResponse(json.dumps(response), content_type='application/json')
+
+def get_timerange(request):
+	forum_id = request.session['forum_id']
+	forum = Forum.objects.get(id = forum_id)
+	# we only consider root docs by this moment
+	root_docs = Doc.objects.filter(forum=forum, folder__isnull=True).order_by("order")
+	nuggetmaps = NuggetMap.objects.filter(doc_id__in = root_docs.values('id'))
+	viewlogs = ViewLog.objects.filter(doc_id__in = root_docs.values('id'))
+	if (nuggetmaps.count() != 0 and viewlogs.count() != 0):
+		time_upper_bound = max(nuggetmaps.order_by("-created_at")[0].created_at, viewlogs.order_by("-created_at")[0].created_at)
+		time_lower_bound = min(nuggetmaps.order_by("created_at")[0].created_at, viewlogs.order_by("created_at")[0].created_at)
+	elif nuggetmaps.count() != 0:
+		time_upper_bound = nuggetmaps.order_by("-created_at")[0].created_at
+		time_lower_bound = nuggetmaps.order_by("created_at")[0].created_at
+	elif viewlogs.count() != 0:
+		time_upper_bound = viewlogs.order_by("-created_at")[0].created_at
+		time_lower_bound = viewlogs.order_by("created_at")[0].created_at
+	else:
+		time_upper_bound = datetime(2020, 1, 1, 1, 1)
+		time_lower_bound = datetime(2010, 1, 1, 1, 1)
+	print time_upper_bound
+	print time_lower_bound
+	time_upper_bound = timezone.localtime(time_upper_bound).strftime("%Y %m %d %H %M %S")
+	time_lower_bound = timezone.localtime(time_lower_bound).strftime("%Y %m %d %H %M %S")
+	response = {}
+	response["time_upper_bound"] = time_upper_bound
+	response["time_lower_bound"] = time_lower_bound
 	return HttpResponse(json.dumps(response), content_type='application/json')
 
 def get_entities(request):
@@ -514,7 +539,7 @@ def get_entities(request):
 	for doc in root_docs:
 		item = {}
 		item["id"] = "doc-" + str(doc.id)
-		item["name"] = "doc-" + str(doc.title)
+		item["name"] = str(doc.title)
 		response["docs"].append( item )
 	response["themes"] = []
 	themes = ClaimTheme.objects.filter(forum=forum)
@@ -528,8 +553,24 @@ def get_entities(request):
 		author = role.user
 		item = {}
 		item["id"] = "author-" + str(author.id)
-		item["name"] = "P" + str(author.id) + ":" + str(author.last_name)
+		item["name"] = "P" + str(author.id) + ":" + str(author.first_name) + " " + str(author.last_name)
 		response["authors"].append( item )
 	return HttpResponse(json.dumps(response), content_type='application/json')
 
+def nuggetlens(request):
+	response = {}
+	forum = Forum.objects.get(id = request.session['forum_id'])
+	is_open = request.REQUEST.get('is_open')
+	author_id = request.REQUEST.get('author_id')
+	if is_open == "true": is_open = True
+	else: is_open = False
+	NuggetLensInteraction.objects.create(is_open = is_open, author_id = author_id, created_at = timezone.now(), forum = forum)
+	return HttpResponse(json.dumps(response), content_type='application/json')
+
+def get_doc_length(forum, doc_id):
+	length = 0
+	for section in Doc.objects.get(id = doc_id).sections.all():
+		section_segmented_text = section.getAttr(forum)["segmented_text"]
+		length = length + len(re.findall(r"data-id", section_segmented_text))
+	return length
 

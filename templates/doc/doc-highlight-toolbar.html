@@ -4,9 +4,9 @@
 			<a data-action="comment" class="item doc-anno-btn">
 				<i class="comment icon"></i>Comment
 			</a>
-			<a data-action="question" class="item doc-anno-btn">
+<!-- 			<a data-action="question" class="item doc-anno-btn">
 				<i class="help icon"></i>Raise question
-			</a>
+			</a> -->
 			<a data-action="claim" class="item doc-anno-btn">
 				<i class="code icon"></i>Extract nugget
 			</a>
@@ -25,7 +25,6 @@
 					<label>Please assign a theme</label>
 					<select class="ui fluid dropdown" name="theme">
 						{% if themes %}
-							<option value="">(not decided)</option>
 							{% for theme in themes %}
 								<option value="{{ theme.id }}">{{ theme.name }}</option>
 							{% endfor %}
@@ -33,7 +32,6 @@
 					</select>
 				</div>
 				<div class="required field" style="display:none;">
-					<div class="ui attached info message">Please reword the highlighted text to form a coherent and meaningful claim.</div>
 					<textarea name="content"></textarea>
 				</div>
 				<div class="inline field" style="display:none;">

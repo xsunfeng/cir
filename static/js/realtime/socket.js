@@ -60,7 +60,7 @@ define([
 			socket
 				.on('client:someone:connected', function(userinfo) {
 					if (!module['online_users'].hasOwnProperty(userinfo.user_id)
-					&& userinfo.forum_id == $('body').attr('forum-id')) {
+						&& userinfo.forum_id == $('body').attr('forum-id')) {
 						module['online_users'][userinfo.user_id] = userinfo;
 						Chatter.addOnlineUser(userinfo);
 					}
@@ -71,9 +71,11 @@ define([
 				}).on('client:users:current_online', function(users) {
 					for (var i = 0; i < users.length; i++) {
 						if (!module['online_users'].hasOwnProperty(users[i].user_id)
-						&& users[i].forum_id == $('body').attr('forum-id')) {
+							&& users[i].forum_id == $('body').attr('forum-id')) {
 							module['online_users'][users[i].user_id] = users[i];
-							Chatter.addOnlineUser(users[i]);
+							if ($('body').attr('forum-id') == users[i].forum_id) {
+								Chatter.addOnlineUser(users[i]);
+							}
 						}
 					}
 				}).on('client:chat:emit_msg', function(msg) {

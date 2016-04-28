@@ -3,10 +3,11 @@ import os
 import socket
 
 # automatically determine debug status
-if 'lws-cai01' in socket.getfqdn():
-    DEBUG = False
+if 'cai' in socket.getfqdn():
+    DEBUG = True
 else:
     DEBUG = True
+
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -26,7 +27,7 @@ DISPATCHER_URL = '130.203.136.141:443'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'cir',  # Or path to database file if using sqlite3.
+        'NAME': 'cir_backup_20160318',  # Or path to database file if using sqlite3.
         'USER': 'postgres',
         'PASSWORD': 'asdf1234',
         'HOST': SERVER_HOST,
@@ -34,7 +35,7 @@ DATABASES = {
     },
     'dev': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'cir',  # Or path to database file if using sqlite3.
+        'NAME': 'cir_backup_20160318',  # Or path to database file if using sqlite3.
         'USER': 'postgres',
         'PASSWORD': 'asdf1234',
         'HOST': SERVER_HOST,

@@ -1,7 +1,9 @@
 define([
+	'crossfilter',
 	'utils',
 	'feed/activity-feed'
 ], function(
+	Crossfilter,
 	Utils
 ) {
 	var module = {};
@@ -22,61 +24,216 @@ define([
 		module.currentThemeText = "";
 		module.currentThemeId = "-1";
 		module.claim_category = "finding";
-		module.doc_id = "-1";
-		
+		module.threshold = 300;
+
 		module.claim_textarea_container = $("#workbench2-claim-textarea-container");
 		module.claim_list_container = $("#workbench2-claim-container");
 		module.nugget_list_container = $("#workbench2-nugget-container");
 		module.focus_nugget_container = null;
 		
-		module.body_bottom = 230;
+		module.body_bottom = 200;
 
 		load_toc();
-		$.when(load_theme(), load_claim_list(), load_nugget_list(), load_init_doc()).done(function(promise1, promise2, romise3, promise4) {
-		  	// load_highlights("-1");
-		  	$("#loading-status").fadeOut("slow");
-		});
+		// module.doc_id = $("#default-doc-id").attr("data-id");
+
+		module.doc_id = "";
+		if (module.doc_id == "") {
+			$.when(load_theme(), load_nugget_list()).done(function(promise1, promise2) {
+			  	// load_highlights("-1");
+			  	$("#loading-status").fadeOut("slow");
+			  	$("#workbench-document").height($(window).height() - module.body_bottom);
+			});
+		} else {
+			$.when(load_theme(), load_nugget_list(), get_doc(module.doc_id)).done(function(promise1, promise2, romise3) {
+			  	// load_highlights("-1");
+			  	$("#loading-status").fadeOut("slow");
+			});
+		}
 
 		init_tk_event();
 		init_button();
 		initPopup();
-		// initTutorial();
 	
 		// module.nugget_discussion_timer = setInterval(refresh_nugget_discussion, 3600000); // 1 hour
 		// clearInterval(nugget_discussion_timer);
 		
 		require('doc/qa').updateQuestionList();
-		
 	};
 
-	function initTutorial() {		// tutorial image slider
-		$("body").on("click", ".image-next", getNext);
-		$("body").on("click", ".image-prev", getPrev);
-		$('#slider li').hide().filter(':first').show();
-		$("#slider").css("height", $(".tutorial-image:first img")[0].naturalHeight);
-		$(".image-count").text($(".tutorial-image:first").attr("data-id") + "/" + $(".tutorial-image").length);
-		
-		function getNext() {
-			var $curr = $('.tutorial-image:visible'),
-				$next = ($curr.next().length) ? $curr.next() : $('.tutorial-image').first();
-			transition($curr, $next);
+	// get heatmap
+	idleTime2 = 0
+	idleInterval2 = setInterval(function() {
+		idleTime2 = idleTime2 + 1;
+		if (idleTime2 < 2 && $(".workbench-doc-item").is(":visible") && !$("#sankey-container").is(":visible")) { // 30s
+			update_viewlog();
 		}
-		
-		function getPrev() {
-			var $curr = $('.tutorial-image:visible'),
-				$next = ($curr.prev().length) ? $curr.prev() : $('.tutorial-image').last();
-			transition($curr, $next);
-		}
-	
-		function transition($curr, $next) {
-			$next.css('z-index', 2).fadeIn('slow', function () {
-				// $("#slider").animate({
-				// 	"height": $next.height()}, 200);
-				$curr.hide().css('z-index', 0);
-				$next.css('z-index', 1);
+	}, 5000); // every 5s
+
+	// put heatmap
+	idleTime = 0
+	idleInterval = setInterval(function() {
+		idleTime = idleTime + 1;
+		if (idleTime < 2 && $(".workbench-doc-item").is(":visible") && !$("#sankey-container").is(":visible")) { // 30s
+		  if ($("#header-user-name").attr("data-role") !== "panelist") return;
+		  var upper = $("#workbench-document").scrollTop();
+		  var lower = $("#workbench-document").scrollTop() + $("#workbench-document").height();
+		  var height = $("#workbench-document .workbench-doc-item").height();
+		  var doc_id = $(".workbench-doc-item").attr("data-id");
+		  var author_id = $("#header-user-name").attr("data-id");
+		  $.ajax({
+				url: '/sankey/put_viewlog/',
+				type: 'post',
+				data: {
+				  "doc_id": 	doc_id,
+				  "lower": 		lower,
+				  "upper": 		upper,
+				  "height": 	height,
+				  "author_id": 	author_id
+				},
+				success: function(xhr) {
+				},
+				error: function(xhr) {
+				  if (xhr.status == 403) {
+				    Utils.notify('error', xhr.responseText);
+				  }
+				}
 			});
-			$(".image-count").text($next.attr("data-id") + "/" + $(".tutorial-image").length);
 		}
+	}, 2000); // every 5s
+
+	//Zero the idle timer on mouse movement.
+	$("body").on("mousemove", "#workbench2-document-container", function(e){
+		idleTime = 0;
+		idleTime2 = 0;
+	})
+
+	module.get_nuggetmap = function() {
+		if ($("#header-user-name").attr("data-role") !== "panelist") return;
+		$.ajax({
+			url: '/sankey/get_nuggetmap/',
+			type: 'post',
+			data: {
+				"my_id": 	sessionStorage.getItem('user_id'),
+				"doc_id": 	module.doc_id,
+				'theme_id': module.currentThemeId
+			},
+			success: function(xhr) {
+				data = xhr.my_nuggetmap;
+
+				function cell_dim(total, cells) { return Math.floor(total/cells) }
+				var total_height = 5 * data.length;
+				var total_width = 30;
+				var rows = data.length;
+				var cols = 1; 
+				var row_height = cell_dim(total_height, rows);
+				var col_width = cell_dim(total_width, cols);
+
+				$("#workbench2-document-nuggetmap").html("");
+				var color_chart = d3.select("#workbench2-document-nuggetmap")
+				                  .append("svg")
+				                  .attr("class", "chart")
+				                  .attr("width", col_width * cols)
+				                  .attr("height", row_height * rows);
+
+				var color = d3.scale.linear()
+				          .domain([0, d3.max(data)])
+				          .range(["Azure", "#C0E7F3"]);
+
+				color_chart.selectAll("rect")
+				        .data(data)
+				        .enter()
+				        .append("rect")
+				        .attr("x", function(d,i) { return Math.floor(i / rows) * col_width; })
+				        .attr("y", function(d,i) { return i % rows * row_height; })
+				        .attr("width", col_width)
+				        .attr("height", row_height)
+				        .attr("fill", color)
+				        .attr("data-id", function(d) { return d; });
+			},
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			}
+		});		
+	}
+
+	module.get_viewlog = function() {
+		if ($("#header-user-name").attr("data-role") !== "panelist") return;
+		$.ajax({
+			url: '/sankey/get_viewlog/',
+			type: 'post',
+			data: {
+				"my_id": 	sessionStorage.getItem('user_id'),
+				"doc_id": 	module.doc_id
+			},
+			success: function(xhr) {
+				data = xhr.my_viewlog;
+
+				function cell_dim(total, cells) { return Math.floor(total/cells) }
+				var total_height = 5 * data.length;
+				var total_width = 10;
+				var rows = data.length; // 1hr split into 5min blocks
+				var cols = 1; // 24hrs in a day
+				var row_height = cell_dim(total_height, rows);
+				var col_width = cell_dim(total_width, cols);
+
+				$("#workbench2-document-viewlog").html("");
+				var color_chart = d3.select("#workbench2-document-viewlog")
+				                  .append("svg")
+				                  .attr("class", "chart")
+				                  .attr("width", col_width * cols)
+				                  .attr("height", row_height * rows);
+
+				var color = d3.scale.linear()
+				          .domain([0, module.threshold ])
+				          .range(["white", "red"]);
+
+				color_chart.selectAll("rect")
+				        .data(data)
+				        .enter()
+				        .append("rect")
+				        .attr("x", function(d,i) { return Math.floor(i / rows) * col_width; })
+				        .attr("y", function(d,i) { return i % rows * row_height; })
+				        .attr("width", col_width)
+				        .attr("height", row_height)
+				        .attr("fill", color)
+				        .attr("data-id", function(d) { return d; });
+			},
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			}
+		});		
+	}
+
+	function update_viewlog() {
+		$.ajax({
+			url: '/sankey/get_viewlog/',
+			type: 'post',
+			data: {
+				"my_id": 	sessionStorage.getItem('user_id'),
+				"doc_id": 	module.doc_id
+			},
+			success: function(xhr) {
+				data = xhr.my_viewlog;
+
+				var color = d3.scale.linear()
+				          .domain([0, module.threshold])
+				          .range(["white", "red"]);
+
+				d3.select("#workbench2-document-viewlog").selectAll("rect").data(data)
+						.transition()
+				        .attr("fill", color)
+				        .attr("data-id", function(d) { return d; });
+			},
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			}
+		});		
 	}
 
 	function set_page_loading_progress(number) {
@@ -108,6 +265,8 @@ define([
 				$("#workbench2-document-container").animate({scrollTop: 0}, 0);
 				module.doc_id = xhr.doc_id;
 				module.load_highlights_by_doc();
+				module.get_viewlog();
+				module.get_nuggetmap();
 				$("#workbench-document").height($(window).height() - module.body_bottom);
 			},
 			error: function(xhr) {
@@ -126,52 +285,9 @@ define([
 			},
 			success: function(xhr) {
 				$("#workbench-document-toc-container").html(xhr.document_toc);
-				$(".document-toc-sec-link").click(function(e) {
-					var sec_id = e.target.getAttribute("data-id");			
-					$.ajax({
-						url: '/workbench/api_get_doc_by_sec_id/',
-						type: 'post',
-						data: {
-							'sec_id': sec_id,
-						},
-						success: function(xhr) {
-							$("#workbench-document").html(xhr.workbench_document);
-							$("#workbench-document").height($(window).height() - module.body_bottom);
-							
-							$("#workbench-document").animate({scrollTop: 0}, 0);
-							var tmp = $(".section-header[data-id=" + sec_id + "]").offsetParent().position().top;
-							$("#workbench-document").animate({scrollTop: tmp}, 0);
-							module.doc_id = xhr.doc_id;
-							module.load_highlights_by_doc();
-						},
-						error: function(xhr) {
-							if (xhr.status == 403) {
-								Utils.notify('error', xhr.responseText);
-							}
-						}
-					});
-				});
 				$(".document-toc-doc-link").click(function(e) {
 					var doc_id = e.target.getAttribute("data-id");			
-					$.ajax({
-						url: '/workbench/api_get_doc_by_doc_id/',
-						type: 'post',
-						data: {
-							'doc_id': doc_id,
-						},
-						success: function(xhr) {
-							$("#workbench-document").html(xhr.workbench_document);
-							$("#workbench-document").height($(window).height() - module.body_bottom);
-							$("#workbench2-document-container").animate({scrollTop: 0}, 0);
-							module.doc_id = xhr.doc_id;
-							module.load_highlights_by_doc();
-						},
-						error: function(xhr) {
-							if (xhr.status == 403) {
-								Utils.notify('error', xhr.responseText);
-							}
-						}
-					});
+					get_doc(doc_id);
 				});
 			},
 			error: function(xhr) {
@@ -180,6 +296,30 @@ define([
 				}
 			}
 		});		
+	}
+
+	function get_doc(doc_id) {
+		$.ajax({
+			url: '/workbench/api_get_doc_by_doc_id/',
+			type: 'post',
+			data: {
+				'doc_id': doc_id,
+			},
+			success: function(xhr) {
+				$("#workbench-document").html(xhr.workbench_document);
+				$("#workbench-document").height($(window).height() - module.body_bottom);
+				$("#workbench2-document-container").animate({scrollTop: 0}, 0);
+				module.doc_id = xhr.doc_id;
+				module.load_highlights_by_doc();
+				module.get_viewlog();
+				module.get_nuggetmap();
+			},
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			}
+		});
 	}
 
 	function load_all_documents() {
@@ -203,13 +343,65 @@ define([
 
 	function init_button() {
 
+		$("#workbench-document").on('click', '.tk', function(e) {
+			e.stopPropagation();
+			if ($(this).hasClass('my_nugget') || $(this).hasClass('my_comment') || $(this).hasClass('other_nugget') || $(this).hasClass('other_comment')) {
+				var highlight_ids = this.getAttribute('data-hl-id').split(' ');
+				for (var i = 0; i < highlight_ids.length; i++) {
+					$('#doc-thread-content').feed('update', {
+						type: 'highlight',
+						id: highlight_ids[i]
+					}).done(function() {
+						$('#doc-thread-popup').css('left', e.pageX).css('top', e.pageY);
+					});
+				}
+			}
+		});
+
+		$("#workbench-document").bind('scroll', function() {
+			var perc = ($("#workbench-document").scrollTop() + $("#workbench-document").height() / 2) / $("#workbench-document .workbench-doc-item").height();
+			var origin = $("#workbench2-document-viewlog").offset();
+			$("#workbench2-document-scrollbar").show();
+			$("#workbench2-document-scrollbar").css("left", origin.left).css("top", origin.top + $("#workbench2-document-viewlog").height() * perc);
+		});
+
 		$("body").on("click", '#show-sankey', function() {
 			$("#sankey-container").show();
 			$("#dark-fullscreen").show();
+			$.ajax({
+				url: '/sankey/nuggetlens/',
+				type: 'post',
+				data: {
+					'is_open': "true",
+					'author_id': sessionStorage.getItem('user_id'),
+				},
+				success: function(xhr) {
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});
 		})
 		$("body").on("click", '#close-sankey', function() {
 			$("#sankey-container").hide();
 			$("#dark-fullscreen").hide();
+			$.ajax({
+				url: '/sankey/nuggetlens/',
+				type: 'post',
+				data: {
+					'is_open': "false",
+					'author_id': sessionStorage.getItem('user_id'),
+				},
+				success: function(xhr) {
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});
 		})
 
 		// nugget context menu
@@ -222,7 +414,7 @@ define([
 					} else {
 						$nugget_operations = $("#nugget-operations-green");
 					}
-					$nugget_operations.css("left", $(this).offset().left - $nugget_operations.css("width").slice(0, -2) + 5);
+					$nugget_operations.css("left", $(this).offset().left + $(this).width() - 10);
 					$nugget_operations.css("top", $(this).offset().top + 5);	
 			  	}
 			  	if (module.focus_nugget_container.find(".red").length > 0) {
@@ -240,7 +432,7 @@ define([
   		$('body').on({
 		    mouseenter: function(){
 		  		$(".document-related").show();
-				$("#workbench-document-toc-container").css("left", $("#workbench2-document-container").offset().left + $("#workbench2-document-container").width() - 10);
+				$("#workbench-document-toc-container").css("left", $("#workbench2-document-container").offset().left - $("#workbench-document-toc-container").width() - 10);
 				$("#workbench-document-toc-container").css("top", $("#workbench2-document-container").offset().top + 10);	
 		    },mouseleave: function(){
 			    $("#workbench-document-toc-container").hide();
@@ -257,17 +449,17 @@ define([
 		});
 
 		module.claim_list_container.on("click", "#workbench-claim-operation-back", function(e) {
-			load_claim_list();
+			// load_claim_list();
 		});
 
 		module.claim_textarea_container.on("click", ".workbench-claim-tab", function(e) {
 			$(this).siblings().removeClass("positive");
 			$(this).addClass("positive");
 			module.claim_category = $(this).text().toLowerCase();
-			load_claim_list();
+			// load_claim_list();
 		});
 
-		// nugget button group
+	// nugget button group
 		$("body").on("click", ".use-nugget", function(e) {
 			var $list_container = module.focus_nugget_container;
 			var data_hl_id = $list_container.attr('data-hl-id');
@@ -318,6 +510,10 @@ define([
 							_jump();
 						});
 					}
+
+					module.load_highlights_by_doc();
+					module.get_viewlog();
+					module.get_nuggetmap();
 					
 					function _jump() {
 						$("#workbench-document").animate({scrollTop: 0}, 0);
@@ -382,7 +578,7 @@ define([
 		$("body").on("click", ".nugget2claim", function(e) {
 			var $list_container = module.focus_nugget_container;
 			var hl_id = $list_container.attr("data-hl-id");
-			load_claim_list_partial(hl_id);
+			// load_claim_list_partial(hl_id);
 		});
 		
 		// Claim
@@ -395,7 +591,7 @@ define([
 					claim_id: claim_id,
 				},
 				success: function(xhr) {
-					load_claim_list();
+					// load_claim_list();
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -404,31 +600,7 @@ define([
 				}
 			});			
 		});
-		// $("#workbench-claim-section").on("click", ".workbench-save-claim", function(e) {
-		// 	$(this).parentsUntil('li').parent().find('.workbench-edit-claim').show();
-		// 	$(this).parentsUntil('li').parent().find('.workbench-save-claim').hide();
-		// 	var content = $(this).parentsUntil('li').parent().find('textarea').val();
-		// 	var html = content;
-		// 	var content = $(this).parentsUntil('li').parent().find('.workbench-claim-content').html(html);
 
-		// 	var claim_id = $(this).parentsUntil('li').parent().find(".workbench-claim-content").attr("claim-id");
-		// 	$.ajax({
-		// 		url: 'workbench/api_edit_claim/',
-		// 		type: 'post',
-		// 		data: {
-		// 			claim_id: claim_id,
-		// 			content: content.text(),
-		// 		},
-		// 		success: function(xhr) {
-		// 			console.log(xhr);
-		// 		},
-		// 		error: function(xhr) {
-		// 			if (xhr.status == 403) {
-		// 				Utils.notify('error', xhr.responseText);
-		// 			}
-		// 		}
-		// 	});
-		// });
 		module.claim_textarea_container.on("click", ".workbench-clear-claim", function(e) {
 			module.claim_textarea_container.find("textarea").attr("data-id", "").val("");
 		});
@@ -448,7 +620,7 @@ define([
 				},
 				success: function(xhr) {
 					module.claim_textarea_container.find("textarea").attr("data-id", "").val("");
-					load_claim_list();
+					// load_claim_list();
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -628,7 +800,6 @@ define([
 	}
 
 	function load_theme() {
-		
 		var promise = $.ajax({
 			url: '/workbench/api_load_all_themes/',
 			type: 'post',
@@ -636,26 +807,16 @@ define([
 			},
 			success: function(xhr) {
 				$("#workbench-theme-container").html(xhr.workbench_container);
-				
-				$('#current-phase')
-				.popup({
-					popup : $('#phase-instructions'),
-					on    : 'hover'
-				})
-				;
-
-				// bind click event to theme button
-				$('#claim-theme-filter-menu').dropdown({
-    				onChange: function(value, text, $selectedItem) {
-						module.currentThemeText = text
-						module.currentThemeId = $selectedItem.attr("data-id");
-						$("#current-claim-theme-text").text(text);
-						load_nugget_list();
-						load_claim_list();
-						clear_highlights();
-						module.load_highlights_by_doc();
-	    			}
-  				});
+				$('.theme-desc')
+				  .popup({
+				    inline   : true,
+				    hoverable: true,
+				    position : 'bottom left',
+				    delay: {
+				      show: 300,
+				      hide: 800
+				    }
+			  	});
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -721,6 +882,23 @@ define([
 						text += highlights[i].textContent;
 					};
 					module.newHighlight.text = text;
+
+					// document inner container upper bound relative to document
+					var tmp2 = $("#workbench-document").offset().top
+					// distance scroll to the top
+					var tmp3 = $("#workbench-document").scrollTop()
+					// start and end of nugget relative to document
+					var st = $(this).find('.tk.highlighted')[0]
+					var ed = $(this).find('.tk.highlighted')[$(this).find('.tk.highlighted').length - 1]
+					var top = $(st).offset().top;
+					var bottom = $(ed).offset().top;
+					top = top - tmp2 + tmp3;
+					bottom = bottom - tmp2 + tmp3;
+					// overall height
+					var height = $("#workbench-document .workbench-doc-item").height();
+					module.newHighlight.upper_bound = top / height;
+					module.newHighlight.lower_bound = bottom / height;
+
 					$('#doc-claim-form').hide();
 					$('#doc-comment-form').parent().hide();
 					$('#doc-highlight-toolbar').css('left', e.pageX).css('top', e.pageY);
@@ -804,11 +982,33 @@ define([
 			}
 		});
 		
+		// add nugget
 		$('#doc-claim-form').form({
-			fields: {
-			},
+			fields: {},
 			onSuccess: function(e) {
 				e.preventDefault();
+				// send nugget map
+				$.ajax({
+					url: '/sankey/put_nuggetmap/',
+					type: 'post',
+					data: {
+						"upper_bound": 	module.newHighlight.upper_bound,
+						"lower_bound": 	module.newHighlight.lower_bound,
+						"doc_id": 		module.doc_id,
+						"author_id": 	sessionStorage.getItem('user_id'),
+						"theme_id":		$(this).find("select").val()
+					},
+					success: function(xhr) {
+						module.get_nuggetmap();
+					},
+					error: function(xhr) {
+						$('#doc-highlight-toolbar .button').removeClass('loading');
+						if (xhr.status == 403) {
+							Utils.notify('error', xhr.responseText);
+						}
+					}
+				});
+				// send created highlight
 				$('#doc-highlight-toolbar .button').addClass('loading');
 				$.ajax({
 					url: '/api_highlight/',
@@ -850,7 +1050,9 @@ define([
 			end: module.newHighlight.end,
 			id: newHighlightId,
 			text: module.newHighlight.text,
-			type: module.newHighlight.type
+			type: module.newHighlight.type,
+			upper_bound: module.newHighlight.upper_bound,
+			lower_bound: module.newHighlight.lower_bound
 		};
 
 		// dispatch to other users
@@ -874,11 +1076,10 @@ define([
 
 	function clear_highlights() {
 		$('#workbench-document [data-hl-id]')
-			.removeClass('n')
-			.removeClass('t')
-			.removeClass('c')
-			.removeClass('p')
-			.removeClass('q')
+			.removeClass('my_nugget')
+			.removeClass('my_comment')
+			.removeClass('other_nugget')
+			.removeClass('other_comment')
 			.removeAttr('data-hl-id');
 	}
 
@@ -918,14 +1119,18 @@ define([
 					var $context = $("#workbench-document").find('.section-content[data-id="' + highlight.context_id + '"]');
 					// assume orginal claims are nuggets now 
 					var className = '';
-					if (highlight.type == 'comment') {
-						className = 'p'; // for 'post'
-					} else if (highlight.type == 'question') {
-						className = 'q'; // for 'question'
-					} else if (highlight.type == 'claim') {
-						className = 'c'; // for 'claim'
-					} else if (highlight.type == 'tag') {
-						className = 't'; // for 'tag
+					if (highlight.author_id == sessionStorage.getItem('user_id')) {
+						if (highlight.type == 'comment') {
+							className = 'my_comment';
+						} else {
+							className = 'my_nugget';
+						}
+					} else {
+						if (highlight.type == 'comment') {
+							className = 'other_comment';
+						} else {
+							className = 'other_nugget';
+						}
 					}
 					var text = [];
 					// loop over all words in the highlight

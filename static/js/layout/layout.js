@@ -6,7 +6,6 @@ define([
 	'claim/claim-navigator',
 	'claim/draft-stmt',
 	'doc/qa',
-	'vis/activity',
 	'semantic-ui',
 	'realtime/socket'
 
@@ -17,8 +16,7 @@ define([
 	ClaimView,
 	ClaimNavigator,
 	DraftStmt,
-	QAView,
-	VisActivity
+	QAView
 ) {
 	var module = {
 		changeTab: function(dest, callback) {
@@ -57,7 +55,6 @@ define([
 		
 		// DocumentView.initDocumentView();
 		ClaimView.initClaimView();
-		VisActivity.init();
 		WorkbenchView.initWorkbenchView();
 		SankeyView.init();
 	}

@@ -132,10 +132,13 @@ def api_annotation(request):
     response = {}
     action = request.REQUEST.get('action')
     if action == 'load-thread':
+        context = {}
         forum = Forum.objects.get(id=request.session['forum_id'])
         highlight_id = request.REQUEST.get('highlight_id')
         highlight = Highlight.objects.get(id=highlight_id)
-        context = {}
+        if (highlight.is_nugget):
+            context['theme'] = highlight.theme
+            context['author'] = highlight.author
         context['forum_phase'] = forum.phase
         context['source'] = 'highlight'
         context['entries'] = []

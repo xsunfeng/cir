@@ -31,7 +31,8 @@
     <div class="item" style="padding:0;">
       <div class="ui buttons">
         <button id="update-sankey" class="ui button">clear</button>
-        <button id="refresh-sankey" class="ui button">refresh</button>
+        <button id="refresh-sankey" style="position:fixed;left:20px; bottom:20px; z-index:200;" class="ui button">refresh</button>
+        <button id="close-sankey" class="ui red button">Close NuggetLens</button>
       </div>
     </div>
   </div>
@@ -99,111 +100,48 @@
     <div id="sankey-filter-author" class="ui labeled icon button" author-id="-1"><i class="remove icon"></i><span>theme: all</span></div>
   </div>
 <!-- filter end -->
-<div id="sankey-timerange">
+<div id="sankey-timerange" style="text-align: center;">
   <div id="sankey-timerange-slider"> </div>
   <span id="sankey-timerange-lower-value" data-value="0"></span> ~
   <span id="sankey-timerange-upper-value" data-value="0"></span>
 </div>
 
+<div id="brush"></div>
+<div class="ui divider"></div>
 <div style="margin-top:16px;">
-  <div id="sankey-and-barchart" style="float:left;">
-    <div id="sankey" class="sankey-related" style="width:700px;height:600px;background:white;"></div>
-    <div id="barchart" style="min-width: 700px; height: 200px; margin: 0 auto"></div>
-  </div>
-  <div id="doc-bar-container" style="float:left;"></div>
+
+  <div id="doc-bar-container" style="position:relative; float:left;"></div>
   <!-- <div id="sankey-word-cloud" style="float:left;width:300px;"></div> -->
-  <div id="sankey-document-container" style="position: absolute; overflow: auto; right: 0; left: 960px;">
+  
+  <div id="sankey-document-container" style="position: absolute; overflow: auto; right: 500px; left: 450px;">
     <div id="sankey-document" class="ui segment" style="overflow: auto;">
     </div>
     <button id="context-menu-goto" class="ui button" style="float:right;">goto</button>
   </div>
 
-  
-  <div id="sankey-workbench" class="ui segment">
-        <div class="ui list">
-
-          <div class="item">
-            <div class="header">1. How do you jusge the task is completed ?</div>
-            <div class="description">
-              <div class="ui list">
-                
-                <div class="item">
-                  1. The number of nugget
-                  <a><i class="large blue file icon"></i></a>
-                  <a><i class="large red minus square outline icon sankey-workbench-item-remove"></i></a>
-                  <div class="ui divider" style="margin: 1px;"></div>
-                </div>
-
-                <div class="item">
-                  2. The number of nugget
-                  <a><i class="large red minus square outline icon sankey-workbench-item-remove"></i></a>
-                  <div class="ui divider" style="margin: 1px;"></div>
-                </div>
-
-                <div class="item">
-                  <div class="ui form">
-                    <div class="field">
-                      <textarea rows="1"></textarea>
-                    </div>
-                  </div>
-                  <a class="sankey-workbench-item-capture-screenshot"><i class="large yellow photo icon"></i></a>
-                  <a class="sankey-workbench-item-add"><i class="large plus square outline icon"></i></a>
-                </div>
-
-              </div>
-            </div>
-          </div>
-
-          <div class="item">
-            <div class="header">2. How do you jusge the task is completed ?</div>
-            <div class="description">
-              <div class="ui list">
-                
-                <div class="item">
-                  1. The number of nugget
-                  <a class="sankey-workbench-item-remove"><i class="large red minus square outline icon"></i></a>
-                  <div class="ui divider" style="margin: 1px;"></div>
-                </div>
-
-                <div class="item">
-                  2. The number of nugget
-                  <a class="sankey-workbench-item-remove"><i class="large red minus square outline icon"></i></a>
-                  <div class="ui divider" style="margin: 1px;"></div>
-                </div>
-
-                <div class="item">
-                  <div class="ui form">
-                    <div class="field">
-                      <textarea rows="1"></textarea>
-                    </div>
-                  </div>
-                  <a class="sankey-workbench-item-capture-screenshot"><i class="large yellow photo icon"></i></a>
-                  <a class="sankey-workbench-item-add"><i class="large plus square outline icon"></i></a>
-                </div>
-
-              </div>
-            </div>
-          </div>
-
-        </div>
+  <div id="sankey-and-barchart" style="float:right;">
+    <div id="sankey-legend" style="width:500px;height:100%;background:white;">
+      <div style="float:left;width:100px;">Documents</div>
+      <div style="float:right;width:70px;">Themes</div>
+      <div style="margin:0 auto;width:50px;">Panelists</div>
+    </div>
+    <div id="sankey" class="sankey-related" style="width:500px;height:600px;background:white;"></div>
   </div>
 </div>
 
 <div class="ui segment sankey-related" id="context-menu-info">
 </div>
 
-<div class="" id="countdown-number">
-</div>
-
 <div id="sankey-doc-arrow" style="position:fixed; display:none;">
-  <i class="icon big blue check circle outline"></i>
+  <i class="icon big yellow star "></i>
 </div>
 <div id="doc-bar-indicator" style="position:fixed; display:none;">
-  <i class="icon big blue check circle outline"></i>
+  <i class="icon big yellow star"></i>
 </div>
 
 <div id="doc-bar-arrow" style="position:fixed;">
   <i class="icon big blue caret right"></i>
 </div>
 
-<i id="close-sankey" class="circular inverted red remove icon" style="position:fixed;right:1em;top:4em;"></i>
+<div id="latest-activity-container"></div>
+<div id="sankey-document-nuggetmaps" style="position:fixed; left:0; top:0;"></div>

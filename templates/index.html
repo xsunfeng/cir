@@ -15,7 +15,7 @@
 {% endblock %}
 {% block header %}
 
-<div id="sankey-container" style="display:none; position:fixed; left: 5em; right: 5em; top: 5%; bottom: 5%;  z-index: 100;">
+<div id="sankey-container" style="display:none; overflow: scroll; position:fixed; top: 5%; bottom:0; width:100%; z-index: 100;">
 	{% include 'sankey.html' %}
 </div>
 <div id="dark-fullscreen" style="display:none; position:fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 99; background-color:white; opacity:1;"></div>
@@ -41,7 +41,6 @@
     <div class="item">GeoDeliberator</div>
     {% else %}
     <a href="#" class="blue item {{ phase.document_active }}" data-tab="document-tab"><i class="icon file text outline"></i>Documents</a>
-    <a href="#" class="blue item {{ phase.claim_active }}" data-tab="claim-tab"><i class="icon comment outline"></i>Claims</a>
     {% if phase.show_statement_link %}
     <a href="{{ forum_url }}/statement" class="item">Citizens' Statement</a>
     {% endif %}
@@ -124,16 +123,8 @@
 		<div class="sixteen wide document column" style="z-index:40;">
 			<div id="workbench-theme-container"></div>
 		</div>
-	
-		<div class="six wide document column document-related" id="workbench2-document-container" style="overflow:auto;">
-			<div id="workbench-document-panel">
-				<div id="workbench-document" class="ui segment" style="overflow: auto;">
-<!-- 					{% include 'workbench-tutorial.html' %}
- -->				</div>
-			</div>	
-		</div>
 
-		<div class="five wide column" id = "workbench2-nugget-container">
+		<div id = "workbench2-nugget-container">
 			<div id="workbench-nugget-container">
 				<div id="workbench-nugget-panel">
 					<div id="workbench-nugget">
@@ -142,30 +133,7 @@
 					</div>
 				</div>
 			</div>
-		</div>
-
-		<div class="five wide column" style = "padding:0.5em;">
-			<div id = "workbench2-claim-textarea-container" style = "height:230px;" class="ui segment">
-				<div class="ui top attached label">Create claim based on nugget(s) here</div>
-				<div class="ui form">
-					<div class="field">
-						<textarea rows="6"></textarea>
-					</div>
-					<div class="ui buttons">
-						<button class="ui positive button workbench-claim-tab">Finding</button>
-						<div class="or"></div>
-						<button class="ui button workbench-claim-tab">Opinion</button>
-					</div>
-					<div class="ui button workbench-add-claim" style="float:right;">Add</div>
-					<div class="ui button workbench-clear-claim" style="float:right;">Clear</div>
-				</div>
-			</div>
-			<div id = "workbench2-claim-container" >
-				<div id="workbench-claim-list" class="flag ui segment" style="overflow:auto;">
-				</div>
-			</div>
-		</div>		
-		
+		</div>	
 	</div>
 	{% include 'doc/doc-highlight-toolbar.html' with phase=phase %}
 	{% include 'doc/doc-thread-popup.html' with phase=phase %}
@@ -297,26 +265,19 @@
 <div class="ui raised segment document-related" id="workbench-document-toc-container">
 </div>
 
+<div class="document-related" id="workbench2-document-container" style="overflow:auto;">
+	<div id="workbench-document-panel">
+		<div id="workbench-document" class="ui segment" style="overflow: auto;">
+			<h1>Please select a document from table of contents to start.</h1>
+		</div>
+	</div>	
+</div>
 
-<!-- <div class="ui segment sankey-related" id="sankey-element-checkbox-list" style="margin:0; padding:0; width:150px; z-index:105;">
-  <div class="ui checkbox" data-value="d">
-    <input type="checkbox" name="public">
-    <label>Document<a class="ui green label" id="doc-num" style="margin-left:10px; float:right;"></a></label>
-  </div>
-  <div class="ui checkbox" data-value="p">
-    <input type="checkbox" name="public">
-    <label>Person<a class="ui red label" id="person-num" style="margin-left:10px; float:right;"></a></label>
-  </div>
-  <div class="ui checkbox" data-value="s">
-    <input type="checkbox" name="public">
-    <label>Section<a class="ui blue label" id="section-num" style="margin-left:10px; float:right;"></a></label>
-  </div>
-  <div class="ui checkbox" data-value="t">
-    <input type="checkbox" name="public">
-    <label>Topic<a class="ui yellow label" id="topic-num" style="margin-left:10px; float:right;"></a></label>
-  </div>
-  <div class="ui bottom attached basic button" id="update-sankey" style="margin-top: 10px;">Clean/Update</div>
-</div> -->
+<div id="workbench2-document-viewlog"></div>
+<div id="workbench2-document-nuggetmap"></div>
+<div id="workbench2-document-scrollbar" style="position:fixed; left:-100px;"><i class="icon big blue caret left"></i></div>
+
+<div style="display:none;" id="default-doc-id" data-id="{{ doc_id }}"></div>
 
 {% if role != 'visitor' %}
 	{% include 'chatter.html' %}
