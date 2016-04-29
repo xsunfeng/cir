@@ -24,13 +24,15 @@
                     'sankey': 'vis/sankey',
                     'dimple': '//dimplejs.org/dist/dimple.v2.1.6.min',
                     'tagcloud': 'vis/tagcloud',
-                    'crossfilter': 'https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min'
-                },
+                    'crossfilter': 'https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min',
+                	'trumbowyg': 'vendor/trumbowyg.min'
+				},
                 shim: {
                     'semantic-ui': ['jquery'],
                     'dimple': ['d3'],
                     'sankey': ['d3'],
-                    'd3-tooltip': ['d3']
+                    'd3-tooltip': ['d3'],
+					'trumbowyg': ['jquery']
                 },
                 waitSeconds: 200,
             });

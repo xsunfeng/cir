@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block header %}
 <header class="ui fixed inverted main menu">
 	<div class="item">GeoDeliberator</div>
@@ -10,6 +11,18 @@
 	{% endif %}
 </header>
 {% endblock %}
+{% block extracss %}
+	<link rel="stylesheet" href="{% static 'css/trumbowyg.min.css' %}">
+{% endblock %}
+{% block extralib %}
+	<script>
+		require([
+			'postcir/postcir',
+			'trumbowyg'
+		]);
+	</script>
+{% endblock %}
+
 {% block body %}
 
 {% if load_error and load_error == '404' %}
@@ -23,9 +36,15 @@
 {% else %}
 <div id="citizens-statement">
 		<h2>Citizen's statement on {{ forum_name }}</h2>
-		<section class="ui segment">
-			{{ stmt_preamble|safe }}
-		</section>
+		<div class="ui styled accordion">
+			<div class="title">
+				<i class="dropdown icon"></i>
+				Click to show an overview of the issue description.
+			</div>
+			<div class="content">
+				{{ stmt_preamble|safe }}
+			</div>
+		</div>
 		<h3>Key Findings</h3>
 		<section class="ui segment">
 			<ol class="ui list">
@@ -67,11 +86,10 @@
 		</section>
 </div>
 <div id="opinion-board">
-    <h2>Your opinion on {{ forum_name }}...</h2>
     <form class="ui form">
         <div class="ui info message">
             <div class="header">
-                Please give your opinion...
+                Please share your opinion...
             </div>
             <ul class="list">
                 <li>You can now have cover images on blog pages</li>
@@ -79,7 +97,7 @@
             </ul>
         </div>
         <div class="field">
-            <textarea></textarea>
+            <textarea id="opinion-textarea"></textarea>
         </div>
         <div id="post-btn" class="ui submit primary button">Post</div>
     </form>

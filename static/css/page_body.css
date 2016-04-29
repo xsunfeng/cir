@@ -86,27 +86,29 @@ iframe[src^="//www.youtube.com"] {
 #fixed-steps > .step {
 	height: 1.2em;
 }
-@media only screen and (min-width: 1120px) {
-	#citizens-statement {
-		width: 50%;
-		margin-left: 0;
-	}
-
-    #opinion-board {
-        width: 50%;
-        right: 0;
-        top: 36px;
-        bottom: 0;
-        position: absolute;
-        padding: 1em;
-    }
-}
 
 #citizens-statement {
-	padding-top: 36px;
+	position: absolute;
+	left: 1em;
+	top: calc(1em + 36px);
+	bottom: 0;
+	width: calc(50% - 0.5em);
+	overflow-y: auto;
+	padding-bottom: 2em;
+	padding-right: 1em;
 }
 #citizens-statement .segment,
 #citizens-statement .segment .description{
 	font-size: 16px;
 	line-height: 1.4em;
+}
+#opinion-board {
+	top: calc(1em + 36px);
+	right: 0;
+	bottom: 0;
+	width: calc(50% - 1em);
+	overflow-y: auto;
+	padding-right: 1em;
+	padding-bottom: 2em;
+	position: absolute;
 }
