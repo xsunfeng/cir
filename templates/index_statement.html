@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 {% block header %}
 <header class="ui fixed inverted main menu">
-	<div href="/" class="item">GeoDeliberator</div>
+	<div class="item">GeoDeliberator</div>
 	{% if not load_error %}
+    <div class="item">Community Deliberation</div>
 	<div id="header-member-wrapper" class="right menu" style="display:flex">
 		<a href="/{{ forum_url }}" class="item" target="_blank">Open full review in new tab</a>
 	</div>
@@ -33,8 +34,6 @@
 					<div class="description" data-id="{{ claim.id }}">
 						{{ claim.content|safe }}
 						{% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
-					<a class="ui right floated small label">Comment (0)</a>
-					<a class="ui right floated small label">Show thread</a>
 					</div>
 				</li>
 			{% endfor %}
@@ -48,8 +47,6 @@
 					<div class="description" data-id="{{ claim.id }}">
 						{{ claim.content|safe }}
 						{% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
-					<a class="ui right floated small label">Comment (0)</a>
-					<a class="ui right floated small label">Show thread</a>
 					</div>
 				</li>
 			{% endfor %}
@@ -63,13 +60,29 @@
 					<div class="description" data-id="{{ claim.id }}">
 						{{ claim.content|safe }}
 						{% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
-					<a class="ui right floated small label">Comment (0)</a>
-					<a class="ui right floated small label">Show thread</a>
 					</div>
 				</li>
 			{% endfor %}
 			</ol>
 		</section>
+</div>
+<div id="opinion-board">
+    <h2>Your opinion on {{ forum_name }}...</h2>
+    <form class="ui form">
+        <div class="ui info message">
+            <div class="header">
+                Please give your opinion...
+            </div>
+            <ul class="list">
+                <li>You can now have cover images on blog pages</li>
+                <li>Drafts will now auto-save while writing</li>
+            </ul>
+        </div>
+        <div class="field">
+            <textarea></textarea>
+        </div>
+        <div id="post-btn" class="ui submit primary button">Post</div>
+    </form>
 </div>
 {% endif %}
 {% endblock %}

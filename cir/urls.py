@@ -12,6 +12,7 @@ import workbench_views
 import chatter_views
 import vis_views
 import sankey_views
+import postcir_views
 
 
 admin.autodiscover()
