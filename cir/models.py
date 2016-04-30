@@ -337,7 +337,7 @@ class Claim(Entry):
     def getAttrStmt(self):
         attr = {}
         attr['id'] = self.id
-        attr['content'] = self.adopted_version().content
+        attr['content'] = utils.segment_text(self.adopted_version().content)
         if self.theme:
             attr['theme'] = self.theme.name
         return attr

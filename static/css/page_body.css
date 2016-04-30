@@ -86,29 +86,3 @@ iframe[src^="//www.youtube.com"] {
 #fixed-steps > .step {
 	height: 1.2em;
 }
-
-#citizens-statement {
-	position: absolute;
-	left: 1em;
-	top: calc(1em + 36px);
-	bottom: 0;
-	width: calc(50% - 0.5em);
-	overflow-y: auto;
-	padding-bottom: 2em;
-	padding-right: 1em;
-}
-#citizens-statement .segment,
-#citizens-statement .segment .description{
-	font-size: 16px;
-	line-height: 1.4em;
-}
-#opinion-board {
-	top: calc(1em + 36px);
-	right: 0;
-	bottom: 0;
-	width: calc(50% - 1em);
-	overflow-y: auto;
-	padding-right: 1em;
-	padding-bottom: 2em;
-	position: absolute;
-}

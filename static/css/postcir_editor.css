@@ -1,0 +1,17 @@
+@import url(https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic&subset=latin);
+
+
+body {
+    background-color: #fff;
+    color: rgba(0, 0, 0, 0.701961);
+    font-family: Lato, 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-size: 16px;
+}
+
+p {
+    margin:0.5em 0;
+}
+
+li {
+    margin: 5px 0;
+}

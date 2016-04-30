@@ -12,15 +12,16 @@
 </header>
 {% endblock %}
 {% block extracss %}
-	<link rel="stylesheet" href="{% static 'css/trumbowyg.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/postcir.css' %}">
 {% endblock %}
 {% block extralib %}
 	<script>
 		require([
 			'postcir/postcir',
-			'trumbowyg'
+			'tinymce'
 		]);
 	</script>
+
 {% endblock %}
 
 {% block body %}
@@ -35,55 +36,62 @@
 </article>
 {% else %}
 <div id="citizens-statement">
-		<h2>Citizen's statement on {{ forum_name }}</h2>
-		<div class="ui styled accordion">
-			<div class="title">
-				<i class="dropdown icon"></i>
-				Click to show an overview of the issue description.
-			</div>
-			<div class="content">
-				{{ stmt_preamble|safe }}
-			</div>
-		</div>
-		<h3>Key Findings</h3>
-		<section class="ui segment">
-			<ol class="ui list">
-			{% for claim in claims.findings %}
-				<li class="item">
-					<div class="description" data-id="{{ claim.id }}">
-						{{ claim.content|safe }}
-						{% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
-					</div>
-				</li>
-			{% endfor %}
-			</ol>
-		</section>
-		<h3>Proponent Claims</h3>
-		<section class="ui segment">
-			<ol class="ui list">
-			{% for claim in claims.pros %}
-				<li class="item">
-					<div class="description" data-id="{{ claim.id }}">
-						{{ claim.content|safe }}
-						{% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
-					</div>
-				</li>
-			{% endfor %}
-			</ol>
-		</section>
-		<h3>Opponent Claims</h3>
-		<section class="ui segment">
-			<ol class="ui list">
-			{% for claim in claims.cons %}
-				<li class="item">
-					<div class="description" data-id="{{ claim.id }}">
-						{{ claim.content|safe }}
-						{% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
-					</div>
-				</li>
-			{% endfor %}
-			</ol>
-		</section>
+    <h2>Citizen's statement on {{ forum_name }}</h2>
+    <div class="ui styled accordion" style="width:auto">
+        <div class="title">
+            <i class="dropdown icon"></i>
+            Click to show an overview of the issue description.
+        </div>
+        <div class="content">
+            {{ stmt_preamble|safe }}
+        </div>
+    </div>
+    <h3>Key Findings</h3>
+    <section class="ui stmt segment">
+        <ol class="ui list">
+        {% for claim in claims.findings %}
+            <li class="item" cite-name="FINDING-{{ forloop.counter }}">
+                <div class="description" data-id="{{ claim.id }}">
+                    {{ claim.content|safe }}
+                    {% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
+                </div>
+            </li>
+        {% endfor %}
+        </ol>
+    </section>
+    <h3>Proponent Claims</h3>
+    <section class="ui stmt segment">
+        <ol class="ui list">
+        {% for claim in claims.pros %}
+            <li class="item" cite-name="PRO-{{ forloop.counter }}">
+                <div class="description" data-id="{{ claim.id }}">
+                    {{ claim.content|safe }}
+                    {% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
+                </div>
+            </li>
+        {% endfor %}
+        </ol>
+    </section>
+    <h3>Opponent Claims</h3>
+    <section class="ui stmt segment">
+        <ol class="ui list">
+        {% for claim in claims.cons %}
+            <li class="item" cite-name="CON-{{ forloop.counter }}">
+                <div class="description" data-id="{{ claim.id }}">
+                    {{ claim.content|safe }}
+                    {% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
+                </div>
+            </li>
+        {% endfor %}
+        </ol>
+    </section>
+    <div id="stmt-highlight-toolbar">
+        <div class="ui blue segment labeled icon menu">
+            <a class="item stmt-cite-btn">
+                <i class="quote left icon"></i>Cite
+            </a>
+        </div>
+    </div>
 </div>
 <div id="opinion-board">
     <form class="ui form">
@@ -102,5 +110,6 @@
         <div id="post-btn" class="ui submit primary button">Post</div>
     </form>
 </div>
+
 {% endif %}
 {% endblock %}
