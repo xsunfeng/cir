@@ -19,12 +19,21 @@ define([
             autoresize_bottom_margin: 0,
             menubar: false,
             min_height: 100,
-            plugins: 'autoresize paste code autolink link image',
+            plugins: 'autoresize paste code autolink link image noneditable',
+            noneditable_noneditable_class: 'cite-label',
             browser_spellcheck: true,
             statusbar: false,
             paste_as_text: true,
             toolbar: 'undo redo | bold italic | bullist numlist | link image | code',
             content_css: '/static/css/postcir_editor.css',
+            setup: function(editor) {
+                editor.on('click', function(e) {
+                    var $target = $(e.target);
+                    if ($target.hasClass('cite-label')) {
+
+                    }
+                });
+            }
         });
 
 
@@ -86,7 +95,15 @@ define([
         });
 
         $('#stmt-highlight-toolbar .stmt-cite-btn').click(function() {
-            var citeHtml = '<a>[' + module.newHighlight.cite_name + ']</a>';
+            var citeHtml = '<span class="cite-label" claim-id="'
+                + module.newHighlight.contextId
+                + '" start="'
+                + module.newHighlight.start
+                + '" end="'
+                + module.newHighlight.end
+                + '">'
+                + module.newHighlight.cite_name
+                + '</span>';
             tinymce.activeEditor.insertContent(citeHtml);
             $('#stmt-highlight-toolbar').removeAttr('style');
 
@@ -95,6 +112,7 @@ define([
         $('#post-btn').click(function() {
 
         });
+
 
 	}
 
