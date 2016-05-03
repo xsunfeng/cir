@@ -454,6 +454,7 @@ class Post(Entry):  # in discussion
     CONTENT_CHOICES = (
         ('question', 'Question'),
         ('comment', 'Comment'),
+        ('postcir', 'Post-CIR'),
     )
     content_type = models.CharField(max_length=10, choices=CONTENT_CHOICES)
 

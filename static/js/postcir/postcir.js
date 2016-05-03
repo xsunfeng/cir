@@ -1,10 +1,12 @@
 define([
 
 	'jquery',
+	'utils',
 	'semantic-ui',
     'tinymce'
 ], function(
-	$
+	$,
+	Utils
 ) {
 	var module = {
 
@@ -19,20 +21,24 @@ define([
             autoresize_bottom_margin: 0,
             menubar: false,
             min_height: 100,
-            plugins: 'autoresize paste code autolink link image noneditable',
+            plugins: 'autoresize paste autolink link image noneditable',
             noneditable_noneditable_class: 'cite-label',
             browser_spellcheck: true,
             statusbar: false,
             paste_as_text: true,
-            toolbar: 'undo redo | bold italic | bullist numlist | link image | code',
+            toolbar: 'undo redo | bold italic | bullist numlist | link image',
             content_css: '/static/css/postcir_editor.css',
             setup: function(editor) {
-                editor.on('click', function(e) {
-                    var $target = $(e.target);
-                    if ($target.hasClass('cite-label')) {
-
-                    }
-                });
+                editor.on('click', onClickCitationLabel)
+					.on('mouseup', function() {
+						// look up geo name, if Selection is not empty
+						if (!editor.selection.isCollapsed()
+							&& editor.selection.getContent().indexOf('cite-label') < 0
+							&& editor.selection.getContent().indexOf('</li>') < 0) {
+							var searchText = editor.selection.getContent({format: 'text'}).trim();
+							console.log(searchText);
+						}
+					});
             }
         });
         $('#show-cited-checkbox').checkbox({
@@ -41,7 +47,6 @@ define([
                 // TODO show other users' cited highlights
             },
             onUnchecked: function() {
-                console.log('unchecked')
             }
         });
 
@@ -66,7 +71,7 @@ define([
                     module.newHighlight.end = e2.target.getAttribute('data-id');
                     var min = Math.min(module.newHighlight.start, module.newHighlight.end);
                     var max = Math.max(module.newHighlight.start, module.newHighlight.end);
-                    $('#citizens-statement .tk.highlighted').removeClass('highlighted');
+                    $('#citizens-statement .tk.highlighted').removeClass('highlighted').removeClass('my');
                     for (var i = min; i <= max; i++) {
                         module.draggingTarget.find('.tk[data-id="' + i + '"]').addClass('highlighted');
                     }
@@ -98,10 +103,16 @@ define([
                 }
             } else { // just clicking
                 $('#stmt-highlight-toolbar').removeAttr('style');
-                $(this).find('.tk').removeClass('highlighted');
+                $(this).find('.tk').removeClass('highlighted').removeClass('my');
                 module.newHighlight = {};
             }
         });
+
+		$('#posts-area')
+			.on('click', '.cite-label', onClickCitationLabel)
+			.on('click', '', function() {
+
+			});
 
         $('#stmt-highlight-toolbar .stmt-cite-btn').click(function() {
             var citeHtml = '<span class="cite-label" data-claim-id="'
@@ -126,14 +137,61 @@ define([
         });
 
         $('#post-btn').click(function() {
-            // TODO save all cited pieces
+			var rawcontent = tinymce.activeEditor.getContent();
+			var $citations = $(rawcontent).find('.cite-label');
+			var data = {
+				'citations': [],
+				'content': rawcontent,
+				'action': 'new-post'
+			};
+			for (var i = 0; i < $citations.length; i ++) {
+				data['citations'].push({
+					'claim_id': $citations.get(i).getAttribute('data-claim-id'),
+					'start': $citations.get(i).getAttribute('start'),
+					'end': $citations.get(i).getAttribute('end'),
+				});
+			}
+			$.ajax({
+				url: '/api_postcir/',
+				type: 'post',
+				data: data,
+				success: function(xhr) {
+					loadPosts();
+					tinymce.activeEditor.setContent('');
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});
             // TODO re-retrieve all my citations
         });
-
-
 	}
 
 	initLayout();
+	loadPosts();
+
+	function loadPosts() {
+		$('#posts-area').html('<div class="ui active centered inline loader"></div>');
+		$.ajax({
+			url: '/api_postcir/',
+			type: 'post',
+			data: {
+				action: 'load-posts'
+			},
+			success: function(xhr) {
+				$('#posts-area').html(xhr.html);
+
+				//showDeleteButtons();
+			},
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			},
+		});
+	}
 
     function highlight(data) {
         var $context = $('#citizens-statement .description[data-id="' + data.claim_id + '"]');
@@ -159,6 +217,18 @@ define([
         }
     }
 
+	function onClickCitationLabel(e) {
+		var $target = $(e.target);
+		$('#citizens-statement .tk.highlighted').removeClass('highlighted').removeClass('my');
+		if ($target.hasClass('cite-label')) {
+			highlight({
+				claim_id: $target.attr('data-claim-id'),
+				start: $target.attr('data-start'),
+				end: $target.attr('data-end'),
+				type: 'my_citation'
+			});
+		}
+	}
 	return module;
 });
 
