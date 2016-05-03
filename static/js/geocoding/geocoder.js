@@ -321,6 +321,7 @@ define([
 
 	function showLocalResults(results) {
 		if (results.length > 0) {
+			var againstTarget = ' (calculated against <b>State College Borough</b>)';
 			presentLocalResults(results, againstTarget);
 		} else {
 			$('#local_results').html('<b>No local results.</b>');

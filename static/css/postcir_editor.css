@@ -16,7 +16,7 @@ li {
     margin: 5px 0;
 }
 
-span.ne-cite-label {
+span.cite-label {
     font-size: smaller;
     background-color: #0E566C;
     color: #fff;
@@ -28,6 +28,6 @@ span.ne-cite-label {
     margin: 0 2px;
 }
 
-span.ne-geoname {
-    background-color: pink;
+span.geoname {
+    background-color: pink!important;
 }

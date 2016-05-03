@@ -14,7 +14,7 @@ define([
 		resolvePlace: function(place_id, place_type) {
 			var content = tinymce.activeEditor.selection.getContent();
 			var wholeText = tinymce.activeEditor.getContent();
-			var wrapped = '<span class="ne-geoname" data-place-id="' + place_id
+			var wrapped = '<span class="cite-label geoname" data-place-id="' + place_id
 				+ '" data-place-type="'
 				+ place_type + '">' + content + '</span>';
 			wholeText = wholeText.replace(content,wrapped);
@@ -32,7 +32,7 @@ define([
             menubar: false,
             min_height: 100,
             plugins: 'autoresize paste autolink link image noneditable',
-			noneditable_regexp: '^ne-',
+            noneditable_noneditable_class: 'cite-label',
             browser_spellcheck: true,
             statusbar: false,
             paste_as_text: true,
@@ -44,7 +44,7 @@ define([
 					.on('mouseup', function() {
 						// look up geo name, if Selection is not empty
 						if (!editor.selection.isCollapsed()
-							&& editor.selection.getContent().indexOf('ne-cite-label') < 0
+							&& editor.selection.getContent().indexOf('cite-label') < 0
 							&& editor.selection.getContent().indexOf('</li>') < 0) {
 							var searchText = editor.selection.getContent({format: 'text'}).trim();
 							$('#geocoding').show();
@@ -111,7 +111,7 @@ define([
                         text += highlights[i].textContent;
                     }
                     module.newHighlight.text = text;
-                    module.newHighlight.cite_name = $(highlights[0]).parents('li').attr('ne-cite-name');
+                    module.newHighlight.cite_name = $(highlights[0]).parents('li').attr('cite-name');
                     $('#stmt-highlight-toolbar').css('left', e.pageX - 14).css('top', e.pageY + $('#citizens-statement').scrollTop() - 50);
                 }
             } else { // just clicking
@@ -122,14 +122,13 @@ define([
         });
 
 		$('#posts-area')
-			.on('click', '.ne-cite-label', onClickCitationLabel)
+			.on('click', '.cite-label', onClickCitationLabel)
 			.on('click', '', function() {
 
 			});
 
         $('#stmt-highlight-toolbar .stmt-cite-btn').click(function() {
-            var citeHtml = '<span ' +
-				'"ne-cite-label" data-claim-id="'
+            var citeHtml = '<span class="cite-label" data-claim-id="'
                 + module.newHighlight.contextId
                 + '" data-start="'
                 + module.newHighlight.start
@@ -152,7 +151,7 @@ define([
 
         $('#post-btn').click(function() {
 			var rawcontent = tinymce.activeEditor.getContent();
-			var $citations = $(rawcontent).find('.ne-cite-label');
+			var $citations = $(rawcontent).find('.cite-label');
 			var data = {
 				'citations': [],
 				'content': rawcontent,
@@ -234,7 +233,7 @@ define([
 	function onClickCitationLabel(e) {
 		var $target = $(e.target);
 		$('#citizens-statement .tk.highlighted').removeClass('highlighted').removeClass('my');
-		if ($target.hasClass('ne-cite-label')) {
+		if ($target.hasClass('cite-label')) {
 			highlight({
 				claim_id: $target.attr('data-claim-id'),
 				start: $target.attr('data-start'),
