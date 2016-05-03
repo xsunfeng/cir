@@ -35,6 +35,15 @@ define([
                 });
             }
         });
+        $('#show-cited-checkbox').checkbox({
+            onChecked: function() {
+                // TODO disable opinion panel
+                // TODO show other users' cited highlights
+            },
+            onUnchecked: function() {
+                console.log('unchecked')
+            }
+        });
 
 
         module.newHighlight = {};
@@ -95,28 +104,61 @@ define([
         });
 
         $('#stmt-highlight-toolbar .stmt-cite-btn').click(function() {
-            var citeHtml = '<span class="cite-label" claim-id="'
+            var citeHtml = '<span class="cite-label" data-claim-id="'
                 + module.newHighlight.contextId
-                + '" start="'
+                + '" data-start="'
                 + module.newHighlight.start
-                + '" end="'
+                + '" data-end="'
                 + module.newHighlight.end
                 + '">'
                 + module.newHighlight.cite_name
                 + '</span>';
             tinymce.activeEditor.insertContent(citeHtml);
             $('#stmt-highlight-toolbar').removeAttr('style');
-
+            $('#citizens-statement .tk').removeClass('highlighted');
+            highlight({
+                context_id: module.newHighlight.contextId,
+                start: module.newHighlight.start,
+                end: module.newHighlight.end,
+                type: 'my_citation',
+                highlight_id: null
+            });
         });
 
         $('#post-btn').click(function() {
-
+            // TODO save all cited pieces
+            // TODO re-retrieve all my citations
         });
 
 
 	}
 
 	initLayout();
+
+    function highlight(data) {
+        var $context = $('#citizens-statement .description[data-id="' + data.claim_id + '"]');
+        var className;
+        if (data.type == 'my_citation') {
+            className = 'my';
+        } else if (data.type == 'others_citation') {
+            className = 'others';
+        }
+        var text = [];
+        // loop over all words in the highlight
+        for (var i = data.start; i <= data.end; i++) {
+            var $token = $context.find('.tk[data-id="' + i + '"]');
+            $token.addClass(className);
+            if (data.highlight_id) {
+                if (typeof $token.attr('data-hl-id') == 'undefined') { // new highlight for this word
+                    $token.attr('data-hl-id', data.highlight_id);
+                } else {
+                    var curr_id = $token.attr('data-hl-id'); // append highlight for this word
+                    $token.attr('data-hl-id', curr_id + ' ' + data.highlight_id);
+                }
+            }
+        }
+    }
+
 	return module;
 });
 
