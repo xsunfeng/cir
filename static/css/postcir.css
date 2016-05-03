@@ -78,3 +78,14 @@
     cursor: pointer!important;
     margin: 0 2px;
 }
+
+#geocoding {
+
+}
+#local_results {
+    max-height: 300px;
+    overflow-y: auto;
+}
+#search_area {
+    margin:0 0 5px 0;
+}

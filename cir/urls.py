@@ -82,6 +82,8 @@ urlpatterns = patterns('',
     url(r'^dashboard/docs/$', facilitator_views.admin_document),
     url(r'^dashboard/phase/$', facilitator_views.admin_phase),
 
+    url(r'^geocoder/', include('annotator.urls')),
+
     # these must be put last!
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/workbench/?$', forum_views.enter_workbench),

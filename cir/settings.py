@@ -17,6 +17,7 @@ ADMINS = (
 MANAGERS = ADMINS
 
 SERVER_HOST =  '130.203.136.141'
+NOMINATIM_SERVER_HOST = '130.203.139.102'
 
 # dispatcher url
 # if DEBUG:
@@ -40,8 +41,35 @@ DATABASES = {
         'PASSWORD': 'asdf1234',
         'HOST': SERVER_HOST,
         'PORT': '',  # Set to empty string for default.
+    },
+    'geoparser': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'geoparser',                      # Or path to database file if using sqlite3.
+        # The following settings are not used with sqlite3:
+        'USER': 'postgres',
+        'PASSWORD': 'asdf1234',
+        'HOST': SERVER_HOST,                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '5432',                      # Set to empty string for default.
+    },
+    'nominatim': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'nominatim',                      # Or path to database file if using sqlite3.
+        # The following settings are not used with sqlite3:
+        'USER': 'postgres',
+        'PASSWORD': '',
+        'HOST': NOMINATIM_SERVER_HOST,                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '5432',                      # Set to empty string for default.
     }
 }
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+        'TIMEOUT': 60 * 60 * 24 * 30
+    }
+}
+
 
 PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
@@ -193,7 +221,7 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-DATABASE_ROUTERS = ['cir.user_db_router.UserForumRoleRouter']
+DATABASE_ROUTERS = ['cir.user_db_router.DBRouter']
 ROOT_URLCONF = 'cir.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
@@ -219,6 +247,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'south',
     'cir',
+    'annotator',
     'password_reset',
     'pipeline',
 )

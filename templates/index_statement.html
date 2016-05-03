@@ -13,12 +13,14 @@
 {% endblock %}
 {% block extracss %}
     <link rel="stylesheet" href="{% static 'css/postcir.css' %}">
+	<link href="{% static 'css' %}/ol.min.css" rel="stylesheet" />
 {% endblock %}
 {% block extralib %}
 	<script>
 		require([
 			'postcir/postcir',
-			'tinymce'
+			'tinymce',
+			'ol'
 		]);
 	</script>
 
@@ -114,6 +116,10 @@
         <div class="field">
             <textarea id="opinion-textarea"></textarea>
         </div>
+		<div id="geocoding" style="display:none">
+			{% include 'geocoding_workbench.html' %}
+
+		</div>
         <div id="post-btn" class="ui submit primary button">Post</div>
     </form>
 	<div id="posts-area"></div>

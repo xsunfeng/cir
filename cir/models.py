@@ -1,6 +1,8 @@
 from django.contrib.gis.db import models
 from django.contrib.auth.models import User
 
+
+import nltk
 import utils
 
 import datetime, time
