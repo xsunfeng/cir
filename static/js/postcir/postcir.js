@@ -11,10 +11,10 @@ define([
 	GeoCoder
 ) {
 	var module = {
-		resolvePlace: function(place_id, place_type) {
+		resolvePlace: function(geotext, place_type) {
 			var content = tinymce.activeEditor.selection.getContent();
 			var wholeText = tinymce.activeEditor.getContent();
-			var wrapped = '<span class="cite-label geoname" data-place-id="' + place_id
+			var wrapped = '<span class="cite-label geoname" data-geotext="' + geotext
 				+ '" data-place-type="'
 				+ place_type + '">' + content + '</span>';
 			wholeText = wholeText.replace(content,wrapped);
@@ -49,6 +49,8 @@ define([
 							var searchText = editor.selection.getContent({format: 'text'}).trim();
 							$('#geocoding').show();
 							GeoCoder.getRecommendation(searchText);
+						} else {
+							GeoCoder.hideGeocoder();
 						}
 					});
             }
@@ -67,6 +69,9 @@ define([
         module.newHighlight = {};
         module.isDragging = false;
         module.draggingTarget = null;
+		$('#opinion-board').click(function() {
+			$('#hover-map').removeAttr('style');
+		});
         $('#citizens-statement').on('click', '.tk', function (e) {
             e.stopPropagation();
             if ($(this).hasClass('r')) {
@@ -123,8 +128,11 @@ define([
 
 		$('#posts-area')
 			.on('click', '.cite-label', onClickCitationLabel)
-			.on('click', '', function() {
-
+			.on('click', '.cite-label.geoname', function(e) {
+				e.stopPropagation();
+				var $target = $(e.target);
+				var geotext = $target.attr('data-geotext');
+				GeoCoder.showPlace(geotext, e);
 			});
 
         $('#stmt-highlight-toolbar .stmt-cite-btn').click(function() {
@@ -150,41 +158,87 @@ define([
         });
 
         $('#post-btn').click(function() {
+
+			var body = tinymce.activeEditor.getBody();
+			var $citations = $(body).find('.cite-label:not(.geoname)');
+			var $geonames = $(body).find('.cite-label.geoname');
+			var geoname_candidates = $(body).find('.geoname-candidate').length;
+
+			// strip geoname-candidate tags
+			var element = $(body);//convert string to JQuery element
+			element.find("span.geoname-candidate").each(function(index) {
+				var text = $(this).html();//get span content
+				$(this).replaceWith(text);//replace all span with just content
+			});
+			//var newString = element.html();//get back new string
 			var rawcontent = tinymce.activeEditor.getContent();
-			var $citations = $(rawcontent).find('.cite-label');
-			var data = {
-				'citations': [],
-				'content': rawcontent,
-				'action': 'new-post'
-			};
-			for (var i = 0; i < $citations.length; i ++) {
-				data['citations'].push({
-					'claim_id': $citations.get(i).getAttribute('data-claim-id'),
-					'start': $citations.get(i).getAttribute('start'),
-					'end': $citations.get(i).getAttribute('end'),
+
+			if ($geonames.length != 0 || geoname_candidates > 0) {
+				makePost(rawcontent, $citations, $geonames);
+			} else {
+				// use nltk
+				$.ajax({
+					url: '/api_geoparse/',
+					type: 'post',
+					data: {text: tinymce.activeEditor.getContent({format: 'text'})},
+					success: function(xhr) {
+						var geonames = xhr.entity_names;
+						if (geonames.length == 0) {
+							makePost(rawcontent, $citations, $geonames);
+						} else {
+							for (var i = 0; i < geonames.length; i ++) {
+								// highlight geonames in tinymce
+								var geoname = geonames[i];
+								var wholeText = tinymce.activeEditor.getContent();
+								var wrapped = '<span class="geoname-candidate">' + geoname + '</span>';
+								wholeText = wholeText.replace(geoname, wrapped);
+								tinymce.activeEditor.setContent(wholeText);
+							}
+						}
+					}
 				});
 			}
-			$.ajax({
-				url: '/api_postcir/',
-				type: 'post',
-				data: data,
-				success: function(xhr) {
-					loadPosts();
-					tinymce.activeEditor.setContent('');
-				},
-				error: function(xhr) {
-					if (xhr.status == 403) {
-						Utils.notify('error', xhr.responseText);
-					}
-				}
-			});
-            // TODO re-retrieve all my citations
         });
 	}
 
 	initLayout();
 	loadPosts();
 
+	function makePost(rawcontent, $citations, $geonames) {
+		var data = {
+			'citations': [],
+			'geonames': [],
+			'content': rawcontent,
+			'action': 'new-post'
+		};
+		for (var i = 0; i < $citations.length; i ++) {
+			data['citations'].push({
+				'claim_id': $citations.get(i).getAttribute('data-claim-id'),
+				'start': $citations.get(i).getAttribute('start'),
+				'end': $citations.get(i).getAttribute('end'),
+			});
+		}
+		for (var i = 0; i < $geonames.length; i ++) {
+			data['geonames'].push({
+				'text': $geonames.get(i).innerHTML,
+				'geotext': $geonames.get(i).getAttribute('data-geotext')
+			});
+		}
+		$.ajax({
+			url: '/api_postcir/',
+			type: 'post',
+			data: data,
+			success: function(xhr) {
+				loadPosts();
+				tinymce.activeEditor.setContent('');
+			},
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			}
+		});
+	}
 	function loadPosts() {
 		$('#posts-area').html('<div class="ui active centered inline loader"></div>');
 		$.ajax({
@@ -216,7 +270,7 @@ define([
         }
         var text = [];
         // loop over all words in the highlight
-        for (var i = data.start; i <= data.end; i++) {
+        for (var i = parseInt(data.start); i <= parseInt(data.end); i++) {
             var $token = $context.find('.tk[data-id="' + i + '"]');
             $token.addClass(className);
             if (data.highlight_id) {
@@ -231,15 +285,21 @@ define([
     }
 
 	function onClickCitationLabel(e) {
+		e.stopPropagation();
 		var $target = $(e.target);
-		$('#citizens-statement .tk.highlighted').removeClass('highlighted').removeClass('my');
-		if ($target.hasClass('cite-label')) {
-			highlight({
-				claim_id: $target.attr('data-claim-id'),
-				start: $target.attr('data-start'),
-				end: $target.attr('data-end'),
-				type: 'my_citation'
-			});
+		if ($target.hasClass('geoname')) {
+
+		} else {
+			if ($target.hasClass('cite-label')) {
+				$('#citizens-statement .tk.highlighted').removeClass('highlighted');
+				$('#citizens-statement .tk.my').removeClass('my');
+				highlight({
+					claim_id: $target.attr('data-claim-id'),
+					start: $target.attr('data-start'),
+					end: $target.attr('data-end'),
+					type: 'my_citation'
+				});
+			}
 		}
 	}
 	return module;

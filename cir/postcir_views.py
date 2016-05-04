@@ -1,4 +1,5 @@
 import json
+import nltk
 
 from django.template.loader import render_to_string
 from django.http import HttpResponse
@@ -7,102 +8,36 @@ from django.db.models import Q
 from django.core.cache import cache
 
 from cir.models import *
+from annotator.models import Annotation
 from cir.utils import segment_text
 
 index_building = False
 
 VISITOR_ROLE = 'visitor'
 
+def api_geoparse(request):
+    sentences = nltk.sent_tokenize(request.REQUEST.get('text'))
+    tokenized_sentences = [nltk.word_tokenize(sentence) for sentence in sentences]
+    tagged_sentences = [nltk.pos_tag(sentence) for sentence in tokenized_sentences]
+    chunked_sentences = nltk.ne_chunk_sents(tagged_sentences, binary=True)
+    response = {}
+    def extract_entity_names(t):
+        entity_names = []
 
-def update_index(request):
-    global index_building
-    if index_building:
-        return
-    index_building = True
-    print "Building frequency index ..."
-    anno = GeoAnnotation.objects.all()
-    tmpCache = {}
-
-    segmented_docs = {} # cache segmented docs
-
-    def getTokens(content):
-        s = Segmenter()
-        try:
-            s.feed(content)
-            return s.get_tokens()
-        except HTMLParseError:
-            pass
-
-    for an in anno:
-        doc = an.source
-        if doc.id not in segmented_docs: # identical behavior with get_doc
-            segmented_docs[doc.id] = getTokens('<p>' + '</p><p>'.join(doc.get_sentences_annotated()) + '</p>')
-        text = ''.join(segmented_docs[doc.id][an.start:an.end + 1])
-        text = text.lower().strip().replace(' ', '_')
-        if len(text) == 0:
-            continue
-        if an.place_id: # from nominatim
-            place_id = an.place_id
-            place_type = 'nominatim'
-        elif an.custom_place:
-            place_id = an.custom_place.id
-            place_type = 'custom'
-        else:
-            continue
-        shape = an.shape
-        if text in tmpCache:
-            cached = tmpCache[text]
-            if shape in cached: # cannot use ID as key
-                cached[shape]['freq'] += 1
+        if hasattr(t, 'label') and t.label:
+            if t.label() == 'NE':
+                entity_names.append(' '.join([child[0] for child in t]))
             else:
-                cached[shape] = {
-                    'freq': 1,
-                    'type': place_type,
-                    'place_id': place_id,
-                    'text': an.text
-                }
-        else:
-            tmpCache[text] = {
-                shape: {
-                    'freq': 1,
-                    'type': place_type,
-                    'place_id': place_id,
-                    'text': an.text
-                }
-            }
-    customPlaces = CustomPlace.objects.all()
-    for cp in customPlaces:
-        text = cp.place_name.lower().strip().replace(' ', '_')
-        if len(text) == 0:
-            continue
-        shape = cp.shape
-        if text in tmpCache:
-            cached = tmpCache[text]
-            if shape in cached: # cannot use ID as key
-                cached[shape]['freq'] += 1
-            else:
-                cached[shape] = {
-                    'freq': 1,
-                    'type': 'custom',
-                    'place_id': cp.id,
-                    'text': cp.place_name
-                }
-        else:
-            tmpCache[text] = {
-                shape: {
-                    'freq': 1,
-                    'type': 'custom',
-                    'place_id': cp.id,
-                    'text': cp.place_name
-                }
-            }
-    cache.clear()
-    for key in tmpCache:
-        cache.set(key, tmpCache[key])
-    print "Frequency index built."
-    index_building = False
-    return HttpResponse()
+                for child in t:
+                    entity_names.extend(extract_entity_names(child))
 
+        return entity_names
+
+    response['entity_names'] = []
+    for tree in chunked_sentences:
+        response['entity_names'].extend(extract_entity_names(tree))
+
+    return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_postcir(request):
     response = {}
@@ -110,12 +45,16 @@ def api_postcir(request):
     now = timezone.now()
     if action == 'new-post':
         content = request.REQUEST.get('content')
-        citations = request.REQUEST.getlist('citations')
+        citations = request.POST.getlist('citations[]')
+        geonames = request.POST.getlist('geonames[]')
         for citation in citations:
             claim = Claim.objects.get(id=citation.claim_id)
             start = citation.start
             end = citation.end
             Highlight.objects.create(start_pos=start, end_pos=end, context=claim, is_nugget=False, created_at=now, author=request.user)
+        for geoname in geonames:
+            Annotation.objects.create(text=geoname.text, shape=geoname.geotext, created_at=now)
+
         Post.objects.create(forum_id=request.session['forum_id'], author=request.user,
             content=content, created_at=now, updated_at=now, content_type='postcir')
     if action == 'load-posts':

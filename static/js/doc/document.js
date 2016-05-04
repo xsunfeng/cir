@@ -220,7 +220,7 @@ define([
 	function afterAddHighlight(newHighlightId) {
 		// reset input boxes
 		$('#doc-claim-form').form('reset');
-		$('#doc-highlight-toolbar').removeAttr('style');
+		doc-highlight-toolbar
 		$('#doc-highlight-toolbar textarea').val('');
 		$('#doc-highlight-toolbar .button').removeClass('loading');
 		$('.tk.highlighted').removeClass('highlighted');

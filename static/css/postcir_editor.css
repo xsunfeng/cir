@@ -17,7 +17,6 @@ li {
 }
 
 span.cite-label {
-    font-size: smaller;
     background-color: #0E566C;
     color: #fff;
     padding: 1px 2px;
@@ -29,5 +28,10 @@ span.cite-label {
 }
 
 span.geoname {
-    background-color: pink!important;
+    background-color: #9B273B;
+    color: #fff;
+}
+
+span.geoname-candidate {
+    background-color: pink;
 }

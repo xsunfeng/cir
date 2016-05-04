@@ -68,7 +68,6 @@
 }
 
 #posts-area span.cite-label {
-    font-size: smaller;
     background-color: #0E566C;
     color: #fff;
     padding: 1px 2px;
@@ -79,13 +78,22 @@
     margin: 0 2px;
 }
 
-#geocoding {
 
+#posts-area span.geoname {
+    background-color: #9B273B;
+    color: #fff;
 }
-#local_results {
+#search_results {
     max-height: 300px;
     overflow-y: auto;
 }
 #search_area {
     margin:0 0 5px 0;
+}
+#hover-map {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    left: -99999px;
+    top: -99999px;
 }

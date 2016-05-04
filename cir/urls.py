@@ -38,6 +38,7 @@ urlpatterns = patterns('',
     url(r'^api_tag/$', tag_views.api_tag),
     url(r'^api_tag_theme/$', facilitator_views.tag_theme),
     url(r'^api_postcir/$', postcir_views.api_postcir),
+    url(r'^api_geoparse/$', postcir_views.api_geoparse),
 
     url(r'^workbench/api_load_all_documents/$', workbench_views.api_load_all_documents),
     url(r'^workbench/api_load_all_themes/$', workbench_views.api_load_all_themes),

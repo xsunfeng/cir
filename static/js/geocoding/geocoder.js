@@ -10,23 +10,68 @@ define([
 ) {
 	var urlPrefix = '/geocoder/';
 	var alreadyInitialized = false;
+	var hoverAlreadyInitialized = false;
 	var sortBy;
-	var searchResults;
+	var searchResults, undisplayedResults;
 	var matchedAnnotations;
-	var drawSource, vectorSource;
-	var map;
+	var vectorSource = new ol.source.Vector();
+	var drawSource = new ol.source.Vector();
+	var hoverSource = new ol.source.Vector();
+	var map, hoverMap;
 	var searchText;
+	var fullresults = {};
+	var vectorStyles = {
+		nominatim: new ol.style.Style({
+			stroke: new ol.style.Stroke({
+				color: 'blue',
+				width: 3
+			}),
+			fill: new ol.style.Fill({
+				color: 'rgba(0, 0, 255, 0.1)'
+			}),
+			image: new ol.style.Circle({
+				radius: 15,
+				fill: new ol.style.Fill({
+					color: 'blue'
+				})
+			})
+		}),
+			custom: new ol.style.Style({
+			stroke: new ol.style.Stroke({
+				color: '#FF66CC',
+				width: 3
+			}),
+			fill: new ol.style.Fill({
+				color: 'rgba(0, 0, 255, 0.1)'
+			}),
+			image: new ol.style.Circle({
+				radius: 15,
+				fill: new ol.style.Fill({
+					color: '#FF66CC'
+				})
+			})
+		})
+	};
 	var module = {
 		resolvedPlaceId: -1,
 		resolvedPlaceType: '',
+		geotext: '',
+		hideGeocoder: function() {
+			$('#geocoding').hide();
+		},
 		getRecommendation: function(text) {
 			var previousAnnotation = false;
+			module.resolvedPlaceId = -1;
+			module.resolvedPlaceType = '';
+			module.geotext = '';
+			$('#save_annotation').attr('disabled', true);
 			searchText = text;
 
 			$('#previous_annotations').html('<b>Searching previous annotations</b>');
 			$('#local_results').html('');
 			$('#global_results').html('');
 			searchResults = {};
+			undisplayedResults = [];
 			$.ajax({
 				url: urlPrefix + 'search_annotation',
 				data: {text: text},
@@ -41,14 +86,14 @@ define([
 						}
 					}
 				}
-			}).done(function() {
-				if (previousAnnotation) return;
-				searchLocal(text, function() {
-					if (Object.keys(searchResults).length != 0) {
-						return;
-					}
-					searchGlobal(text);
-				});
+			});
+
+			//if (previousAnnotation) return; // do a local search any way
+			searchLocal(text, function() {
+				if (Object.keys(searchResults).length != 0) {
+					return;
+				}
+				searchGlobal(text);
 			});
 		},
 		init: function() {
@@ -119,7 +164,8 @@ define([
 						module.resolvedPlaceId = xhr.custom_place_id;
 						module.resolvedPlaceType = 'previous';
 						showDetail(geotext, 'custom');
-						require('postcir/postcir').resolvePlace(module.resolvedPlaceId, module.resolvedPlaceType);
+						require('postcir/postcir').resolvePlace(geotext, module.resolvedPlaceType);
+						$('#geocoding').hide();
 					}
 				})
 			});
@@ -171,17 +217,51 @@ define([
 				}
 			}).on('click', '#save_annotation', function(e) {
 				e.preventDefault();
-				require('postcir/postcir').resolvePlace(module.resolvedPlaceId, module.resolvedPlaceType);
+				require('postcir/postcir').resolvePlace(module.geotext, module.resolvedPlaceType);
+				$('#geocoding').hide();
 			});
-		}
+		},
+		showPlace: function(geotext, e) {
+			$('#hover-map').css('left', e.pageX).css('top', e.pageY);
+			if (!hoverAlreadyInitialized) initHoverMap();
+			hoverSource.clear();
+			var format = new ol.format.WKT();
+			var feature = format.readFeature(geotext);
+			feature.getGeometry().transform('EPSG:4326', 'EPSG:3857');
+			feature.setStyle(vectorStyles.nominatim);
+			hoverSource.addFeature(feature);
+			hoverMap.getView().fit(hoverSource.getExtent(), hoverMap.getSize(), {
+				maxZoom: 16
+			});
+
+		},
 	};
 
+	function initHoverMap() {
+		if (hoverAlreadyInitialized) return;
+		hoverAlreadyInitialized = true;
+		hoverMap = new ol.Map({
+			target: 'hover-map',
+			interactions: ol.interaction.defaults({doubleClickZoom: false, mouseWheelZoom: false}),
+			layers: [
+				new ol.layer.Tile({
+					source: new ol.source.OSM()
+				}),
+				new ol.layer.Vector({
+					source: hoverSource,
+				}),
+			],
+			view: new ol.View({
+				center: ol.proj.fromLonLat([-77.86, 40.80]),
+				maxZoom: 19,
+				zoom: 12
+			})
+		});
+	}
 	function initmap() {
 		if (alreadyInitialized) return;
 		alreadyInitialized = true;
 		$('#map-toolbar').show();
-		vectorSource = new ol.source.Vector();
-		drawSource = new ol.source.Vector();
 
 
 		window.highlightsData = {};
@@ -196,42 +276,10 @@ define([
 			neighbourhood: 'Downtown State College'
 		};
 
-		window.vectorStyles = {
-			nominatim: new ol.style.Style({
-				stroke: new ol.style.Stroke({
-					color: 'blue',
-					width: 3
-				}),
-				fill: new ol.style.Fill({
-					color: 'rgba(0, 0, 255, 0.1)'
-				}),
-				image: new ol.style.Circle({
-					radius: 15,
-					fill: new ol.style.Fill({
-						color: 'blue'
-					})
-				})
-			}),
-			custom: new ol.style.Style({
-				stroke: new ol.style.Stroke({
-					color: '#FF66CC',
-					width: 3
-				}),
-				fill: new ol.style.Fill({
-					color: 'rgba(0, 0, 255, 0.1)'
-				}),
-				image: new ol.style.Circle({
-					radius: 15,
-					fill: new ol.style.Fill({
-						color: '#FF66CC'
-					})
-				})
-			})
-		};
 
 		map = new ol.Map({
 			target: 'map',
-			interactions: ol.interaction.defaults({doubleClickZoom: false}),
+			interactions: ol.interaction.defaults({doubleClickZoom: false, mouseWheelZoom: false}),
 			layers: [
 				new ol.layer.Tile({
 					source: new ol.source.OSM()
@@ -264,12 +312,13 @@ define([
 				zoom: 12
 			})
 		});
+
 	}
 
 	function searchLocal(searchtext, finalCallback) {
 		searchtext = searchtext.trim().replace(' ', '+');
 		var results = [];
-		$('#local_results').html('<b>Searching locally...</b>');
+		$('#local_results').html('<b>Loading search results...</b>');
 		$.ajax({
 			url: '//gir.ist.psu.edu/nominatim/search.php',
 			data: 'q=' + searchtext + '&format=json&addressdetails=1&polygon_text=1',
@@ -324,17 +373,16 @@ define([
 			var againstTarget = ' (calculated against <b>State College Borough</b>)';
 			presentLocalResults(results, againstTarget);
 		} else {
-			$('#local_results').html('<b>No local results.</b>');
+			$('#local_results').html('');
 		}
 	}
 
 	function presentLocalResults(results, againstTarget) {
 		if (!alreadyInitialized) initmap();
 		var wgs84Sphere = new ol.Sphere(6378137);
-		var alternativeSort =  (window.sortBy == 'ontology' ? 'distance' : 'ontology');
-		var html = '<b>Local results:</b>' + againstTarget +
-			'<a class="sort_by" data-sort="' + alternativeSort + '">by ' + alternativeSort + '</a>' +
-			'<div class="ui celled list">';
+		var alternativeSort =  (sortBy == 'ontology' ? 'distance' : 'ontology');
+		var html = '<div class="ui celled list">';
+
 		for (var i = 0; i < results.length; i ++) {
 			results[i].distance = wgs84Sphere.haversineDistance(window.overallCentroid, [
 				results[i].lon,
@@ -344,7 +392,7 @@ define([
 			searchResults[results[i].place_id] = results[i];
 		}
 		results.sort(function(a, b) {
-			if (window.sortBy == 'ontology') {
+			if (sortBy == 'ontology') {
 				// sort by ontology
 				if (a.ont_distance.code < b.ont_distance.code) {
 					return 1;
@@ -359,21 +407,45 @@ define([
 			}
 		});
 
-		for (var i = 0; i < results.length; i ++) {
-			var shortname = results[i].display_name.replace(/, United States of America$/, '');
-			var distance = results[i].distance / 1609.34;
+		var displayedResults = results;
+		if (results.length > 5) {
+			displayedResults = results.slice(0, 5);
+			undisplayedResults = results.slice(5);
+		}
+
+		for (var i = 0; i < displayedResults.length; i ++) {
+			var shortname = displayedResults[i].display_name.replace(/, United States of America$/, '');
+			var distance = displayedResults[i].distance / 1609.34;
 			distance = distance.toPrecision(3);
-			html += '<a class="place item" data-place-id="' + results[i].place_id + '">' +
-				(results[i].icon ? '<img class="ui avatar image" src="' + results[i].icon + '">' : '') +
-				(window.sortBy == 'ontology' ? ('<span class="ui grey circular label">' + results[i].ont_distance.text + '</span>') : '') +
-				(window.sortBy == 'distance' ? ('<span class="ui label">' + distance + ' mi</span>') : '') +
+			html += '<a class="place item" data-place-id="' + displayedResults[i].place_id + '">' +
+				(displayedResults[i].icon ? '<img class="ui avatar image" src="' + displayedResults[i].icon + '">' : '') +
+				(sortBy == 'ontology' ? ('<span class="ui grey circular label">' + displayedResults[i].ont_distance.text + '</span>') : '') +
+				(sortBy == 'distance' ? ('<span class="ui label">' + distance + ' mi</span>') : '') +
 				shortname + ' (' +
-				results[i].importance + ')</a>';
+				displayedResults[i].importance + ')</a>';
 		}
 		html += '</div>';
 		$('#local_results').html(html);
 	}
 
+	function showUndisplayedResults() {
+		var html = '<div class="ui celled list">';
+
+		for (var i = 0; i < undisplayedResults.length; i ++) {
+			var shortname = undisplayedResults[i].display_name.replace(/, United States of America$/, '');
+			var distance = undisplayedResults[i].distance / 1609.34;
+			distance = distance.toPrecision(3);
+			html += '<a class="place item" data-place-id="' + undisplayedResults[i].place_id + '">' +
+				(undisplayedResults[i].icon ? '<img class="ui avatar image" src="' + undisplayedResults[i].icon + '">' : '') +
+				(sortBy == 'ontology' ? ('<span class="ui grey circular label">' + undisplayedResults[i].ont_distance.text + '</span>') : '') +
+				(sortBy == 'distance' ? ('<span class="ui label">' + distance + ' mi</span>') : '') +
+				shortname + ' (' +
+				undisplayedResults[i].importance + ')</a>';
+		}
+		html += '</div>';
+		$('#local_results').append(html);
+		undisplayedResults = [];
+	}
 	function searchGlobal(searchtext) {
 		$('#global_results').html('<b>Searching globally...</b>');
 		searchtext = searchtext.trim().replace(' ', '+');
@@ -389,7 +461,7 @@ define([
 	function showGlobalResults(results) {
 		if (!alreadyInitialized) initmap();
 		if (results.length > 0) {
-			var html = '<b>Global results:</b><div class="ui celled list">';
+			var html = '<div class="ui celled list">';
 			for (var i =0; i < results.length; i ++) {
 				results[i].ont_distance = getOntologyDistance(results[i].address);
 				searchResults[results[i].place_id] = results[i];
@@ -415,7 +487,7 @@ define([
 			html += '</div>';
 			$('#global_results').html(html);
 		} else {
-			$('#global_results').html('<b>No global results.</b>');
+			$('#global_results').html('');
 		}
 
 	}
@@ -446,24 +518,26 @@ define([
 			e.preventDefault();
 			searchLocal(searchText);
 
-		}).on('click', '#search_global', function(e) {
+		}).on('click', '#full_results', function(e) {
 			e.preventDefault();
 			searchGlobal(searchText);
+			if (undisplayedResults.length > 0) {
+				showUndisplayedResults();
+			}
 		});
 
 	}
 
 	function showDetail(geotext, shapetype) {
 		vectorSource.clear();
-		window.geotext = geotext;
-
+		module.geotext = geotext;
 		var format = new ol.format.WKT();
 		var feature = format.readFeature(geotext);
 		feature.getGeometry().transform('EPSG:4326', 'EPSG:3857');
 		if (shapetype == 'custom') {
-			feature.setStyle(window.vectorStyles.custom);
+			feature.setStyle(vectorStyles.custom);
 		} else {
-			feature.setStyle(window.vectorStyles.nominatim);
+			feature.setStyle(vectorStyles.nominatim);
 		}
 		vectorSource.addFeature(feature);
 		map.getView().fit(vectorSource.getExtent(), map.getSize(), {
