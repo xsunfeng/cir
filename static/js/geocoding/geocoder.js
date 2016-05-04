@@ -8,7 +8,7 @@ define([
 	Utils,
 	ol
 ) {
-	var urlPrefix = '/geocoder/';
+	var urlPrefix = '/cir/geocoder/';
 	var alreadyInitialized = false;
 	var hoverAlreadyInitialized = false;
 	var sortBy;
