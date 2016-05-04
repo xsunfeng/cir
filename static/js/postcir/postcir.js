@@ -10,6 +10,7 @@ define([
 	Utils,
 	GeoCoder
 ) {
+	var urlPrefix = '/cir';
 	var module = {
 		resolvePlace: function(geotext, place_type) {
 			var content = tinymce.activeEditor.selection.getContent();
@@ -178,7 +179,7 @@ define([
 			} else {
 				// use nltk
 				$.ajax({
-					url: '/api_geoparse/',
+					url: urlPrefix + '/api_geoparse/',
 					type: 'post',
 					data: {text: tinymce.activeEditor.getContent({format: 'text'})},
 					success: function(xhr) {
@@ -225,7 +226,7 @@ define([
 			});
 		}
 		$.ajax({
-			url: '/api_postcir/',
+			url: urlPrefix + '/api_postcir/',
 			type: 'post',
 			data: data,
 			success: function(xhr) {
@@ -242,7 +243,7 @@ define([
 	function loadPosts() {
 		$('#posts-area').html('<div class="ui active centered inline loader"></div>');
 		$.ajax({
-			url: '/api_postcir/',
+			url: urlPrefix + '/api_postcir/',
 			type: 'post',
 			data: {
 				action: 'load-posts'
