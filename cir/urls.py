@@ -37,8 +37,8 @@ urlpatterns = patterns('',
     url(r'^api_get_flags/$', claim_views.api_get_flags),
     url(r'^api_tag/$', tag_views.api_tag),
     url(r'^api_tag_theme/$', facilitator_views.tag_theme),
-    url(r'^api_postcir/$', postcir_views.api_postcir),
-    url(r'^api_geoparse/$', postcir_views.api_geoparse),
+    url(r'api_postcir/$', postcir_views.api_postcir),
+    url(r'api_geoparse/$', postcir_views.api_geoparse),
 
     url(r'^workbench/api_load_all_documents/$', workbench_views.api_load_all_documents),
     url(r'^workbench/api_load_all_themes/$', workbench_views.api_load_all_themes),
@@ -83,7 +83,7 @@ urlpatterns = patterns('',
     url(r'^dashboard/docs/$', facilitator_views.admin_document),
     url(r'^dashboard/phase/$', facilitator_views.admin_phase),
 
-    url(r'^geocoder/', include('annotator.urls')),
+    url(r'geocoder/', include('annotator.urls')),
 
     # these must be put last!
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum),
