@@ -13,6 +13,8 @@ import chatter_views
 import vis_views
 import sankey_views
 
+import phase2
+
 
 admin.autodiscover()
 
@@ -58,6 +60,8 @@ urlpatterns = patterns('',
     url(r'^workbench/api_get_doc_by_doc_id/$', workbench_views.api_get_doc_by_doc_id),
     url(r'^workbench/api_get_init_doc/$', workbench_views.api_get_init_doc),
 
+    url(r'^phase2/get_claim/$', phase2.get_claim),
+
     url(r'^sankey/get_graph/$', sankey_views.get_graph),
     url(r'^sankey/get_doc/$', sankey_views.get_doc),
     url(r'^sankey/get_doc_coverage/$', sankey_views.get_doc_coverage),
@@ -82,7 +86,7 @@ urlpatterns = patterns('',
 
     # these must be put last!
     # url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/phase/(?P<phase_name>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum),
-    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/phase/(?P<phase_name>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum),
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/workbench/?$', forum_views.enter_workbench),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/sankey/?$', forum_views.enter_sankey),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/dashboard/?$', facilitator_views.enter_dashboard),
