@@ -123,6 +123,7 @@ def enter_forum(request, forum_url, phase_name):  # access /forum_name
 
 def _get_phases(forum, selected_phase):
     results = {}
+    results['phase_name'] = forum.phase
     results['selected_phase_name'] = _get_full_phase_name(selected_phase)
     results['phases'] = []
     for name in ['nugget', 'extract', 'categorize', 'improve', 'finished']:

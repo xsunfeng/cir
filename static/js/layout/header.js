@@ -72,8 +72,8 @@ define([
 						sessionStorage['simulated_user_id'] = user_id;
 						sessionStorage['simulated_user_role'] = xhr.role;
 					}
-					if (require.defined('claim/claim')) {
-						require('claim/claim').updateClaimPane();
+					if (require.defined('phase3/claim')) {
+						require('phase3/claim').updateClaimPane();
 					}
 				},
 				error: function(xhr) {

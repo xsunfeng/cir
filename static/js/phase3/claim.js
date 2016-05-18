@@ -1,15 +1,20 @@
 define([
+	'jquery',
 	'claim-common/claim-navigator',
 	'utils',
+	'feed/activity-feed',
+	'semantic-ui'
 ], function(
+	$,
 	ClaimNavigator,
 	Utils
 ) {
 	var module = {};
 	module.initClaimView = function() {
+		$('#claim-container .claim-view-btn').tab();
 		this.display_type = 'overview';
 		// static event listeners
-		$('#claim-pane').on('click', '.claim-vote-btn:not(.disabled):not(.unready)', function() {
+		$('#claim-container').on('click', '.claim-vote-btn:not(.disabled):not(.unready)', function() {
 			var _that = this;
 			var action = _that.getAttribute('data-action');
 			var $menu = $(_that).parent();
@@ -97,8 +102,8 @@ define([
 			var $segment = $(this).parents('.claim.segment');
 			$segment.find('.merge.corner.label').show();
 			$('#claim-pane .filter.segment').hide();
-			$('#claim-pane .merging.segment').show();
-			$('#claim-pane .merging.segment .merge.count').text($('#claim-pane .merge.corner.label:visible').length);
+			$('#claim-pane .merging.menu').show();
+			$('#claim-pane .merging.menu .merge.count').text($('#claim-pane .merge.corner.label:visible').length);
 		}).on('click', '.theme-assign-btn', function() {
 			var _that = this;
 			var $menu = $(_that).parents('.claim.menu');
@@ -118,10 +123,6 @@ define([
 			});
 		}).on('click', '.theme-suggest-btn', function() {
 
-		}).on('click', '.claim-fullscreen-btn', function() {
-			module.claim_id = $(this).parents('.claim.menu').attr('data-id');
-			_setDisplayType('fullscreen');
-			module.updateClaimPane();
 		}).on('click', '.claim-back-to-list-btn', function() {
 			var id = $(this).parents('.claim.menu').attr('data-id');
 			module.jumpTo(id, 'overview');
@@ -261,10 +262,10 @@ define([
 			});
 		}).on('click', '.merge.corner.label', function() {
 			$(this).removeClass('visible').hide();
-			$('#claim-pane .merging.segment .merge.count').text($('#claim-pane .merge.corner.label:visible').length);
+			$('#claim-pane .merging.menu .merge.count').text($('#claim-pane .merge.corner.label:visible').length);
 			if ($('#claim-pane .merge.corner.label:visible').length == 0) {
 				$('#claim-pane .filter.segment').show();
-				$('#claim-pane .merging.segment').hide();
+				$('#claim-pane .merging.menu').hide();
 			}
 		}).on('click', '.merge-flag-tags .tag.label', function(e) {
 			e.stopPropagation();
@@ -298,7 +299,7 @@ define([
 						$(this).removeClass('visible').hide();
 					});
 					$('#claim-pane .filter.segment').show();
-					$('#claim-pane .merging.segment').hide();
+					$('#claim-pane .merging.menu').hide();
 				});
 			}
 		}).on('click', '#claim-perform-merge', function() {
@@ -322,7 +323,7 @@ define([
 				$(this).removeClass('visible').hide();
 			});
 			$('#claim-pane .filter.segment').show();
-			$('#claim-pane .merging.segment').hide();
+			$('#claim-pane .merging.menu').hide();
 		}).on('click', '.merged.label', function() {
 			var action = this.getAttribute('data-action');
 			var claim_ids = this.getAttribute('data-ids').split('.');
@@ -342,6 +343,11 @@ define([
 			$('#claim-pane .reword.form').transition('slide down', '500ms');
 		});
 
+		$('#claim-pane-overview').on('click', '.claim-fullscreen-btn', function() {
+			module.claim_id = $(this).parents('.claim.menu').attr('data-id');
+			_setDisplayType('fullscreen');
+			module.updateClaimPane();
+		})
 		$('#claim-reason-editor').on('click', '.primary.button', function() {
 			var reason = $('#claim-reason-editor textarea.reason.editor').val();
 			var collective = $('#claim-reason-editor input[name="collective"]').val();
@@ -405,7 +411,7 @@ define([
 
 		// dynamic event listeners
 		$('.claim-view-btn').click(function() {
-			var type = this.getAttribute('data-type');
+			var type = this.getAttribute('data-tab');
 			if (module.display_type != type) {
 				_setDisplayType(type);
 				module.updateClaimPane();
@@ -500,8 +506,7 @@ define([
 	}
 
 	function _setDisplayType(display_type) {
-		$('.item.claim-view-btn').removeClass('active');
-		$('.item.claim-view-btn[data-type=' + display_type + ']').addClass('active');
+		$('#claim-container .claim-view-btn').tab('change tab', display_type);
 		module.display_type = display_type;
 	}
 
@@ -511,27 +516,24 @@ define([
 	 * @param display_type (optional) If specified, switch to specified display type first.
 	 */
 	module.jumpTo = function(claim_id, display_type) {
-		$('#claim-pane .claim.segment .claim-content').removeClass('highlight-found');
+		$('#claim-pane-overview .claim.segment .claim-content').removeClass('highlight-found');
 		ClaimNavigator.highlight();
 		if (typeof display_type != 'undefined') {
 			// change display type and update pane
 			_setDisplayType(display_type);
 			if (module.display_type == 'overview') {
-				module.updateClaimPane().done(function() {
-					var $claim_wrapper = $('#claim-pane .claim.segment[data-id="' + claim_id + '"]');
-					if ($claim_wrapper.length) {
-						window.scrollTo(0, $claim_wrapper.position().top - 20); // navbar width
-						$claim_wrapper.addClass('highlight-found');
-						setTimeout(function() {
-							$claim_wrapper.removeClass('highlight-found');
-						}, 1000);
-						window.scrollTo(0, 96.4375 - 20);
-					} 
-				});
+				var $claim_wrapper = $('#claim-pane-overview .claim.segment[data-id="' + claim_id + '"]');
+				if ($claim_wrapper.length) {
+					window.scrollTo(0, $claim_wrapper.position().top - 20); // navbar width
+					$claim_wrapper.addClass('highlight-found');
+					setTimeout(function() {
+						$claim_wrapper.removeClass('highlight-found');
+					}, 1000);
+				}
 			}
 		} else {
 			if (module.display_type == 'overview') {
-				var $claim_wrapper = $('#claim-pane .claim.segment[data-id="' + claim_id + '"]');
+				var $claim_wrapper = $('#claim-pane-overview .claim.segment[data-id="' + claim_id + '"]');
 				if ($claim_wrapper.length) {
 					window.scrollTo(0, $claim_wrapper.position().top - 20); // navbar width
 					if ($claim_wrapper.hasClass('accordion')) {
@@ -557,15 +559,9 @@ define([
 		if (module.claimLoader) {
 			module.claimLoader.abort();
 		}
-		$('#claim-pane > .segment').addClass('loading'); // for fullscreen view
-		$('#claim-pane > .segments').css('opacity', '0.5'); // for overview
+		$('#claim-container .active.tab').addClass('loading');
 		ClaimNavigator.setActive();
-		if (module.flagLoader) {
-			module.flagLoader.abort();
-		}
-		if (module.voteLoader) {
-			module.voteLoader.abort();
-		}
+
 		module.claimLoader = $.ajax({
 			url: '/api_get_claim/',
 			type: 'post',
@@ -577,26 +573,28 @@ define([
 				'theme': ClaimNavigator.currentTheme,
 			},
 			success: function(xhr) {
-				$('#claim-pane').html(xhr.html);
-				$('#claim-pane > .segment').removeClass('loading');
-
-				if (module.display_type == 'fullscreen') {
+				$('#claim-container .active.tab').removeClass('loading');
+				if (module.display_type == 'overview') {
+					$('#claim-pane-overview').html(xhr.html);
+					$('.ui.accordion').accordion({'close nested': false});
+				} else if (module.display_type == 'fullscreen') {
+					$('#claim-pane-fullscreen').html(xhr.html);
 					if (xhr.claim_id) module.claim_id = xhr.claim_id; // undefined if no claim exists
 					ClaimNavigator.setActive(module.claim_id);
 
-					if ($('#claim-pane textarea.claim.editor').length) { // this is unpublished!
-						$('#claim-pane textarea.claim.editor').focus();
+					if ($('#claim-pane-fullscreen textarea.claim.editor').length) { // this is unpublished!
+						$('#claim-pane-fullscreen textarea.claim.editor').focus();
 					} else {
 						// load activities
 						$('#claim-activity-feed').feed('init');
 						var filter = 'all';
-						if ($('#claim-pane').hasClass('extract')) {
+						if ($('body').attr('data-phase') == 'extract') {
 							filter = 'general';
-						} else if ($('#claim-pane').hasClass('categorize')) {
+						} else if ($('body').attr('data-phase') == 'categorize') {
 							filter = 'categorize';
-						} else if ($('#claim-pane').hasClass('theming')) {
+						} else if ($('body').attr('data-phase') == 'theming') {
 							filter = 'theming';
-						} else if ($('#claim-pane').hasClass('improve')) {
+						} else if ($('body').attr('data-phase') == 'improve') {
 							filter = 'improve';
 						}
 						$('#claim-activity-feed').feed('update', { // async
@@ -605,22 +603,20 @@ define([
 							'filter': filter
 						});
 						//loadRatings();
-						$('#claim-pane .ratings .rating').rating({
-							initialRating: 4,
-							maxRating: 5,
-						});
+						//$('#claim-pane .ratings .rating').rating({
+						//	initialRating: 4,
+						//	maxRating: 5,
+						//});
 					}
-				} else if (module.display_type == 'overview') {
-					$('#claim-pane .ui.accordion').accordion({'close nested': false});
 				}
 				// initialize menu/button popups
 				// $('#claim-pane .menu .item').popup();
 				// $('#claim-pane abbr').popup();
 				// $('#claim-pane .merged.label').popup();
 				if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (!sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
-					$('#claim-pane .facilitator-only').show();
+					$('#claim-container .facilitator-only').show();
 				}
-				if (module.claim_id) { // make sure non-empty claim list
+				if ($('#claim-container .claim.segment').length) { // make sure non-empty claim list
 					loadVotes();
 					loadFlags();
 				}
@@ -726,9 +722,9 @@ define([
 			},
 			success: function(xhr) {
 				if (module.display_type == 'fullscreen') {
-					_updateVotingMenu($('#claim-pane .claim.menu'), xhr['voters']);
+					_updateVotingMenu($('#claim-pane-fullscreen .claim.menu'), xhr['voters']);
 				} else if (module.display_type == 'overview') {
-					$('#claim-pane .claim.menu').each(function() {
+					$('#claim-pane-overview .claim.menu').each(function() {
 						var claim_id = this.getAttribute('data-id');
 						_updateVotingMenu($(this), xhr[claim_id]);
 					});

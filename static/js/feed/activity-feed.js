@@ -1,8 +1,8 @@
 define([
-	'claim/claim',
+	'jquery',
 	'utils'
 ], function(
-	ClaimView,
+	$,
 	Utils
 ) {
 	jQuery.fn.feed = function(action, data) {
@@ -21,6 +21,9 @@ define([
 				this.data('question_id', this.data('id'));
 				var url = '/api_qa/';
 			}
+			if (!require.defined('phase3/claim')) {
+				return;
+			}
 			_this.updater = $.ajax({
 				url: url,
 				type: 'post',
@@ -33,7 +36,7 @@ define([
 
 					showDeleteButtons();
 
-					if (_this.data('type') == 'claim' && ClaimView.display_type == 'fullscreen') {
+					if (_this.data('type') == 'claim' && require('phase3/claim').display_type == 'fullscreen') {
 						_this.find('.filter.buttons .button').removeClass('loading').removeClass('active');
 						_this.find('.filter.buttons .button[data-filter="' + _this.data('filter') + '"]').addClass('active');
 
@@ -115,7 +118,7 @@ define([
 			$('#claim-activity-feed .improve.menu').each(function() {
 				var $menu = $(this);
 				// prevent users' fast view switching!
-				if (ClaimView.display_type != 'fullscreen') return;
+				if (require('phase3/claim').display_type != 'fullscreen') return;
 				var version_id = this.getAttribute('data-id');
 				$.ajax({
 					url: '/api_claim_vote/',
@@ -271,7 +274,7 @@ define([
 					version_id: id,
 				},
 				success: function(xhr) {
-					ClaimView.updateClaimPane();
+					require('phase3/claim').updateClaimPane();
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -333,7 +336,7 @@ define([
 			}).on('click', '.doc-jumpto-claim', function(e) {
 				var claim_id = this.getAttribute('data-id');
 				require('layout/layout').changeTab('claim-tab', function() {
-					ClaimView.jumpTo(claim_id, 'fullscreen')
+					require('phase3/claim').jumpTo(claim_id, 'fullscreen')
 				});
 			}).on('click', '.filter.buttons .button', function() {
 				$(this).addClass('loading');
