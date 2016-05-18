@@ -60,7 +60,9 @@ urlpatterns = patterns('',
     url(r'^workbench/api_get_doc_by_doc_id/$', workbench_views.api_get_doc_by_doc_id),
     url(r'^workbench/api_get_init_doc/$', workbench_views.api_get_init_doc),
 
-    url(r'^phase2/get_claim/$', phase2.get_claim),
+    url(r'^phase2/get_claim_list/$', phase2.get_claim_list),
+    url(r'^phase2/get_nugget_list/$', phase2.get_nugget_list),
+    url(r'^phase2/get_theme_list/$', phase2.get_theme_list),
 
     url(r'^sankey/get_graph/$', sankey_views.get_graph),
     url(r'^sankey/get_doc/$', sankey_views.get_doc),

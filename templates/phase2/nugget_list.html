@@ -1,0 +1,47 @@
+{% if highlights %}
+	{% for highlight in highlights %}
+		<div class="ui workbench-nugget nugget-related" data-hl-id = {{ highlight.id }}>
+			{% if highlight.is_nugget %}
+				{% if highlight.is_used %}
+				<a class="ui tiny green right corner label nugget2claim">
+					<i class="icon"></i>
+				</a>
+				{% endif %}
+				<div class="discription">
+					<div class="ui heart rating" data-rating="0" data-max-rating="1"></div>
+					<span> | </span>
+					<span>{{ highlight.author_name }}</span>
+					<span> | </span>
+					<span>{{ highlight.created_at_pretty }}</span>
+				</div>
+				<div class="content">
+					<div class="description more" data="{{ highlight.text}}">
+						{{ highlight.text }}
+					</div>
+				</div>
+				<div class="discription">
+					<span class="ui label">{{ highlight.theme }}</span>
+					<span style="float:right;">
+						<a href="#" class="item source-nugget">context</a>
+						<span> | </span>
+						<a href="#" class="item comment-nugget">comment</a>
+						<span> | </span>
+						<a href="#" class="item reassign-nugget">change theme</a>
+						<span> | </span>
+						<a href="#" class="item use-nugget">adopt</a>
+					<span>
+				</div>
+			{% endif %}
+		</div>
+		<div class="ui divider"></div>
+	{% endfor %}
+{% else %}
+		<div class="ui card" style="background: PapayaWhip;">
+				<div class="content">
+					<div class="description">
+						No nuggets yet.
+					</div>
+				</div>
+		</div>
+{% endif %}
+

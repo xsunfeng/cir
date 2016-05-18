@@ -176,18 +176,21 @@ def add_nugget_comment(request):
     response['workbench_nugget_comments'] = render_to_string("workbench_nugget_comments.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
-def api_load_all_themes(request):
+def get_theme_list(request):
     response = {}
     context = {}
     forum = Forum.objects.get(id=request.session['forum_id'])
     context['forum_name'] = forum.full_name
     context['forum_url'] = forum.url    
     themes = ClaimTheme.objects.filter(forum_id=request.session['forum_id'])
-    context["themes"] = []
+    response["themes"] = []
     for theme in themes:
-        context["themes"].append(theme)
+        item = {}
+        item["name"] = theme.name
+        item["id"] = theme.id
+        response["themes"].append(item)
     context["phase"] = PHASE_CONTROL[forum.phase]
-    response['workbench_container'] = render_to_string("workbench-theme-container.html", context)
+
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_load_highlights(request):
@@ -313,7 +316,7 @@ def api_remove_nugget(request):
     response['workbench_single_nugget'] = render_to_string("workbench-single-nugget.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
-def api_load_nugget_list(request):
+def get_nugget_list(request):
     response = {}
     context = {}
     theme_id = int(request.REQUEST.get("theme_id"))
@@ -328,7 +331,7 @@ def api_load_nugget_list(request):
             for highlight in highlights:
                 context['highlights'].append(highlight.getAttr())
     context['highlights'].sort(key = lambda x: x["created_at"], reverse=True)
-    response['workbench_nugget_list'] = render_to_string("workbench-nuggets.html", context)
+    response['workbench_nugget_list'] = render_to_string("phase2/nugget_list.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_load_nugget_list_partial(request):
@@ -375,7 +378,7 @@ def api_edit_claim(request):
     response = {}
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
-def get_claim(request):
+def get_claim_list(request):
     forum = Forum.objects.get(id=request.session['forum_id'])
     response = {}
     context = {}
@@ -400,7 +403,7 @@ def get_claim(request):
         item['highlight_ids'].strip(" ")
         context["claims"].append(item)
     context['claims'].sort(key = lambda x: x["created_at_used_for_sort"], reverse=True)
-    response['workbench_claims'] = render_to_string("workbench-claims.html", context)
+    response['workbench_claims'] = render_to_string("phase2/claim_list.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')   
 
 def api_others(request):  
