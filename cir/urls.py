@@ -83,6 +83,7 @@ urlpatterns = patterns('',
     url(r'^dashboard/forum/$', facilitator_views.admin_forum),
     url(r'^dashboard/docs/$', facilitator_views.admin_document),
     url(r'^dashboard/phase/$', facilitator_views.admin_phase),
+    url(r'^dashboard/user_mgmt/$', facilitator_views.user_mgmt),
 
     # these must be put last!
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)(/phase/(?P<phase_name>[a-zA-Z0-9_]+))?/?$', forum_views.enter_forum),

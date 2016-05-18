@@ -34,7 +34,23 @@ define([
 	};
 
 	function initFacilitatorBtns() {
-		$('#user-switch-menu .switch.user.menu .item').click(function() {
+		// populate users list
+		$.ajax({
+			url: '/dashboard/user_mgmt/',
+			type: 'post',
+			data: {
+				'action': 'get_user_list'
+			},
+			success: function(xhr) {
+				$('#user-switch-menu .switch.user.menu').html(xhr.html);
+			},
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			}
+		});
+		$('#user-switch-menu .switch.user.menu').on('click', ' .item', function() {
 			var user_id = this.getAttribute('data-id');
 			var user_name = $(this).text();
 			$.ajax({

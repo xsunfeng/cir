@@ -1,11 +1,7 @@
 define([
 	'realtime/chatter',
-	'workbench2',
-	'doc/qa',
 ], function(
-	Chatter,
-	Workbench,
-	QAView
+	Chatter
 ) {
 	var socket = {
 		emit: function() {
@@ -84,11 +80,17 @@ define([
 					}
 
 				}).on('client:document:add_highlight', function(data) {
-					Workbench.receiveNewHighlight(data);
+					if (require.defined('workbench2')) {
+						require('workbench2').receiveNewHighlight(data);
+					}
 				}).on('client:document:add_question', function(data) {
-					QAView.newQuestionAdded(data);
+					if (require.defined('doc/qa')) {
+						require('doc/qa').newQuestionAdded(data);
+					}
 				}).on('client:qa:add_post', function(data) {
-					QAView.newReplyAdded(data);
+				if (require.defined('doc/qa')) {
+					require('doc/qa').newReply(data);
+				}
 				}).on('client:facilitation:update_phase', function(data) {
 					var message = 'Facilitator has changed the phase of this forum to <b>' + data.phase
 						 + '</b>. Please refresh the page as soon as possible.';
