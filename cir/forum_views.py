@@ -14,21 +14,14 @@ def home(request):  # access /
     if 'actual_user_id' in request.session:
         del request.session['actual_user_id']
     request.session['forum_id'] = -1
-    if request.user.is_authenticated():
-        context = {
-            'user_id': request.user.id,
-            'user_name': request.user.get_full_name(),
-            'forums': _forums(request)
-        }
-        return render(request, 'index_forums.html', context)
-    else:
-        return render(request, 'index_forums.html', {'user_id': '-1', 'forums': _forums(request)})
 
-def _forums(request):
     forum_infos = []
+
+    # don't include private forums
     forums = Forum.objects.exclude(access_level='private')
-    if request.user.is_authenticated():  # add forums in which I have a role
-        # get all forums in which I have a role
+
+    if request.user.is_authenticated():
+        # add private forums in which I have a role
         forums_q = request.user.role.all().values('forum').query
         forums |= Forum.objects.filter(id__in=forums_q)
     for forum in forums.order_by('-id'):
@@ -39,7 +32,20 @@ def _forums(request):
         forum_info = forum.getAttr()
         forum_info['role'] = role
         forum_infos.append(forum_info)
-    return forum_infos
+
+    if request.user.is_authenticated():
+        context = {
+            'user_id': request.user.id,
+            'user_name': request.user.get_full_name(),
+            'forums': forum_infos
+        }
+    else:
+        context = {
+            'user_id': '-1',
+            'forums': forum_infos
+        }
+    return render(request, 'index_forums.html', context)
+
 
 def enter_forum(request, forum_url, phase_name):  # access /forum_name
     print phase_name

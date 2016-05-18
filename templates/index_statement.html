@@ -1,13 +1,6 @@
 {% extends 'base.html' %}
 {% block header %}
-<header class="ui fixed inverted main menu">
-	<div href="/" class="item">GeoDeliberator</div>
-	{% if not load_error %}
-	<div id="header-member-wrapper" class="right menu" style="display:flex">
-		<a href="/{{ forum_url }}" class="item" target="_blank">Open full review in new tab</a>
-	</div>
-	{% endif %}
-</header>
+{% include 'header/forum_postcir_header.html' %}
 {% endblock %}
 {% block body %}
 

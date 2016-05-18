@@ -42,15 +42,15 @@
         </script>
     </head>
     <body id="cir" {% if forum_id %}forum-id="{{ forum_id }}" {% endif %}{% if phase %}data-phase="{{ phase.short_name }}"{% endif %}>
-            {% block header %}
-            {% endblock %}
+{% block header %}
+{% endblock %}
 
 
-            {% block body %}
-            {% endblock %}
+{% block body %}
+{% endblock %}
 
-            {% include 'signin-signup.html' %}
-            {% block extralib %}{% endblock %}
-            {% block delaylib %}{% endblock %}
+{% include 'signin-signup.html' %}
+{% block extralib %}{% endblock %}
+{% block delaylib %}{% endblock %}
     </body>
 </html>
