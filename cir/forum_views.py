@@ -42,7 +42,6 @@ def _forums(request):
     return forum_infos
 
 def enter_forum(request, forum_url, phase_name):  # access /forum_name
-    print phase_name
     if 'actual_user_id' in request.session:
         del request.session['actual_user_id']
     try:
@@ -100,7 +99,20 @@ def enter_forum(request, forum_url, phase_name):  # access /forum_name
     context['themes'] = [theme.getAttr() for theme in themes]
     context['dispatcher_url'] = DISPATCHER_URL
     context['sankey'] = render(request, 'sankey.html', context)
-    return render(request, 'index_phase1.html', context)
+    index_html = "index.html"
+    # phase_name = forum.phase
+    if (phase_name == "nugget"):
+        index_html = "phase1/index.html"
+    elif (phase_name == "extract"):
+        index_html = "phase2/index.html"
+    elif (phase_name == "categorize"):
+        index_html = "phase3/index.html"
+    elif (phase_name == "improve"):
+        index_html = "phase4/index.html"
+    elif (phase_name == "finished"):
+        index_html = "phase5/index.html"
+    return render(request, index_html, context)
+
 
 # def enter_forum(request, forum_url):  # access /forum_name
 #     if 'actual_user_id' in request.session:
