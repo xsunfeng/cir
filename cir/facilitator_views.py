@@ -221,3 +221,19 @@ def tag_theme(request):
         except:
             print "except"
     return HttpResponse()
+
+def _user_list(forum):
+    context = {}
+    context['panelists'] = []
+    context['staff'] = []
+    for panelist in forum.members.filter(role='panelist'):
+        context['panelists'].append({
+            'id': panelist.user.id,
+            'name': panelist.user.get_full_name()
+        })
+    for staff in forum.members.filter(Q(role='facilitator') | Q(role='admin')).exclude(user=request.user):
+        context['staff'].append({
+            'id': staff.user.id,
+            'name': staff.user.get_full_name()
+        })
+    return context

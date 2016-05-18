@@ -85,8 +85,7 @@ urlpatterns = patterns('',
     url(r'^dashboard/phase/$', facilitator_views.admin_phase),
 
     # these must be put last!
-    # url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/phase/(?P<phase_name>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum),
-    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum),
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)(/phase/(?P<phase_name>[a-zA-Z0-9_]+))?/?$', forum_views.enter_forum),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/workbench/?$', forum_views.enter_workbench),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/sankey/?$', forum_views.enter_sankey),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/dashboard/?$', facilitator_views.enter_dashboard),

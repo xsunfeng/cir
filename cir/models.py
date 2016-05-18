@@ -30,7 +30,7 @@ class Forum(models.Model):
         ('categorize', 'Claim categorization'), # phase 3
         ('theming', 'Claim theme identification'), 
         ('improve', 'Claim prioritization and improvement'), # phase 4
-        ('finished', 'Finished') # # phase 5 statements
+        ('finished', 'Finished') # phase 5 statements
     )
     access_level = models.CharField(max_length=100, choices=ACCESS_CHOICES, default='private')
     phase = models.CharField(max_length=100, choices=PHASE_CHOICES, default='not_started')

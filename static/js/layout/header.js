@@ -26,7 +26,6 @@ define([
 
 					// check if facilitator
 					if (role == 'facilitator' || role == 'admin') {
-						$('#header-facilitator-wrapper').show();
 						initFacilitatorBtns();
 					}
 				}
@@ -35,7 +34,7 @@ define([
 	};
 
 	function initFacilitatorBtns() {
-		$('#header-facilitator-wrapper .switch.user.menu .item').click(function() {
+		$('#user-switch-menu .switch.user.menu .item').click(function() {
 			var user_id = this.getAttribute('data-id');
 			var user_name = $(this).text();
 			$.ajax({

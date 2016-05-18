@@ -1,4 +1,4 @@
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render, render_to_response, redirect
 from django.template import RequestContext
 from django.db.models import Q
 from django.utils import timezone
@@ -6,7 +6,6 @@ from django.utils import timezone
 from cir.models import *
 from cir.phase_control import PHASE_CONTROL
 from cir.settings import DISPATCHER_URL
-from user_views import update_user_login
 
 VISITOR_ROLE = 'visitor'
 
@@ -50,73 +49,74 @@ def home(request):  # access /
 def enter_forum(request, forum_url, phase_name):  # access /forum_name
     if 'actual_user_id' in request.session:
         del request.session['actual_user_id']
+
+    context = {}
+
+    # need user name anyway.
+    if request.user.is_authenticated():
+        context['user_id'] = request.user.id
+        context['user_name'] = request.user.get_full_name()
+    else:
+        context['user_id'] = '-1'
+
+    # check for possible errors
     try:
         forum = Forum.objects.get(url=forum_url)
-    except:  # 404
-        context = {
-            'load_error': '404'
-        }
-        return render(request, 'index.html', context)
+    except:
+        context['load_error'] = '404'
+        context['error_msg'] = 'The requested forum is not valid: <b>' + forum_url + '</b>'
+        return render(request, 'error_index.html', context)
+    if forum.access_level == 'private' and (
+                not request.user.is_authenticated() or not Role.objects.filter(user=request.user,
+                forum=forum).exists()):
+        context['load_error'] = '403'
+        return render(request, 'error_index.html', context)
+    if phase_name is not None and phase_name not in ['nugget', 'extract', 'categorize', 'improve', 'finished']:
+        context['load_error'] = '404'
+        context['error_msg'] = 'The requested forum phase is not valid: <b>' + phase_name + '</b>'
+        return render(request, 'error_index.html', context)
+
+    # if phase_name is not given, redirect to the latest phase.
+    if phase_name is None:
+        phase = forum.phase
+        return redirect('/' + forum_url + '/phase/' + phase)
+
+    # load forum info
     request.session['forum_id'] = forum.id
-    request.session['role'] = VISITOR_ROLE
-    context = {}
+    context['forum_id'] = forum.id
     context['forum_name'] = forum.full_name
     context['forum_url'] = forum.url
-    context['forum_id'] = forum.id
-    context['phase'] = PHASE_CONTROL[forum.phase]
+    context['phase'] = forum.phase
+
+    # load role info
+    role = VISITOR_ROLE
 
     if request.user.is_authenticated():
-        context['panelists'] = []
-        context['staff'] = []
-        for panelist in forum.members.filter(role='panelist'):
-            context['panelists'].append({
-                'id': panelist.user.id,
-                'name': panelist.user.get_full_name()
-            })
-        for staff in forum.members.filter(Q(role='facilitator') | Q(role='admin')).exclude(user=request.user):
-            context['staff'].append({
-                'id': staff.user.id,
-                'name': staff.user.get_full_name()
-            })
+        # update last visited info
         try:
             request.user.info.last_visited_forum = forum
             request.user.info.save()
         except:  # no userinfo found
             UserInfo.objects.create(user=request.user, last_visited_forum=forum)
+
         try:
-            request.session['role'] = Role.objects.get(user=request.user, forum=forum).role
+            role = Role.objects.get(user=request.user, forum=forum).role
         except:
             pass
-        context['user_id'] = request.user.id
-        context['user_name'] = request.user.get_full_name()
-        context['role'] = request.session['role']
-    else:
-        context['user_id'] = -1
-        context['user_name'] = ''
-        context['role'] = request.session['role']
-    if forum.access_level == 'private' and (
-                not request.user.is_authenticated() or not Role.objects.filter(user=request.user,
-                    forum=forum).exists()):
-        context['load_error'] = '403'
-    elif request.user.is_authenticated(): # everything allright
-        # add user login entry
-        update_user_login(None, request.user)
-    themes = ClaimTheme.objects.filter(forum=forum)
-    context['themes'] = [theme.getAttr() for theme in themes]
-    context['dispatcher_url'] = DISPATCHER_URL
-    context['sankey'] = render(request, 'sankey.html', context)
-    index_html = "index.html"
-    phase_name = forum.phase
-    if (phase_name == "nugget"):
-        index_html = "phase1/index.html"
-    elif phase_name == "extract":
-        index_html = "phase2/index.html"
-    elif phase_name == "categorize":
-        index_html = "phase3/index.html"
-    elif phase_name == "improve":
-        index_html = "phase4/index.html"
-    elif phase_name == "finished":
-        index_html = "phase5/index.html"
+
+    request.session['role'] = context['role'] = role
+
+    index_html = ''
+    if phase_name == 'nugget':
+        index_html = 'phase1/index.html'
+    elif phase_name == 'extract':
+        index_html = 'phase2/index.html'
+    elif phase_name == 'categorize':
+        index_html = 'phase3/index.html'
+    elif phase_name == 'improve':
+        index_html = 'phase4/index.html'
+    elif phase_name == 'finished':
+        index_html = 'phase5/index.html'
     return render(request, index_html, context)
 
 
