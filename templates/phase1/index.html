@@ -14,63 +14,7 @@
 	{% compressed_css 'cir_forum' %}
 {% endblock %}
 {% block header %}
-
-<header id="nav-menu" class="ui top fixed menu">
-	<div class="item">
-		<img style="height: 30px;width: 150px;" src="http://imageprocessor.websimages.com/fit/1920x1920/geodeliberation.webs.com/tight%20logo.png">
-	</div>
-    <a href="/" class="title item">{{ forum_name }}</a>
-    {% if load_error %}
-    	<div class="item">GeoDeliberator</div>
-    {% else %}
-    <div class="right menu">
-
-	    <span id="header-visitor-wrapper" style="display:inline-flex;">
-	        <div class="item">
-	            <div id="login-btn">Log in</div>
-	        </div>
-	        <div class="item">
-	            <div id="signup-btn">Sign up</div>
-	        </div>
-	    </span>
-    
-	    <span id="header-member-wrapper" style="display:inline-flex;">
-	        <div class="ui simple dropdown item" tabindex="0">
-	            <span id="header-user-name" data-id="{{ user_id }}" data-role="{{ role }}">{{ user_name }}</span>
-	            <i class="icon dropdown" tabindex="0"></i>
-	            <div class="menu" tabindex="-1">
-	                <a href="#" id="edit-profile-btn" class="item"><i class="edit icon"></i>Edit Profile</a>
-	                <a href="/" class="item"><i class="list layout icon"></i>Switch Forum</a>
-	                <a href="#" class="item"><i class="share alternative icon"></i>Share Forum</a>
-	                <a href="#" id="sign-out-btn" class="item"><i class="sign out icon"></i>Sign out</a>
-	            </div>
-	        </div>
-	    </span>
-
-	    <span id="header-facilitator-wrapper" style="display:inline-flex;">
-	        <span href="{{ forum_url }}/dashboard" target="_blank" class="item">
-	            <i class="icon dashboard"></i>
-	        </span>
-	        <span class="ui simple dropdown item" tabindex="0">
-	            <i class="icon spy"></i>
-	            <i class="icon dropdown" tabindex="0"></i>
-	            <div class="switch user menu" tabindex="-1">
-	                <div class="header">Yourself</div>
-	                <div class="item" data-id="{{ user_id }}">{{ user_name }}</div>
-	                <div class="header">Panelists</div>
-	                {% for user in panelists %}
-	                <div class="item" data-id="{{ user.id }}">{{ user.name }}</div>
-	                {% endfor %}
-	                <div class="header">Staff</div>
-	                {% for user in staff %}
-	                <div class="item" data-id="{{ user.id }}">{{ user.name }}</div>
-	                {% endfor %}
-	            </div>
-	        </span>
-	    </span>
-	</div>
-    {% endif %}
-</header>
+	{% include 'header/forum_header.html' %}
 {% endblock %}
 
 {% block body %}
