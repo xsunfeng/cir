@@ -8,98 +8,17 @@
         ]);
     </script>
 {% endblock %}
-{% block delaylib %}
-{% endblock %}
 {% block extracss %}
 	{% compressed_css 'cir_forum' %}
 {% endblock %}
 {% block header %}
-
-<header id="nav-menu" class="ui top fixed menu">
-	<div class="item">
-		<img style="height: 30px;width: 150px;" src="http://imageprocessor.websimages.com/fit/1920x1920/geodeliberation.webs.com/tight%20logo.png">
-	</div>
-    <a href="/" class="title item">{{ forum_name }}</a>
-    {% if load_error %}
-    	<div class="item">GeoDeliberator</div>
-    {% else %}
-    <div class="right menu">
-
-	    <span id="header-visitor-wrapper" style="display:inline-flex;">
-	        <div class="item">
-	            <div id="login-btn">Log in</div>
-	        </div>
-	        <div class="item">
-	            <div id="signup-btn">Sign up</div>
-	        </div>
-	    </span>
-    
-	    <span id="header-member-wrapper" style="display:inline-flex;">
-	        <div class="ui simple dropdown item" tabindex="0">
-	            <span id="header-user-name" data-id="{{ user_id }}" data-role="{{ role }}">{{ user_name }}</span>
-	            <i class="icon dropdown" tabindex="0"></i>
-	            <div class="menu" tabindex="-1">
-	                <a href="#" id="edit-profile-btn" class="item"><i class="edit icon"></i>Edit Profile</a>
-	                <a href="/" class="item"><i class="list layout icon"></i>Switch Forum</a>
-	                <a href="#" class="item"><i class="share alternative icon"></i>Share Forum</a>
-	                <a href="#" id="sign-out-btn" class="item"><i class="sign out icon"></i>Sign out</a>
-	            </div>
-	        </div>
-	    </span>
-
-	    <span id="header-facilitator-wrapper" style="display:inline-flex;">
-	        <a href="{{ forum_url }}/dashboard" target="_blank" class="item">
-	            <i class="icon dashboard"></i>
-	        </a>
-	        <a class="ui simple dropdown item" tabindex="0">
-	            <i class="icon spy"></i>
-	            <i class="icon dropdown" tabindex="0"></i>
-	            <div class="switch user menu" tabindex="-1">
-	                <div class="header">Yourself</div>
-	                <div class="item" data-id="{{ user_id }}">{{ user_name }}</div>
-	                <div class="header">Panelists</div>
-	                {% for user in panelists %}
-	                <div class="item" data-id="{{ user.id }}">{{ user.name }}</div>
-	                {% endfor %}
-	                <div class="header">Staff</div>
-	                {% for user in staff %}
-	                <div class="item" data-id="{{ user.id }}">{{ user.name }}</div>
-	                {% endfor %}
-	            </div>
-	        </a>
-	    </span>
-	</div>
-    {% endif %}
-</header>
+	{% include 'header/forum_header.html' %}
 {% endblock %}
 
 {% block body %}
 
 <div id="popup-notification" class="ui message hidden"></div>
-	{% if load_error %}
-		{% if load_error == '404' %}
-<article class="ui two column centered grid">
-	<div class="column" style="top:50px">
-		<div class="ui error message">
-			<div class="header">Forum does not exist; did you enter the correct address?</div>
-			<p>Click <a href="/">here</a> to return to homepage.</p>
-		</div>
-	</div>
-</article>
-		{% elif load_error == '403' %}
-<article class="ui two column centered grid">
-	<div class="column" style="top:50px">
-		<div class="ui error message">
-			<div class="header">Sorry, this is a private forum</div>
-			<ul class="list">
-				<li>This forum is only accessible to specific users.</li>
-				<li>Click <a href="/">here</a> to return to homepage.</li>
-			</ul>
-		</div>
-	</div>
-</article>
-		{% endif %}
-	{% else %}
+
 
 <!-- left panel -->
 <div style="font-size:1.2em; position:fixed; top:50px; bottom:0; left:0; right:50%;">
@@ -153,14 +72,10 @@
 	</div>
 </div>
 
-
-
-
-
 {% if role != 'visitor' %}
 	{% include 'chatter.html' %}
 {% endif %}
-	{% endif %}
+
 
 {% endblock %}
 

@@ -9,12 +9,6 @@ from cir.models import *
 
 VISITOR_ROLE = 'visitor'
 
-def update_user_login(sender, user, **kwargs):
-    user.userlogin_set.create(timestamp=timezone.now())
-    user.save()
-
-user_logged_in.connect(update_user_login)
-
 def login_view(request):
     response = {}
     email = request.REQUEST.get('email').lower()

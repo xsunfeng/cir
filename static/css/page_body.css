@@ -63,11 +63,11 @@ a.user {
 .user.facilitator:after {
   content: ' (facilitator)';
 }
-#header-facilitator-wrapper .switch.user.menu {
+#user-switch-menu .switch.user.menu {
   max-height: 500px;
   overflow: auto;
 }
-#header-facilitator-wrapper .switch.user.menu .item {
+#user-switch-menu .switch.user.menu .item {
   padding: 5px 10px!important;
 }
 .doc-content img {

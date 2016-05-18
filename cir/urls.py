@@ -85,15 +85,16 @@ urlpatterns = patterns('',
     url(r'^dashboard/forum/$', facilitator_views.admin_forum),
     url(r'^dashboard/docs/$', facilitator_views.admin_document),
     url(r'^dashboard/phase/$', facilitator_views.admin_phase),
+    url(r'^dashboard/user_mgmt/$', facilitator_views.user_mgmt),
 
     # these must be put last!
-    # url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/phase/(?P<phase_name>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum),
-    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum),
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)(/phase/(?P<phase_name>[a-zA-Z0-9_]+))?/?$', forum_views.enter_forum),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/workbench/?$', forum_views.enter_workbench),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/sankey/?$', forum_views.enter_sankey),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/dashboard/?$', facilitator_views.enter_dashboard),
-    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/statement/?$', forum_views.enter_statement),
-    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/(?P<doc_id>[a-zA-Z0-9_]+)/?$', forum_views.enter_forum_doc) )
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/statement/?$', forum_views.enter_statement)
+    
+)
     
 
 urlpatterns += patterns('',

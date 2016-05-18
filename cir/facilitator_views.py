@@ -5,6 +5,7 @@ from django.template.loader import render_to_string
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.utils import timezone
+from django.db.models import Q
 
 from cir.models import *
 
@@ -221,3 +222,26 @@ def tag_theme(request):
         except:
             print "except"
     return HttpResponse()
+
+def user_mgmt(request):
+    response = {}
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    action = request.REQUEST.get('action')
+    if action == 'get_user_list':
+        context = {}
+        context['panelists'] = []
+        context['staff'] = []
+        for panelist in forum.members.filter(role='panelist'):
+            context['panelists'].append({
+                'id': panelist.user.id,
+                'name': panelist.user.get_full_name()
+            })
+        for staff in forum.members.filter(Q(role='facilitator') | Q(role='admin')).exclude(user=request.user):
+            context['staff'].append({
+                'id': staff.user.id,
+                'name': staff.user.get_full_name()
+            })
+        context['user_id'] = request.user.id
+        context['user_name'] = request.user.get_full_name()
+        response['html'] = render_to_string('header/user_switch_menu.html', context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')

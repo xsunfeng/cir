@@ -1,0 +1,50 @@
+<div class="ui top fixed menu">
+	<img style="height:40px;vertical-align:middle;margin:0 1em;" src="/media/gdlogo.png" alt="Geodeliberator Logo">
+	<div class="title item">{{ forum_name }}</div>
+	<div class="ui dropdown simple grey item" tabindex="0">
+		{{ phase_word }}
+		<i class="icon dropdown" tabindex="0"></i>
+		<div class="menu" tabindex="-1">
+			<a href="/{{ forum_url }}/phase/nugget" class="item{% if phase == 'nugget' %} disabled{% endif %}">Nugget extraction</a>
+			<a href="/{{ forum_url }}/phase/extract" class="item{% if phase == 'nugget' or phase == 'extract' %} disabled{% endif %}">Claim construction</a>
+			<a href="/{{ forum_url }}/phase/categorize" class="item{% if phase == 'nugget' or phase == 'extract' or phase == 'categorize' %} disabled{% endif %}">Claim categorization</a>
+			<a href="/{{ forum_url }}/phase/improve" class="item{% if phase == 'nugget' or phase == 'extract' or phase == 'categorize' or phase == 'improve' %} disabled{% endif %}">Claim improvement</a>
+			<a href="/{{ forum_url }}/phase/finished" class="item{% if phase == 'nugget' or phase == 'extract' or phase == 'categorize' or phase == 'improve' or phase == 'finished' %} disabled{% endif %}">Citizens Statement</a>
+		</div>
+	</div>
+	{% if user_id == '-1' %}
+	<div id="header-visitor-wrapper" class="right menu" style="display:flex">
+		<a class="item">
+			<div id="login-btn">Log in</div>
+		</a>
+		<a class="item">
+			<div id="signup-btn">Sign up</div>
+		</a>
+	</div>
+	{% else %}
+	<div class="right menu" style="display:flex">
+		<a href="#" class="item"><i class="mail icon"></i>Messages</a>
+		<div class="ui dropdown simple item" tabindex="0">
+			<span id="header-user-name" data-id="{{ user_id }}"{% if role %} data-role="{{ role }}"{% endif %}>{{ user_name }}</span>
+			<i class="icon dropdown" tabindex="0"></i>
+			<div class="menu" tabindex="-1">
+				<a href="#" id="edit-profile-btn" class="item"><i class="edit icon"></i>Edit Profile</a>
+				<a href="/" class="item"><i class="list layout icon"></i>Switch forum</a>
+				<a href="#" id="sign-out-btn" class="item"><i class="sign out icon"></i>Sign out</a>
+			</div>
+		</div>
+		{% if role == 'facilitator' or role == 'admin' %}
+		<a href="/{{ forum_url }}/dashboard" target="_blank" class="item">
+			<i class="icon dashboard"></i>
+		</a>
+		<div id="user-switch-menu" class="ui simple dropdown item" tabindex="0">
+			<i class="icon spy"></i>
+			<i class="icon dropdown" tabindex="0"></i>
+			<div class="switch user menu" tabindex="-1">
+
+			</div>
+		</div>
+		{% endif %}
+	</div>
+	{% endif %}
+</div>

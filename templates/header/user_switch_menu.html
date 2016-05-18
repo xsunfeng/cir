@@ -1,0 +1,10 @@
+<div class="header">Yourself</div>
+<div class="item" data-id="{{ user_id }}">{{ user_name }}</div>
+<div class="header">Panelists</div>
+{% for user in panelists %}
+	<div class="item" data-id="{{ user.id }}">{{ user.name }}</div>
+{% endfor %}
+<div class="header">Staff</div>
+{% for user in staff %}
+	<div class="item" data-id="{{ user.id }}">{{ user.name }}</div>
+{% endfor %}

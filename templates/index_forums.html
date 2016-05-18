@@ -1,27 +1,6 @@
 {% extends 'base.html' %}
 {% block header %}
-<div class="ui top fixed menu">
-    <div class="title item">GeoDeliberator</div>
-    <div id="header-visitor-wrapper" class="right menu" style="display:flex">
-        <div class="item">
-            <div id="login-btn">Log in</div>
-        </div>
-        <div class="item">
-            <div id="signup-btn">Sign up</div>
-        </div>
-    </div>
-    <div id="header-member-wrapper" class="right menu" style="display:flex">
-        <a href="#" class="item"><i class="mail icon"></i>Messages</a>
-        <div class="ui dropdown simple item" tabindex="0">
-            <span id="header-user-name" data-id="{{ user_id }}">{{ user_name }}</span>
-            <i class="icon dropdown" tabindex="0"></i>
-            <div class="menu" tabindex="-1">
-                <a href="#" id="edit-profile-btn" class="item"><i class="edit icon"></i>Edit Profile</a>
-                <a href="#" id="sign-out-btn" class="item"><i class="sign out icon"></i>Sign out</a>
-            </div>
-        </div>
-    </div>
-</div>
+{% include 'header/forum_list_header.html' %}
 {% endblock %}
 {% block body %}
 <div class="ui grid container">
@@ -35,65 +14,92 @@
 	</div>
 	<div class="row">
 		<div class="column">
-			<div class="ui divided items segment">
-				{% if forums %}
-					{% for forum in forums %}
+			{% if forums %}
+				{% for forum in forums %}
+					<div class="ui top attached segment items">
 						<div class="item">
 							<div class="image"><img src="{{ forum.logo_url }}" alt="Default forum picture"></div>
 							<div class="content">
-								<a href="/{{ forum.url }}" class="header">{{ forum.full_name }}</a>
+								<a href="/{{ forum.url }}/phase/{{ forum.phase }}" class="header">{{ forum.full_name }}</a>
 								<div class="meta">cir.ist.psu.edu/{{ forum.url }}</div>
 								<div class="description">{{ forum.short_description }}</div>
 								<div class="extra">
-									<a href="/{{ forum.url }}" class="ui right floated primary button">Enter<i class="right chevron icon"></i></a>
+									<a href="/{{ forum.url }}/phase/{{ forum.phase }}" class="ui right floated primary button">Enter<i class="right chevron icon"></i></a>
 									<div class="ui horizontal label">{{ forum.access_level|capfirst }}</div>
 									<div class="ui horizontal label">My role: <strong>{{ forum.role|capfirst }}</strong></div>
+									{% if forum.role == 'facilitator' or forum.role == 'admin' %}
+									<a href="/{{ forum.url }}/dashboard" class="ui horizontal label"><i class="dashboard icon"></i></a>
+									{% endif %}
 								</div>
 							</div>
 						</div>
-					{% endfor %}
-				{% else %}
+					</div>
+					<div class="ui bottom attached ordered small steps">
+						{% if forum.phase == 'nugget' %}
+							<a href="/{{ forum.url }}/phase/nugget" class="active step">
+						{% else %}
+							<a href="/{{ forum.url }}/phase/nugget" class="completed step">
+						{% endif %}
+								<div class="content">
+									<div class="description">Extract<br>nuggets</div>
+								</div>
+							</a>
+						{% if forum.phase == 'extract' %}
+							<a href="/{{ forum.url }}/phase/extract" class="active step">
+						{% elif forum.phase == 'nugget' %}
+							<a class="disabled step">
+						{% else %}
+							<a href="/{{ forum.url }}/phase/extract" class="completed step">
+						{% endif %}
+								<div class="content">
+									<div class="description">Compose<br>claims</div>
+								</div>
+							</a>
+						{% if forum.phase == 'categorize' %}
+							<a href="/{{ forum.url }}/phase/categorize" class="active step">
+						{% elif forum.phase == 'nugget' or forum.phase == 'extract' %}
+							<a class="disabled step">
+						{% else %}
+							<a href="/{{ forum.url }}/phase/categorize" class="completed step">
+						{% endif %}
+								<div class="content">
+									<div class="description">Categorize<br>claims</div>
+								</div>
+							</a>
+						{% if forum.phase == 'improve' %}
+							<a href="/{{ forum.url }}/phase/improve" class="active step">
+						{% elif forum.phase == 'nugget' or forum.phase == 'extract' or forum.phase == 'categorize' %}
+							<a class="disabled step">
+						{% else %}
+							<a href="/{{ forum.url }}/phase/improve" class="completed step">
+						{% endif %}
+								<div class="content">
+									<div class="description">Refine<br>claims</div>
+								</div>
+							</a>
+						{% if forum.phase == 'finished' %}
+							<a href="/{{ forum.url }}/phase/finished" class="active step">
+						{% else %}
+							<a class="disabled step">
+						{% endif %}
+								<div class="content">
+									<div class="description">Citizens<br>Statement</div>
+								</div>
+							</a>
+					</div>
+				{% endfor %}
+			{% else %}
+			<div class="ui items">
 				<div class="item">
 					<div class="image"><img src="/media/generic.png" alt="Image placeholder"></div>
 					<div class="content">
-						<a href="#" class="header">No forums available!</a>
-						<div class="description">Please come back and check again</div>
+						<div href="#" class="header">No forums available</div>
+						<div class="description">Some forums are visible only to participants. Please log in.</div>
 					</div>
 				</div>
-				{% endif %}
 			</div>
+			{% endif %}
 		</div>
 	</div>
-
-	<div class="row">
-		<div class="column">
-				{% if forums %}
-					{% for forum in forums %}
-						<div class="ui segment item">
-							<div class="image"><img src="{{ forum.logo_url }}" alt="Default forum picture"></div>
-							<div class="content">
-								<a href="/{{ forum.url }}" class="header">{{ forum.full_name }}</a>
-								<div class="meta">cir.ist.psu.edu/{{ forum.url }}</div>
-								<div class="description">{{ forum.short_description }}</div>
-								<div class="extra">
-									<a href="/{{ forum.url }}" class="ui right floated primary button">Enter<i class="right chevron icon"></i></a>
-									<div class="ui horizontal label">{{ forum.access_level|capfirst }}</div>
-									<div class="ui horizontal label">My role: <strong>{{ forum.role|capfirst }}</strong></div>
-								</div>
-							</div>
-						</div>
-					{% endfor %}
-				{% else %}
-				<div class="item">
-					<div class="image"><img src="/media/generic.png" alt="Image placeholder"></div>
-					<div class="content">
-						<a href="#" class="header">No forums available!</a>
-						<div class="description">Please come back and check again</div>
-					</div>
-				</div>
-				{% endif %}
-		</div>
-	</div>
-
 </div>
 {% endblock %}
