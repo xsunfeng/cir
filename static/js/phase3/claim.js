@@ -1,11 +1,8 @@
 define([
-	'claim/claim-navigator',
-	'claim/draft-stmt',
+	'claim-common/claim-navigator',
 	'utils',
-	'jquery.ui' // for draggable & droppable
 ], function(
 	ClaimNavigator,
-	DraftStmt,
 	Utils
 ) {
 	var module = {};
@@ -793,5 +790,8 @@ define([
 		});
 	}
 
+	module.initClaimView();
+	module.updateClaimPane();
+	ClaimNavigator.updateNavigator();
 	return module;
 });

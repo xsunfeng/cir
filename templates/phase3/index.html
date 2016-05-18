@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load compressed %}
+{% block extralib %}
+	<script>
+		require([
+			'phase3/claim'
+		]);
+	</script>
+{% endblock %}
+{% block extracss %}
+	{% compressed_css 'cir_forum' %}
+{% endblock %}
+{% block header %}
+	{% include 'header/forum_header.html' %}
+{% endblock %}
+
+{% block body %}
+
+	<div class="ui grid">
+		<div class="ten wide claim column" style="margin-bottom: 3em">
+			<div class="ui attached info message" style="margin-top:0">
+				<div class="ui instructions accordion">
+					<div class="ui active title"><i class="dropdown icon"></i>Current phase: Claim categorization</div>
+					<div class="active content">
+						Before we proceed with claim improvement, let's category the claims we just composed. Available categories are Pro, Con and Key Finding. If you don't think a claim should proceed to the next round, you can also vote a Discard to it. Facilitators will perform the final categorization for each claim.
+					</div>
+				</div>
+			</div>
+			<div class="ui menu" style="margin:0 -1px;border:none">
+				<a class="blue item active claim-view-btn" data-type="overview">
+					<i class="align justify icon"></i> Overview
+				</a>
+				<a class="blue item claim-view-btn" data-type="fullscreen">
+					<i class="maximize icon"></i> Full-screen Review
+				</a>
+			</div>
+
+			<div id="claim-pane" class="{{ phase.short_name }}">
+				<div class="ui segment" style="height: 10em;"></div>
+			</div>
+		</div>
+		<div id="claim-navigator" class="six wide column"></div>
+		<div id="claim-merge-editor" class="ui modal">
+			<i class="close icon"></i>
+			<div class="content">
+				<form class="ui form">
+					<h4 class="ui dividing header">You are merging the following claims:</h4>
+					<input type="hidden" />
+					<div class="claim-content"></div>
+					<textarea class="claim editor" rows="6"></textarea>
+					<div class="ui primary button">Submit</div>
+					<div class="ui close button">Discard</div>
+				</form>
+			</div>
+		</div>
+		<div id="claim-reason-editor" class="ui modal">
+			<i class="close icon"></i>
+			<div class="content">
+				<form class="ui form">
+					<h4 class="ui dividing header">Please input a reason for the suggested operation (optional):</h4>
+					<input type="hidden" name="version_id" />
+					<input type="hidden" name="collective" />
+					<div class="reason-content"></div>
+					<textarea class="reason editor" rows="3" placeholder="Reason (optional)"></textarea>
+					<div class="ui primary button">Submit</div>
+					<div class="ui close button">Cancel</div>
+				</form>
+			</div>
+		</div>
+	</div>
+{% endblock %}
