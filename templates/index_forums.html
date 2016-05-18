@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% block header %}
-<div class="ui fixed inverted main menu">
+<div class="ui top fixed menu">
     <div class="title item">GeoDeliberator</div>
     <div id="header-visitor-wrapper" class="right menu" style="display:flex">
         <div class="item">
-            <div id="login-btn" class="ui button">Log in</div>
+            <div id="login-btn">Log in</div>
         </div>
         <div class="item">
-            <div id="signup-btn" class="ui button">Sign up</div>
+            <div id="signup-btn">Sign up</div>
         </div>
     </div>
     <div id="header-member-wrapper" class="right menu" style="display:flex">
@@ -36,21 +36,23 @@
 	<div class="row">
 		<div class="column">
 			<div class="ui divided items segment">
-				{% if forums %}{% for forum in forums %}
-				<div class="item">
-					<div class="image"><img src="{{ forum.logo_url }}" alt="Default forum picture"></div>
-					<div class="content">
-						<a href="/{{ forum.url }}" class="header">{{ forum.full_name }}</a>
-						<div class="meta">cir.ist.psu.edu/{{ forum.url }}</div>
-						<div class="description">{{ forum.short_description }}</div>
-						<div class="extra">
-							<a href="/{{ forum.url }}" class="ui right floated primary button">Enter<i class="right chevron icon"></i></a>
-							<div class="ui horizontal label">{{ forum.access_level|capfirst }}</div>
-							<div class="ui horizontal label">My role: <strong>{{ forum.role|capfirst }}</strong></div>
+				{% if forums %}
+					{% for forum in forums %}
+						<div class="item">
+							<div class="image"><img src="{{ forum.logo_url }}" alt="Default forum picture"></div>
+							<div class="content">
+								<a href="/{{ forum.url }}" class="header">{{ forum.full_name }}</a>
+								<div class="meta">cir.ist.psu.edu/{{ forum.url }}</div>
+								<div class="description">{{ forum.short_description }}</div>
+								<div class="extra">
+									<a href="/{{ forum.url }}" class="ui right floated primary button">Enter<i class="right chevron icon"></i></a>
+									<div class="ui horizontal label">{{ forum.access_level|capfirst }}</div>
+									<div class="ui horizontal label">My role: <strong>{{ forum.role|capfirst }}</strong></div>
+								</div>
+							</div>
 						</div>
-					</div>
-				</div>
-				{% endfor %}{% else %}
+					{% endfor %}
+				{% else %}
 				<div class="item">
 					<div class="image"><img src="/media/generic.png" alt="Image placeholder"></div>
 					<div class="content">
@@ -62,5 +64,36 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="row">
+		<div class="column">
+				{% if forums %}
+					{% for forum in forums %}
+						<div class="ui segment item">
+							<div class="image"><img src="{{ forum.logo_url }}" alt="Default forum picture"></div>
+							<div class="content">
+								<a href="/{{ forum.url }}" class="header">{{ forum.full_name }}</a>
+								<div class="meta">cir.ist.psu.edu/{{ forum.url }}</div>
+								<div class="description">{{ forum.short_description }}</div>
+								<div class="extra">
+									<a href="/{{ forum.url }}" class="ui right floated primary button">Enter<i class="right chevron icon"></i></a>
+									<div class="ui horizontal label">{{ forum.access_level|capfirst }}</div>
+									<div class="ui horizontal label">My role: <strong>{{ forum.role|capfirst }}</strong></div>
+								</div>
+							</div>
+						</div>
+					{% endfor %}
+				{% else %}
+				<div class="item">
+					<div class="image"><img src="/media/generic.png" alt="Image placeholder"></div>
+					<div class="content">
+						<a href="#" class="header">No forums available!</a>
+						<div class="description">Please come back and check again</div>
+					</div>
+				</div>
+				{% endif %}
+		</div>
+	</div>
+
 </div>
 {% endblock %}

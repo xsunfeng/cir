@@ -25,12 +25,12 @@ class Forum(models.Model):
         ('paused', 'Paused'),
         ('not_started', 'Not started'),
         ('tagging', 'Tagging'),
-        ('nugget', 'Nugget extraction'),
-        ('extract', 'Claim construction'),
-        ('categorize', 'Claim categorization'),
-        ('theming', 'Claim theme identification'),
-        ('improve', 'Claim prioritization and improvement'),
-        ('finished', 'Finished')
+        ('nugget', 'Nugget extraction'), # phase 1
+        ('extract', 'Claim construction'), # phase 2
+        ('categorize', 'Claim categorization'), # phase 3
+        ('theming', 'Claim theme identification'), 
+        ('improve', 'Claim prioritization and improvement'), # phase 4
+        ('finished', 'Finished') # # phase 5 statements
     )
     access_level = models.CharField(max_length=100, choices=ACCESS_CHOICES, default='private')
     phase = models.CharField(max_length=100, choices=PHASE_CHOICES, default='not_started')
@@ -235,6 +235,7 @@ class Highlight(models.Model):
     def getAttr(self):
         attr = {}
         attr['created_at'] = time.mktime(self.created_at.timetuple())
+        attr['created_at_pretty'] = utils.pretty_date(self.created_at)
         attr['id'] = self.id
         attr['start'] = self.start_pos
         attr['end'] = self.end_pos
@@ -244,6 +245,7 @@ class Highlight(models.Model):
         attr['is_nugget'] = self.is_nugget
         attr['is_used'] = HighlightClaim.objects.filter(highlight_id = self.id).count() > 0
         attr['author_name'] = self.author.first_name + " " + self.author.last_name
+        attr['theme'] = self.theme.name
         try:
             tag = Tag.objects.get(highlight_ptr=self)
             attr['content'] = tag.content

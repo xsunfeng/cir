@@ -429,15 +429,15 @@ define([
 		}, '.nugget-related');
 
   		// document context menu
-  		$('body').on({
-		    mouseenter: function(){
-		  		$(".document-related").show();
-				$("#workbench-document-toc-container").css("left", $("#workbench2-document-container").offset().left - $("#workbench-document-toc-container").width() - 10);
-				$("#workbench-document-toc-container").css("top", $("#workbench2-document-container").offset().top + 10);	
-		    },mouseleave: function(){
-			    $("#workbench-document-toc-container").hide();
-		    }
-		}, '.document-related');
+  // 		$('body').on({
+		//     mouseenter: function(){
+		//   		$(".document-related").show();
+		// 		$("#workbench-document-toc-container").css("left", $("#workbench2-document-container").offset().left - $("#workbench-document-toc-container").width() - 10);
+		// 		$("#workbench-document-toc-container").css("top", $("#workbench2-document-container").offset().top + 10);	
+		//     },mouseleave: function(){
+		// 	    $("#workbench-document-toc-container").hide();
+		//     }
+		// }, '.document-related');
 
 
 		$("body").on("click", "#workbench-document-back-to-top", function(e) {
@@ -731,8 +731,6 @@ define([
 				var def = '<a id="" class="item">button1</a>' + '<a id="" class="item">button2</a>';
 				$("#workbench-nugget-operation-container").html(def);
 			
-				$("#workbench-nugget-list").height($(window).height() - module.body_bottom);
-
 				// show more... / less
 				var showChar = 200;
 			    var ellipsestext = "...";

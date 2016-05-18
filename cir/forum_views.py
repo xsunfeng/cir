@@ -41,7 +41,8 @@ def _forums(request):
         forum_infos.append(forum_info)
     return forum_infos
 
-def enter_forum(request, forum_url):  # access /forum_name
+def enter_forum(request, forum_url, phase_name):  # access /forum_name
+    print phase_name
     if 'actual_user_id' in request.session:
         del request.session['actual_user_id']
     try:
@@ -99,7 +100,67 @@ def enter_forum(request, forum_url):  # access /forum_name
     context['themes'] = [theme.getAttr() for theme in themes]
     context['dispatcher_url'] = DISPATCHER_URL
     context['sankey'] = render(request, 'sankey.html', context)
-    return render(request, 'index.html', context)
+    return render(request, 'index_phase1.html', context)
+
+# def enter_forum(request, forum_url):  # access /forum_name
+#     if 'actual_user_id' in request.session:
+#         del request.session['actual_user_id']
+#     try:
+#         forum = Forum.objects.get(url=forum_url)
+#     except:  # 404
+#         context = {
+#             'load_error': '404'
+#         }
+#         return render(request, 'index.html', context)
+#     request.session['forum_id'] = forum.id
+#     request.session['role'] = VISITOR_ROLE
+#     context = {}
+#     context['forum_name'] = forum.full_name
+#     context['forum_url'] = forum.url
+#     context['forum_id'] = forum.id
+#     context['phase'] = PHASE_CONTROL[forum.phase]
+
+#     if request.user.is_authenticated():
+#         context['panelists'] = []
+#         context['staff'] = []
+#         for panelist in forum.members.filter(role='panelist'):
+#             context['panelists'].append({
+#                 'id': panelist.user.id,
+#                 'name': panelist.user.get_full_name()
+#             })
+#         for staff in forum.members.filter(Q(role='facilitator') | Q(role='admin')).exclude(user=request.user):
+#             context['staff'].append({
+#                 'id': staff.user.id,
+#                 'name': staff.user.get_full_name()
+#             })
+#         try:
+#             request.user.info.last_visited_forum = forum
+#             request.user.info.save()
+#         except:  # no userinfo found
+#             UserInfo.objects.create(user=request.user, last_visited_forum=forum)
+#         try:
+#             request.session['role'] = Role.objects.get(user=request.user, forum=forum).role
+#         except:
+#             pass
+#         context['user_id'] = request.user.id
+#         context['user_name'] = request.user.get_full_name()
+#         context['role'] = request.session['role']
+#     else:
+#         context['user_id'] = -1
+#         context['user_name'] = ''
+#         context['role'] = request.session['role']
+#     if forum.access_level == 'private' and (
+#                 not request.user.is_authenticated() or not Role.objects.filter(user=request.user,
+#                     forum=forum).exists()):
+#         context['load_error'] = '403'
+#     elif request.user.is_authenticated(): # everything allright
+#         # add user login entry
+#         update_user_login(None, request.user)
+#     themes = ClaimTheme.objects.filter(forum=forum)
+#     context['themes'] = [theme.getAttr() for theme in themes]
+#     context['dispatcher_url'] = DISPATCHER_URL
+#     context['sankey'] = render(request, 'sankey.html', context)
+#     return render(request, 'index.html', context)
 
 def enter_forum_doc(request, forum_url, doc_id):  # access /forum_name
     if 'actual_user_id' in request.session:
@@ -159,7 +220,8 @@ def enter_forum_doc(request, forum_url, doc_id):  # access /forum_name
     context['themes'] = [theme.getAttr() for theme in themes]
     context['dispatcher_url'] = DISPATCHER_URL
     context['sankey'] = render(request, 'sankey.html', context)
-    return render(request, 'index.html', context)
+    context['workbench_document'] = render(request, 'workbench-document.html', context)
+    return render(request, 'index_phase1.html', context)
 
 def enter_workbench(request, forum_url):  # access /forum_name
     if 'actual_user_id' in request.session:
