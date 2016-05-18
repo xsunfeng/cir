@@ -14,9 +14,9 @@
 	</div>
 	<div class="row">
 		<div class="column">
-			<div class="ui divided items segment">
-				{% if forums %}
-					{% for forum in forums %}
+			{% if forums %}
+				{% for forum in forums %}
+					<div class="ui top attached segment items">
 						<div class="item">
 							<div class="image"><img src="{{ forum.logo_url }}" alt="Default forum picture"></div>
 							<div class="content">
@@ -27,20 +27,78 @@
 									<a href="/{{ forum.url }}/phase/{{ forum.phase }}" class="ui right floated primary button">Enter<i class="right chevron icon"></i></a>
 									<div class="ui horizontal label">{{ forum.access_level|capfirst }}</div>
 									<div class="ui horizontal label">My role: <strong>{{ forum.role|capfirst }}</strong></div>
+									{% if forum.role == 'facilitator' or forum.role == 'admin' %}
+									<a href="/{{ forum.url }}/dashboard" class="ui horizontal label"><i class="dashboard icon"></i></a>
+									{% endif %}
 								</div>
 							</div>
 						</div>
-					{% endfor %}
-				{% else %}
+					</div>
+					<div class="ui bottom attached ordered small steps">
+						{% if forum.phase == 'nugget' %}
+							<a href="/{{ forum.url }}/phase/nugget" class="active step">
+						{% else %}
+							<a href="/{{ forum.url }}/phase/nugget" class="completed step">
+						{% endif %}
+								<div class="content">
+									<div class="description">Extract<br>nuggets</div>
+								</div>
+							</a>
+						{% if forum.phase == 'extract' %}
+							<a href="/{{ forum.url }}/phase/extract" class="active step">
+						{% elif forum.phase == 'nugget' %}
+							<a class="disabled step">
+						{% else %}
+							<a href="/{{ forum.url }}/phase/extract" class="completed step">
+						{% endif %}
+								<div class="content">
+									<div class="description">Compose<br>claims</div>
+								</div>
+							</a>
+						{% if forum.phase == 'categorize' %}
+							<a href="/{{ forum.url }}/phase/categorize" class="active step">
+						{% elif forum.phase == 'nugget' or forum.phase == 'extract' %}
+							<a class="disabled step">
+						{% else %}
+							<a href="/{{ forum.url }}/phase/categorize" class="completed step">
+						{% endif %}
+								<div class="content">
+									<div class="description">Categorize<br>claims</div>
+								</div>
+							</a>
+						{% if forum.phase == 'improve' %}
+							<a href="/{{ forum.url }}/phase/improve" class="active step">
+						{% elif forum.phase == 'nugget' or forum.phase == 'extract' or forum.phase == 'categorize' %}
+							<a class="disabled step">
+						{% else %}
+							<a href="/{{ forum.url }}/phase/improve" class="completed step">
+						{% endif %}
+								<div class="content">
+									<div class="description">Refine<br>claims</div>
+								</div>
+							</a>
+						{% if forum.phase == 'finished' %}
+							<a href="/{{ forum.url }}/phase/finished" class="active step">
+						{% else %}
+							<a class="disabled step">
+						{% endif %}
+								<div class="content">
+									<div class="description">Citizens<br>Statement</div>
+								</div>
+							</a>
+					</div>
+				{% endfor %}
+			{% else %}
+			<div class="ui items">
 				<div class="item">
 					<div class="image"><img src="/media/generic.png" alt="Image placeholder"></div>
 					<div class="content">
 						<div href="#" class="header">No forums available</div>
-						<div class="description">Some forums are only visible to participants. Please log in.</div>
+						<div class="description">Some forums are visible only to participants. Please log in.</div>
 					</div>
 				</div>
-				{% endif %}
 			</div>
+			{% endif %}
 		</div>
 	</div>
 </div>
