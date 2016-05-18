@@ -731,6 +731,8 @@ define([
 				var def = '<a id="" class="item">button1</a>' + '<a id="" class="item">button2</a>';
 				$("#workbench-nugget-operation-container").html(def);
 			
+				$("#workbench-nugget-list").height($(window).height() - module.body_bottom);
+
 				// show more... / less
 				var showChar = 200;
 			    var ellipsestext = "...";

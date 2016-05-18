@@ -41,7 +41,7 @@ def _forums(request):
         forum_infos.append(forum_info)
     return forum_infos
 
-def enter_forum(request, forum_url, phase_name):  # access /forum_name
+def enter_forum(request, forum_url):  # access /forum_name
     if 'actual_user_id' in request.session:
         del request.session['actual_user_id']
     try:
@@ -100,7 +100,7 @@ def enter_forum(request, forum_url, phase_name):  # access /forum_name
     context['dispatcher_url'] = DISPATCHER_URL
     context['sankey'] = render(request, 'sankey.html', context)
     index_html = "index.html"
-    # phase_name = forum.phase
+    phase_name = forum.phase
     if (phase_name == "nugget"):
         index_html = "phase1/index.html"
     elif (phase_name == "extract"):

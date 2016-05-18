@@ -48,10 +48,10 @@
 	    </span>
 
 	    <span id="header-facilitator-wrapper" style="display:inline-flex;">
-	        <span href="{{ forum_url }}/dashboard" target="_blank" class="item">
+	        <a href="{{ forum_url }}/dashboard" target="_blank" class="item">
 	            <i class="icon dashboard"></i>
-	        </span>
-	        <span class="ui simple dropdown item" tabindex="0">
+	        </a>
+	        <a class="ui simple dropdown item" tabindex="0">
 	            <i class="icon spy"></i>
 	            <i class="icon dropdown" tabindex="0"></i>
 	            <div class="switch user menu" tabindex="-1">
@@ -66,7 +66,7 @@
 	                <div class="item" data-id="{{ user.id }}">{{ user.name }}</div>
 	                {% endfor %}
 	            </div>
-	        </span>
+	        </a>
 	    </span>
 	</div>
     {% endif %}
