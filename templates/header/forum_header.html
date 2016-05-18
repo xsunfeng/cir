@@ -1,12 +1,15 @@
 <div class="ui top fixed menu">
 	<img style="height:40px;vertical-align:middle;margin:0 1em;" src="/media/gdlogo.png" alt="Geodeliberator Logo">
 	<div class="title item">{{ forum_name }}</div>
-	<div class="ui dropdown simple item" tabindex="0">
-		{{ phase }}
+	<div class="ui dropdown simple grey item" tabindex="0">
+		{{ phase_word }}
 		<i class="icon dropdown" tabindex="0"></i>
 		<div class="menu" tabindex="-1">
-			<a href="#" id="edit-profile-btn" class="item">Nugget extraction</a>
-			<a href="#" id="sign-out-btn" class="item">Claim construction</a>
+			<a href="/{{ forum_url }}/phase/nugget" class="item{% if phase == 'nugget' %} disabled{% endif %}">Nugget extraction</a>
+			<a href="/{{ forum_url }}/phase/extract" class="item{% if phase == 'nugget' or phase == 'extract' %} disabled{% endif %}">Claim construction</a>
+			<a href="/{{ forum_url }}/phase/categorize" class="item{% if phase == 'nugget' or phase == 'extract' or phase == 'categorize' %} disabled{% endif %}">Claim categorization</a>
+			<a href="/{{ forum_url }}/phase/improve" class="item{% if phase == 'nugget' or phase == 'extract' or phase == 'categorize' or phase == 'improve' %} disabled{% endif %}">Claim improvement</a>
+			<a href="/{{ forum_url }}/phase/finished" class="item{% if phase == 'nugget' or phase == 'extract' or phase == 'categorize' or phase == 'improve' or phase == 'finished' %} disabled{% endif %}">Citizens Statement</a>
 		</div>
 	</div>
 	{% if user_id == '-1' %}

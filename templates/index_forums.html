@@ -20,11 +20,11 @@
 						<div class="item">
 							<div class="image"><img src="{{ forum.logo_url }}" alt="Default forum picture"></div>
 							<div class="content">
-								<a href="/{{ forum.url }}/phase/{{ forum.current_phase }}" class="header">{{ forum.full_name }}</a>
+								<a href="/{{ forum.url }}/phase/{{ forum.phase }}" class="header">{{ forum.full_name }}</a>
 								<div class="meta">cir.ist.psu.edu/{{ forum.url }}</div>
 								<div class="description">{{ forum.short_description }}</div>
 								<div class="extra">
-									<a href="/{{ forum.url }}/phase/{{ forum.current_phase }}" class="ui right floated primary button">Enter<i class="right chevron icon"></i></a>
+									<a href="/{{ forum.url }}/phase/{{ forum.phase }}" class="ui right floated primary button">Enter<i class="right chevron icon"></i></a>
 									<div class="ui horizontal label">{{ forum.access_level|capfirst }}</div>
 									<div class="ui horizontal label">My role: <strong>{{ forum.role|capfirst }}</strong></div>
 								</div>

@@ -87,6 +87,7 @@ def enter_forum(request, forum_url, phase_name):  # access /forum_name
     context['forum_name'] = forum.full_name
     context['forum_url'] = forum.url
     context['phase'] = forum.phase
+    context['phase_word'] = forum.get_phase_display()
 
     # load role info
     role = VISITOR_ROLE

@@ -49,7 +49,7 @@ class Forum(models.Model):
         attr['url'] = self.url
         attr['full_description'] = self.description
         attr['short_description'] = self.description[:400] + '...'
-        attr['current_phase'] = self.phase
+        attr['phase'] = self.phase
         if self.access_level == 'open':
             attr['access_level'] = 'Open access'
         elif self.access_level == 'panelist':
