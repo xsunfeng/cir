@@ -16,58 +16,12 @@
 
 {% block body %}
 
-<div class="ui grid" style="margin-top: 1em;">
-	<div id="claim-container" class="ten wide claim column">
-		<div class="ui attached info message">
-			<div class="ui instructions accordion">
-				<div class="ui active title"><i class="dropdown icon"></i>Current phase: Claim improvement and prioritization</div>
-				<div class="active content">
-					This phase involves claim consolidation and improvement in terms of information and language. Please use the rewording and merging functions.
-				</div>
-			</div>
-		</div>
-		<div class="ui top attached tabular menu">
-			<a class="blue item active claim-view-btn" data-tab="overview">
-				<i class="align justify icon"></i> Overview
-			</a>
-			<a class="blue item claim-view-btn" data-tab="fullscreen">
-				<i class="maximize icon"></i> Full-screen Review
-			</a>
-		</div>
-
-		<div id="claim-pane-overview" class="ui active tab" data-tab="overview">
-		</div>
-		<div id="claim-pane-fullscreen" class="ui tab" data-tab="fullscreen">
-
-		</div>
+<div class="ui claim grid">
+	<div id="draft-stmt-container" class="eight wide column">
+		<div id="draft-stmt"></div>
 	</div>
-	<div id="claim-navigator" class="six wide column"></div>
-	<div id="claim-merge-editor" class="ui modal">
-		<i class="close icon"></i>
-		<div class="content">
-			<form class="ui form">
-				<h4 class="ui dividing header">You are merging the following claims:</h4>
-				<input type="hidden" />
-				<div class="claim-content"></div>
-				<textarea class="claim editor" rows="6"></textarea>
-				<div class="ui primary button">Submit</div>
-				<div class="ui close button">Discard</div>
-			</form>
-		</div>
-	</div>
-	<div id="claim-reason-editor" class="ui modal">
-		<i class="close icon"></i>
-		<div class="content">
-			<form class="ui form">
-				<h4 class="ui dividing header">Please input a reason for the suggested operation (optional):</h4>
-				<input type="hidden" name="version_id" />
-				<input type="hidden" name="collective" />
-				<div class="reason-content"></div>
-				<textarea class="reason editor" rows="3" placeholder="Reason (optional)"></textarea>
-				<div class="ui primary button">Submit</div>
-				<div class="ui close button">Cancel</div>
-			</form>
-		</div>
+	<div id="claim-pane-fullscreen" class="eight wide column">
+		<div class="ui message">Please click "Open Discussion" from the left column.</div>
 	</div>
 </div>
 {% endblock %}

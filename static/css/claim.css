@@ -13,6 +13,11 @@
 	height: 100%;
 	overflow: auto;
 }
+
+#claim-pane-fullscreen {
+	height: 100%;
+	overflow: auto;
+}
 #claim-container .hidden {
     display: none;
 }
@@ -24,14 +29,12 @@
 	display: none;
 	border-radius: 0;
 }
-#claim-pane > .ui.empty.segment {
+#claim-pane-overview > .ui.empty.segment {
 	height: 10em;
 	border: none;
 	border-radius: 0;
 }
-#claim-pane > .full-screen.segment {
-	border-top: none;
-}
+
 .claim.column > .ui.menu {
 	-webkit-box-shadow: none;
 	-moz-box-shadow: none;
@@ -157,7 +160,7 @@ a.claim-vote-btn.unready:hover {
 #draft-stmt .slot:hover .destmt.button {
 	display: block;
 }
-#draft-stmt .slot:hover .src_claim {
+#draft-stmt .slot.phase3:hover .src_claim {
 	max-height: inherit;
 }
 #draft-stmt .item.to-merge:after {

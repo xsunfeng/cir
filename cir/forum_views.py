@@ -83,6 +83,7 @@ def enter_forum(request, forum_url, phase_name):  # access /forum_name
 
     # load forum info
     request.session['forum_id'] = forum.id
+    request.session['selected_phase'] = phase_name
     context['forum_id'] = forum.id
     context['forum_name'] = forum.full_name
     context['forum_url'] = forum.url
@@ -117,7 +118,6 @@ def enter_forum(request, forum_url, phase_name):  # access /forum_name
             pass
 
     request.session['role'] = context['role'] = role
-
 
     return render(request, index_html, context)
 

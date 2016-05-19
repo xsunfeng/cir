@@ -3,7 +3,6 @@ define([
 	'claim-common/claim-filter',
 	'claim-common/draft-stmt',
 	'utils',
-	'feed/activity-feed',
 	'semantic-ui'
 ], function(
 	$,

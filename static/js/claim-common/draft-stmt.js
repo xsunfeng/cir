@@ -7,6 +7,7 @@ define([
 	Utils
 ) {
 	var module = {};
+	module.activeClaimModule = null;
 	module.categories = ['finding', 'pro', 'con'];
 	module.stmtLimit = {
 		'finding': 10,
@@ -30,6 +31,9 @@ define([
 		}).done(function() {
 			$('#claim-pane-overview .claim.segment[data-id="' + claim_id + '"]').removeClass('stmt');
 		});
+	}).on('click', '.fullscreen.item', function() {
+		module.activeClaimModule.slot_id = this.getAttribute('data-id');
+		module.activeClaimModule.updateClaimPane();
 	});
 
 	module.initStmtHandles = function() {

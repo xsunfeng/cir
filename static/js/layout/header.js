@@ -75,6 +75,9 @@ define([
 					if (require.defined('phase3/claim')) {
 						require('phase3/claim').updateClaimPane();
 					}
+					if (require.defined('phase4/claim')) {
+						require('phase4/claim').updateClaimPane();
+					}
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {

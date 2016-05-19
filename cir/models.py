@@ -339,12 +339,12 @@ class Claim(Entry):
             attr['is_stmt'] = True
         return attr
 
-    def getAttrSlot(self):
-        attr = {
-            'slot_id': self.id,
-            'slot_theme': self.theme,
-            'claims': []
-        }
+    def getAttrSlot(self, forum):
+        attr = super(Claim, self).getAttr(forum)
+        if self.theme:
+            attr['slot_theme'] = self.theme.name,
+        attr['category'] = self.claim_category,
+        attr['claims'] = []
         for claimref in self.older_versions.filter(refer_type='stmt'):
             attr['claims'].append({
                 'id': claimref.from_claim.id,

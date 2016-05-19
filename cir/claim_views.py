@@ -4,6 +4,7 @@ from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.utils import timezone
 from django.db.models import Q
+from django.core.exceptions import ObjectDoesNotExist
 
 from cir.models import *
 from cir.utils import pretty_date
@@ -17,8 +18,6 @@ def api_get_claim(request):
     forum = Forum.objects.get(id=request.session['forum_id'])
     context = {}
     claims = Claim.objects.filter(forum=forum, is_deleted=False, published=True, stmt_order__isnull=True)
-    if request.user.is_authenticated():
-        claims = claims | Claim.objects.filter(author=request.user, forum=forum, is_deleted=False, published=False)
     category = request.REQUEST.get('category')
     if category:
         context['category'] = category
@@ -38,29 +37,13 @@ def api_get_claim(request):
     context['claims_cnt'] = 0
 
     if action == 'get-claim':
-        display_type = request.REQUEST.get('display_type')
-        if display_type == 'overview':
-            for claim in claims:
-                context['claims_cnt'] += 1
-                context['claims'].append(claim.getAttr(forum))
-            context['claims'] = sorted(context['claims'], key=lambda c: c['updated_at_full'], reverse=True)
-            response['html'] = render_to_string("claim-common/claim-overview.html", context)
-        elif display_type == 'fullscreen':
-            # if no claims available, just leave context['claim'] and response['claim_id'] undefined.
-            if len(claims) != 0:
-                claim_return = claims.reverse()[0]
-                old_claim_id = request.REQUEST.get('claim_id')
-                # the specified claim may not exist in the current filtered set.
-                # if this is the case, return the first claim in the current filtered set.
-                if old_claim_id:
-                    for claim in claims:
-                        if claim.id == int(old_claim_id):
-                            claim_return = claim
-                            break
-                context['claim'] = claim_return.getAttr(forum)
-                response['claim_id'] = claim_return.id
-            response['html'] = render_to_string("claim-common/claim-fullscreen.html", context)
-    if action == 'navigator':
+        for claim in claims:
+            context['claims_cnt'] += 1
+            context['claims'].append(claim.getAttr(forum))
+        context['claims'] = sorted(context['claims'], key=lambda c: c['updated_at_full'], reverse=True)
+        response['html'] = render_to_string("claim-common/claim-overview.html", context)
+
+    elif action == 'navigator':
         context['option'] = {}
         if request.REQUEST.get('update_claim') == 'true':
             context['option']['claim'] = True
@@ -72,6 +55,23 @@ def api_get_claim(request):
             context['option']['filter'] = True
             context['themes'] = [theme.getAttr() for theme in ClaimTheme.objects.filter(forum=forum)]
         response['html'] = render_to_string("claim-common/claim-navigator.html", context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def api_get_slot(request):
+    response = {}
+    action = request.REQUEST.get('action')
+    context = {}
+
+    if action == 'get-slot':
+        slot = Claim.objects.get(id=request.REQUEST.get('slot_id'))
+        forum = Forum.objects.get(id=request.session['forum_id'])
+        context['slot'] = slot.getAttrSlot(forum)
+
+        try:
+            context['version'] = slot.adopted_version().getAttr(forum)
+        except ObjectDoesNotExist:
+            pass
+    response['html'] = render_to_string("claim-common/claim-fullscreen.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_draft_stmt(request):
@@ -137,9 +137,12 @@ def api_draft_stmt(request):
     response['slots_cnt'] = {'finding': 0, 'pro': 0, 'con': 0}
     slots = Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False)
     for category in ['finding', 'pro', 'con']:
-        context['categories'][category] = [slot.getAttrSlot() for slot in slots.filter(claim_category=category).order_by('stmt_order')]
+        context['categories'][category] = [slot.getAttrSlot(forum) for slot in slots.filter(claim_category=category).order_by('stmt_order')]
         response['slots_cnt'][category] += len(context['categories'][category])
-    response['html'] = render_to_string('phase3/draft-stmt.html', context)
+    if forum.phase == 'categorize':
+        response['html'] = render_to_string('phase3/draft-stmt.html', context)
+    else:
+        response['html'] = render_to_string('phase4/draft-stmt.html', context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_claim(request):

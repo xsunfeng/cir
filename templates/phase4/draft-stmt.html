@@ -6,9 +6,9 @@
 <ol class="ui list" data-list-type="finding">
 	{% if categories.finding %}{% for slot_info in categories.finding %}
 		<li class="item">
-			<div class="ui stacked segment phase3 slot" data-id="{{ slot_info.id }}">
+			<div class="ui top attached segment slot" data-id="{{ slot_info.id }}">
 				<i class="reorder-handle vertical resize icon"></i>
-				Theme for this slot: {{ slot.slot_theme }}
+				Theme for this slot: (unknown)
 				{% for src_claim in slot_info.claims %}
 				<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}">
 					{% if src_claim.theme %}<div class="ui label">Theme: {{ src_claim.theme }}</div>{% endif %}
@@ -16,6 +16,9 @@
 					<div class="ui destmt circular icon red button"><i class="trash icon"></i></div>
 				</div>
 				{% endfor %}
+			</div>
+			<div class="ui bottom attached one item menu">
+				<a class="fullscreen item" data-id="{{ slot_info.id }}">Open discussions</a>
 			</div>
 		</li>
 	{% endfor %}{% else %}
@@ -34,9 +37,9 @@
 <ol class="ui list" data-list-type="pro">
 	{% if categories.pro %}{% for slot_info in categories.pro %}
 		<li class="item">
-			<div class="ui stacked segment phase3 slot" data-id="{{ slot_info.id }}">
+			<div class="ui stacked segment slot" data-id="{{ slot_info.id }}">
 				<i class="reorder-handle vertical resize icon"></i>
-				Theme for this slot: {{ slot.slot_theme }}
+				Theme for this slot: (unknown)
 				{% for src_claim in slot_info.claims %}
 					<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}">
 						{% if src_claim.theme %}<div class="ui label">Theme: {{ src_claim.theme }}</div>{% endif %}
@@ -62,9 +65,9 @@
 <ol class="ui list" data-list-type="con">
 	{% if categories.con %}{% for slot_info in categories.con %}
 		<li class="item">
-			<div class="ui stacked segment phase3 slot" data-id="{{ slot_info.id }}">
+			<div class="ui stacked segment slot" data-id="{{ slot_info.id }}">
 				<i class="reorder-handle vertical resize icon"></i>
-				Theme for this slot: {{ slot.slot_theme }}
+				Theme for this slot: (unknown)
 				{% for src_claim in slot_info.claims %}
 					<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}">
 						{% if src_claim.theme %}<div class="ui label">Theme: {{ src_claim.theme }}</div>{% endif %}
