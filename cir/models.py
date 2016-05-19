@@ -546,10 +546,8 @@ class NuggetComment(MPTTModel):
     text = models.CharField(max_length=50, unique=True)
     parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    source_highlight = models.ForeignKey(Highlight, related_name='comments')
+    highlight = models.ForeignKey(Highlight)
     created_at = models.DateTimeField()
-    class MPTTMeta:
-        order_insertion_by = ['created_at']
 
 class Genre(MPTTModel):
     name = models.CharField(max_length=50, unique=True)

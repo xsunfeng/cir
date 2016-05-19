@@ -11,9 +11,41 @@ import claim_views
 from cir.phase_control import PHASE_CONTROL
 import utils
 
-def show_genres(request):
+def get_nugget_comment_list(request):
+    response = {}
     context = {}
-    return render_to_response("genres.html", {'nodes':Genre.objects.all()}, context_instance=context)
+    highlight_id = request.REQUEST.get("highlight_id")
+    this_highlight = Highlight.objects.get(id=highlight_id)
+    thread_comments = NuggetComment.objects.filter(highlight=this_highlight)
+    context['highlight'] = this_highlight.getAttr()
+    context['comments'] = thread_comments
+    response['nugget_comment_list'] = render_to_string("phase1/nugget_comment_list.html", context)
+    response['nugget_comment_highlight'] = render_to_string("phase1/nugget_comment_highlight.html", context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def put_nugget_comment(request):
+    response = {}
+    context = {}
+    author = request.user
+    parent_id = request.REQUEST.get('parent_id')
+    highlight_id = request.REQUEST.get('highlight_id')
+    text = request.REQUEST.get('text')
+    created_at = timezone.now()
+    highlight = Highlight.objects.get(id = highlight_id)
+    if parent_id == "": #root node
+        newNuggetComment = NuggetComment(author = author, text = text, highlight = highlight, created_at = created_at)
+    else:
+        parent = NuggetComment.objects.get(id = parent_id)
+        newNuggetComment = NuggetComment(author = author, text = text, highlight = highlight, parent = parent, created_at = created_at)
+    newNuggetComment.save()
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+class NuggetComment(MPTTModel):
+    text = models.CharField(max_length=50, unique=True)
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    highlight = models.ForeignKey(Highlight)
+    created_at = models.DateTimeField()
 
 def api_load_all_documents(request):
     response = {}
@@ -209,6 +241,7 @@ def get_highlights(request):
         for highlight in highlights:
             highlight_info = highlight.getAttr()
             highlight_info["cur_theme"] = True if highlight.theme.id == theme_id else False
+            highlight_info["doc_id"] = DocSection.objects.get(id=highlight.context.id).doc.id
             response['highlights'].append(highlight_info)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
@@ -307,12 +340,11 @@ def get_nugget_list(request):
     context['highlights'] = []
     for doc in docs:
         for section in doc.sections.all():
-            if (theme_id > 0):
-                highlights = section.highlights.filter(theme_id = theme_id)
-            else:
-                highlights = section.highlights.all()
+            highlights = section.highlights.all()
             for highlight in highlights:
-                context['highlights'].append(highlight.getAttr())
+                highlight_info = highlight.getAttr()
+                highlight_info["doc_id"] = DocSection.objects.get(id=highlight.context.id).doc.id
+                context['highlights'].append(highlight_info)
     context['highlights'].sort(key = lambda x: x["created_at"], reverse=True)
     response['workbench_nugget_list'] = render_to_string("phase1/nugget_list.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')

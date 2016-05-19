@@ -63,7 +63,8 @@ urlpatterns = patterns('',
 
     url(r'^phase1/get_nugget_list/$', phase1.get_nugget_list),
     url(r'^phase1/get_highlights/$', phase1.get_highlights),
-    url(r'^phase1/genres/$', phase1.show_genres),
+    url(r'^phase1/get_nugget_comment_list/$', phase1.get_nugget_comment_list),
+    url(r'^phase1/put_nugget_comment/$', phase1.put_nugget_comment),
 
     url(r'^phase2/get_claim_list/$', phase2.get_claim_list),
     url(r'^phase2/get_nugget_list/$', phase2.get_nugget_list),

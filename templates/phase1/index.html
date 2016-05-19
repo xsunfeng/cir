@@ -17,6 +17,8 @@
 
 {% block body %}
 
+
+
 <!-- left panel -->
 <div style="font-size:1.2em; position:fixed; top:50px; bottom:0; left:0; right:50%;">
 	<div>
@@ -31,9 +33,9 @@
 			</div>
 		</div>
 	</div>
-	<div style="overflow:auto; top:60px; bottom:0; position:absolute; left:0; right:0; padding:1em; padding-top:0;">
+	<div style="overflow:auto; top:60px; bottom:0; position:absolute; left:0; right:0; padding:1em; padding-top:0;" id="workbench-document-panel">
 		<div id="workbench-document-container" class="ui segment" style="border-radius: 0;">
-			<img style="width:100%;" src="http://i1206.photobucket.com/albums/bb452/phattphudge/samplehighlightsofqualifications1.png">
+			<img style="width:100%;" src="http://imageprocessor.websimages.com/width/874/crop/0,0,874x640/geodeliberation.webs.com/CIR%20(1).png">
 		</div>		
 	</div>
 </div>
@@ -43,7 +45,6 @@
 	<div>
 		<div style="padding-left:2em;" class="ui text menu">
 			<div class="header item">nugget list</div>
-						
 			<div class="header item" style="border-left: 1px solid #000000;margin-left: 1em;">sort by</div>
 			<select name="gender" class="ui dropdown item" id="nugget-list-order-by">
 				<option value="option1">latest</option>
@@ -54,7 +55,7 @@
 			<select name="gender" class="ui dropdown item" id="nugget-list-theme">
 			</select>
 
-			<div class="ui checked checkbox item">
+			<div class="ui checked checkbox item" id="doc-only">
 				<input type="checkbox" checked="">
 				<label>this document only</label>
 			</div>
@@ -69,12 +70,12 @@
 	</div>
 </div>
 
-{% include 'phase1/nugget-thread-popup.html' %}
-
 {% if role != 'visitor' %}
 	{% include 'chatter.html' %}
 {% endif %}
 
+{% include 'phase1/nugget_comment.html' %}
+{% include 'phase1/nugget_toolbar.html' %}
 
 {% endblock %}
 

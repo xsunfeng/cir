@@ -73,6 +73,7 @@ def api_highlight(request):
     if action == 'create':
         if not request.user.is_authenticated():
             return HttpResponse("Please log in first.", status=403)
+        print request.REQUEST
         content = request.REQUEST.get('content')
         content_type = request.REQUEST.get('type')
         start = request.REQUEST.get('start')

@@ -1,6 +1,6 @@
 {% if highlights %}
 	{% for highlight in highlights %}
-		<div class="ui segment workbench-nugget nugget-related" data-hl-id = {{ highlight.id }}>
+		<div class="ui segment workbench-nugget nugget-related" data-hl-id = {{ highlight.id }} doc-id = {{ highlight.doc_id }} theme-id = {{ highlight.theme_id }}>
 			{% if highlight.is_nugget %}
 				<a class="ui small red right corner label nugget-select-mark" style="display:none;">
 					<i class="checkmark icon"></i>
@@ -18,7 +18,7 @@
 					<span>{{ highlight.author_name }}</span>
 					<span> | </span>
 					<span>{{ highlight.created_at_pretty }}</span>
-					<span style="float:right;">
+					<span style="float:right;" class="actions">
 						<a href="#" class="item source-nugget">context</a>
 						<span> | </span>
 						<a href="#" class="item comment-nugget">comment</a>

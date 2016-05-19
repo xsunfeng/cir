@@ -1,0 +1,48 @@
+<div class="ui threaded comments" style="width:100%;" highlight-id="{{ highlight.id }}">
+  	<h3 class="ui dividing header">Comments</h3>
+
+	<form class="ui form">
+		<div class="field" style="margin-bottom:0;">
+			<textarea rows="2"></textarea>
+		</div>
+		<div class="actions">
+			<a href="#" class="reply nugget-comment-post">post</a>
+		</div>
+	</form>
+
+
+	{% load mptt_tags %}
+
+	{% recursetree comments %}
+		<div class="comment" comment-id="{{ node.id }}">
+			<a class="avatar">
+				<img src="http://a.kym-cdn.com/assets/avatar_default_small.png">
+			</a>
+			<div class="content">
+				<a class="author">{{ node.author }}</a>
+				<div class="metadata">
+					<span class="date">{{ node.created_at }}</span>
+				</div>
+				<div class="text">
+					<p>{{ node.text|safe }}</p>
+				</div>
+				<div class="actions">
+					<a class="reply nugget-comment-reply">Reply</a>
+				</div>
+				<form class="ui form" style="display:none;">
+					<div class="field" style="margin-bottom:0;">
+						<textarea rows="2"></textarea>
+					</div>
+					<a href="#" class="reply nugget-comment-reply-save">save</a><span> | </span><a href="#" class="reply nugget-comment-reply-cancel">cancel</a>
+				</form>
+			</div>	
+
+            {% if not node.is_leaf_node %}
+            	<div class="comments">
+                {{ children }}
+                </div>
+            {% endif %}
+	    
+		</div>
+	{% endrecursetree %}
+</div>
