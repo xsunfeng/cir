@@ -1,8 +1,8 @@
 {% if highlights %}
 	{% for highlight in highlights %}
-		{% if highlight.is_nugget %}
-			<div class="ui segment workbench-nugget nugget-related" data-hl-id = {{ highlight.id }} theme-id = {{ highlight.theme_id }}>
-				<a class="ui small green right corner label nugget-select-mark" style="display:none;">
+		<div class="ui segment workbench-nugget nugget-related" data-hl-id = {{ highlight.id }}>
+			{% if highlight.is_nugget %}
+				<a class="ui small red right corner label nugget-select-mark" style="display:none;">
 					<i class="checkmark icon"></i>
 				</a>
 				<div class="content">
@@ -11,6 +11,8 @@
 					</div>
 				</div>
 				<div class="discription" style="color:rgba(0,0,0,.4);">
+					<span class="ui label theme-label" theme-id={{ highlight.theme_id }}>{{ highlight.theme }}</span>
+					<span> | </span>
 					<span class="ui heart rating" data-rating="0" data-max-rating="1"></span>
 					<span> | </span>
 					<span>{{ highlight.author_name }}</span>
@@ -22,13 +24,10 @@
 						<a href="#" class="item comment-nugget">comment</a>
 						<span> | </span>
 						<a href="#" class="item reassign-nugget">change theme</a>
-						<span> | </span>
-						<a href="#" class="item use-nugget">adopt</a>
-						<a href="#" class="item use-nugget-num"></a>
 					</span>
-				</div>	
-			</div>
-		{% endif %}
+				</div>
+			{% endif %}
+		</div>
 	{% endfor %}
 {% else %}
 		<div class="ui card" style="background: PapayaWhip;">

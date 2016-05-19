@@ -3,12 +3,17 @@ import json
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.utils import timezone
+from django.shortcuts import render_to_response
 
 from cir.models import *
 import claim_views
 
 from cir.phase_control import PHASE_CONTROL
 import utils
+
+def show_genres(request):
+    context = {}
+    return render_to_response("genres.html", {'nodes':Genre.objects.all()}, context_instance=context)
 
 def api_load_all_documents(request):
     response = {}
@@ -193,25 +198,18 @@ def get_theme_list(request):
 
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
-def api_load_highlights(request):
+def get_highlights(request):
     response = {}
     response['highlights'] = []
     theme_id = request.REQUEST.get('theme_id')
     doc_id = request.REQUEST.get('doc_id')
     doc = Doc.objects.get(id = doc_id)
-    if theme_id == "-1":
-        for section in doc.sections.all():
-            highlights = section.highlights.all()
-            for highlight in highlights:
-                highlight_info = highlight.getAttr()
-                response['highlights'].append(highlight_info)
-    else:
-        for section in doc.sections.all():
-            highlights = section.highlights.all()
-            for highlight in highlights:
-                if (highlight.theme != None and int(highlight.theme.id) == int(theme_id)):
-                    highlight_info = highlight.getAttr()
-                    response['highlights'].append(highlight_info)
+    for section in doc.sections.all():
+        highlights = section.highlights.all()
+        for highlight in highlights:
+            highlight_info = highlight.getAttr()
+            highlight_info["cur_theme"] = True if highlight.theme.id == theme_id else False
+            response['highlights'].append(highlight_info)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_load_one_highlight(request):
@@ -304,23 +302,31 @@ def api_remove_nugget(request):
 def get_nugget_list(request):
     response = {}
     context = {}
+    theme_id = int(request.REQUEST.get("theme_id"))
     docs = Doc.objects.filter(forum_id=request.session["forum_id"])
     context['highlights'] = []
     for doc in docs:
         for section in doc.sections.all():
-            highlights = section.highlights.all()
+            if (theme_id > 0):
+                highlights = section.highlights.filter(theme_id = theme_id)
+            else:
+                highlights = section.highlights.all()
             for highlight in highlights:
                 context['highlights'].append(highlight.getAttr())
     context['highlights'].sort(key = lambda x: x["created_at"], reverse=True)
-    response['highlight2claims'] = {}
-    for highlight in context['highlights']:
-        highlightClaims = HighlightClaim.objects.filter(highlight_id=highlight['id'])
-        if highlightClaims.count() > 0:
-            s = []
-            for highlightClaim in highlightClaims:
-                s.append(highlightClaim.claim_id)
-            response['highlight2claims'][highlight["id"]] = s
-    response['workbench_nugget_list'] = render_to_string("phase2/nugget_list.html", context)
+    response['workbench_nugget_list'] = render_to_string("phase1/nugget_list.html", context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def api_load_nugget_list_partial(request):
+    response = {}
+    context = {}
+    context['highlights'] = []
+    highlight_ids = request.REQUEST.get("highlight_ids")
+    highlight_ids = highlight_ids.split()
+    for highlight_id in highlight_ids:
+        highlight = Highlight.objects.get(id = highlight_id)
+        context['highlights'].append(highlight.getAttr())
+    response['workbench_nugget_list'] = render_to_string("workbench-nuggets.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_load_claim_list_partial(request):
@@ -374,10 +380,10 @@ def get_claim_list(request):
         item['id'] = claim.id
         item['author_name'] = claim.author.first_name + " " + claim.author.last_name
         item['is_author'] = (request.user == claim.author)
-        arr = []
+        item['highlight_ids'] = ""
         for highlight in claim.source_highlights.all():
-            arr.append(str(highlight.id))
-        item['highlight_ids'] = ",".join(arr)
+            item['highlight_ids'] += (str(highlight.id) + " ")
+        item['highlight_ids'].strip(" ")
         context["claims"].append(item)
     context['claims'].sort(key = lambda x: x["created_at_used_for_sort"], reverse=True)
     response['workbench_claims'] = render_to_string("phase2/claim_list.html", context)

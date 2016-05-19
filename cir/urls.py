@@ -13,6 +13,7 @@ import chatter_views
 import vis_views
 import sankey_views
 
+import phase1
 import phase2
 
 
@@ -60,9 +61,14 @@ urlpatterns = patterns('',
     url(r'^workbench/api_get_doc_by_doc_id/$', workbench_views.api_get_doc_by_doc_id),
     url(r'^workbench/api_get_init_doc/$', workbench_views.api_get_init_doc),
 
+    url(r'^phase1/get_nugget_list/$', phase1.get_nugget_list),
+    url(r'^phase1/get_highlights/$', phase1.get_highlights),
+    url(r'^phase1/genres/$', phase1.show_genres),
+
     url(r'^phase2/get_claim_list/$', phase2.get_claim_list),
     url(r'^phase2/get_nugget_list/$', phase2.get_nugget_list),
     url(r'^phase2/get_theme_list/$', phase2.get_theme_list),
+    url(r'^phase2/put_claim/$', phase2.put_claim),
 
     url(r'^sankey/get_graph/$', sankey_views.get_graph),
     url(r'^sankey/get_doc/$', sankey_views.get_doc),
