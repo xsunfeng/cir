@@ -16,8 +16,7 @@ def api_get_claim(request):
     action = request.REQUEST.get('action')
     forum = Forum.objects.get(id=request.session['forum_id'])
     context = {}
-    context['phase'] = PHASE_CONTROL[forum.phase]
-    claims = Claim.objects.filter(forum=forum, is_deleted=False, published=True)
+    claims = Claim.objects.filter(forum=forum, is_deleted=False, published=True, stmt_order__isnull=True)
     if request.user.is_authenticated():
         claims = claims | Claim.objects.filter(author=request.user, forum=forum, is_deleted=False, published=False)
     category = request.REQUEST.get('category')
@@ -80,35 +79,67 @@ def api_draft_stmt(request):
     action = request.REQUEST.get('action')
     forum = Forum.objects.get(id=request.session['forum_id'])
     context = {}
-    if action == 'add-to-stmt':
-        new_claim = Claim.objects.get(id=request.REQUEST['claim_id'])
-        order = int(request.REQUEST['order'])
-        # refresh claims one by one
-        claims = Claim.objects.filter(forum=forum, stmt_order__isnull=False, claim_category=new_claim.claim_category)
-        for claim in claims:
-            if claim.stmt_order >= order:
-                claim.stmt_order += 1
-                claim.save()
-        new_claim.stmt_order = order
-        new_claim.save()
+    if action == 'initiate-slot':
+        now = timezone.now()
+        claim_category = request.REQUEST.get('list_type')
+        selected_claim = Claim.objects.get(id=request.REQUEST['claim_id'])
+        order = int(request.REQUEST['order']) # order of the slot
+
+        # the "claim" will have an unassigned theme by default.
+        if 'actual_user_id' in request.session:
+            actual_author = User.objects.get(id=request.session['actual_user_id'])
+        else:
+            actual_author = None
+
+        if actual_author:
+            newSlot = Claim(forum=forum, author=actual_author, delegator=request.user,
+                created_at=now, updated_at=now, claim_category=claim_category)
+        else:
+            newSlot = Claim(forum=forum, author=request.user, created_at=now, updated_at=now, claim_category=claim_category)
+
+        # refresh slots one by one
+        slots = Claim.objects.filter(forum=forum, stmt_order__isnull=False, claim_category=claim_category)
+        for slot in slots:
+            if slot.stmt_order >= order:
+                slot.stmt_order += 1
+                slot.save()
+        newSlot.stmt_order = order
+        newSlot.save()
+
+        # add claim reference: newSlot references selected_claim
+        ClaimReference.objects.create(refer_type='stmt', from_claim=selected_claim, to_claim=newSlot)
+
+    if action == 'add-to-slot': # merge with existing
+        slot = Claim.objects.get(id=request.REQUEST['slot_id'])
+        claim = Claim.objects.get(id=request.REQUEST['claim_id'])
+        if not ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=slot).exists():
+            ClaimReference.objects.create(refer_type='stmt', from_claim=claim, to_claim=slot)
+
     if action == 'reorder':
         orders = json.loads(request.REQUEST.get('order'))
         for claim_id in orders:
             claim = Claim.objects.get(id=claim_id)
             claim.stmt_order = orders[claim_id]
             claim.save()
+
     if action == 'destmt':
         claim = Claim.objects.get(id=request.REQUEST['claim_id'])
-        claim.stmt_order = None
-        claim.save()
-    if action == 'add-to-stmt' or action == 'get-list' or action == 'reorder' or action == 'destmt':
-        context['categories'] = {}
-        response['claims_cnt'] = {'finding': 0, 'pro': 0, 'con': 0}
-        claims = Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False)
-        for category in ['finding', 'pro', 'con']:
-            context['categories'][category] = [claim.getAttr(forum) for claim in claims.filter(claim_category=category).order_by('stmt_order')]
-            response['claims_cnt'][category] += len(context['categories'][category])
-        response['html'] = render_to_string("phase4/draft-stmt.html", context)
+        slot = Claim.objects.get(id=request.REQUEST['slot_id'])
+        ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=slot).delete()
+        if ClaimReference.objects.filter(refer_type='stmt', to_claim=slot).count() == 0:
+            # the last reference is removed
+            slot.is_deleted = True
+            slot.stmt_order = None
+            slot.save()
+
+    # for all actions, return updated lists
+    context['categories'] = {}
+    response['slots_cnt'] = {'finding': 0, 'pro': 0, 'con': 0}
+    slots = Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False)
+    for category in ['finding', 'pro', 'con']:
+        context['categories'][category] = [slot.getAttrSlot() for slot in slots.filter(claim_category=category).order_by('stmt_order')]
+        response['slots_cnt'][category] += len(context['categories'][category])
+    response['html'] = render_to_string('phase3/draft-stmt.html', context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_claim(request):

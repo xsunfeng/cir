@@ -16,30 +16,24 @@
 
 {% block body %}
 
-<div class="ui grid" style="margin-top: 1em;">
-	<div id="claim-container" class="ten wide claim column" style="margin-bottom: 3em">
-		<div class="ui attached info message">
-			<div class="ui instructions accordion">
-				<div class="ui active title"><i class="dropdown icon"></i>Current phase: Claim categorization</div>
-				<div class="active content">
-					Before we proceed with claim improvement, let's category the claims we just composed. Available categories are Pro, Con and Key Finding. If you don't think a claim should proceed to the next round, you can also vote a Discard to it. Facilitators will perform the final categorization for each claim.
+<div class="ui claim grid">
+	<div id="claim-container" class="six wide claim column" style="margin-bottom: 3em">
+		<div style="position:relative">
+			<div class="ui attached info message">
+				<div class="ui instructions accordion">
+					<div class="ui active title"><i class="dropdown icon"></i>Current phase: Claim categorization</div>
+					<div class="active content">
+						Before we proceed with claim improvement, let's category the claims we just composed. Available categories are Pro, Con and Key Finding. If you don't think a claim should proceed to the next round, you can also vote a Discard to it. Facilitators will perform the final categorization for each claim.
+					</div>
 				</div>
 			</div>
-		</div>
-		<div class="ui top attached tabular menu">
-			<a class="blue item active claim-view-btn" data-tab="overview">
-				<i class="align justify icon"></i> Overview
-			</a>
-			<a class="blue item claim-view-btn" data-tab="fullscreen">
-				<i class="maximize icon"></i> Full-screen Review
-			</a>
-		</div>
-
-		<div id="claim-pane-overview" class="ui active tab" data-tab="overview">
-		</div>
-		<div id="claim-pane-fullscreen" class="ui tab" data-tab="fullscreen">
+			<div id="claim-filter-pane" class="ui attached menu"></div>
+			<div id="claim-pane-overview">
+			</div>
 		</div>
 	</div>
-	<div id="claim-navigator" class="six wide column"></div>
+	<div id="draft-stmt-container" class="ten wide column">
+		<div id="draft-stmt"></div>
+	</div>
 </div>
 {% endblock %}

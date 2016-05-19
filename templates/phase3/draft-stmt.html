@@ -1,0 +1,85 @@
+<div class="ui indicating finding stmt progress">
+	<div class="title">Key Findings</div>
+	<div class="bar"></div>
+	<div class="label"></div>
+</div>
+<ol class="ui list" data-list-type="finding">
+	{% if categories.finding %}{% for slot_info in categories.finding %}
+		<li class="item">
+			<div class="ui stacked segment slot" data-id="{{ slot_info.slot_id }}">
+				<i class="reorder-handle vertical resize icon"></i>
+				Theme for this slot: (unknown)
+				{% for src_claim in slot_info.claims %}
+				<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}">
+					{% if src_claim.theme %}<div class="ui label">Theme: {{ src_claim.theme }}</div>{% endif %}
+					{{ src_claim.content }}
+					<div class="ui destmt circular icon red button"><i class="trash icon"></i></div>
+				</div>
+				{% endfor %}
+			</div>
+		</li>
+	{% endfor %}{% else %}
+		<div class="item empty">
+			<div class="content">
+				<div class="description">(No entries yet)</div>
+			</div>
+		</div>
+	{% endif %}
+</ol>
+<div class="ui indicating pro stmt progress">
+	<div class="title">Pro Statements</div>
+	<div class="bar"></div>
+	<div class="label"></div>
+</div>
+<ol class="ui list" data-list-type="pro">
+	{% if categories.pro %}{% for slot_info in categories.pro %}
+		<li class="item">
+			<div class="ui stacked segment slot" data-id="{{ slot_info.slot_id }}">
+				<i class="reorder-handle vertical resize icon"></i>
+				Theme for this slot: (unknown)
+				{% for src_claim in slot_info.claims %}
+					<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}">
+						{% if src_claim.theme %}<div class="ui label">Theme: {{ src_claim.theme }}</div>{% endif %}
+						{{ src_claim.content }}
+						<div class="ui destmt circular icon red button"><i class="trash icon"></i></div>
+					</div>
+				{% endfor %}
+			</div>
+		</li>
+	{% endfor %}{% else %}
+		<div class="item empty">
+			<div class="content">
+				<div class="description">(No entries yet)</div>
+			</div>
+		</div>
+	{% endif %}
+</ol>
+<div class="ui indicating con stmt progress">
+	<div class="title">Con Statements</div>
+	<div class="bar"></div>
+	<div class="label"></div>
+</div>
+<ol class="ui list" data-list-type="con">
+	{% if categories.con %}{% for slot_info in categories.con %}
+		<li class="item">
+			<div class="ui stacked segment slot" data-id="{{ slot_info.slot_id }}">
+				<i class="reorder-handle vertical resize icon"></i>
+				Theme for this slot: (unknown)
+				{% for src_claim in slot_info.claims %}
+					<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}">
+						{% if src_claim.theme %}<div class="ui label">Theme: {{ src_claim.theme }}</div>{% endif %}
+						{{ src_claim.content }}
+						<div class="ui destmt circular icon red button"><i class="trash icon"></i></div>
+					</div>
+				{% endfor %}
+			</div>
+		</li>
+	{% endfor %}{% else %}
+		<div class="item empty">
+			<div class="content">
+				<div class="description">(No entries yet)</div>
+			</div>
+		</div>
+	{% endif %}
+</ol>
+
