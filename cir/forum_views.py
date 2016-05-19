@@ -86,8 +86,19 @@ def enter_forum(request, forum_url, phase_name):  # access /forum_name
     context['forum_id'] = forum.id
     context['forum_name'] = forum.full_name
     context['forum_url'] = forum.url
-    context['phase'] = forum.phase
-    context['phase_word'] = forum.get_phase_display()
+    context['phase_info'] = _get_phases(forum, phase_name)
+
+    index_html = ''
+    if phase_name == 'nugget':
+        index_html = 'phase1/index.html'
+    elif phase_name == 'extract':
+        index_html = 'phase2/index.html'
+    elif phase_name == 'categorize':
+        index_html = 'phase3/index.html'
+    elif phase_name == 'improve':
+        index_html = 'phase4/index.html'
+    elif phase_name == 'finished':
+        index_html = 'phase5/index.html'
 
     # load role info
     role = VISITOR_ROLE
@@ -107,19 +118,38 @@ def enter_forum(request, forum_url, phase_name):  # access /forum_name
 
     request.session['role'] = context['role'] = role
 
-    index_html = ''
-    if phase_name == 'nugget':
-        index_html = 'phase1/index.html'
-    elif phase_name == 'extract':
-        index_html = 'phase2/index.html'
-    elif phase_name == 'categorize':
-        index_html = 'phase3/index.html'
-    elif phase_name == 'improve':
-        index_html = 'phase4/index.html'
-    elif phase_name == 'finished':
-        index_html = 'phase5/index.html'
+
     return render(request, index_html, context)
 
+def _get_phases(forum, selected_phase):
+    results = {}
+    results['phase_name'] = forum.phase
+    results['selected_phase_name'] = _get_full_phase_name(selected_phase)
+    results['phases'] = []
+    for name in ['nugget', 'extract', 'categorize', 'improve', 'finished']:
+        phase_info = {
+            'name': name,
+            'fullname': _get_full_phase_name(name)
+        }
+        if name == selected_phase:
+            phase_info['status'] = 'active'
+        elif (name == 'nugget') or \
+                (name == 'extract' and forum.phase != 'nugget') or \
+                (name == 'categorize' and forum.phase != 'nugget' and forum.phase != 'extract') or \
+                (name == 'improve' and (forum.phase == 'improve' or forum.phase == 'finished')) or \
+                (name == 'finished' and forum.phase == 'finished'):
+            phase_info['status'] = ''
+        else:
+            phase_info['status'] = 'disabled'
+        results['phases'].append(phase_info)
+    return results
+
+
+def _get_full_phase_name(name):
+    for phase_tuple in Forum.PHASE_CHOICES:
+        if phase_tuple[0] == name:
+            return phase_tuple[1]
+    return ''
 
 def enter_workbench(request, forum_url):  # access /forum_name
     if 'actual_user_id' in request.session:

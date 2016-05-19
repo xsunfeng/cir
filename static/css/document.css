@@ -183,12 +183,6 @@
     width: 500px;
 }
 
-a {
-    color: #0254EB
-}
-a:visited {
-    color: #0254EB
-}
 a.morelink {
     text-decoration:none;
     outline: none;
@@ -433,10 +427,6 @@ a.morelink {
 */
 
 
-body {
-  font: 16px sans-serif;
-}
-
 .axis path,
 .axis line {
   fill: none;
@@ -525,10 +515,6 @@ body {
 	margin-bottom: 0 !important;
 }
 
-body {
-    padding:30px;
-    font:normal 12px/1.5 Arial, sans-serif;
-}
 
 /**
  * Tooltip Styles

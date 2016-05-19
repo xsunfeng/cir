@@ -1,10 +1,10 @@
-#claim-pane .hidden {
+#claim-container .hidden {
     display: none;
 }
 #claim-pane > .ui.segments {
 	border: none;
 }
-#claim-pane > .ui.segments > .merging.segment {
+#claim-pane-overview > .merging.menu {
 	padding: 0.5em 0;
 	display: none;
 	border-radius: 0;
@@ -28,9 +28,7 @@
 	border: none;
 
 }
-.claim.column > .ui.menu > .item.active {
-	background-color: #fff;
-}
+
 .ui.secondary.menu .dropdown.item > .menu {
     margin-top: 0!important;
 }
@@ -89,24 +87,24 @@ a.claim-vote-btn.unready:hover {
 	color: rgba(40,40,40,.3)!important;
 	background-color: transparent!important;
 }
-#claim-pane .claim.segment {
+#claim-pane-overview .claim.segment {
     padding-bottom: 0;
 
 }
-#claim-pane .stmt.segment {
+#claim-pane-overview .stmt.segment {
 	background-color: #FFFAF3;
 }
-#claim-pane .stmt.segment .claim-addstmt-handle {
+#claim-pane-overview .stmt.segment .claim-addstmt-handle {
 	display: none;
 }
-#claim-pane .segments .claim.menu {
+#claim-pane-overview .claim.menu {
     margin: 0 -1em;
 	-webkit-box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
 	-moz-box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
 	box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
 	background-color: #F3F4F5;
 }
-#claim-pane .private.claim.segment {
+#claim-container .private.claim.segment {
     opacity: 0.6;
 }
 #claim-navigator {
@@ -245,69 +243,3 @@ a.claim-vote-btn.unready:hover {
 	width: 100%;
 	background: linear-gradient(to bottom, rgba(0, 0, 0, 0), white);
 }
-
-/*4:3:3*/
-
-/*#workbench-document-container {
-	position: absolute;
-	left: 0%;
-	top: 0%; 
-	bottom: 0%;
-	right: 60%;
-	margin: 0.5em;
-}
-
-#workbench-document-panel {
-	left: 0%;
-	top: 0%;
-	bottom: 0%;
-	right: 0%;
-	height: 94%;
-	overflow: auto;
-}
-
-#workbench-nugget-container {
-	position: absolute;
-	left: 40%;
-	top: 0%;
-	bottom: 0%;
-	right: 30%;
-    margin: 0.5em;
-}
-
-#workbench-nugget-panel {
-	left: 0%;
-	top: 0%; 
-	bottom: 0%;
-	right: 0%;
-	height: 94%;
-	overflow: auto;
-}
-
-#workbench-claim-container {
-	position: absolute;
-	left: 70%;
-	top: 0%; 
-	bottom: 0%;
-	right: 0%;
-	margin: 0.5em;
-}
-
-#workbench-claim-panel {
-	left: 0%;
-	top: 0%; 
-	bottom: 0%;
-	right: 0%;
-	height: 94%;
-	overflow: auto;
-}
-
-#workbench-theme-container {
-	padding: 0.5em;
-	margin: 0.5em;
-}
-*/
-
-/*.workbench-documents-column:nth-of-type(even) {
-	background: #FFCCCC;
-}*/
