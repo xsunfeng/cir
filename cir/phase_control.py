@@ -82,7 +82,7 @@ PHASE_CONTROL = {
         'full_name': 'Claim prioritization and improvement',
         'instructions': 'This phase involves claim consolidation and improvement in terms of information and language. Please use the rewording and merging functions.',
         'claim_active': 'active',
-        'vote_btn': 'disabled',
+        'vote_btn': 'hidden',
         'theming_menu': 'hidden',
     },
     'finished': {

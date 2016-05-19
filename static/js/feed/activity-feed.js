@@ -21,9 +21,10 @@ define([
 				this.data('question_id', this.data('id'));
 				var url = '/api_qa/';
 			}
-			if (!require.defined('phase3/claim')) {
+			if (!require.defined('phase3/claim') && !require.defined('phase4/claim')) {
 				return;
 			}
+			var claimModule = require.defined('phase3/claim') ? require('phase3/claim') : require('phase4/claim');
 			_this.updater = $.ajax({
 				url: url,
 				type: 'post',
@@ -36,7 +37,7 @@ define([
 
 					showDeleteButtons();
 
-					if (_this.data('type') == 'claim' && require('phase3/claim').display_type == 'fullscreen') {
+					if (_this.data('type') == 'claim' && claimModule.display_type == 'fullscreen') {
 						_this.find('.filter.buttons .button').removeClass('loading').removeClass('active');
 						_this.find('.filter.buttons .button[data-filter="' + _this.data('filter') + '"]').addClass('active');
 
@@ -118,7 +119,8 @@ define([
 			$('#claim-activity-feed .improve.menu').each(function() {
 				var $menu = $(this);
 				// prevent users' fast view switching!
-				if (require('phase3/claim').display_type != 'fullscreen') return;
+				var claimModule = require.defined('phase3/claim') ? require('phase3/claim') : require('phase4/claim');
+				if (claimModule.display_type != 'fullscreen') return;
 				var version_id = this.getAttribute('data-id');
 				$.ajax({
 					url: '/api_claim_vote/',
@@ -274,7 +276,8 @@ define([
 					version_id: id,
 				},
 				success: function(xhr) {
-					require('phase3/claim').updateClaimPane();
+					var claimModule = require.defined('phase3/claim') ? require('phase3/claim') : require('phase4/claim');
+					claimModule.updateClaimPane();
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -336,7 +339,8 @@ define([
 			}).on('click', '.doc-jumpto-claim', function(e) {
 				var claim_id = this.getAttribute('data-id');
 				require('layout/layout').changeTab('claim-tab', function() {
-					require('phase3/claim').jumpTo(claim_id, 'fullscreen')
+					var claimModule = require.defined('phase3/claim') ? require('phase3/claim') : require('phase4/claim');
+					claimModule.jumpTo(claim_id, 'fullscreen')
 				});
 			}).on('click', '.filter.buttons .button', function() {
 				$(this).addClass('loading');
