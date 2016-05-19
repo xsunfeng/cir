@@ -53,16 +53,6 @@
 			<a class="item claim-vote-btn {{ phase.vote_btn }}" data-action="finding"><i class="flag outline icon"></i><span></span></a>
 			<a class="item claim-vote-btn {{ phase.vote_btn }}" data-action="discarded"><i class="trash outline icon"></i><span></span></a>
 			<div class="right menu">
-				<div class="ui dropdown simple theme item {{ phase.theming_menu }}">
-					Theme
-					<i class="dropdown icon"></i>
-					<div class="ui menu">
-						{% if themes %}{% for theme in themes %}
-						<a class="item theme-assign-btn" data-id="{{ theme.id }}">{{ theme.name }}</a>
-						{% endfor %}{% endif %}
-						<a class="item theme-suggest-btn">Suggest a new theme ...</a>
-					</div>
-				</div>
 				<div class="ui dropdown simple flag item {{ phase.improve_menu }}">
 					Flag
 					<i class="dropdown icon"></i>

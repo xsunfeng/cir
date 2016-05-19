@@ -313,9 +313,6 @@ define([
 				if ($('#claim-container .claim.segment').length) { // make sure non-empty claim list
 					loadVotes();
 				}
-				if ($('body').attr('data-phase') == 'improve') {
-					initStmtHandles();
-				}
 			},
 			error: function(xhr) {
 				$('#claim-pane > .segment').removeClass('loading');
@@ -397,6 +394,7 @@ define([
 
 	module.initClaimView();
 	module.updateClaimPane();
-	ClaimNavigator.updateNavigator();
+	ClaimNavigator.activeClaimModule = module;
+	ClaimNavigator.updateNavigator({'claim': true, 'filter': true});
 	return module;
 });

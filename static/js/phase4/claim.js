@@ -787,6 +787,6 @@ define([
 
 	module.initClaimView();
 	module.updateClaimPane();
-	ClaimNavigator.updateNavigator();
+	ClaimNavigator.updateNavigator({'filter': true});
 	return module;
 });

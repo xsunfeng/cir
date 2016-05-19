@@ -6,19 +6,15 @@ define([
 	var module = {};
 	module.currentCategory = null;
 	module.currentTheme = null;
-	$('#claim-navigator')
-		.on('click', '#claim-nav-pane .claim.item', function() {
-			var claim_id = this.getAttribute('data-id');
-			require('phase3/claim').jumpTo(claim_id); // without changing display_type
-		}).on('click', '#claim-nav-pane .refresh.item', function() {
-			module.updateNavigator({'claim_only': true});
-		});
+	module.activeClaimModule = null;
+
 	module.updateNavigator = function(options) {
 		var options = options || {};
-		if (options.claim_only) {
+		if (options.claim) {
 			$('#claim-nav-pane').css('opacity', '0.5');
-		} else {
-			$('#claim-navigator').css('opacity', '0.5');
+		}
+		if (options.filter) {
+			$('#claim-filter-pane').css('opacity', '0.5');
 		}
 		$.ajax({
 			url: '/api_get_claim/',
@@ -27,27 +23,28 @@ define([
 				'action': 'navigator',
 				'category': module.currentCategory,
 				'theme': module.currentTheme,
+				'update_claim': options.claim,
+				'update_filter': options.filter
 			},
 			success: function(xhr) {
-				if (options.claim_only) {
-					$('#claim-nav-pane').css('opacity', '1.0');
-					$('#claim-nav-pane').html($(xhr.html).filter('#claim-nav-pane').children());
-				} else {
-					$('#claim-navigator').css('opacity', '1.0');
+				$('#claim-nav-pane').css('opacity', '1.0');
+				$('#claim-filter-pane').css('opacity', '1.0');
+				if (options.claim && options.filter) {
 					$('#claim-navigator').html(xhr.html);
-					$('#claim-filter-pane .accordion.menu').accordion();
+					initNav();
 					initFilters();
-				}
-				if (require.defined('phase3/claim')) {
-					module.setActive(require('phase3/claim').claim_id);
+				} else if (options.claim) {
+					$('#claim-nav-pane').html($(xhr.html).children());
+					initNav();
+					module.setActive(module.activeClaimModule.claim_id);
+				} else if (options.filter) {
+					$('#claim-filter-pane').html($(xhr.html).children());
+					initFilters();
 				}
 			},
 			error: function(xhr) {
-				if (options.claim_only) {
-					$('#claim-nav-pane').css('opacity', '1.0');
-				} else {
-					$('#claim-navigator').css('opacity', '1.0');
-				}
+				$('#claim-nav-pane').css('opacity', '1.0');
+				$('#claim-filter-pane').css('opacity', '1.0');
 				if (xhr.status == 403) {
 					Utils.notify('error', xhr.responseText);
 				}
@@ -72,38 +69,47 @@ define([
 			}
 		}
 	};
+
+	function initNav() {
+		$('#claim-nav-pane .claim.item').click(function() {
+			if (module.activeClaimModule) {
+				var claim_id = this.getAttribute('data-id');
+				module.activeClaimModule.jumpTo(claim_id); // without changing display_type
+			}
+		});
+		$('#claim-nav-pane .refresh.item').click(function() {
+			module.updateNavigator({'claim': true});
+		});
+	}
 	function initFilters() {
-		// initialize filters
-		$('#claim-filter-pane .theme.menu').on('click', 'a.item', function() {
-			if ($(this).hasClass('active')) return;
-			var choice = this.getAttribute('data-value');
+		$('#claim-filter-pane .theme.menu').click(function(e) {
+			if ($(e.target).hasClass('active')) return;
+			var choice = e.target.getAttribute('data-value');
 			if (choice == '0') {
 				delete module.currentTheme;
 			} else {
 				module.currentTheme = choice;
 			}
-			if (require.defined('phase3/claim')) {
-				require('phase3/claim').updateClaimPane();
-			}
 
-			module.updateNavigator({'claim_only': true});
+			module.activeClaimModule.updateClaimPane();
+
+			module.updateNavigator({'claim': true});
 			$('#claim-filter-pane .theme.menu .item').removeClass('active');
-			$(this).addClass('active');
+			$(e.target).addClass('active');
 		});
-		$('#claim-filter-pane .category.menu').on('click', 'a.item', function() {
-			if ($(this).hasClass('active')) return;
-			var choice = this.getAttribute('data-value');
+		$('#claim-filter-pane .category.menu').click(function(e) {
+			if ($(e.target).hasClass('active')) return;
+			var choice = e.target.getAttribute('data-value');
 			if (choice == 'all') {
 				delete module.currentCategory;
 			} else {
 				module.currentCategory = choice;
 			}
-			if (require.defined('phase3/claim')) {
-				require('phase3/claim').updateClaimPane();
-			}
-			module.updateNavigator({'claim_only': true});
+
+			module.activeClaimModule.updateClaimPane();
+			module.updateNavigator({'claim': true});
 			$('#claim-filter-pane .category.menu .item').removeClass('active');
-			$(this).addClass('active');
+			$(e.target).addClass('active');
 		});
 	}
 	return module;

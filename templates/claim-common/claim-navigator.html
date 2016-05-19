@@ -1,24 +1,23 @@
+{% if option.filter %}
 <div id="claim-filter-pane">
-    <h4 class="ui header">Review status</h4>
+    <h4 class="ui header">Filter by theme</h4>
     <div class="ui vertical text theme menu">
         <a data-value="0" class="item">(All)</a>
         {% for theme in themes %}<a data-value="{{ theme.id }}" class="item">{{ theme.name }}</a>{% endfor %}
-        <a data-value="-1" class="item">(Undecided)</a>
+        <a data-value="-1" class="item">(Unassigned)</a>
     </div>
-    <div class="ui vertical text accordion menu">
-        <h4 class="title ui header" style="margin-bottom: 0;">
-            Filter by category
-        </h4>
-        <div class="content category menu">
-            <a data-value="all" class="item">(All)</a>
-            <a data-value="pro" class="item">Pro</a>
-            <a data-value="con" class="item">Con</a>
-            <a data-value="finding" class="item">Finding</a>
-            <a data-value="discarded" class="item">Discarded</a>
-            <a data-value="undecided" class="item">(Undecided)</a>
-        </div>
-    </div>
+    <h4 class="ui header">Filter by category</h4>
+	<div class="ui vertical text category menu">
+		<a data-value="all" class="item">(All)</a>
+		<a data-value="pro" class="item">Pro</a>
+		<a data-value="con" class="item">Con</a>
+		<a data-value="finding" class="item">Finding</a>
+		<a data-value="discarded" class="item">Discarded</a>
+		<a data-value="undecided" class="item">(Unassigned)</a>
+	</div>
 </div>
+{% endif %}
+{% if option.claim %}
 <div id="claim-nav-pane" class="ui secondary vertical blue menu">
     <h4 class="ui header">
         {% if not category and not theme %}<strong>All claims</strong>
@@ -43,3 +42,4 @@
     </div>
 	{% endif %}
 </div>
+{% endif %}

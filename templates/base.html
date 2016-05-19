@@ -41,7 +41,7 @@
             });
         </script>
     </head>
-    <body id="cir" {% if forum_id %}forum-id="{{ forum_id }}" {% endif %}{% if phase_info %}data-phase="{{ phase_info.phase_name }}"{% endif %}>
+    <body id="cir" {% if forum_id %}forum-id="{{ forum_id }}" {% endif %}{% if phase_info %}data-phase="{{ phase_info.selected_phase }}"{% endif %}>
 	{% block header %}
 	{% endblock %}
 	<div id="popup-notification" class="ui message hidden"></div>

@@ -16,7 +16,7 @@
 	<div class="title"><i class="dropdown icon"></i>This claim has been merged -- click to expand.</div>
 	<div class="content">
 {% else %}
-<section class="ui attached segment claim {% if claim.stmt_order != None %}stmt{% endif %} {% if not claim.published %}private{% endif %}" data-id="{{ claim.id }}">
+<section class="ui attached segment claim{% if claim.stmt_order != None %} stmt{% endif %}{% if not claim.published %} private{% endif %}" data-id="{{ claim.id }}">
 {% endif %}
 	<a class="ui right teal corner merge label" title="Flagged as to be merged -- click to remove flag" style="display:none">
 		<i class="plus square outline icon"></i>
@@ -64,16 +64,6 @@
 		<a class="item claim-vote-btn {{ phase.vote_btn }}" data-action="discarded"><i class="trash outline icon"></i><span></span></a>
 		<div class="right menu">
 			{% if not claim.is_merged %}
-			<div class="ui dropdown simple theme item {{ phase.theming_menu }}">
-				Theme
-				<i class="dropdown icon"></i>
-				<div class="ui menu">
-					{% if themes %}{% for theme in themes %}
-					<a class="item theme-assign-btn" data-id="{{ theme.id }}">{{ theme.name }}</a>
-					{% endfor %}{% endif %}
-					<a class="item theme-suggest-btn">Suggest a new theme ...</a>
-				</div>
-			</div>
 			<div class="ui dropdown simple flag item {{ phase.improve_menu }}">
 				Flag
 				<i class="dropdown icon"></i>
