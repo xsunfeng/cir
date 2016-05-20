@@ -241,10 +241,12 @@ def put_claim(request):
     newClaim.save()
     claim_version = ClaimVersion(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, claim=newClaim)
     claim_version.save()
-    data_hl_ids_list = data_hl_ids.strip().split(" ")
+    data_hl_ids_list = data_hl_ids.strip().split(",")
     for data_hl_id in data_hl_ids_list:
         newHighlightClaim = HighlightClaim(claim_id=newClaim.id, highlight_id=data_hl_id)
         newHighlightClaim.save()
+        newClaimAndTheme = ClaimAndTheme(claim_id = newClaim.id, theme = Highlight.objects.get(id = data_hl_id).theme)
+        newClaimAndTheme.save()
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_assign_nugget(request):
@@ -310,7 +312,9 @@ def get_nugget_list(request):
         for section in doc.sections.all():
             highlights = section.highlights.all()
             for highlight in highlights:
-                context['highlights'].append(highlight.getAttr())
+                highlight_info = highlight.getAttr()
+                highlight_info["comment_number"] = NuggetComment.objects.filter(highlight_id = highlight.id).count()
+                context['highlights'].append(highlight_info)
     context['highlights'].sort(key = lambda x: x["created_at"], reverse=True)
     response['highlight2claims'] = {}
     for highlight in context['highlights']:
@@ -359,11 +363,7 @@ def get_claim_list(request):
     forum = Forum.objects.get(id=request.session['forum_id'])
     response = {}
     context = {}
-    theme_id = int(request.REQUEST.get('theme_id'))
-    if (theme_id > 0): 
-        claims = Claim.objects.filter(theme_id = theme_id)
-    else:
-        claims = Claim.objects.filter(forum = forum)
+    claims = Claim.objects.filter(forum = forum)
     context["claims"] = []
     for claim in claims:
         item = {}
@@ -378,6 +378,11 @@ def get_claim_list(request):
         for highlight in claim.source_highlights.all():
             arr.append(str(highlight.id))
         item['highlight_ids'] = ",".join(arr)
+        item['themes'] = []
+        for claimAndTheme in ClaimAndTheme.objects.filter(claim = claim):
+            theme = claimAndTheme.theme
+            if theme not in item['themes']:
+                item['themes'].append(theme)
         context["claims"].append(item)
     context['claims'].sort(key = lambda x: x["created_at_used_for_sort"], reverse=True)
     response['workbench_claims'] = render_to_string("phase2/claim_list.html", context)

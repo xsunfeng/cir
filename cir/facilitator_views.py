@@ -245,3 +245,49 @@ def user_mgmt(request):
         context['user_name'] = request.user.get_full_name()
         response['html'] = render_to_string('header/user_switch_menu.html', context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def get_pie(request):
+    response = {}
+    response["html"] = render_to_string('facilitation/vis/pie.html')
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def get_highlights(request):
+    # filters
+    forum = Forum.objects.get(id = request.session['forum_id'])
+    theme_ids = ClaimTheme.objects.filter(forum = forum).values("id")
+    highlights = Highlight.objects.filter(theme_id__in = theme_ids, is_nugget = True)
+    response = {}
+    response['highlights'] = []
+    for highlight in highlights:
+        highlight_info = {}
+        highlight_info["id"] = highlight.id
+        highlight_info["date"] = timezone.localtime(highlight.created_at).strftime("%Y %m %d %H %M")
+        highlight_info["doc_id"] = DocSection.objects.get(id = highlight.context.id).doc.id
+        highlight_info["theme_id"] = highlight.theme.id
+        highlight_info["author_id"] = highlight.author.id
+        highlight_info["author_name"] = str(highlight.author)
+        highlight_info["theme_name"] = str(highlight.theme.name)
+        response['highlights'].append(highlight_info)
+    # we only consider root docs by this moment
+    root_docs = Doc.objects.filter(forum=forum, folder__isnull=True).order_by("order")
+    nuggetmaps = NuggetMap.objects.filter(doc_id__in = root_docs.values('id'))
+    viewlogs = ViewLog.objects.filter(doc_id__in = root_docs.values('id'))
+    if (nuggetmaps.count() != 0 and viewlogs.count() != 0):
+        time_upper_bound = max(nuggetmaps.order_by("-created_at")[0].created_at, viewlogs.order_by("-created_at")[0].created_at)
+        time_lower_bound = min(nuggetmaps.order_by("created_at")[0].created_at, viewlogs.order_by("created_at")[0].created_at)
+    elif nuggetmaps.count() != 0:
+        time_upper_bound = nuggetmaps.order_by("-created_at")[0].created_at
+        time_lower_bound = nuggetmaps.order_by("created_at")[0].created_at
+    elif viewlogs.count() != 0:
+        time_upper_bound = viewlogs.order_by("-created_at")[0].created_at
+        time_lower_bound = viewlogs.order_by("created_at")[0].created_at
+    else:
+        time_upper_bound = datetime(2011, 8, 15, 8, 15, 12, 0, pytz.UTC)
+        time_lower_bound = datetime(2021, 8, 15, 8, 15, 12, 0, pytz.UTC)
+    print time_upper_bound
+    print time_lower_bound
+    time_upper_bound = timezone.localtime(time_upper_bound).strftime("%Y %m %d %H %M")
+    time_lower_bound = timezone.localtime(time_lower_bound).strftime("%Y %m %d %H %M")
+    response["time_upper_bound"] = time_upper_bound
+    response["time_lower_bound"] = time_lower_bound
+    return HttpResponse(json.dumps(response), mimetype='application/json')

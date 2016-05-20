@@ -309,6 +309,8 @@ def get_highlights2(request):
 		highlight_info["doc_id"] = DocSection.objects.get(id = highlight.context.id).doc.id
 		highlight_info["theme_id"] = highlight.theme.id
 		highlight_info["author_id"] = highlight.author.id
+		highlight_info["author_name"] = str(highlight.author)
+		highlight_info["theme_name"] = str(highlight.theme.name)
 		response['highlights'].append(highlight_info)
 	# we only consider root docs by this moment
 	root_docs = Doc.objects.filter(forum=forum, folder__isnull=True).order_by("order")

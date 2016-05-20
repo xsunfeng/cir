@@ -515,6 +515,10 @@ class HighlightClaim(models.Model):
     claim = models.ForeignKey(Claim, on_delete=models.CASCADE)
     highlight = models.ForeignKey(Highlight, on_delete=models.CASCADE)
 
+class ClaimAndTheme(models.Model):
+    claim = models.ForeignKey(Claim, on_delete=models.CASCADE)
+    theme = models.ForeignKey(ClaimTheme, on_delete=models.CASCADE)
+
 class SankeyWorkbench(models.Model):
     forum = models.ForeignKey(Forum, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)

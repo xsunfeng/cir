@@ -266,7 +266,6 @@ define([
 			});						
 		});
 		$("body").on("click", ".reassign-nugget", function(e) {
-			console.log(module.Theme.themes);
 			var container = $(this).closest(".workbench-nugget");
 			var html = "<div class='reassign-options'><div style='overflow:hidden;'><button class='workbench-nugget-reassign-close' style='float:right;'><i class='remove icon'></i>close</button></div>";
 			for (var theme_name in module.Theme.themes) {

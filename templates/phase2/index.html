@@ -81,6 +81,7 @@
 		</div>
 	</div>
 	<div style="overflow:auto; top:60px; bottom:0; position:absolute; padding:1em; left:0; right:0; padding-top: 0;">
+		<div id="candidate-nugget-list" style="margin-bottom: 1em;"></div>
 		<div class="ui form" id="claim-maker">
 			<div class="field">
 				<textarea></textarea>
@@ -113,6 +114,8 @@
 	{% include 'chatter.html' %}
 {% endif %}
 	{% endif %}
+
+{% include 'phase1/nugget_comment.html' %}
 
 {% endblock %}
 
