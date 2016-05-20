@@ -1,11 +1,13 @@
 {% if claims %}{% for claim in claims %}
-{% if claim.is_merged %}
-<section class="ui attached claim segment accordion" data-id="{{ claim.id }}">
-	<div class="title"><i class="dropdown icon"></i>This claim has been merged -- click to expand.</div>
-	<div class="content">
-{% else %}
-<section class="ui attached segment claim{% if claim.is_stmt %} stmt{% endif %}{% if not claim.published %} private{% endif %}" data-id="{{ claim.id }}">
-{% endif %}
+<div class="ui top attached secondary claim menu" data-id="{{ claim.id }}">
+	<div class="item">
+		<div class="ui label">C{{ claim.id }}</div>
+	</div>
+	<div class="right menu">
+		<div class="item claim-addstmt-handle"><i class="move icon"></i>Drag to statement</div>
+	</div>
+</div>
+<section class="ui bottom attached segment claim{% if claim.is_stmt %} stmt{% endif %}" data-id="{{ claim.id }}">
 	<div class="content">
 	{% if claim.collective %}
 		<a class="ui teal right ribbon label">Collective</a>
@@ -20,21 +22,7 @@
 		{% endif %}
 		</div>
 	</div>
-	<div class="ui red small secondary claim menu" data-id="{{ claim.id }}">
-	{% if claim.published %}
-		<div class="right menu">
-			{% if not claim.is_merged %}
-			<div class="item claim-addstmt-handle"><i class="move icon"></i>Drag to statement</div>
-			{% endif %}
-		</div>
-	{% else %}
-		<div class="red active item" title="This claim is unpublished and only visible to you">Private</div>
-		<a class="item claim-edit-btn"><i class="edit icon"></i>Edit</a>
-		<a class="item claim-delete-btn"><i class="delete icon"></i>Delete</a>
-	{% endif %}
-	</div>
 </section>
-{% if claim.is_merged %}</section>{% endif %}
 {% endfor %}{% else %}
 <div class="ui orange inverted segment">
 	No claims available for now.

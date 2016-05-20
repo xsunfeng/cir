@@ -8,7 +8,7 @@
 		<li class="item">
 			<div class="ui top attached segment slot" data-id="{{ slot_info.id }}">
 				<i class="reorder-handle vertical resize icon"></i>
-				Theme for this slot: (unknown)
+				Theme for this slot: {{ slot_info.slot_theme }}
 				{% for src_claim in slot_info.claims %}
 				<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}">
 					{% if src_claim.theme %}<div class="ui label">Theme: {{ src_claim.theme }}</div>{% endif %}
@@ -18,7 +18,7 @@
 				{% endfor %}
 			</div>
 			<div class="ui bottom attached one item menu">
-				<a class="fullscreen item" data-id="{{ slot_info.id }}">Open discussions</a>
+				<a class="fullscreen item" data-id="{{ slot_info.id }}">Discussions</a>
 			</div>
 		</li>
 	{% endfor %}{% else %}

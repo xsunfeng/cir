@@ -3,7 +3,8 @@ define([
 	'claim-common/claim-filter',
 	'claim-common/draft-stmt',
 	'utils',
-	'semantic-ui'
+	'semantic-ui',
+	'realtime/socket'
 ], function(
 	$,
 	ClaimFilter,
@@ -19,7 +20,7 @@ define([
 		if (module.claimLoader) {
 			module.claimLoader.abort();
 		}
-		$('#claim-pane-overview').addClass('loading');
+		$('#claim-pane-overview').html('<div class="ui active centered inline loader"></div>');
 		ClaimFilter.setActive();
 
 		module.claimLoader = $.ajax({
@@ -33,7 +34,6 @@ define([
 				'theme': ClaimFilter.currentTheme,
 			},
 			success: function(xhr) {
-				$('#claim-pane-overview').removeClass('loading');
 				$('#claim-pane-overview').html(xhr.html);
 				$('.ui.accordion').accordion({'close nested': false});
 				DraftStmt.initStmtHandles();

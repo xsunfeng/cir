@@ -24,4 +24,7 @@
 		<div class="ui message">Please click "Open Discussion" from the left column.</div>
 	</div>
 </div>
+{% if role != 'visitor' %}
+	{% include 'chatter.html' %}
+{% endif %}
 {% endblock %}

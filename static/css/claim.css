@@ -12,6 +12,7 @@
 #draft-stmt-container {
 	height: 100%;
 	overflow: auto;
+	padding-bottom:3em;
 }
 
 #claim-pane-fullscreen {
@@ -112,13 +113,6 @@ a.claim-vote-btn.unready:hover {
 	background-color: #FFFAF3;
 }
 
-#claim-pane-overview .claim.menu {
-    margin: 0 -1em;
-	-webkit-box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
-	-moz-box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
-	box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
-	background-color: #F3F4F5;
-}
 #claim-container .private.claim.segment {
     opacity: 0.6;
 }
@@ -138,6 +132,31 @@ a.claim-vote-btn.unready:hover {
 
 }
 
+#draft-stmt .stmt.progress {
+	margin:0;
+}
+
+#draft-stmt .slot-title {
+	display: inline-block;
+
+}
+#draft-stmt .slot-title-wrapper {
+	display: inline-block;
+	width: calc(100% - 40px);
+}
+#draft-stmt .slot-title:hover {
+	cursor: text;
+	margin: 2px 0 0;
+	border:	 1px solid #A7A7A7;
+	background-color: #fff;
+}
+#draft-stmt .slot-title-input {
+	cursor: text;
+	margin: 2px 1em 0;
+	border:	 1px solid #A7A7A7;
+	background-color: #fff;
+	width: 40%;
+}
 
 #draft-stmt .ui.progress .title {
 	position: absolute;
@@ -146,8 +165,14 @@ a.claim-vote-btn.unready:hover {
 	z-index: 2;
 	font-size: 1.1em;
 	font-weight: bold;
+	margin-top:0.2em;
 }
 
+#draft-stmt .ui.progress .label {
+	top: 0;
+	font-weight: inherit;
+	left: -40%;
+}
 
 #draft-stmt .src_claim {
 	max-height: 5em;
@@ -163,21 +188,7 @@ a.claim-vote-btn.unready:hover {
 #draft-stmt .slot.phase3:hover .src_claim {
 	max-height: inherit;
 }
-#draft-stmt .item.to-merge:after {
-	background-color: #D9D9D9;
-	width: 100%;
-	height: calc(100% - 4px);
-	content: 'Drop to merge into slot';
-	position: absolute;
-	visibility: visible;
-	z-index: 2;
-	text-align: center;
-	border-radius: 10px;
-	border: 5px dashed #2185D0;
-	font-size: 2em;
-	line-height: 1em;
-	top: 4px;
-}
+
 #draft-stmt .slot .reorder-handle {
 	cursor: ns-resize;
 }
@@ -194,21 +205,6 @@ a.claim-vote-btn.unready:hover {
 	max-height:3.5em;
 }
 
-#draft-stmt .item.empty.to-drop:after {
-	background-color: #D9D9D9;
-	width: 100%;
-	height: 100%;
-	content: 'Drop to create the first slot';
-	position: absolute;
-	visibility: visible;
-	z-index: 2;
-	text-align: center;
-	border-radius: 10px;
-	border: 5px dashed #2185D0;
-	font-size: 2em;
-	line-height: 1em;
-	top: 0;
-}
 #draft-stmt .sortable-placeholder {
 	background-color: #D9D9D9;
 	height: 7em;
@@ -225,18 +221,40 @@ a.claim-vote-btn.unready:hover {
 	font-size: 2em;
 	line-height: 2em;
 }
-
-#droppable-edge:after {
+#draft-stmt .item.to-drop:after {
 	background-color: #D9D9D9;
-	height: 2em;
-	content: 'Drop to create a new slot here';
+	width: 100%;
+	height: calc(100% - 4px);
+	content: 'Drop to merge into slot';
+	position: absolute;
 	visibility: visible;
+	z-index: 2;
 	text-align: center;
 	border-radius: 10px;
 	border: 5px dashed #2185D0;
 	font-size: 2em;
 	line-height: 1em;
+	top: 4px;
 }
+
+.droppable-edge:after {
+	display: block;
+	background-color: #F3F4F5;
+	height: 42px;
+	content: 'Drop a claim here to create a new slot';
+	text-align: center;
+	border-radius: 0.3em;
+	border: 2px solid #2185D0;
+	font-size: 1em;
+	line-height: 2em;
+	margin-top: 14px;
+}
+.droppable-edge.to-drop:after {
+	background-color: #D9D9D9;
+	content: 'Drop to create a new slot';
+	border: 5px dashed #2185D0;
+}
+
 #claim-stmt-helper {
 	width: 25em;
 	max-height: 7em;

@@ -34,11 +34,53 @@ define([
 	}).on('click', '.fullscreen.item', function() {
 		module.activeClaimModule.slot_id = this.getAttribute('data-id');
 		module.activeClaimModule.updateClaimPane();
+	}).on('click', '.slot-title', function() {
+		module.$slotTitleInput = $('<div class="slot-title-wrapper">')
+			.append('<input type="text" class="slot-title-input">')
+			.append('<button class="ui primary update-slot-title button">Update</button>')
+			.append('<button class="ui cancel-slot-title button">Cancel</button>');
+		if ($(this).hasClass('empty')) {
+			module.$slotTitleInput.find('input').val('');
+			module.currentSlotTitle = '';
+		} else {
+			module.$slotTitleInput.find('input').val($(this).text());
+			module.currentSlotTitle = $(this).text();
+		}
+		$(this).replaceWith(module.$slotTitleInput);
+		module.$slotTitleInput.find('input').select();
+	}).on('click', '.slot .update-slot-title', function() {
+		var newTitle = module.$slotTitleInput.find('input').val();
+		$.ajax({
+			url: '/api_draft_stmt/',
+			type: 'post',
+			data: {
+				action: 'change-title',
+				slot_id: $('.update-slot-title').parents('.slot').attr('data-id'),
+				new_title: newTitle,
+			},
+			success: function() {
+				var html = '<div class="slot-title">' + newTitle + '</div>';
+				module.$slotTitleInput.replaceWith(html);
+				delete module.$slotTitleInput;
+				delete module.currentSlotTitle;
+			},
+		})
+
+	}).on('click', '.slot .cancel-slot-title', function() {
+		var html = '<div class="slot-title';
+		if (module.currentSlotTitle == '') {
+			html += ' empty">(Click to name this slot)</div>';
+		} else {
+			html += '">' + module.currentSlotTitle + '</div>';
+		}
+		module.$slotTitleInput.replaceWith(html);
+		delete module.$slotTitleInput;
+		delete module.currentSlotTitle;
 	});
 
 	module.initStmtHandles = function() {
 		$('#claim-pane-overview .claim-addstmt-handle').mousedown(function(event) {
-			var $claimsegment = $(this).parents('.claim.segment');
+			var $claimsegment = $(this).parents('.claim.menu').next();
 			var claimcontent = $claimsegment.find('.claim-content').text();
 			module.draggingClaimId = $claimsegment.attr('data-id');
 			var $helper = $('<div id="claim-stmt-helper" class="ui segment">' + claimcontent + '</div>');
@@ -77,7 +119,7 @@ define([
 			if (e.pageX > targetOffset.left
 				&& e.pageX < targetOffset.left + $target.width()
 				&& e.pageY > targetOffset.top
-				&& e.pageY < targetOffset.top + $target.outerHeight(true)) {
+				&& e.pageY < targetOffset.top + $target.outerHeight()) {
 				module.$currentlist = $target;
 				break;
 			}
@@ -88,42 +130,28 @@ define([
 			return false;
 		}
 
-		var $items = module.$currentlist.find('.item');
+		var $items = module.$currentlist.children();
+		var $newslot = module.$currentlist.find('.droppable-edge');
 
-		if ($items.hasClass('empty')) {
-			$items.addClass('to-drop');
-			module.action = 'insert';
-			module.order = 0;
-		} else {
-			// check if on an entry or between entries
-			var wrapperTop = $('#draft-stmt').offset().top;
-			for (var i = 0; i < $items.length; i++) {
-				var $item = $target.find('.item').eq(i);
-				var itemY = $item.offset().top;
-				if (e.pageY < itemY + 10) {
-					// insert before this $item
-					if (!$('#droppable-edge').length) $('<li id="droppable-edge" class="item">').insertBefore($item);
-					$items.removeClass('to-merge');
-					module.order = i;
-					module.action = 'insert';
-					return;
-				} else if (e.pageY >= itemY + 10
-					&& e.pageY <= itemY + $item.height() - 10) {
+		var wrapperTop = $('#draft-stmt').offset().top;
+		for (var i = 0; i < $items.length; i++) {
+			var $item = $items.eq(i);
+			var itemY = $item.offset().top;
+			if (e.pageY >= itemY && e.pageY <= itemY + $item.height()) {
+				$items.removeClass('to-drop');
+				$item.addClass('to-drop');
+				if ($item.hasClass('item')) {
 					// merge with $item
-					$('#droppable-edge').remove();
-					$item.addClass('to-merge');
 					module.target_id = $item.find('.slot').attr('data-id');
 					module.action = 'merge';
 					return;
-				}
-				if (i == $items.length - 1
-					&& e.pageY > itemY + $item.height()) {
-					$('<li id="droppable-edge" class="item">').insertAfter($item);
-					$items.removeClass('to-merge');
-					module.order = i + 1;
+				} else if ($item.hasClass('droppable-edge')) {
+					// insert new slot
 					module.action = 'insert';
+					module.order = i;
 					return;
 				}
+
 			}
 		}
 	};
@@ -161,8 +189,7 @@ define([
 	};
 
 	function clearDropStatus() {
-		$('#draft-stmt .list .item')
-			.removeClass('to-merge')
+		$('#draft-stmt .list').children()
 			.removeClass('to-drop');
 		delete module.order;
 		delete module.action;
@@ -182,7 +209,7 @@ define([
 				stop: function(event, ui) {
 					// current elements reordered
 					var orders = {};
-					$(this).children().each(function(idx) {
+					$(this).find('.item').each(function(idx) {
 						orders[$(this).find('.slot').attr('data-id')] = idx;
 					});
 					_stmtUpdater({
@@ -201,8 +228,8 @@ define([
 					value: module.stmtCount[category],
 					total: module.stmtLimit[category],
 					text: {
-						active: '{value}/{total} entries',
-						success: '{value}/{total} entries'
+						active: '{value}/{total} slots',
+						success: '{value}/{total} slots'
 					}
 				});
 		});

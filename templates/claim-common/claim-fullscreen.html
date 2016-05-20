@@ -23,6 +23,15 @@
 			<div class="reword-flag-tags" data-id="{{ slot.version_id }}"></div>
 		</div>
 	</div>
+	<div class="ui vertical segment">
+	This slot contains the following claims
+		{% for src_claim in slot.claims %}
+			<div class="ui vertical segment" data-id="{{ src_claim.id }}">
+				{% if src_claim.theme %}<div class="ui label">Theme: {{ src_claim.theme }}</div>{% endif %}
+				{{ src_claim.content }}
+			</div>
+		{% endfor %}
+	</div>
 	<div class="ui vertical segment" style="padding: 0">
 		<div class="ui red small secondary claim menu" data-id="{{ slot.id }}">
 			<div class="ui dropdown simple flag item {{ phase.improve_menu }}">

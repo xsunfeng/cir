@@ -3,7 +3,8 @@ define([
 	'utils',
 	'claim-common/draft-stmt',
 	'feed/activity-feed',
-	'semantic-ui'
+	'semantic-ui',
+	'realtime/socket'
 ], function(
 	$,
 	Utils,

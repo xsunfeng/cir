@@ -79,6 +79,14 @@ def api_draft_stmt(request):
     action = request.REQUEST.get('action')
     forum = Forum.objects.get(id=request.session['forum_id'])
     context = {}
+
+    if action == 'change-title':
+        slot = Claim.objects.get(id=request.REQUEST['slot_id'])
+        new_title = request.REQUEST['new_title']
+        slot.title = new_title
+        slot.save()
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+
     if action == 'initiate-slot':
         now = timezone.now()
         claim_category = request.REQUEST.get('list_type')
@@ -139,7 +147,7 @@ def api_draft_stmt(request):
     for category in ['finding', 'pro', 'con']:
         context['categories'][category] = [slot.getAttrSlot(forum) for slot in slots.filter(claim_category=category).order_by('stmt_order')]
         response['slots_cnt'][category] += len(context['categories'][category])
-    if forum.phase == 'categorize':
+    if request.session['selected_phase'] == 'categorize':
         response['html'] = render_to_string('phase3/draft-stmt.html', context)
     else:
         response['html'] = render_to_string('phase4/draft-stmt.html', context)

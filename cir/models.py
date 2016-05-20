@@ -291,7 +291,7 @@ class ClaimVersion(Entry):
         return attr
 
 class Claim(Entry):
-    # for a Claim, its EntryCategory is not used for now -- for further extension of phases
+    title = models.TextField(null=True, blank=True)
     published = models.BooleanField(default=True)
     stmt_order = models.IntegerField(null=True, blank=True)
     CATEGORY_CHOICES = (
@@ -323,7 +323,6 @@ class Claim(Entry):
     def getAttr(self, forum):
         attr = self.adopted_version().getAttr(forum)
         attr['id'] = self.id
-        attr['published'] = self.published
         attr['entry_type'] = 'claim'
         attr['category'] = self.claim_category
         if self.theme:
@@ -341,9 +340,8 @@ class Claim(Entry):
 
     def getAttrSlot(self, forum):
         attr = super(Claim, self).getAttr(forum)
-        if self.theme:
-            attr['slot_theme'] = self.theme.name,
-        attr['category'] = self.claim_category,
+        attr['slot_title'] = self.title
+        attr['category'] = self.claim_category
         attr['claims'] = []
         for claimref in self.older_versions.filter(refer_type='stmt'):
             attr['claims'].append({
@@ -364,7 +362,6 @@ class Claim(Entry):
     def getExcerpt(self, forum):  # used for claim navigator
         attr = self.adopted_version().getExcerpt(forum)
         attr['id'] = self.id
-        attr['published'] = self.published
         return attr
 
 class ClaimReference(models.Model):
