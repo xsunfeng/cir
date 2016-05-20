@@ -1,64 +1,30 @@
-{% if slot %}
-<div class="ui full-screen segment">
-	<div class="ui vertical segment" style="padding-top:0">
-		{% if version %}
-		<div class="claim-content">{{ version.content|safe }}</div>
-		<div class="claim-metainfo">
-			Adopted version written by <a class="user" data-id="{{ version.author_id }}">{{ version.author_name }}</a>
-			<abbr title="{{ version.updated_at_full }}">{{ version.updated_at }}</abbr>
-		</div>
-		{% else %}
-		<div class="ui info message">No version is ever written for this slot.</div>
-		{% endif %}
+<h4 class="ui top attached center aligned header">
+	Slot details
+</h4>
+<div class="ui attached menu">
+	<a class="item claim-reword-btn">Compose a new statement candidate</a>
 
-		<div class="claim-metainfo">
-			<div class="ui label">Theme: {{ slot.theme }}</div>
-			{% if slot.category == 'pro' %}
-			<a class="ui teal label">Pro</a>
-			{% elif slot.category == 'con' %}
-			<a class="ui red label">Con</a>
-			{% elif slot.category == 'finding' %}
-			<a class="ui blue label">Key Finding</a>
-			{% endif %}
-			<div class="reword-flag-tags" data-id="{{ slot.version_id }}"></div>
-		</div>
-	</div>
-	<div class="ui vertical segment">
-	This slot contains the following claims
-		{% for src_claim in slot.claims %}
-			<div class="ui vertical segment" data-id="{{ src_claim.id }}">
-				{% if src_claim.theme %}<div class="ui label">Theme: {{ src_claim.theme }}</div>{% endif %}
-				{{ src_claim.content }}
-			</div>
-		{% endfor %}
-	</div>
-	<div class="ui vertical segment" style="padding: 0">
-		<div class="ui red small secondary claim menu" data-id="{{ slot.id }}">
-			<div class="ui dropdown simple flag item {{ phase.improve_menu }}">
-				Flag
-				<i class="dropdown icon"></i>
-				<div class="menu" data-id="{{ slot.version_id }}">
-					<a class="item claim-flag-reword-btn" data-collective="false">Flag as "needs rewording"</a>
-					<a class="item claim-flag-merge-btn">Flag as "needs merging" ...</a>
-				</div>
-			</div>
-			<div class="ui dropdown simple improve item {{ phase.improve_menu }}">
-				Improve
-				<i class="dropdown icon"></i>
-				<div class="menu">
-					<a class="item claim-reword-btn">Reword ...</a>
-					<a class="item claim-merge-btn">Merge ...</a>
-					<a class="item claim-duplicate-btn facilitator-only">Duplicate ...</a>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div id="claim-activity-feed" class="ui vertical segment">
-		<div class="ui small active inline loader"></div>Loading activities ...
-	</div>
 </div>
-{% else %}
-<div class="ui orange inverted segment">
-	No claims available for now.
+<form class="ui form reword attached segment" style="display:none">
+	<div class="ui info message">
+		<div class="header">
+			Hints for rewording a claim:
+		</div>
+		<ul class="list">
+			<li>Please keep in mind that it is a candidate statement in the final product, so the language should be precise, clear, and informative.</li>
+			<li>Please read the panel's discussion and think about their suggestions before writing your version.</li>
+			<li>After submission, your version will appear in Activities as a candidate version; the facilitator will ultimately perform the adoption.</li>
+		</ul>
+	</div>
+	<div class="field">
+		<label><span>Reword this claim</span> (Ctrl + Enter to publish)</label>
+		<textarea class="claim reword editor" rows="6"></textarea>
+		<input type="hidden" name="collective">
+	</div>
+	<div class="ui primary submit button"><i class="send outline icon"></i>Submit</div>
+	<div class="ui reset button">Cancel</div>
+</form>
+<h4 class="ui attached center aligned header">Activities on this slot (latest first)</h4>
+<div id="claim-activity-feed" class="ui bottom attached segment">
+	<div class="ui small active inline loader"></div>Loading activities ...
 </div>
-{% endif %}

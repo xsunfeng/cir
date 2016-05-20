@@ -1,9 +1,11 @@
 define([
 	'jquery',
-	'utils'
+	'utils',
+	'claim-common/draft-stmt'
 ], function(
 	$,
-	Utils
+	Utils,
+	DraftStmt
 ) {
 	jQuery.fn.feed = function(action, data) {
 		var _this = this;
@@ -15,7 +17,7 @@ define([
 				this.data('highlight_id', this.data('id'));
 				var url = '/api_annotation/';
 			} else if (this.data('type') == 'claim') {
-				this.data('claim_id', this.data('id'));
+				this.data('slot_id', this.data('id'));
 				var url = '/api_claim_activities/';
 			} else if (this.data('type') == 'question') {
 				this.data('question_id', this.data('id'));
@@ -268,16 +270,18 @@ define([
 		function adoptClaimVersion(button) {
 			var $menu = $(button).parent();
 			var id = $menu.attr('data-id');
+			var action = button.getAttribute('data-action');
 			$.ajax({
 				url: '/api_claim_vote/',
 				type: 'post',
 				data: {
-					action: 'adopt version',
+					action: action,
 					version_id: id,
 				},
 				success: function(xhr) {
 					var claimModule = require.defined('phase3/claim') ? require('phase3/claim') : require('phase4/claim');
 					claimModule.updateClaimPane();
+					DraftStmt.update();
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {

@@ -66,11 +66,6 @@ def api_get_slot(request):
         slot = Claim.objects.get(id=request.REQUEST.get('slot_id'))
         forum = Forum.objects.get(id=request.session['forum_id'])
         context['slot'] = slot.getAttrSlot(forum)
-
-        try:
-            context['version'] = slot.adopted_version().getAttr(forum)
-        except ObjectDoesNotExist:
-            pass
     response['html'] = render_to_string("claim-common/claim-fullscreen.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
@@ -134,7 +129,7 @@ def api_draft_stmt(request):
         claim = Claim.objects.get(id=request.REQUEST['claim_id'])
         slot = Claim.objects.get(id=request.REQUEST['slot_id'])
         ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=slot).delete()
-        if ClaimReference.objects.filter(refer_type='stmt', to_claim=slot).count() == 0:
+        if request.session['selected_phase'] == 'categorize' and ClaimReference.objects.filter(refer_type='stmt', to_claim=slot).count() == 0:
             # the last reference is removed
             slot.is_deleted = True
             slot.stmt_order = None
@@ -178,21 +173,18 @@ def api_claim(request):
             version.save()
         claim.save()
     elif action == 'reword':
-        claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
+        slot = Claim.objects.get(id=request.REQUEST.get('slot_id'))
         content = request.REQUEST.get('content')
         collective = request.REQUEST.get('collective')
         now = timezone.now()
         new_version = ClaimVersion(forum_id=request.session['forum_id'], content=content, created_at=now,
-            updated_at=now, is_adopted=False, claim=claim)
+            updated_at=now, is_adopted=False, claim=slot)
         if collective == 'true':
             new_version.collective = True
             # automatically adopt
-            current_version = claim.adopted_version()
-            current_version.is_adopted = False
-            current_version.save()
             new_version.is_adopted = True
-            claim.updated_at = now
-            claim.save()
+            slot.updated_at = now
+            slot.save()
         if actual_author:
             new_version.author = actual_author
             new_version.delegator = request.user
@@ -253,71 +245,26 @@ def api_claim_activities(request):
     response = {}
     action = request.REQUEST.get('action')
     if action == 'load-thread':
-        activity = request.REQUEST.get('filter')
-        claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
+        slot = Claim.objects.get(id=request.REQUEST.get('slot_id'))
         forum = Forum.objects.get(id=request.session['forum_id'])
         context = {}
         context['entries'] = []
-        if activity == 'all' or activity == 'general':
-            posts = claim.comments_of_entry.all()
+        posts = slot.comments_of_entry.all()
+        for post in posts:
+            for comment in post.getTree(exclude_root=False):
+                context['entries'].append(comment.getAttr(forum))
+
+        # performed rewording
+        for version in slot.versions.all():
+            version_info = version.getAttr(forum)
+            context['entries'].append(version_info)
+            posts = version.comments_of_entry.all()
             for post in posts:
                 for comment in post.getTree(exclude_root=False):
                     context['entries'].append(comment.getAttr(forum))
-        if activity == 'all' or activity == 'categorize':
-            votes = Vote.objects.filter(entry=claim).filter(
-                Q(vote_type='pro') | Q(vote_type='con') | Q(vote_type='finding') | Q(vote_type='discarded'))
-            for vote in votes:
-                context['entries'].append(vote.getAttr(forum))
-                posts = vote.comments_of_event.all()
-                for post in posts:
-                    for comment in post.getTree(exclude_root=False):
-                        context['entries'].append(comment.getAttr(forum))
-        if activity == 'all' or activity == 'theming':
-            themeassignments = ThemeAssignment.objects.filter(entry=claim)
-            for themeassignment in themeassignments:
-                context['entries'].append(themeassignment.getAttr(forum))
-                posts = themeassignment.comments_of_event.all()
-                for post in posts:
-                    for comment in post.getTree(exclude_root=False):
-                        context['entries'].append(comment.getAttr(forum))
-        if activity == 'all' or activity == 'improve':
-            reword_flags = Vote.objects.filter(entry=claim.adopted_version()).filter(vote_type='reword')
-            for flag in reword_flags:
-                context['entries'].append(flag.getAttr(forum))
-            merge_flags = Vote.objects.filter(entry=claim).filter(vote_type='merge')
-            for flag in merge_flags:
-                context['entries'].append(flag.getAttr(forum))
-            # performed rewording
-            for version in claim.versions.all():
-                if not version.is_adopted:  # skip the adopted one
-                    version_info = version.getAttr(forum)
-                    context['entries'].append(version_info)
-            # performed merging
-            for newer_claim in claim.newer_versions.all():
-                new_claim = newer_claim.to_claim
-                try:
-                    author_role = Role.objects.get(user=new_claim.author, forum=forum).role
-                except:
-                    author_role = VISITOR_ROLE
-                try:
-                    author_initial = str.upper(str(new_claim.author.first_name[0]) + str(new_claim.author.last_name[0]))
-                except:
-                    author_initial = ''
-                entry = {'author_role': author_role, 'author_initial': author_initial,
-                    'new_claim_author_id': new_claim.author.id,
-                    'new_claim_author_name': new_claim.author.get_full_name(), 'entry_type': 'claim old version',
-                    'is_merged': new_claim.id, 'other_old_claims': '.'.join(
-                    [str(claimref.from_claim.id) for claimref in new_claim.older_versions.all() if
-                        claimref.from_claim != claim]),
-                    'created_at_full': new_claim.created_at,
-                    'updated_at_full': new_claim.updated_at, 'updated_at': pretty_date(new_claim.updated_at)}
-                context['entries'].append(entry)
-            if claim.older_versions.all():  # this is a merged one!
-                attribute = claim.getAttr(forum)
-                attribute['entry_type'] = 'claim new version'
-                context['entries'].append(attribute)
-        context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'])
-        response['html'] = render_to_string("feed/activity-feed-claim.html", context)
+
+        context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'], reverse=True)
+        response['html'] = render_to_string('feed/activity-feed-claim.html', context)
         return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def _edit_claim(request):
@@ -631,11 +578,13 @@ def api_claim_vote(request):
                 Vote.objects.create(user=request.user, entry=claim_version, vote_type='like', created_at=timezone.now())
             response['voters'] = _get_version_votes(request.user, claim_version)
         return HttpResponse(json.dumps(response), mimetype='application/json')
-    if action == 'adopt version':
-        new_version = ClaimVersion.objects.get(id=request.REQUEST.get('version_id'))
-        current_version = new_version.claim.adopted_version()
-        current_version.is_adopted = False
-        current_version.save()
-        new_version.is_adopted = True
-        new_version.save()
+    if action == 'adopt':
+        version = ClaimVersion.objects.get(id=request.REQUEST.get('version_id'))
+        version.is_adopted = True
+        version.save()
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+    if action == 'deadopt':
+        version = ClaimVersion.objects.get(id=request.REQUEST.get('version_id'))
+        version.is_adopted = False
+        version.save()
         return HttpResponse(json.dumps(response), mimetype='application/json')

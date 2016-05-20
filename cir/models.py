@@ -313,6 +313,9 @@ class Claim(Entry):
     def adopted_version(self):
         return self.versions.get(is_adopted=True)
 
+    def adopted_versions(self):
+        return self.versions.filter(is_adopted=True)
+
     # get id, author and time only
     def getAttrSimple(self):
         return {
@@ -343,6 +346,13 @@ class Claim(Entry):
         attr['slot_title'] = self.title
         attr['category'] = self.claim_category
         attr['claims'] = []
+        attr['adopted_versions'] = []
+        for adopted_version in self.adopted_versions().all():
+            attr['adopted_versions'].append({
+                'id': adopted_version.id,
+                'content': adopted_version.content,
+                'author': adopted_version.author.get_full_name()
+            })
         for claimref in self.older_versions.filter(refer_type='stmt'):
             attr['claims'].append({
                 'id': claimref.from_claim.id,
@@ -493,8 +503,11 @@ class Post(Entry):  # in discussion
         attr = super(Post, self).getAttr(forum)
         attr['entry_type'] = self.content_type
         if self.target_entry:
-            attr['parent_name'] = self.target_entry.author.get_full_name()
-            attr['parent_id'] = self.target_entry.id
+            try:
+                order = self.target_entry.stmt_order # see if it's a slot
+            except:
+                attr['parent_name'] = self.target_entry.author.get_full_name()
+                attr['parent_id'] = self.target_entry.id
         if self.target_event:
             attr['parent_name'] = self.target_event.user.get_full_name()
             attr['parent_id'] = self.target_event.id

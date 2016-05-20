@@ -34,6 +34,11 @@ define([
 	}).on('click', '.fullscreen.item', function() {
 		module.activeClaimModule.slot_id = this.getAttribute('data-id');
 		module.activeClaimModule.updateClaimPane();
+		$('#draft-stmt li.item').removeClass('active');
+		$('#draft-stmt li.item[data-id="' + module.activeClaimModule.slot_id + '"]').addClass('active');
+		$('#draft-stmt li.item').find('.fullscreen.item').removeClass('active');
+		$('#draft-stmt li.item[data-id="' + module.activeClaimModule.slot_id + '"]').find('.fullscreen.item').addClass('active');
+
 	}).on('click', '.slot-title', function() {
 		module.$slotTitleInput = $('<div class="slot-title-wrapper">')
 			.append('<input type="text" class="slot-title-input">')
@@ -43,19 +48,19 @@ define([
 			module.$slotTitleInput.find('input').val('');
 			module.currentSlotTitle = '';
 		} else {
-			module.$slotTitleInput.find('input').val($(this).text());
-			module.currentSlotTitle = $(this).text();
+			module.$slotTitleInput.find('input').val($(this).text().trim());
+			module.currentSlotTitle = $(this).text().trim();
 		}
 		$(this).replaceWith(module.$slotTitleInput);
 		module.$slotTitleInput.find('input').select();
-	}).on('click', '.slot .update-slot-title', function() {
+	}).on('click', '.update-slot-title', function() {
 		var newTitle = module.$slotTitleInput.find('input').val();
 		$.ajax({
 			url: '/api_draft_stmt/',
 			type: 'post',
 			data: {
 				action: 'change-title',
-				slot_id: $('.update-slot-title').parents('.slot').attr('data-id'),
+				slot_id: $('.update-slot-title').parents('li.item').attr('data-id'),
 				new_title: newTitle,
 			},
 			success: function() {
@@ -66,7 +71,7 @@ define([
 			},
 		})
 
-	}).on('click', '.slot .cancel-slot-title', function() {
+	}).on('click', '.cancel-slot-title', function() {
 		var html = '<div class="slot-title';
 		if (module.currentSlotTitle == '') {
 			html += ' empty">(Click to name this slot)</div>';
@@ -81,7 +86,7 @@ define([
 	module.initStmtHandles = function() {
 		$('#claim-pane-overview .claim-addstmt-handle').mousedown(function(event) {
 			var $claimsegment = $(this).parents('.claim.menu').next();
-			var claimcontent = $claimsegment.find('.claim-content').text();
+			var claimcontent = $claimsegment.find('.claim-content').text().trim();
 			module.draggingClaimId = $claimsegment.attr('data-id');
 			var $helper = $('<div id="claim-stmt-helper" class="ui segment">' + claimcontent + '</div>');
 			$('body').addClass('noselect');
@@ -142,7 +147,7 @@ define([
 				$item.addClass('to-drop');
 				if ($item.hasClass('item')) {
 					// merge with $item
-					module.target_id = $item.find('.slot').attr('data-id');
+					module.target_id = $item.attr('data-id');
 					module.action = 'merge';
 					return;
 				} else if ($item.hasClass('droppable-edge')) {
@@ -201,7 +206,7 @@ define([
 			$('#draft-stmt ol.list').sortable({
 				axis: 'y',
 				helper: function(event, ui) {
-					return ui.find('.slot').clone();
+					return ui.clone();
 				},
 				handle: ".reorder-handle",
 				items: '> li',
@@ -209,8 +214,8 @@ define([
 				stop: function(event, ui) {
 					// current elements reordered
 					var orders = {};
-					$(this).find('.item').each(function(idx) {
-						orders[$(this).find('.slot').attr('data-id')] = idx;
+					$(this).find('li.item').each(function(idx) {
+						orders[$(this).attr('data-id')] = idx;
 					});
 					_stmtUpdater({
 						'action': 'reorder',

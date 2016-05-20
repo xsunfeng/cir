@@ -5,16 +5,16 @@
 </div>
 <ol class="ui list" data-list-type="finding">
 	{% for slot_info in categories.finding %}
-		<li class="item">
-			<div class="ui stacked segment phase3 slot" data-id="{{ slot_info.id }}">
+		<li class="item phase3 slot" data-id="{{ slot_info.id }}">
+			<div class="ui stacked segment">
 				<i class="reorder-handle vertical resize icon"></i>
 				<div class="slot-title{% if not slot_info.slot_title %} empty{% endif %}">
 					{% if slot_info.slot_title %}{{ slot_info.slot_title }}{% else %}(Click to name this slot){% endif %}
 				</div>
 				{% for src_claim in slot_info.claims %}
-				<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}">
+				<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}"><div class="ui label">C{{ src_claim.id }}</div>
 					{% if src_claim.theme %}<div class="ui label">Theme: {{ src_claim.theme }}</div>{% endif %}
-					{{ src_claim.content }}
+					{{ src_claim.content | safe }}
 					<div class="ui destmt circular icon red button"><i class="trash icon"></i></div>
 				</div>
 				{% endfor %}
@@ -30,16 +30,16 @@
 </div>
 <ol class="ui list" data-list-type="pro">
 	{% for slot_info in categories.pro %}
-		<li class="item">
-			<div class="ui stacked segment phase3 slot" data-id="{{ slot_info.id }}">
+		<li class="item phase3 slot" data-id="{{ slot_info.id }}">
+			<div class="ui stacked segment">
 				<i class="reorder-handle vertical resize icon"></i>
 				<div class="slot-title{% if not slot_info.slot_title %} empty{% endif %}">
 					{% if slot_info.slot_title %}{{ slot_info.slot_title }}{% else %}(Click to name this slot){% endif %}
 				</div>
 				{% for src_claim in slot_info.claims %}
-					<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}">
+					<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}"><div class="ui label">C{{ src_claim.id }}</div>
 						{% if src_claim.theme %}<div class="ui label">Theme: {{ src_claim.theme }}</div>{% endif %}
-						{{ src_claim.content }}
+						{{ src_claim.content | safe }}
 						<div class="ui destmt circular icon red button"><i class="trash icon"></i></div>
 					</div>
 				{% endfor %}
@@ -55,16 +55,16 @@
 </div>
 <ol class="ui list" data-list-type="con">
 	{% for slot_info in categories.con %}
-		<li class="item">
-			<div class="ui stacked segment phase3 slot" data-id="{{ slot_info.id }}">
+		<li class="item phase3 slot" data-id="{{ slot_info.id }}">
+			<div class="ui stacked segment">
 				<i class="reorder-handle vertical resize icon"></i>
 				<div class="slot-title{% if not slot_info.slot_title %} empty{% endif %}">
 					{% if slot_info.slot_title %}{{ slot_info.slot_title }}{% else %}(Click to name this slot){% endif %}
 				</div>
 				{% for src_claim in slot_info.claims %}
-					<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}">
+					<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}"><div class="ui label">C{{ src_claim.id }}</div>
 						{% if src_claim.theme %}<div class="ui label">Theme: {{ src_claim.theme }}</div>{% endif %}
-						{{ src_claim.content }}
+						{{ src_claim.content | safe }}
 						<div class="ui destmt circular icon red button"><i class="trash icon"></i></div>
 					</div>
 				{% endfor %}

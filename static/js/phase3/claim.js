@@ -55,7 +55,7 @@ define([
 		$('#claim-pane-overview .claim.segment .claim-content').removeClass('highlight-found');
 		var $claim_wrapper = $('#claim-pane-overview .claim.segment[data-id="' + claim_id + '"]');
 		if ($claim_wrapper.length) {
-			$('#claim-container').scrollTop($claim_wrapper.position().top);
+			$('#claim-container').scrollTop($claim_wrapper.position().top - 30);
 			$claim_wrapper.addClass('highlight-found');
 			setTimeout(function() {
 				$claim_wrapper.removeClass('highlight-found');

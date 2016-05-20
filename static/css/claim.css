@@ -19,6 +19,9 @@
 	height: 100%;
 	overflow: auto;
 }
+#claim-pane-fullscreen .ui.header {
+	background-color: #F3F4F5;
+}
 #claim-container .hidden {
     display: none;
 }
@@ -79,6 +82,7 @@
 }
 .claim-metainfo {
 	margin: 10px 0;
+	font-size: 12px;
 }
 .claim-metainfo > * {
 	display: inline-block;
@@ -174,7 +178,7 @@ a.claim-vote-btn.unready:hover {
 	left: -40%;
 }
 
-#draft-stmt .src_claim {
+#draft-stmt .phase3.slot .src_claim {
 	max-height: 5em;
 	overflow: hidden;
 }
@@ -182,7 +186,7 @@ a.claim-vote-btn.unready:hover {
 	position: relative;
 	height: 3em;
 }
-#draft-stmt .slot:hover .destmt.button {
+#draft-stmt .src_claim:hover .destmt.button {
 	display: block;
 }
 #draft-stmt .slot.phase3:hover .src_claim {
@@ -236,7 +240,19 @@ a.claim-vote-btn.unready:hover {
 	line-height: 1em;
 	top: 4px;
 }
+#draft-stmt li.item.active {
 
+}
+#draft-stmt li.item.active .slot-hidden {
+	display: block!important;
+}
+#draft-stmt .phase4.slot .description {
+	margin-bottom:0;
+}
+#draft-stmt .phase4.slot .src_claim {
+	font-size:1.3em;
+	line-height:1.3em;
+}
 .droppable-edge:after {
 	display: block;
 	background-color: #F3F4F5;
