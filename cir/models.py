@@ -309,7 +309,7 @@ class Claim(Entry):
 
     def __unicode__(self):
         if self.adopted_versions().count() == 0:
-            return '(No adopted version yet)'
+            return '(No adopted version)'
         if self.adopted_versions().count() == 1:
             return self.adopted_version().content
         return '(Multiple adopted versions)'

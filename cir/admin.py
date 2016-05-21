@@ -66,7 +66,7 @@ class ClaimAdmin(admin.ModelAdmin):
         return "%s %s" % (self.author.first_name, self.author.last_name)
 
     def claim_content(self):
-        return '<a href="../claimversion/%d">%s</a>' % (self.adopted_version().id, self.adopted_version().content)
+        return self.__unicode__()
 
     def version_author(self):
         return "%s %s" % (self.adopted_version().author.first_name, self.adopted_version().author.last_name)
