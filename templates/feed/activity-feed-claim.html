@@ -106,7 +106,7 @@
 			{% else %}
 				<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> removed claim <div class="ui label">C{{ entry.claim_id }}</div> from this slot.
 			{% endif %}
-				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
 			</div>
 		{% endif %}
 		</div>

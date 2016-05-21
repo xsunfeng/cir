@@ -33,6 +33,7 @@ define([
 		});
 	}).on('click', '.fullscreen.item', function() {
 		module.activeClaimModule.slot_id = this.getAttribute('data-id');
+		module.activeSlotId = this.getAttribute('data-id');
 		module.activeClaimModule.updateClaimPane();
 		$('#draft-stmt li.item').removeClass('active');
 		$('#draft-stmt li.item[data-id="' + module.activeClaimModule.slot_id + '"]').addClass('active');
@@ -99,8 +100,8 @@ define([
 
 			// register mousemove & mouseup
 			$(window)
-				.mousemove(module.onDrag)
-				.mouseup(module.onDragStop);
+				.mousemove(onDrag)
+				.mouseup(onDragStop);
 		});
 	};
 
@@ -109,14 +110,14 @@ define([
 		_stmtUpdater({'action': 'get-list'});
 	};
 
-	module.onDrag = function(e) {
+	function onDrag(e) {
 		// update helper position
 		$('#claim-stmt-helper')
 			.css('left', e.clientX)
 			.css('top', e.clientY);
 
 		var lists = $('#draft-stmt .list');
-		module.$currentlist = null;
+		module.$listOnHover = null;
 
 		for (var i = 0; i < lists.length; i ++) {
 			var $target = $(lists[i]);
@@ -125,18 +126,18 @@ define([
 				&& e.pageX < targetOffset.left + $target.width()
 				&& e.pageY > targetOffset.top
 				&& e.pageY < targetOffset.top + $target.outerHeight()) {
-				module.$currentlist = $target;
+				module.$listOnHover = $target;
 				break;
 			}
 		}
 
-		if (!module.$currentlist) {
+		if (!module.$listOnHover) {
 			clearDropStatus();
 			return false;
 		}
 
-		var $items = module.$currentlist.children();
-		var $newslot = module.$currentlist.find('.droppable-edge');
+		var $items = module.$listOnHover.children();
+		var $newslot = module.$listOnHover.find('.droppable-edge');
 
 		var wrapperTop = $('#draft-stmt').offset().top;
 		for (var i = 0; i < $items.length; i++) {
@@ -159,9 +160,9 @@ define([
 
 			}
 		}
-	};
+	}
 
-	module.onDragStop = function(e) {
+	function onDragStop(e) {
 		$('body').removeClass('noselect');
 		$(window)
 			.off('mousemove')
@@ -170,7 +171,7 @@ define([
 		$('#claim-stmt-helper').remove();
 
 		if (module.action == 'insert') {
-			var list_type = module.$currentlist.attr('data-list-type');
+			var list_type = module.$listOnHover.attr('data-list-type');
 			_stmtUpdater({
 				'action': 'initiate-slot',
 				'claim_id': module.draggingClaimId,
@@ -191,7 +192,7 @@ define([
 			});
 		}
 		clearDropStatus();
-	};
+	}
 
 	function clearDropStatus() {
 		$('#draft-stmt .list').children()
@@ -224,6 +225,76 @@ define([
 				}
 			});
 		}
+		if ($('#draft-stmt .move-claim-handle').length) {
+			$('#draft-stmt .move-claim-handle').mousedown(function(event) {
+				var $claimsegment = $(this).parent();
+				module.draggingClaimId = $claimsegment.attr('data-id');
+				var $helper = $('<div id="claim-stmt-helper" class="ui segment">' + $claimsegment.html() + '</div>');
+				$('body').addClass('noselect');
+
+				// place helper
+				$helper
+					.css('left', event.clientX)
+					.css('top', event.clientY)
+					.appendTo($('body'));
+
+				// register mousemove & mouseup
+				$(window).mousemove(function(e) {
+					// update helper position
+					$('#claim-stmt-helper')
+						.css('left', e.clientX)
+						.css('top', e.clientY);
+					$('#draft-stmt .phase4.slot[data-id="' + module.activeSlotId + '"]').removeClass('active');
+
+					var slots = $('#draft-stmt .phase4.slot');
+					module.$slotOnHover = null;
+
+					for (var i = 0; i < slots.length; i ++) {
+						var $target = $(slots[i]);
+						var targetOffset = $target.offset();
+						if (e.pageX > targetOffset.left
+							&& e.pageX < targetOffset.left + $target.width()
+							&& e.pageY > targetOffset.top
+							&& e.pageY < targetOffset.top + $target.outerHeight()) {
+							module.$slotOnHover = $target;
+							break;
+						}
+					}
+					$('#draft-stmt .phase4.slot').removeClass('to-drop');
+					if (!module.$slotOnHover) {
+						return false;
+					}
+
+					module.$slotOnHover.addClass('to-drop');
+				}).mouseup(function(e) {
+					if (module.$slotOnHover) {
+						module.$slotOnHover.removeClass('to-drop');
+					}
+					$('body').removeClass('noselect');
+					$(window)
+						.off('mousemove')
+						.off('mouseup');
+
+					$('#claim-stmt-helper').remove();
+
+					if (module.$slotOnHover) {
+						_stmtUpdater({
+							'action': 'move-to-slot',
+							'from_slot_id': module.activeSlotId,
+							'to_slot_id': module.$slotOnHover.attr('data-id'),
+							'claim_id': module.draggingClaimId,
+						}).done(function() {
+							delete module.draggingClaimId;
+							delete module.activeSlotId;
+						});
+					} else {
+						$('#draft-stmt .phase4.slot[data-id="' + module.activeSlotId + '"]').addClass('active');
+						delete module.draggingClaimId;
+						delete module.activeSlotId;
+					}
+				});
+			});
+		}
 	}
 
 	function updateProgressBars() {
@@ -249,8 +320,11 @@ define([
 			success: function(xhr) {
 				$('#draft-stmt').css('opacity', '1.0');
 				$('#draft-stmt').html(xhr.html);
-				initSortable();
 				module.stmtCount = xhr.slots_cnt;
+				if (module.activeSlotId) {
+					$('#draft-stmt .phase4.slot[data-id="' + module.activeSlotId + '"]').addClass('active');
+				}
+				initSortable();
 				updateProgressBars();
 			},
 			error: function(xhr) {

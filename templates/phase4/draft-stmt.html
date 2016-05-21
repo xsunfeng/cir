@@ -27,13 +27,15 @@
 			<div class="ui attached segment slot-hidden" style="display:none">
 			{% if slot_info.claims %}
 				<h4 class="description">This slot contains the following claim(s).</h4>{% for src_claim in slot_info.claims %}
-				<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}"><div class="ui label">C{{ src_claim.id }}</div>
+				<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}">
+					<i class="move-claim-handle move icon"></i>
+					<div class="ui label">C{{ src_claim.id }}</div>
 					{% if src_claim.theme %}<div class="ui label">Theme: {{ src_claim.theme }}</div>{% endif %}
 					{{ src_claim.content | safe }}
 					<div class="ui destmt circular icon red button"><i class="trash icon"></i></div>
 				</div>
 			{% endfor %}{% else %}
-				<div class="ui vertical segment">
+				<div class="ui info message">
 				This slot does not contain any claims.
 				</div>
 			{% endif %}
@@ -79,13 +81,15 @@
 			<div class="ui attached segment slot-hidden" style="display:none">
 				{% if slot_info.claims %}
 					<h4 class="description">This slot contains the following claim(s).</h4>{% for src_claim in slot_info.claims %}
-					<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}"><div class="ui label">C{{ src_claim.id }}</div>
+					<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}">
+						<i class="move-claim-handle move icon"></i>
+						<div class="ui label">C{{ src_claim.id }}</div>
 						{% if src_claim.theme %}<div class="ui label">Theme: {{ src_claim.theme }}</div>{% endif %}
 						{{ src_claim.content | safe }}
 						<div class="ui destmt circular icon red button"><i class="trash icon"></i></div>
 					</div>
 				{% endfor %}{% else %}
-					<div class="ui vertical segment">
+					<div class="ui info message">
 						This slot does not contain any claims.
 					</div>
 				{% endif %}
@@ -131,13 +135,15 @@
 			<div class="ui attached segment slot-hidden" style="display:none">
 				{% if slot_info.claims %}
 					<h4 class="description">This slot contains the following claim(s).</h4>{% for src_claim in slot_info.claims %}
-					<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}"><div class="ui label">C{{ src_claim.id }}</div>
+					<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}">
+						<i class="move-claim-handle move icon"></i>
+						<div class="ui label">C{{ src_claim.id }}</div>
 						{% if src_claim.theme %}<div class="ui label">Theme: {{ src_claim.theme }}</div>{% endif %}
 						{{ src_claim.content | safe }}
 						<div class="ui destmt circular icon red button"><i class="trash icon"></i></div>
 					</div>
 				{% endfor %}{% else %}
-					<div class="ui vertical segment">
+					<div class="ui info message">
 						This slot does not contain any claims.
 					</div>
 				{% endif %}

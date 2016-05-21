@@ -121,8 +121,6 @@ def api_draft_stmt(request):
 
     if action == 'add-to-slot': # merge with existing
         now = timezone.now()
-
-
         slot = Claim.objects.get(id=request.REQUEST['slot_id'])
         claim = Claim.objects.get(id=request.REQUEST['claim_id'])
         if not ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=slot).exists():
@@ -161,6 +159,25 @@ def api_draft_stmt(request):
                 SlotAssignment.objects.create(forum=forum, user=request.user,
                     entry=claim, created_at=now, slot=slot, event_type='remove')
 
+    if action == 'move-to-slot':
+        now = timezone.now()
+        claim = Claim.objects.get(id=request.REQUEST['claim_id'])
+        from_slot = Claim.objects.get(id=request.REQUEST['from_slot_id'])
+        to_slot = Claim.objects.get(id=request.REQUEST['to_slot_id'])
+        ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=from_slot).delete()
+        if not ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=to_slot).exists():
+            ClaimReference.objects.create(refer_type='stmt', from_claim=claim, to_claim=to_slot)
+        if 'actual_user_id' in request.session:
+            actual_author = User.objects.get(id=request.session['actual_user_id'])
+            SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
+                entry=claim, created_at=now, slot=from_slot, event_type='remove')
+            SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
+                entry=claim, created_at=now, slot=to_slot, event_type='add')
+        else:
+            SlotAssignment.objects.create(forum=forum, user=request.user,
+                entry=claim, created_at=now, slot=from_slot, event_type='remove')
+            SlotAssignment.objects.create(forum=forum, user=request.user,
+                entry=claim, created_at=now, slot=to_slot, event_type='add')
 
     # for all actions, return updated lists
     context['categories'] = {}

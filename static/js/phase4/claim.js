@@ -100,38 +100,6 @@ define([
 		return module.claimLoader;
 	};
 
-	function initStmtHandles() {
-		$('#claim-pane-overview .claim-addstmt-handle').mousedown(function(event) {
-			var $claimsegment = $(this).parents('.claim.segment');
-			var claimcontent = $claimsegment.find('.claim-content').text();
-			DraftStmt.draggingClaimId = $claimsegment.attr('data-id');
-			var $helper = $('<div id="claim-stmt-helper" class="ui segment">' + claimcontent + '</div>');
-			$('body').addClass('noselect');
-
-			// place helper
-			$helper
-				.css('left', event.clientX)
-				.css('top', event.clientY)
-				.appendTo($('body'));
-
-			// hide invalid categories
-			var category = $claimsegment.find('.category.label').text();
-			$('#draft-stmt ol.list').addClass('invalid');
-			if (category == 'Key Finding') {
-				$('#draft-stmt ol.finding.list').removeClass('invalid');
-			} else if (category == 'Pro') {
-				$('#draft-stmt ol.pro.list').removeClass('invalid');
-			} else if (category == 'Con') {
-				$('#draft-stmt ol.con.list').removeClass('invalid');
-			}
-
-			// register mousemove & mouseup
-			$(window)
-				.mousemove(DraftStmt.onDrag)
-				.mouseup(DraftStmt.onDragStop);
-		});
-	}
-
 
 	DraftStmt.activeClaimModule = module;
 	DraftStmt.update();

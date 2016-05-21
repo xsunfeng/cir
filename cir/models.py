@@ -308,7 +308,11 @@ class Claim(Entry):
     source_highlights = models.ManyToManyField(Highlight, through='HighlightClaim')
 
     def __unicode__(self):
-        return self.adopted_version().content
+        if self.adopted_versions().count() == 0:
+            return '(No adopted version yet)'
+        if self.adopted_versions().count() == 1:
+            return self.adopted_version().content
+        return '(Multiple adopted versions)'
 
     def adopted_version(self):
         return self.versions.get(is_adopted=True)
