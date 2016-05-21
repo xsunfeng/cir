@@ -20,7 +20,7 @@
 	overflow: auto;
 }
 #claim-pane-fullscreen .ui.header {
-	background-color: #F3F4F5;
+	background-color: #DBDCDD;
 }
 #claim-container .hidden {
     display: none;
@@ -150,8 +150,6 @@ a.claim-vote-btn.unready:hover {
 }
 #draft-stmt .slot-title:hover {
 	cursor: text;
-	margin: 2px 0 0;
-	border:	 1px solid #A7A7A7;
 	background-color: #fff;
 }
 #draft-stmt .slot-title-input {

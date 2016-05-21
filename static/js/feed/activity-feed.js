@@ -160,60 +160,34 @@ define([
 				}
 			});
 		}
-		function submitClaim(content) {
+
+		function submitComment(content, type) {
 			if ($.trim(content).length == 0) {
 				Utils.notify('error', 'Content must not be empty.');
 				return;
 			}
-			_this.find('.feed-forms .claim.form .button').addClass('loading');
-			$.ajax({
-				url: '/api_claim/',
-				type: 'post',
-				data: {
-					action: 'create',
-					content: content,
-					highlight_id: _this.data('id'),
-					nopublish: _this.find('.feed-forms .claim.form .nopublish-wrapper').checkbox('is checked'),
-				},
-				success: function(xhr) {
-					_this.update();
-					_this.find('.feed-forms .claim.form textarea').val('').removeAttr('css');
-					_this.find('.feed-forms .claim.form .button').removeClass('loading');
-					_this.find('.feed-forms .claim.form').hide();
-					_this.find('.feed-forms').hide();
-				},
-				error: function(xhr) {
-					_this.find('.feed-forms .claim.form .button').removeClass('loading');
-					if (xhr.status == 403) {
-						Utils.notify('error', xhr.responseText);
-					}
-				}
-			});
-		}
-		function submitComment(content) {
-			if ($.trim(content).length == 0) {
-				Utils.notify('error', 'Content must not be empty.');
-				return;
-			}
-			_this.find('.feed-forms .comment.form .button').addClass('loading');
+			var $form = $('#activity-' + type + '-form');
+			$form.find('.button').addClass('loading');
 
 			var data = $.extend({
 				action: 'create',
 				content: content
 			}, _this.data());
 
-			if (_this.data('type') == 'question') {
+			if (_this.data('type') == 'question' || type == 'reply') {
 				// in QA panel, when you don't specify a reply target, it means the question by default.
-				data.reply_id = _this.find('.feed-forms .comment.form span').attr('data-reply-id');
+				data.reply_id = $form.find('span').attr('data-reply-id');
 				data.reply_type = 'entry';
 				if (typeof data.reply_id == 'undefined') {
 					data.reply_id = _this.data('question_id');
 				}
-			} else {
+			} else if (type == 'comment') {
 				// in document/claim thread, you always need to specify a target
-				data.reply_id = _this.find('.feed-forms .comment.form span').attr('data-reply-id');
-				data.reply_type = _this.find('.feed-forms .comment.form span').attr('data-reply-type');
-				data.collective = _this.find('.ui.checkbox').checkbox('is checked');
+				data.reply_id = $form.find('span').attr('data-reply-id');
+				data.reply_type = $form.find('span').attr('data-reply-type');
+				if ($form.find('.ui.checkbox').length) {
+					data.collective = $form.find('.ui.checkbox').checkbox('is checked');
+				}
 			}
 			$.ajax({
 				url: '/api_annotation/',
@@ -221,13 +195,13 @@ define([
 				data: data,
 				success: function() {
 					_this.update();
-					_this.find('.feed-forms .comment.form textarea').val('').removeAttr('css');
-					_this.find('.feed-forms .comment.form span').text('Add a comment').removeAttr('data-reply-id').removeAttr('data-reply-type');
-					_this.find('.feed-forms .comment.form .button').removeClass('loading');
-					if (_this.data('type') == 'highlight') { // only work for doc view
-						_this.find('.feed-forms .claim.form').hide();
-						_this.find('.feed-forms').hide();
-					} else if (_this.data('type') == 'question') {
+					$form.find('textarea').val('');
+					if (type == 'reply') {
+						$form.hide();
+					}
+					$form.find('span').removeAttr('data-reply-id').removeAttr('data-reply-type');
+					$form.find('.button').removeClass('loading');
+					if (_this.data('type') == 'question') {
 						// activities on QA panel -- dispatch the event
 						require('realtime/socket').dispatchNewPost({
 							'target': _this.data('question_id')
@@ -235,7 +209,7 @@ define([
 					}
 				},
 				error: function(xhr) {
-					_this.find('.feed-forms .comment.form .button').removeClass('loading');
+					$form.find('.button').removeClass('loading');
 					if (xhr.status == 403) {
 						Utils.notify('error', xhr.responseText);
 					}
@@ -279,9 +253,12 @@ define([
 					version_id: id,
 				},
 				success: function(xhr) {
-					var claimModule = require.defined('phase3/claim') ? require('phase3/claim') : require('phase4/claim');
-					claimModule.updateClaimPane();
-					DraftStmt.update();
+					_this.update();
+					if (action == 'adopt') {
+						DraftStmt.update();
+					} else {
+						$('#draft-stmt .src_claim[data-id="' + id + '"]').remove();
+					}
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -293,23 +270,22 @@ define([
 		if (action == 'init') {
 			// listeners
 			this.on('click', '.feed-reply-entry, .feed-reply-event', function(e) {
+				e.preventDefault();
 				var name = $(this).parents('.event').find('.user:eq(0)').text();
 				var entry_id = this.getAttribute('data-id');
-				_this.find('.feed-forms .claim.form').hide();
 				if ($(this).hasClass('feed-reply-entry')) {
-					_this.find('.feed-forms .comment.form span')
+					$('#activity-reply-form span')
 						.attr('data-reply-id', entry_id)
 						.attr('data-reply-type', 'entry')
 						.text('Reply to ' + name);
 				} else if ($(this).hasClass('feed-reply-event')) {
-					_this.find('.feed-forms .comment.form span')
+					$('#activity-reply-form span')
 						.attr('data-reply-id', entry_id)
 						.attr('data-reply-type', 'event')
 						.text('Reply to ' + name);
 				}
-				_this.find('.feed-forms .comment.form').show();
-				_this.find('.feed-forms').show();
-				_this.find('.feed-forms .comment.form textarea').focus();
+				$('#activity-reply-form').insertAfter($(this).parent()).show();
+				$('#activity-reply-form textarea').focus();
 			}).on('click', '.feed-delete-entry', function() {
 				var entry_id = this.getAttribute('data-id');
 				deleteEntry(entry_id);
@@ -331,28 +307,15 @@ define([
 				}
 			}).on('click', '.feed-adopt-claim-version', function() {
 				adoptClaimVersion(this);
-			}).on('click', '.comment.form div.submit', function(e) {
-				var content = _this.find('.feed-forms .comment.form textarea').val();
-				submitComment(content);
-			}).on('click', '.claim.form div.submit', function(e) {
-				var content = _this.find('.feed-forms .claim.form textarea').val();
-				submitClaim(content);
-			}).on('click', '.comment.form div.reset', function(e) {
-				_this.find('.feed-forms .comment.form textarea').val('').removeAttr('css');
-				_this.find('.feed-forms .comment.form span').text('Add a comment').removeAttr('data-reply-id').removeAttr('data-reply-type');
-			}).on('click', '.doc-jumpto-claim', function(e) {
-				var claim_id = this.getAttribute('data-id');
-				require('layout/layout').changeTab('claim-tab', function() {
-					var claimModule = require.defined('phase3/claim') ? require('phase3/claim') : require('phase4/claim');
-					claimModule.jumpTo(claim_id, 'fullscreen')
-				});
-			}).on('click', '.filter.buttons .button', function() {
-				$(this).addClass('loading');
-				_this.data('filter', this.getAttribute('data-filter'));
-				_this.update();
-			}).on('keydown', '.comment.form textarea', function(e) {
+			}).on('click', '#activity-comment-form div.submit', function(e) {
+				var content = $('#activity-comment-form textarea').val();
+				submitComment(content, 'comment');
+			}).on('click', '#activity-reply-form div.submit', function(e) {
+				var content = $('#activity-reply-form textarea').val();
+				submitComment(content, 'reply');
+			}).on('keydown', 'textarea', function(e) {
 				if ((e.ctrlKey || e.metaKey) && e.keyCode == 13) {
-					_this.find('.comment.form div.submit').trigger('click');
+					$(this).parent().next().trigger('click');
 				}
 			});
 		} else if (action == 'update') {
@@ -360,18 +323,6 @@ define([
 				this.data(data);
 			}
 			return this.update();
-		} else if (action == 'switch') { // only happens with doc view
-			if (data.action == 'comment') {
-				_this.find('.feed-forms .claim.form').hide();
-				_this.find('.feed-forms .comment.form').show();
-				_this.find('.feed-forms').show();
-				_this.find('.feed-forms .comment.form label span').text('Add a comment').removeAttr('data-reply-id').removeAttr('data-reply-type');
-				_this.find('.feed-forms .comment.form textarea').focus();
-			} else if (data.action == 'claim') {
-				_this.find('.feed-forms .comment.form').hide();
-				_this.find('.feed-forms .claim.form').show();
-				_this.find('.feed-forms').show();
-			}
 		} else if (action == 'get_id') {
 			return _this.data('id');
 		}

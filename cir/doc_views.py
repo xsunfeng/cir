@@ -180,7 +180,7 @@ def api_annotation(request):
             elif source == 'claim':
                 slot = Claim.objects.get(id=request.REQUEST.get('slot_id'))
                 newPost.target_entry = slot
-        collective = request.REQUEST.get('collective')
+        collective = request.REQUEST.get('collective', 'false')
         if collective == 'true':
             newPost.collective = True
         else:

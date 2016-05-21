@@ -109,14 +109,31 @@ def api_draft_stmt(request):
         newSlot.stmt_order = order
         newSlot.save()
 
+        if actual_author:
+            SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
+                entry=selected_claim, created_at=now, slot=newSlot, event_type='add')
+        else:
+            SlotAssignment.objects.create(forum=forum, user=request.user,
+                entry=selected_claim, created_at=now, slot=newSlot, event_type='add')
+
         # add claim reference: newSlot references selected_claim
         ClaimReference.objects.create(refer_type='stmt', from_claim=selected_claim, to_claim=newSlot)
 
     if action == 'add-to-slot': # merge with existing
+        now = timezone.now()
+
+
         slot = Claim.objects.get(id=request.REQUEST['slot_id'])
         claim = Claim.objects.get(id=request.REQUEST['claim_id'])
         if not ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=slot).exists():
             ClaimReference.objects.create(refer_type='stmt', from_claim=claim, to_claim=slot)
+        if 'actual_user_id' in request.session:
+            actual_author = User.objects.get(id=request.session['actual_user_id'])
+            SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
+                entry=claim, created_at=now, slot=slot, event_type='add')
+        else:
+            SlotAssignment.objects.create(forum=forum, user=request.user,
+                entry=claim, created_at=now, slot=slot, event_type='add')
 
     if action == 'reorder':
         orders = json.loads(request.REQUEST.get('order'))
@@ -126,14 +143,24 @@ def api_draft_stmt(request):
             claim.save()
 
     if action == 'destmt':
+        now = timezone.now()
         claim = Claim.objects.get(id=request.REQUEST['claim_id'])
         slot = Claim.objects.get(id=request.REQUEST['slot_id'])
         ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=slot).delete()
         if request.session['selected_phase'] == 'categorize' and ClaimReference.objects.filter(refer_type='stmt', to_claim=slot).count() == 0:
-            # the last reference is removed
+            # the last reference is removed, when in categorize phase
             slot.is_deleted = True
             slot.stmt_order = None
             slot.save()
+        else:
+            if 'actual_user_id' in request.session:
+                actual_author = User.objects.get(id=request.session['actual_user_id'])
+                SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
+                    entry=claim, created_at=now, slot=slot, event_type='remove')
+            else:
+                SlotAssignment.objects.create(forum=forum, user=request.user,
+                    entry=claim, created_at=now, slot=slot, event_type='remove')
+
 
     # for all actions, return updated lists
     context['categories'] = {}
@@ -262,6 +289,11 @@ def api_claim_activities(request):
             for post in posts:
                 for comment in post.getTree(exclude_root=False):
                     context['entries'].append(comment.getAttr(forum))
+
+        # slot assignment events
+        slotassignments = SlotAssignment.objects.filter(slot=slot)
+        for slotassignment in slotassignments:
+            context['entries'].append(slotassignment.getAttr(forum))
 
         context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'], reverse=True)
         response['html'] = render_to_string('feed/activity-feed-claim.html', context)

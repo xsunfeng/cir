@@ -410,6 +410,19 @@ class Event(models.Model):  # the behavior of a user on an entry
         attr['collective'] = self.collective
         return attr
 
+class SlotAssignment(Event):
+    EVENT_CHOICES = (
+        ('add', 'Add to slot'),
+        ('remove', 'Remove from slot'),
+    )
+    slot = models.ForeignKey(Claim)
+    event_type = models.CharField(max_length=20, choices=EVENT_CHOICES)
+    def getAttr(self, forum):
+        attr = super(SlotAssignment, self).getAttr(forum)
+        attr['entry_type'] = 'slotassignment'
+        attr['action'] = self.event_type
+        attr['claim_id'] = self.entry.id
+        return attr
 
 class Vote(Event):
     VOTE_CHOICES = (
