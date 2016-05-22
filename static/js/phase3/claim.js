@@ -2,13 +2,14 @@ define([
 	'jquery',
 	'claim-common/claim-filter',
 	'claim-common/draft-stmt',
+	'realtime/socket',
 	'utils',
 	'semantic-ui',
-	'realtime/socket'
 ], function(
 	$,
 	ClaimFilter,
 	DraftStmt,
+	Socket,
 	Utils
 ) {
 	var module = {};
@@ -106,6 +107,7 @@ define([
 
 	ClaimFilter.activeClaimModule = module;
 	DraftStmt.activeClaimModule = module;
+	Socket.activeClaimModule = module;
 	DraftStmt.update();
 	ClaimFilter.updateNavigator({'filter': true});
 	return module;

@@ -251,6 +251,9 @@ a.claim-vote-btn.unready:hover {
 	font-size:1.3em;
 	line-height:1.3em;
 }
+#draft-stmt .stmt-refresh-category {
+	cursor: pointer;
+}
 .droppable-edge:after {
 	display: block;
 	background-color: #F3F4F5;

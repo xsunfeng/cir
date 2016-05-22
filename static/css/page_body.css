@@ -8,6 +8,10 @@
   position: fixed;
   z-index: 9999;
 }
+#sticked-notification {
+	margin-top: 2em;
+	margin-bottom: -2em;
+}
 .main.tab {
   padding-top: 3rem;
 }

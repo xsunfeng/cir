@@ -180,10 +180,14 @@ def api_draft_stmt(request):
                 entry=claim, created_at=now, slot=to_slot, event_type='add')
 
     # for all actions, return updated lists
+    if request.REQUEST.get('category'):
+        category_list = [request.REQUEST['category']]
+    else:
+        category_list = ['finding', 'pro', 'con']
     context['categories'] = {}
     response['slots_cnt'] = {'finding': 0, 'pro': 0, 'con': 0}
     slots = Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False)
-    for category in ['finding', 'pro', 'con']:
+    for category in category_list:
         context['categories'][category] = [slot.getAttrSlot(forum) for slot in slots.filter(claim_category=category).order_by('stmt_order')]
         response['slots_cnt'][category] += len(context['categories'][category])
     if request.session['selected_phase'] == 'categorize':

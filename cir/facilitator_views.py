@@ -37,6 +37,7 @@ def enter_dashboard(request, forum_url):
             pass
     if request.session['role'] != 'facilitator' and request.session['role'] != 'admin':
         context['load_error'] = '403'
+    context['forum_id'] = forum.id
     context['forum_name'] = forum.full_name
     context['forum_url'] = forum.url
     context['description'] = forum.description

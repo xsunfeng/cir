@@ -1,10 +1,12 @@
 define([
 	'jquery',
 	'utils',
+	'realtime/socket',
 	'jquery.ui'
 ], function(
 	$,
-	Utils
+	Utils,
+	Socket
 ) {
 	var module = {};
 	module.activeClaimModule = null;
@@ -24,12 +26,17 @@ define([
 		// since a claim can be refered by multiple slots, both claim_id and slot_id are needed
 		var claim_id = $(this).parents('.src_claim').attr('data-id');
 		var slot_id = $(this).parents('.slot').attr('data-id');
+		var category = $(this).parents('ol.list').attr('data-list-type');
 		_stmtUpdater({
 			'action': 'destmt',
 			'claim_id': claim_id,
 			'slot_id': slot_id
 		}).done(function() {
 			$('#claim-pane-overview .claim.segment[data-id="' + claim_id + '"]').removeClass('stmt');
+			Socket.slotChange({
+				'forum_id': $('body').attr('forum-id'),
+				'category': category,
+			});
 		});
 	}).on('click', '.fullscreen.item', function() {
 		module.activeClaimModule.slot_id = this.getAttribute('data-id');
@@ -82,6 +89,80 @@ define([
 		module.$slotTitleInput.replaceWith(html);
 		delete module.$slotTitleInput;
 		delete module.currentSlotTitle;
+	}).on('click', '.stmt-refresh-category', function() {
+		_stmtUpdater({
+			'action': 'get-list',
+			'category': $(this).parents('ol.list').attr('data-list-type'),
+		});
+	});
+
+	$('#draft-stmt').on('mousedown', '.move-claim-handle', function(event) {
+		var $claimsegment = $(this).parent();
+		module.draggingClaimId = $claimsegment.attr('data-id');
+		var $helper = $('<div id="claim-stmt-helper" class="ui segment">' + $claimsegment.html() + '</div>');
+		$('body').addClass('noselect');
+
+		// place helper
+		$helper
+			.css('left', event.clientX)
+			.css('top', event.clientY)
+			.appendTo($('body'));
+
+		// register mousemove & mouseup
+		$(window).mousemove(function(e) {
+			// update helper position
+			$('#claim-stmt-helper')
+				.css('left', e.clientX)
+				.css('top', e.clientY);
+			$('#draft-stmt .phase4.slot[data-id="' + module.activeSlotId + '"]').removeClass('active');
+
+			var slots = $('#draft-stmt .phase4.slot');
+			module.$slotOnHover = null;
+
+			for (var i = 0; i < slots.length; i ++) {
+				var $target = $(slots[i]);
+				var targetOffset = $target.offset();
+				if (e.pageX > targetOffset.left
+					&& e.pageX < targetOffset.left + $target.width()
+					&& e.pageY > targetOffset.top
+					&& e.pageY < targetOffset.top + $target.outerHeight()) {
+					module.$slotOnHover = $target;
+					break;
+				}
+			}
+			$('#draft-stmt .phase4.slot').removeClass('to-drop');
+			if (!module.$slotOnHover) {
+				return false;
+			}
+
+			module.$slotOnHover.addClass('to-drop');
+		}).mouseup(function(e) {
+			if (module.$slotOnHover) {
+				module.$slotOnHover.removeClass('to-drop');
+			}
+			$('body').removeClass('noselect');
+			$(window)
+				.off('mousemove')
+				.off('mouseup');
+
+			$('#claim-stmt-helper').remove();
+
+			if (module.$slotOnHover) {
+				_stmtUpdater({
+					'action': 'move-to-slot',
+					'from_slot_id': module.activeSlotId,
+					'to_slot_id': module.$slotOnHover.attr('data-id'),
+					'claim_id': module.draggingClaimId,
+				}).done(function() {
+					delete module.draggingClaimId;
+					delete module.activeSlotId;
+				});
+			} else {
+				$('#draft-stmt .phase4.slot[data-id="' + module.activeSlotId + '"]').addClass('active');
+				delete module.draggingClaimId;
+				delete module.activeSlotId;
+			}
+		});
 	});
 
 	module.initStmtHandles = function() {
@@ -108,6 +189,11 @@ define([
 	module.update = function(options) {
 		var options = options || {};
 		_stmtUpdater({'action': 'get-list'});
+	};
+
+	module.slotChanged = function(data) {
+		var message = 'Slot order and/or claim assignment has changed under this category. Please <a class="stmt-refresh-category">click here</a> to refresh.';
+		$('#draft-stmt ol.list[data-list-type="' + data.category + '"] .message').html(message).show();
 	};
 
 	function onDrag(e) {
@@ -169,9 +255,8 @@ define([
 			.off('mouseup');
 
 		$('#claim-stmt-helper').remove();
-
+		var list_type = module.$listOnHover.attr('data-list-type');
 		if (module.action == 'insert') {
-			var list_type = module.$listOnHover.attr('data-list-type');
 			_stmtUpdater({
 				'action': 'initiate-slot',
 				'claim_id': module.draggingClaimId,
@@ -180,6 +265,10 @@ define([
 			}).done(function() {
 				$('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId + '"]').addClass('stmt');
 				delete module.draggingClaimId;
+				Socket.slotChange({
+					'forum_id': $('body').attr('forum-id'),
+					'category': list_type,
+				});
 			});
 		} else if (module.action == 'merge') {
 			_stmtUpdater({
@@ -189,6 +278,10 @@ define([
 			}).done(function() {
 				$('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId + '"]').addClass('stmt');
 				delete module.draggingClaimId;
+				Socket.slotChange({
+					'forum_id': $('body').attr('forum-id'),
+					'category': list_type,
+				});
 			});
 		}
 		clearDropStatus();
@@ -218,81 +311,17 @@ define([
 					$(this).find('li.item').each(function(idx) {
 						orders[$(this).attr('data-id')] = idx;
 					});
+					var category = this.getAttribute('data-list-type');
 					_stmtUpdater({
 						'action': 'reorder',
 						'order': JSON.stringify(orders)
+					}).done(function() {
+						Socket.slotChange({
+							'forum_id': $('body').attr('forum-id'),
+							'category': category,
+						});
 					});
 				}
-			});
-		}
-		if ($('#draft-stmt .move-claim-handle').length) {
-			$('#draft-stmt .move-claim-handle').mousedown(function(event) {
-				var $claimsegment = $(this).parent();
-				module.draggingClaimId = $claimsegment.attr('data-id');
-				var $helper = $('<div id="claim-stmt-helper" class="ui segment">' + $claimsegment.html() + '</div>');
-				$('body').addClass('noselect');
-
-				// place helper
-				$helper
-					.css('left', event.clientX)
-					.css('top', event.clientY)
-					.appendTo($('body'));
-
-				// register mousemove & mouseup
-				$(window).mousemove(function(e) {
-					// update helper position
-					$('#claim-stmt-helper')
-						.css('left', e.clientX)
-						.css('top', e.clientY);
-					$('#draft-stmt .phase4.slot[data-id="' + module.activeSlotId + '"]').removeClass('active');
-
-					var slots = $('#draft-stmt .phase4.slot');
-					module.$slotOnHover = null;
-
-					for (var i = 0; i < slots.length; i ++) {
-						var $target = $(slots[i]);
-						var targetOffset = $target.offset();
-						if (e.pageX > targetOffset.left
-							&& e.pageX < targetOffset.left + $target.width()
-							&& e.pageY > targetOffset.top
-							&& e.pageY < targetOffset.top + $target.outerHeight()) {
-							module.$slotOnHover = $target;
-							break;
-						}
-					}
-					$('#draft-stmt .phase4.slot').removeClass('to-drop');
-					if (!module.$slotOnHover) {
-						return false;
-					}
-
-					module.$slotOnHover.addClass('to-drop');
-				}).mouseup(function(e) {
-					if (module.$slotOnHover) {
-						module.$slotOnHover.removeClass('to-drop');
-					}
-					$('body').removeClass('noselect');
-					$(window)
-						.off('mousemove')
-						.off('mouseup');
-
-					$('#claim-stmt-helper').remove();
-
-					if (module.$slotOnHover) {
-						_stmtUpdater({
-							'action': 'move-to-slot',
-							'from_slot_id': module.activeSlotId,
-							'to_slot_id': module.$slotOnHover.attr('data-id'),
-							'claim_id': module.draggingClaimId,
-						}).done(function() {
-							delete module.draggingClaimId;
-							delete module.activeSlotId;
-						});
-					} else {
-						$('#draft-stmt .phase4.slot[data-id="' + module.activeSlotId + '"]').addClass('active');
-						delete module.draggingClaimId;
-						delete module.activeSlotId;
-					}
-				});
 			});
 		}
 	}
@@ -312,15 +341,21 @@ define([
 	}
 
 	function _stmtUpdater(data) {
-		$('#claim-navigator').css('opacity', '0.7');
 		return $.ajax({
 			url: '/api_draft_stmt/',
 			type: 'post',
 			data: data,
 			success: function(xhr) {
 				$('#draft-stmt').css('opacity', '1.0');
-				$('#draft-stmt').html(xhr.html);
-				module.stmtCount = xhr.slots_cnt;
+				if (data.category) {
+					$('#draft-stmt ol.list[data-list-type="' + data.category + '"]')
+						.html($(xhr.html).filter('ol.list[data-list-type="' + data.category + '"]').html());
+					module.stmtCount[data.category] = xhr.slots_cnt[data.category];
+				}	else {
+					$('#draft-stmt').html(xhr.html);
+					module.stmtCount = xhr.slots_cnt;
+				}
+
 				if (module.activeSlotId) {
 					$('#draft-stmt .phase4.slot[data-id="' + module.activeSlotId + '"]').addClass('active');
 				}

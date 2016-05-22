@@ -2,13 +2,14 @@ define([
 	'jquery',
 	'utils',
 	'claim-common/draft-stmt',
+	'realtime/socket',
 	'feed/activity-feed',
-	'semantic-ui',
-	'realtime/socket'
+	'semantic-ui'
 ], function(
 	$,
 	Utils,
-	DraftStmt
+	DraftStmt,
+	Socket
 ) {
 	var module = {};
 	module.initClaimView = function() {
@@ -102,6 +103,7 @@ define([
 
 
 	DraftStmt.activeClaimModule = module;
+	Socket.activeClaimModule = module;
 	DraftStmt.update();
 	module.initClaimView();
 	return module;
