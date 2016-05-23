@@ -255,6 +255,9 @@ define([
 			.off('mouseup');
 
 		$('#claim-stmt-helper').remove();
+
+		if (!module.$listOnHover) return;
+
 		var list_type = module.$listOnHover.attr('data-list-type');
 		if (module.action == 'insert') {
 			_stmtUpdater({

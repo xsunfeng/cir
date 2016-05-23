@@ -140,7 +140,9 @@ a.claim-vote-btn.unready:hover {
 
 #draft-stmt .slot-title {
 	display: inline-block;
-
+}
+#draft-stmt .slot-title:not(.empty) {
+	color: #000;
 }
 #draft-stmt .slot-title-wrapper {
 	display: inline-block;
