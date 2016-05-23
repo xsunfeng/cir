@@ -66,7 +66,7 @@ class ClaimAdmin(admin.ModelAdmin):
         return "%s %s" % (self.author.first_name, self.author.last_name)
 
     def claim_content(self):
-        return '<a href="../claimversion/%d">%s</a>' % (self.adopted_version().id, self.adopted_version().content)
+        return self.__unicode__()
 
     def version_author(self):
         return "%s %s" % (self.adopted_version().author.first_name, self.adopted_version().author.last_name)
@@ -88,7 +88,7 @@ class ClaimAdmin(admin.ModelAdmin):
     claim_content.short_description = 'Content of adopted version'
     claim_content.allow_tags = True
     version_author.short_description = 'Author of adopted version'
-    list_display = (author_name, delegator_name, version_author, claim_content, 'claim_category', 'theme', 'created_at')
+    list_display = (author_name, delegator_name, version_author, claim_content, 'claim_category', 'theme', 'created_at', 'is_deleted')
     list_filter = ('forum', 'claim_category', 'theme')
     ordering = ('-created_at', )
 
@@ -123,7 +123,7 @@ class PostAdmin(admin.ModelAdmin):
         return 'Unknown type'
 
     target.allow_tags = True
-    list_display = (author_name, delegator_name, 'title', 'content', target, 'content_type', 'created_at')
+    list_display = (author_name, delegator_name, 'title', 'content', target, 'content_type', 'created_at', 'is_deleted')
     list_filter = ('forum', 'content_type')
     ordering = ('-created_at', )
 

@@ -1,46 +1,21 @@
-<div class="feed-forms">
-	<form class="ui form reword" style="display:none">
-		<div class="ui info message">
-			<div class="header">
-				Hints for rewording a claim:
-			</div>
-			<ul class="list">
-				<li>Please keep in mind that it is a candidate statement in the final product, so the language should be precise, clear, and informative.</li>
-				<li>Please read the panel's discussion and think about their suggestions before writing your version.</li>
-				<li>After submission, your version will appear in Activities as a candidate version; the facilitator will ultimately perform the adoption.</li>
-			</ul>
-		</div>
-		<div class="field">
-			<label><span>Reword this claim</span> (Ctrl + Enter to publish)</label>
-			<textarea class="claim reword editor" rows="6"></textarea>
-			<input type="hidden" name="collective">
-		</div>
-		<div class="ui primary submit button"><i class="send outline icon"></i>Submit</div>
-		<div class="ui reset button">Cancel</div>
-		<div class="ui divider"></div>
-	</form>
-	<form class="ui form comment">
-		<div class="field">
-			<label><span>Add a comment</span> (Ctrl + Enter to publish)</label>
-			<textarea rows="2"></textarea>
-		</div>
-		<div class="ui primary submit button"><i class="send outline icon"></i>Publish</div>
-		<div class="ui reset button"><i class="refresh icon"></i>Reset</div>
-		<div class="ui checkbox facilitator-only" style="display:none">
-			<label>Collective</label>
-			<input type="checkbox" name="collective">
-		</div>
-	</form>
-</div>
-<h4 class="ui horizontal header divider">
-	Activities (oldest first)
-</h4>
-<div class="ui four fluid basic buttons filter" style="margin-bottom: 1em;">
-	<div class="ui button" data-filter="all">All</div>
-	<div class="ui button" data-filter="general">General</div>
-	<div class="ui button" data-filter="categorize">Categorizing</div>
-	<div class="ui button" data-filter="improve">Improving</div>
-</div>
+<form id="activity-comment-form" class="ui form">
+	<div class="field">
+		<label><span>Add a comment</span> (Ctrl + Enter to post)</label>
+		<textarea rows="2"></textarea>
+	</div>
+	<div class="ui checkbox facilitator-only" style="display:none">
+		<label>Collective</label>
+		<input type="checkbox" name="collective">
+	</div>
+	<div class="ui primary submit button"><i class="send outline icon"></i>Post</div>
+</form>
+<form id="activity-reply-form" class="ui form" style="display:none">
+	<div class="field">
+		<label><span></span> (Ctrl + Enter to post)</label>
+		<textarea rows="2"></textarea>
+	</div>
+	<div class="ui primary submit button"><i class="send outline icon"></i>Post</div>
+</form>
 {% if entries %}
 <div class="ui feed" style="margin-top: 1em">
 {% for entry in entries %}
@@ -67,9 +42,11 @@
 			<div class="extra text">
 				{{ entry.content }}
 			</div>
-			<div class="ui red secondary post fitted menu">
-				<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
-				<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+			<div class="ui red secondary post small menu">
+				<div class="right menu">
+					<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+					<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+				</div>
 			</div>
 		{% elif entry.entry_type == 'question' %}
 			<div class="summary">
@@ -86,7 +63,7 @@
 		{% elif entry.entry_type == 'comment' %}
 			<div class="summary">
 			{% if entry.collective %}
-				The panel reached a conclusion on this claim:
+				The panel reached a conclusion on this slot:
 			{% else %}
 				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> commented:
 			{% endif %}
@@ -95,87 +72,49 @@
 			<div class="extra text">
 				{{ entry.content }}
 			</div>
-			<div class="ui red secondary post fitted menu">
-				<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
-				<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+			<div class="ui red secondary post small menu">
+				<div class="right menu">
+					<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+					<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+				</div>
 			</div>
-		{% elif entry.entry_type == 'categorize' %}
-			<div class="summary">
-			{% if entry.collective %}
-				The category of this claim changed to <strong>{{ entry.vote_type_full }}</strong>.
-			{% else %}
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.user_name }}</a> categorized this claim as <strong>{{ entry.vote_type_full }}</strong>.
-			{% endif %}
-				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
-			</div>
-			<div class="ui red secondary categorize fitted menu">
-				<a class="item feed-reply-event" data-id="{{ entry.id }}">Reply</a>
-			</div>
-		{% elif entry.entry_type == 'themeassignment' %}
-			<div class="summary">
-			{% if entry.collective %}
-				The theme of this claim changed to <strong>{{ entry.theme_name }}</strong>.
-			{% else %}
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.user_name }}</a> assigned a theme to this claim: <strong>{{ entry.theme_name }}</strong>.
-			{% endif %}
-				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
-			</div>
-			<div class="ui red secondary theme fitted menu">
-				<a class="item feed-reply-event" data-id="{{ entry.id }}">Reply</a>
-			</div>
-		{% elif entry.entry_type == 'improve' and entry.vote_type == 'reword' %}
-			<div class="summary">
-			{% if entry.collective %}
-				The panel agree that this claim should be reworded.
-			{% else %}
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> suggested that this claim can be reworded.
-			{% endif %}
-				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
-			</div>{% if entry.reason %}
-			<div class="extra text">
-				Reason: {{ entry.reason }}
-			</div>{% endif %}
-			{% if entry.collective %}
-			<div class="ui red secondary reword fitted menu">
-				<a class="item feed-reword-claim">Reword the claim</a>
-			</div>
-			{% endif %}
-		{% elif entry.entry_type == 'improve' and entry.vote_type == 'merge' %}
-			<div class="summary">
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> suggested that this claim can be merged. Please click on the "Needs merging" label to see details.
-				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
-			</div>{% if entry.reason %}
-			<div class="extra text">
-				Reason: {{ entry.content }}
-			</div>{% endif %}
 		{% elif entry.entry_type == 'claim version' %}
 			<div class="summary">
 			{% if entry.collective %}
-				The panel generated an improved version of this claim (written by <a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a>):
+				The panel generated a statement product for this slot (written by <a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a>):
 			{% else %}
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a>'s version of this claim:
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> suggested a statement product for this slot:
 			{% endif %}
 				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
 			</div>
-			<div class="extra improved text">
-				{{ entry.content }}
+
+			<div class="extra improved text"><div class="ui label">S{{ entry.version_id }}</div>
+				{{ entry.content | safe }}
+				{% if entry.is_adopted %}
+					<div class="ui blue label">Adopted</div>
+				{% endif %}
 			</div>
 			{% if not entry.collective %}
-			<div class="ui red secondary improve fitted menu" data-id="{{ entry.version_id }}">
-				<a class="item feed-like-claim-version" data-action="like"><i class="thumbs outline up icon"></i>Like<span></span></a>
-				<a class="item feed-diff-claim-version" data-action="diff">Show difference</a>
-				<a class="item feed-adopt-claim-version facilitator-only" data-action="adopt" style="display: none;">Adopt</a>
+			<div class="ui red secondary improve small menu" data-id="{{ entry.version_id }}">
+				<div class="right menu">
+					<a class="item feed-reply-entry" data-id="{{ entry.version_id }}">Reply</a>
+					{% if entry.is_adopted %}
+						<a class="item feed-adopt-claim-version facilitator-only" data-action="deadopt" style="display: none;">Retract</a>
+					{% else %}
+						<a class="item feed-adopt-claim-version facilitator-only" data-action="adopt" style="display: none;">Adopt</a>
+					{% endif %}
+
+				</div>
 			</div>
 			{% endif %}
-		{% elif entry.entry_type == 'claim old version' %}
+		{% elif entry.entry_type == 'slotassignment' %}
 			<div class="summary">
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.new_claim_author_id }}">{{ entry.new_claim_author_name }}</a> has created <a class="merged label" data-ids="{{ entry.is_merged }}">a new claim</a>, which merged this claim and <a class="merged label" data-ids="{{ entry.other_old_claims }}">these claims</a>.
-				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
-			</div>
-		{% elif entry.entry_type == 'claim new version' %}
-			<div class="summary">
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> created this claim by merging <a class="merged label" data-ids="{{ entry.merge_of }}">these claims</a>.
-				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+			{% if entry.action == 'add' %}
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> added claim <div class="ui label">C{{ entry.claim_id }}</div> into this slot.
+			{% else %}
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> removed claim <div class="ui label">C{{ entry.claim_id }}</div> from this slot.
+			{% endif %}
+				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
 			</div>
 		{% endif %}
 		</div>

@@ -3,11 +3,8 @@ import json
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.utils import timezone
-from django.db.models import Q
 
 from cir.models import *
-from cir.utils import pretty_date
-from cir.phase_control import PHASE_CONTROL
 
 VISITOR_ROLE = 'visitor'
 
@@ -16,10 +13,7 @@ def api_get_claim(request):
     action = request.REQUEST.get('action')
     forum = Forum.objects.get(id=request.session['forum_id'])
     context = {}
-    context['phase'] = PHASE_CONTROL[forum.phase]
-    claims = Claim.objects.filter(forum=forum, is_deleted=False, published=True)
-    if request.user.is_authenticated():
-        claims = claims | Claim.objects.filter(author=request.user, forum=forum, is_deleted=False, published=False)
+    claims = Claim.objects.filter(forum=forum, is_deleted=False, published=True, stmt_order__isnull=True)
     category = request.REQUEST.get('category')
     if category:
         context['category'] = category
@@ -39,29 +33,13 @@ def api_get_claim(request):
     context['claims_cnt'] = 0
 
     if action == 'get-claim':
-        display_type = request.REQUEST.get('display_type')
-        if display_type == 'overview':
-            for claim in claims:
-                context['claims_cnt'] += 1
-                context['claims'].append(claim.getAttr(forum))
-            context['claims'] = sorted(context['claims'], key=lambda c: c['updated_at_full'], reverse=True)
-            response['html'] = render_to_string("claim-common/claim-overview.html", context)
-        elif display_type == 'fullscreen':
-            # if no claims available, just leave context['claim'] and response['claim_id'] undefined.
-            if len(claims) != 0:
-                claim_return = claims.reverse()[0]
-                old_claim_id = request.REQUEST.get('claim_id')
-                # the specified claim may not exist in the current filtered set.
-                # if this is the case, return the first claim in the current filtered set.
-                if old_claim_id:
-                    for claim in claims:
-                        if claim.id == int(old_claim_id):
-                            claim_return = claim
-                            break
-                context['claim'] = claim_return.getAttr(forum)
-                response['claim_id'] = claim_return.id
-            response['html'] = render_to_string("claim-common/claim-fullscreen.html", context)
-    if action == 'navigator':
+        for claim in claims:
+            context['claims_cnt'] += 1
+            context['claims'].append(claim.getAttr(forum))
+        context['claims'] = sorted(context['claims'], key=lambda c: c['updated_at_full'], reverse=True)
+        response['html'] = render_to_string("claim-common/claim-overview.html", context)
+
+    elif action == 'navigator':
         context['option'] = {}
         if request.REQUEST.get('update_claim') == 'true':
             context['option']['claim'] = True
@@ -72,7 +50,19 @@ def api_get_claim(request):
         if request.REQUEST.get('update_filter') == 'true':
             context['option']['filter'] = True
             context['themes'] = [theme.getAttr() for theme in ClaimTheme.objects.filter(forum=forum)]
-        response['html'] = render_to_string("claim-common/claim-navigator.html", context)
+        response['html'] = render_to_string("claim-common/claim-filter.html", context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def api_get_slot(request):
+    response = {}
+    action = request.REQUEST.get('action')
+    context = {}
+
+    if action == 'get-slot':
+        slot = Claim.objects.get(id=request.REQUEST.get('slot_id'))
+        forum = Forum.objects.get(id=request.session['forum_id'])
+        context['slot'] = slot.getAttrSlot(forum)
+    response['html'] = render_to_string("claim-common/claim-fullscreen.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_draft_stmt(request):
@@ -80,35 +70,127 @@ def api_draft_stmt(request):
     action = request.REQUEST.get('action')
     forum = Forum.objects.get(id=request.session['forum_id'])
     context = {}
-    if action == 'add-to-stmt':
-        new_claim = Claim.objects.get(id=request.REQUEST['claim_id'])
-        order = int(request.REQUEST['order'])
-        # refresh claims one by one
-        claims = Claim.objects.filter(forum=forum, stmt_order__isnull=False, claim_category=new_claim.claim_category)
-        for claim in claims:
-            if claim.stmt_order >= order:
-                claim.stmt_order += 1
-                claim.save()
-        new_claim.stmt_order = order
-        new_claim.save()
+
+    if action == 'change-title':
+        slot = Claim.objects.get(id=request.REQUEST['slot_id'])
+        new_title = request.REQUEST['new_title']
+        slot.title = new_title
+        slot.save()
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+
+    if action == 'initiate-slot':
+        now = timezone.now()
+        claim_category = request.REQUEST.get('list_type')
+        selected_claim = Claim.objects.get(id=request.REQUEST['claim_id'])
+        order = int(request.REQUEST['order']) # order of the slot
+
+        # the "claim" will have an unassigned theme by default.
+        if 'actual_user_id' in request.session:
+            actual_author = User.objects.get(id=request.session['actual_user_id'])
+        else:
+            actual_author = None
+
+        if actual_author:
+            newSlot = Claim(forum=forum, author=actual_author, delegator=request.user,
+                created_at=now, updated_at=now, claim_category=claim_category)
+        else:
+            newSlot = Claim(forum=forum, author=request.user, created_at=now, updated_at=now, claim_category=claim_category)
+
+        # refresh slots one by one
+        slots = Claim.objects.filter(forum=forum, stmt_order__isnull=False, claim_category=claim_category)
+        for slot in slots:
+            if slot.stmt_order >= order:
+                slot.stmt_order += 1
+                slot.save()
+        newSlot.stmt_order = order
+        newSlot.save()
+
+        if actual_author:
+            SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
+                entry=selected_claim, created_at=now, slot=newSlot, event_type='add')
+        else:
+            SlotAssignment.objects.create(forum=forum, user=request.user,
+                entry=selected_claim, created_at=now, slot=newSlot, event_type='add')
+
+        # add claim reference: newSlot references selected_claim
+        ClaimReference.objects.create(refer_type='stmt', from_claim=selected_claim, to_claim=newSlot)
+
+    if action == 'add-to-slot': # merge with existing
+        now = timezone.now()
+        slot = Claim.objects.get(id=request.REQUEST['slot_id'])
+        claim = Claim.objects.get(id=request.REQUEST['claim_id'])
+        if not ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=slot).exists():
+            ClaimReference.objects.create(refer_type='stmt', from_claim=claim, to_claim=slot)
+        if 'actual_user_id' in request.session:
+            actual_author = User.objects.get(id=request.session['actual_user_id'])
+            SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
+                entry=claim, created_at=now, slot=slot, event_type='add')
+        else:
+            SlotAssignment.objects.create(forum=forum, user=request.user,
+                entry=claim, created_at=now, slot=slot, event_type='add')
+
     if action == 'reorder':
         orders = json.loads(request.REQUEST.get('order'))
         for claim_id in orders:
             claim = Claim.objects.get(id=claim_id)
             claim.stmt_order = orders[claim_id]
             claim.save()
+
     if action == 'destmt':
+        now = timezone.now()
         claim = Claim.objects.get(id=request.REQUEST['claim_id'])
-        claim.stmt_order = None
-        claim.save()
-    if action == 'add-to-stmt' or action == 'get-list' or action == 'reorder' or action == 'destmt':
-        context['categories'] = {}
-        response['claims_cnt'] = {'finding': 0, 'pro': 0, 'con': 0}
-        claims = Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False)
-        for category in ['finding', 'pro', 'con']:
-            context['categories'][category] = [claim.getAttr(forum) for claim in claims.filter(claim_category=category).order_by('stmt_order')]
-            response['claims_cnt'][category] += len(context['categories'][category])
-        response['html'] = render_to_string("phase4/draft-stmt.html", context)
+        slot = Claim.objects.get(id=request.REQUEST['slot_id'])
+        ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=slot).delete()
+        if request.session['selected_phase'] == 'categorize' and ClaimReference.objects.filter(refer_type='stmt', to_claim=slot).count() == 0:
+            # the last reference is removed, when in categorize phase
+            slot.is_deleted = True
+            slot.stmt_order = None
+            slot.save()
+        else:
+            if 'actual_user_id' in request.session:
+                actual_author = User.objects.get(id=request.session['actual_user_id'])
+                SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
+                    entry=claim, created_at=now, slot=slot, event_type='remove')
+            else:
+                SlotAssignment.objects.create(forum=forum, user=request.user,
+                    entry=claim, created_at=now, slot=slot, event_type='remove')
+
+    if action == 'move-to-slot':
+        now = timezone.now()
+        claim = Claim.objects.get(id=request.REQUEST['claim_id'])
+        from_slot = Claim.objects.get(id=request.REQUEST['from_slot_id'])
+        to_slot = Claim.objects.get(id=request.REQUEST['to_slot_id'])
+        if from_slot != to_slot:
+            ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=from_slot).delete()
+            if not ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=to_slot).exists():
+                ClaimReference.objects.create(refer_type='stmt', from_claim=claim, to_claim=to_slot)
+            if 'actual_user_id' in request.session:
+                actual_author = User.objects.get(id=request.session['actual_user_id'])
+                SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
+                    entry=claim, created_at=now, slot=from_slot, event_type='remove')
+                SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
+                    entry=claim, created_at=now, slot=to_slot, event_type='add')
+            else:
+                SlotAssignment.objects.create(forum=forum, user=request.user,
+                    entry=claim, created_at=now, slot=from_slot, event_type='remove')
+                SlotAssignment.objects.create(forum=forum, user=request.user,
+                    entry=claim, created_at=now, slot=to_slot, event_type='add')
+
+    # for all actions, return updated lists
+    if request.REQUEST.get('category'):
+        category_list = [request.REQUEST['category']]
+    else:
+        category_list = ['finding', 'pro', 'con']
+    context['categories'] = {}
+    response['slots_cnt'] = {'finding': 0, 'pro': 0, 'con': 0}
+    slots = Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False)
+    for category in category_list:
+        context['categories'][category] = [slot.getAttrSlot(forum) for slot in slots.filter(claim_category=category).order_by('stmt_order')]
+        response['slots_cnt'][category] += len(context['categories'][category])
+    if request.session['selected_phase'] == 'categorize':
+        response['html'] = render_to_string('phase3/draft-stmt.html', context)
+    else:
+        response['html'] = render_to_string('phase4/draft-stmt.html', context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_claim(request):
@@ -136,21 +218,18 @@ def api_claim(request):
             version.save()
         claim.save()
     elif action == 'reword':
-        claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
+        slot = Claim.objects.get(id=request.REQUEST.get('slot_id'))
         content = request.REQUEST.get('content')
         collective = request.REQUEST.get('collective')
         now = timezone.now()
         new_version = ClaimVersion(forum_id=request.session['forum_id'], content=content, created_at=now,
-            updated_at=now, is_adopted=False, claim=claim)
+            updated_at=now, is_adopted=False, claim=slot)
         if collective == 'true':
             new_version.collective = True
             # automatically adopt
-            current_version = claim.adopted_version()
-            current_version.is_adopted = False
-            current_version.save()
             new_version.is_adopted = True
-            claim.updated_at = now
-            claim.save()
+            slot.updated_at = now
+            slot.save()
         if actual_author:
             new_version.author = actual_author
             new_version.delegator = request.user
@@ -211,71 +290,31 @@ def api_claim_activities(request):
     response = {}
     action = request.REQUEST.get('action')
     if action == 'load-thread':
-        activity = request.REQUEST.get('filter')
-        claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
+        slot = Claim.objects.get(id=request.REQUEST.get('slot_id'))
         forum = Forum.objects.get(id=request.session['forum_id'])
         context = {}
         context['entries'] = []
-        if activity == 'all' or activity == 'general':
-            posts = claim.comments_of_entry.all()
+        posts = slot.comments_of_entry.all()
+        for post in posts:
+            for comment in post.getTree(exclude_root=False):
+                context['entries'].append(comment.getAttr(forum))
+
+        # performed rewording
+        for version in slot.versions.all():
+            version_info = version.getAttr(forum)
+            context['entries'].append(version_info)
+            posts = version.comments_of_entry.all()
             for post in posts:
                 for comment in post.getTree(exclude_root=False):
                     context['entries'].append(comment.getAttr(forum))
-        if activity == 'all' or activity == 'categorize':
-            votes = Vote.objects.filter(entry=claim).filter(
-                Q(vote_type='pro') | Q(vote_type='con') | Q(vote_type='finding') | Q(vote_type='discarded'))
-            for vote in votes:
-                context['entries'].append(vote.getAttr(forum))
-                posts = vote.comments_of_event.all()
-                for post in posts:
-                    for comment in post.getTree(exclude_root=False):
-                        context['entries'].append(comment.getAttr(forum))
-        if activity == 'all' or activity == 'theming':
-            themeassignments = ThemeAssignment.objects.filter(entry=claim)
-            for themeassignment in themeassignments:
-                context['entries'].append(themeassignment.getAttr(forum))
-                posts = themeassignment.comments_of_event.all()
-                for post in posts:
-                    for comment in post.getTree(exclude_root=False):
-                        context['entries'].append(comment.getAttr(forum))
-        if activity == 'all' or activity == 'improve':
-            reword_flags = Vote.objects.filter(entry=claim.adopted_version()).filter(vote_type='reword')
-            for flag in reword_flags:
-                context['entries'].append(flag.getAttr(forum))
-            merge_flags = Vote.objects.filter(entry=claim).filter(vote_type='merge')
-            for flag in merge_flags:
-                context['entries'].append(flag.getAttr(forum))
-            # performed rewording
-            for version in claim.versions.all():
-                if not version.is_adopted:  # skip the adopted one
-                    version_info = version.getAttr(forum)
-                    context['entries'].append(version_info)
-            # performed merging
-            for newer_claim in claim.newer_versions.all():
-                new_claim = newer_claim.to_claim
-                try:
-                    author_role = Role.objects.get(user=new_claim.author, forum=forum).role
-                except:
-                    author_role = VISITOR_ROLE
-                try:
-                    author_initial = str.upper(str(new_claim.author.first_name[0]) + str(new_claim.author.last_name[0]))
-                except:
-                    author_initial = ''
-                entry = {'author_role': author_role, 'author_initial': author_initial,
-                    'new_claim_author_id': new_claim.author.id,
-                    'new_claim_author_name': new_claim.author.get_full_name(), 'entry_type': 'claim old version',
-                    'is_merged': new_claim.id, 'other_old_claims': '.'.join(
-                    [str(claimref.from_claim.id) for claimref in new_claim.older_versions.all() if
-                        claimref.from_claim != claim]),
-                    'created_at_full': new_claim.created_at,
-                    'updated_at_full': new_claim.updated_at, 'updated_at': pretty_date(new_claim.updated_at)}
-                context['entries'].append(entry)
-            if claim.older_versions.all():  # this is a merged one!
-                attribute = claim.getAttr(forum)
-                attribute['entry_type'] = 'claim new version'
-                context['entries'].append(attribute)
-        context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'])
-        response['html'] = render_to_string("feed/activity-feed-claim.html", context)
+
+        # slot assignment events
+        slotassignments = SlotAssignment.objects.filter(slot=slot)
+        for slotassignment in slotassignments:
+            context['entries'].append(slotassignment.getAttr(forum))
+
+        context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'], reverse=True)
+        response['html'] = render_to_string('feed/activity-feed-claim.html', context)
         return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def _edit_claim(request):
@@ -589,11 +628,13 @@ def api_claim_vote(request):
                 Vote.objects.create(user=request.user, entry=claim_version, vote_type='like', created_at=timezone.now())
             response['voters'] = _get_version_votes(request.user, claim_version)
         return HttpResponse(json.dumps(response), mimetype='application/json')
-    if action == 'adopt version':
-        new_version = ClaimVersion.objects.get(id=request.REQUEST.get('version_id'))
-        current_version = new_version.claim.adopted_version()
-        current_version.is_adopted = False
-        current_version.save()
-        new_version.is_adopted = True
-        new_version.save()
+    if action == 'adopt':
+        version = ClaimVersion.objects.get(id=request.REQUEST.get('version_id'))
+        version.is_adopted = True
+        version.save()
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+    if action == 'deadopt':
+        version = ClaimVersion.objects.get(id=request.REQUEST.get('version_id'))
+        version.is_adopted = False
+        version.save()
         return HttpResponse(json.dumps(response), mimetype='application/json')

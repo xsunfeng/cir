@@ -1,0 +1,48 @@
+{% if categories %}{% for slot_info in categories %}
+	<li class="item phase4 slot" data-id="{{ slot_info.id }}">
+		<div class="ui top attached secondary segment">
+			<i class="reorder-handle vertical resize icon"></i>
+			<div class="slot-title{% if not slot_info.slot_title %} empty{% endif %}">
+				{% if slot_info.slot_title %}{{ slot_info.slot_title }}{% else %}(Click to name this slot){% endif %}
+			</div>
+		</div>
+		<div class="ui attached segment slot-hidden" style="display:none;background-color:#f3f4f5">
+			{% if slot_info.claims %}
+				<h4 class="description">This slot contains the following claim(s).</h4>{% for src_claim in slot_info.claims %}
+				<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}">
+					<i class="move-claim-handle move icon"></i>
+					<div class="ui label">C{{ src_claim.id }}</div>
+					{% if src_claim.theme %}<div class="ui label">Theme: {{ src_claim.theme }}</div>{% endif %}
+					{{ src_claim.content | safe }}
+					<div class="ui destmt circular icon red button"><i class="trash icon"></i></div>
+				</div>
+			{% endfor %}{% else %}
+				<div class="ui info message">
+					This slot does not contain any claims.
+				</div>
+			{% endif %}
+		</div>
+		<div class="ui attached segment slot-hidden" style="display:none">
+			{% if slot_info.adopted_versions %}
+				<h4 class="description">The following statement(s) have been produced by the CIR panel from this slot.</h4>{% for stmt in slot_info.adopted_versions %}
+				<div class="src_claim ui vertical segment" data-id="{{ stmt.id }}"><div class="ui label">S{{ stmt.id }}</div>
+					{{ stmt.content | safe }}
+					<div class="claim-metainfo">Composed by {{ stmt.author }}</div>
+				</div>{% endfor %}{% else %}
+				<div class="ui info message">
+					No statement has been produced from this slot.
+				</div>
+			{% endif %}
+		</div>
+
+		<div class="ui bottom attached one item menu">
+			<a class="fullscreen blue item" data-id="{{ slot_info.id }}">Discussions</a>
+		</div>
+	</li>
+{% endfor %}{% else %}
+	<div class="item empty">
+		<div class="content">
+			<div class="description">(No entries yet)</div>
+		</div>
+	</div>
+{% endif %}

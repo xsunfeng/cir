@@ -179,9 +179,9 @@ def api_annotation(request):
                 highlight = Highlight.objects.get(id=request.REQUEST.get('highlight_id'))
                 newPost.highlight = highlight
             elif source == 'claim':
-                claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
-                newPost.target_entry = claim
-        collective = request.REQUEST.get('collective')
+                slot = Claim.objects.get(id=request.REQUEST.get('slot_id'))
+                newPost.target_entry = slot
+        collective = request.REQUEST.get('collective', 'false')
         if collective == 'true':
             newPost.collective = True
         else:

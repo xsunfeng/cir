@@ -20,7 +20,9 @@ define([
 				success: function(xhr) {
 					Utils.notify('success', 'Phase changed.');
 					require('realtime/socket').updatePhase({
-						phase: module.$el.find('.phase.dropdown option:selected').text()
+						phase: module.$el.find('.phase.dropdown option:selected').val(),
+						forum_id: $('body').attr('forum-id'),
+						phaseFullname: module.$el.find('.phase.dropdown option:selected').text()
 					});
 				}
 			})

@@ -8,61 +8,66 @@ var io = require('socket.io')(server);
 var socketIds = [];
 
 io.on('connection', function(socket) {
-	socket
-		.on('server:user:logged_in', function(msg) {
-			console.log(msg.role + ' connected as ' + socket.id + ' joined forum ' + msg.forum_id);
+	socket.on('server:user:logged_in', function(msg) {
+		console.log('|connect|' + msg.user_name + '|' +
+			msg.role + '|' + socket.id + '|' + msg.forum_id + '|');
 
-			// join a room according to their role
-			socket.join(msg.role);
+		// join a room according to their role
+		socket.join(msg.role);
 
-			// join socketIds
-			socketIds.push({
-				'user_id': msg.user_id,
-				'user_name': msg.user_name,
-				'role': msg.role,
-				'socket_id': socket.id,
-				'forum_id': msg.forum_id,
-			});
-
-			// notify others
-			socket.broadcast.emit('client:someone:connected', {
-				'user_id': msg.user_id,
-				'user_name': msg.user_name,
-				'role': msg.role,
-				'socket_id': socket.id,
-				'forum_id': msg.forum_id
-			});
-
-			// return current online users
-			socket.emit('client:users:current_online', socketIds);
-		}).on('disconnect', function() {
-			console.log('user disconnected: ' + socket.id);
-			for (var i = 0; i < socketIds.length; i++) {
-				if (socketIds[i].socket_id == socket.id) {
-
-					socketIds.slice(i, 1);
-					socket.broadcast.emit('client:someone:disconnected', {
-						'user_id': socketIds[i].user_id
-					});
-					break;
-				}
-			}
-		}).on('server:chat:emit_msg', function(msg) {
-			// except sender
-			socket.broadcast.emit('client:chat:emit_msg', msg);
-		}).on('server:document:add_highlight', function(data) {
-			// except sender
-			socket.broadcast.emit('client:document:add_highlight', data);
-		}).on('server:document:add_question', function(data) {
-			// except sender
-			socket.broadcast.emit('client:document:add_question', data);
-		}).on('server:qa:add_post', function(data) {
-			// except sender
-			socket.broadcast.emit('client:qa:add_post', data);
-		}).on('server:facilitation:update_phase', function(data) {
-			// except sender
-			socket.broadcast.emit('client:facilitation:update_phase', data);
+		// join socketIds
+		socketIds.push({
+			'user_id': msg.user_id,
+			'user_name': msg.user_name,
+			'role': msg.role,
+			'socket_id': socket.id,
+			'forum_id': msg.forum_id,
 		});
+
+		// notify others
+		socket.broadcast.emit('client:someone:connected', {
+			'user_id': msg.user_id,
+			'user_name': msg.user_name,
+			'role': msg.role,
+			'socket_id': socket.id,
+			'forum_id': msg.forum_id
+		});
+
+		// return current online users
+		socket.emit('client:users:current_online', socketIds);
+	}).on('disconnect', function(param1, param2) {
+		console.log('|disconnect|' + socket.id + '|');
+		for (var i = 0; i < socketIds.length; i++) {
+			if (socketIds[i].socket_id == socket.id) {
+				socketIds.slice(i, 1);
+				socket.broadcast.emit('client:someone:disconnected', {
+					'user_id': socketIds[i].user_id
+				});
+				break;
+			}
+		}
+	}).on('server:chat:emit_msg', function(msg) {
+		// notify everyone except sender
+		socket.broadcast.emit('client:chat:emit_msg', msg);
+	}).on('server:document:add_highlight', function(data) {
+		// notify everyone except sender
+		socket.broadcast.emit('client:document:add_highlight', data);
+	}).on('server:document:add_question', function(data) {
+		// notify everyone except sender
+		socket.broadcast.emit('client:document:add_question', data);
+	}).on('server:qa:add_post', function(data) {
+		// notify everyone except sender
+		socket.broadcast.emit('client:qa:add_post', data);
+	}).on('server:facilitation:update_phase', function(data) {
+		// notify everyone except sender
+		socket.broadcast.emit('client:facilitation:update_phase', data);
+	}).on('server:facilitation:update_phase', function(data) {
+		// notify everyone except sender
+		socket.broadcast.emit('client:facilitation:update_phase', data);
+	}).on('server:claim:slot_change', function(data) {
+		// notify everyone except sender
+		socket.broadcast.emit('client:claim:slot_change', data);
+	});
 
 
 

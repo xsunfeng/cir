@@ -1,7 +1,7 @@
 <div class="ui top fixed menu">
 	<img style="height:40px;vertical-align:middle;margin:0 1em;" src="/media/gdlogo.png" alt="Geodeliberator Logo">
 	<div class="title item">{{ forum_name }}</div>
-	<div class="ui dropdown simple grey item" tabindex="0">
+	<div class="ui dropdown blue item" tabindex="0">
 		{{ phase_info.selected_phase_name }}
 		<i class="icon dropdown" tabindex="0"></i>
 		<div class="menu" tabindex="-1">
@@ -22,7 +22,7 @@
 	{% else %}
 	<div class="right menu" style="display:flex">
 		<a href="#" class="item"><i class="mail icon"></i>Messages</a>
-		<div class="ui dropdown simple item" tabindex="0">
+		<div class="ui dropdown item" tabindex="0">
 			<span id="header-user-name" data-id="{{ user_id }}"{% if role %} data-role="{{ role }}"{% endif %}>{{ user_name }}</span>
 			<i class="icon dropdown" tabindex="0"></i>
 			<div class="menu" tabindex="-1">
@@ -35,7 +35,7 @@
 		<a href="/{{ forum_url }}/dashboard" target="_blank" class="item">
 			<i class="icon dashboard"></i>
 		</a>
-		<div id="user-switch-menu" class="ui simple dropdown item" tabindex="0">
+		<div id="user-switch-menu" class="ui dropdown item" tabindex="0">
 			<i class="icon spy"></i>
 			<i class="icon dropdown" tabindex="0"></i>
 			<div class="switch user menu" tabindex="-1">
