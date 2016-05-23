@@ -42,9 +42,11 @@
 			<div class="extra text">
 				{{ entry.content }}
 			</div>
-			<div class="ui red secondary post fitted menu">
-				<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
-				<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+			<div class="ui red secondary post small menu">
+				<div class="right menu">
+					<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+					<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+				</div>
 			</div>
 		{% elif entry.entry_type == 'question' %}
 			<div class="summary">
@@ -70,9 +72,11 @@
 			<div class="extra text">
 				{{ entry.content }}
 			</div>
-			<div class="ui red secondary post fitted menu">
-				<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
-				<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+			<div class="ui red secondary post small menu">
+				<div class="right menu">
+					<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+					<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+				</div>
 			</div>
 		{% elif entry.entry_type == 'claim version' %}
 			<div class="summary">
@@ -83,20 +87,24 @@
 			{% endif %}
 				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
 			</div>
+
 			<div class="extra improved text"><div class="ui label">S{{ entry.version_id }}</div>
 				{{ entry.content | safe }}
+				{% if entry.is_adopted %}
+					<div class="ui blue label">Adopted</div>
+				{% endif %}
 			</div>
-			{% if entry.is_adopted %}
-				<div class="ui info message">This version has been adopted as a statement output of this slot.</div>
-			{% endif %}
 			{% if not entry.collective %}
-			<div class="ui red secondary improve fitted menu" data-id="{{ entry.version_id }}">
-			{% if entry.is_adopted %}
-				<a class="item feed-adopt-claim-version facilitator-only" data-action="deadopt" style="display: none;">De-adopt</a>
-			{% else %}
-				<a class="item feed-adopt-claim-version facilitator-only" data-action="adopt" style="display: none;">Adopt</a>
-			{% endif %}
-				<a class="item feed-reply-entry" data-id="{{ entry.version_id }}">Reply</a>
+			<div class="ui red secondary improve small menu" data-id="{{ entry.version_id }}">
+				<div class="right menu">
+					<a class="item feed-reply-entry" data-id="{{ entry.version_id }}">Reply</a>
+					{% if entry.is_adopted %}
+						<a class="item feed-adopt-claim-version facilitator-only" data-action="deadopt" style="display: none;">Retract</a>
+					{% else %}
+						<a class="item feed-adopt-claim-version facilitator-only" data-action="adopt" style="display: none;">Adopt</a>
+					{% endif %}
+
+				</div>
 			</div>
 			{% endif %}
 		{% elif entry.entry_type == 'slotassignment' %}

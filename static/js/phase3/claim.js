@@ -21,6 +21,7 @@ define([
 		if (module.claimLoader) {
 			module.claimLoader.abort();
 		}
+		$('#claim-filter-pane .ui.dropdown').addClass('disabled');
 		$('#claim-pane-overview').html('<div class="ui active centered inline loader"></div>');
 		ClaimFilter.setActive();
 
@@ -41,12 +42,14 @@ define([
 				if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (!sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
 					$('#claim-container .facilitator-only').show();
 				}
+				$('#claim-filter-pane .ui.dropdown').removeClass('disabled');
 			},
 			error: function(xhr) {
 				$('#claim-pane-overview').removeClass('loading');
 				if (xhr.status == 403) {
 					Utils.notify('error', xhr.responseText);
 				}
+				$('#claim-filter-pane .ui.dropdown').removeClass('disabled');
 			}
 		});
 		return module.claimLoader;

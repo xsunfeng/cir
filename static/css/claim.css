@@ -90,9 +90,7 @@
 textarea.claim.editor {
 	font-size:1.5em;
 }
-.improved.text {
-	font-size: 1.3em!important;
-}
+
 del {
 	color: red;
 }
@@ -179,6 +177,10 @@ a.claim-vote-btn.unready:hover {
 #draft-stmt .phase3.slot .src_claim {
 	max-height: 5em;
 	overflow: hidden;
+	color: #999999;
+}
+#draft-stmt .phase3.slot .src_claim:last-child {
+	padding-bottom: 0;
 }
 #draft-stmt .item.empty {
 	position: relative;
@@ -189,6 +191,7 @@ a.claim-vote-btn.unready:hover {
 }
 #draft-stmt .slot.phase3:hover .src_claim {
 	max-height: inherit;
+	color: #000;
 }
 
 #draft-stmt .slot .reorder-handle {
@@ -258,7 +261,7 @@ a.claim-vote-btn.unready:hover {
 	display: block;
 	background-color: #F3F4F5;
 	height: 42px;
-	content: 'Drop a claim here to create a new slot';
+	content: 'Move a claim here to create a new slot';
 	text-align: center;
 	border-radius: 0.3em;
 	border: 2px solid #2185D0;
@@ -302,4 +305,23 @@ a.claim-vote-btn.unready:hover {
 	bottom: 0;
 	width: 100%;
 	background: linear-gradient(to bottom, rgba(0, 0, 0, 0), white);
+}
+#claim-activity-feed .improve.menu,
+#claim-activity-feed .post.menu {
+	margin: 0;
+}
+#claim-activity-feed .ui.message {
+	margin: 0.5em 0 0 0;
+}
+#claim-activity-feed .improved.text {
+	font-size: 1.3em!important;
+}
+#claim-activity-feed .event[data-type="claim version"] {
+	background-color: #F8FFFF;
+	border-top: 1px #A9D5DE solid;
+	margin-top: 0.5em;
+	margin-left: -1em;
+	width: calc(100% + 2em);
+	padding: 0.5em 1em;
+	border-bottom: 1px #A9D5DE solid;
 }

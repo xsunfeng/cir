@@ -10,7 +10,7 @@ define([
 		initHeader: function() {
 			// set session storage
 			sessionStorage.clear();
-
+			$('.top.menu .ui.dropdown').dropdown();
 			if ($('#header-visitor-wrapper').length) { // not logged in
 				sessionStorage.setItem('user_id', '-1');
 				initVisitorBtns();
@@ -74,8 +74,7 @@ define([
 					}
 					if (require.defined('phase3/claim')) {
 						require('phase3/claim').updateClaimPane();
-					}
-					if (require.defined('phase4/claim')) {
+					} else if (require.defined('phase4/claim') && require('phase4/claim').slot_id) {
 						require('phase4/claim').updateClaimPane();
 					}
 				},

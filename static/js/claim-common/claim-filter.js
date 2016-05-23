@@ -71,6 +71,8 @@ define([
 	};
 
 	function initFilters() {
+		$('#claim-filter-pane .ui.dropdown').dropdown({
+		});
 		$('#claim-filter-pane .theme.item').click(function(e) {
 			if ($(e.target).hasClass('active')) return;
 			var choice = e.target.getAttribute('data-value');

@@ -3,12 +3,8 @@ import json
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.utils import timezone
-from django.db.models import Q
-from django.core.exceptions import ObjectDoesNotExist
 
 from cir.models import *
-from cir.utils import pretty_date
-from cir.phase_control import PHASE_CONTROL
 
 VISITOR_ROLE = 'visitor'
 
@@ -54,7 +50,7 @@ def api_get_claim(request):
         if request.REQUEST.get('update_filter') == 'true':
             context['option']['filter'] = True
             context['themes'] = [theme.getAttr() for theme in ClaimTheme.objects.filter(forum=forum)]
-        response['html'] = render_to_string("claim-common/claim-navigator.html", context)
+        response['html'] = render_to_string("claim-common/claim-filter.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_get_slot(request):
@@ -164,20 +160,21 @@ def api_draft_stmt(request):
         claim = Claim.objects.get(id=request.REQUEST['claim_id'])
         from_slot = Claim.objects.get(id=request.REQUEST['from_slot_id'])
         to_slot = Claim.objects.get(id=request.REQUEST['to_slot_id'])
-        ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=from_slot).delete()
-        if not ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=to_slot).exists():
-            ClaimReference.objects.create(refer_type='stmt', from_claim=claim, to_claim=to_slot)
-        if 'actual_user_id' in request.session:
-            actual_author = User.objects.get(id=request.session['actual_user_id'])
-            SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
-                entry=claim, created_at=now, slot=from_slot, event_type='remove')
-            SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
-                entry=claim, created_at=now, slot=to_slot, event_type='add')
-        else:
-            SlotAssignment.objects.create(forum=forum, user=request.user,
-                entry=claim, created_at=now, slot=from_slot, event_type='remove')
-            SlotAssignment.objects.create(forum=forum, user=request.user,
-                entry=claim, created_at=now, slot=to_slot, event_type='add')
+        if from_slot != to_slot:
+            ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=from_slot).delete()
+            if not ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=to_slot).exists():
+                ClaimReference.objects.create(refer_type='stmt', from_claim=claim, to_claim=to_slot)
+            if 'actual_user_id' in request.session:
+                actual_author = User.objects.get(id=request.session['actual_user_id'])
+                SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
+                    entry=claim, created_at=now, slot=from_slot, event_type='remove')
+                SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
+                    entry=claim, created_at=now, slot=to_slot, event_type='add')
+            else:
+                SlotAssignment.objects.create(forum=forum, user=request.user,
+                    entry=claim, created_at=now, slot=from_slot, event_type='remove')
+                SlotAssignment.objects.create(forum=forum, user=request.user,
+                    entry=claim, created_at=now, slot=to_slot, event_type='add')
 
     # for all actions, return updated lists
     if request.REQUEST.get('category'):

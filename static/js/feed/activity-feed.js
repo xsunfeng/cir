@@ -284,7 +284,7 @@ define([
 						.attr('data-reply-type', 'event')
 						.text('Reply to ' + name);
 				}
-				$('#activity-reply-form').insertAfter($(this).parent()).show();
+				$('#activity-reply-form').insertAfter($(this).parent().parent()).show();
 				$('#activity-reply-form textarea').focus();
 			}).on('click', '.feed-delete-entry', function() {
 				var entry_id = this.getAttribute('data-id');
