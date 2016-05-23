@@ -242,7 +242,7 @@ define([
 			});
 		}
 		function adoptClaimVersion(button) {
-			var $menu = $(button).parent();
+			var $menu = $(button).parent().parent();
 			var id = $menu.attr('data-id');
 			var action = button.getAttribute('data-action');
 			$.ajax({
