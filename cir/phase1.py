@@ -3,12 +3,49 @@ import json
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.utils import timezone
+from django.shortcuts import render_to_response
 
 from cir.models import *
 import claim_views
 
 from cir.phase_control import PHASE_CONTROL
 import utils
+
+def get_nugget_comment_list(request):
+    response = {}
+    context = {}
+    highlight_id = request.REQUEST.get("highlight_id")
+    this_highlight = Highlight.objects.get(id=highlight_id)
+    thread_comments = NuggetComment.objects.filter(highlight=this_highlight)
+    context['highlight'] = this_highlight.getAttr()
+    context['comments'] = thread_comments
+    response['nugget_comment_list'] = render_to_string("phase1/nugget_comment_list.html", context)
+    response['nugget_comment_highlight'] = render_to_string("phase1/nugget_comment_highlight.html", context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def put_nugget_comment(request):
+    response = {}
+    context = {}
+    author = request.user
+    parent_id = request.REQUEST.get('parent_id')
+    highlight_id = request.REQUEST.get('highlight_id')
+    text = request.REQUEST.get('text')
+    created_at = timezone.now()
+    highlight = Highlight.objects.get(id = highlight_id)
+    if parent_id == "": #root node
+        newNuggetComment = NuggetComment(author = author, text = text, highlight = highlight, created_at = created_at)
+    else:
+        parent = NuggetComment.objects.get(id = parent_id)
+        newNuggetComment = NuggetComment(author = author, text = text, highlight = highlight, parent = parent, created_at = created_at)
+    newNuggetComment.save()
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+class NuggetComment(MPTTModel):
+    text = models.CharField(max_length=50, unique=True)
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    highlight = models.ForeignKey(Highlight)
+    created_at = models.DateTimeField()
 
 def api_load_all_documents(request):
     response = {}
@@ -193,25 +230,19 @@ def get_theme_list(request):
 
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
-def api_load_highlights(request):
+def get_highlights(request):
     response = {}
     response['highlights'] = []
     theme_id = request.REQUEST.get('theme_id')
     doc_id = request.REQUEST.get('doc_id')
     doc = Doc.objects.get(id = doc_id)
-    if theme_id == "-1":
-        for section in doc.sections.all():
-            highlights = section.highlights.all()
-            for highlight in highlights:
-                highlight_info = highlight.getAttr()
-                response['highlights'].append(highlight_info)
-    else:
-        for section in doc.sections.all():
-            highlights = section.highlights.all()
-            for highlight in highlights:
-                if (highlight.theme != None and int(highlight.theme.id) == int(theme_id)):
-                    highlight_info = highlight.getAttr()
-                    response['highlights'].append(highlight_info)
+    for section in doc.sections.all():
+        highlights = section.highlights.all()
+        for highlight in highlights:
+            highlight_info = highlight.getAttr()
+            highlight_info["cur_theme"] = True if highlight.theme.id == theme_id else False
+            highlight_info["doc_id"] = DocSection.objects.get(id=highlight.context.id).doc.id
+            response['highlights'].append(highlight_info)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_load_one_highlight(request):
@@ -241,12 +272,10 @@ def put_claim(request):
     newClaim.save()
     claim_version = ClaimVersion(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, claim=newClaim)
     claim_version.save()
-    data_hl_ids_list = data_hl_ids.strip().split(",")
+    data_hl_ids_list = data_hl_ids.strip().split(" ")
     for data_hl_id in data_hl_ids_list:
         newHighlightClaim = HighlightClaim(claim_id=newClaim.id, highlight_id=data_hl_id)
         newHighlightClaim.save()
-        newClaimAndTheme = ClaimAndTheme(claim_id = newClaim.id, theme = Highlight.objects.get(id = data_hl_id).theme)
-        newClaimAndTheme.save()
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_assign_nugget(request):
@@ -306,6 +335,7 @@ def api_remove_nugget(request):
 def get_nugget_list(request):
     response = {}
     context = {}
+    theme_id = int(request.REQUEST.get("theme_id"))
     docs = Doc.objects.filter(forum_id=request.session["forum_id"])
     context['highlights'] = []
     for doc in docs:
@@ -313,18 +343,23 @@ def get_nugget_list(request):
             highlights = section.highlights.all()
             for highlight in highlights:
                 highlight_info = highlight.getAttr()
+                highlight_info["doc_id"] = DocSection.objects.get(id=highlight.context.id).doc.id
                 highlight_info["comment_number"] = NuggetComment.objects.filter(highlight_id = highlight.id).count()
                 context['highlights'].append(highlight_info)
     context['highlights'].sort(key = lambda x: x["created_at"], reverse=True)
-    response['highlight2claims'] = {}
-    for highlight in context['highlights']:
-        highlightClaims = HighlightClaim.objects.filter(highlight_id=highlight['id'])
-        if highlightClaims.count() > 0:
-            s = []
-            for highlightClaim in highlightClaims:
-                s.append(highlightClaim.claim_id)
-            response['highlight2claims'][highlight["id"]] = s
-    response['workbench_nugget_list'] = render_to_string("phase2/nugget_list.html", context)
+    response['workbench_nugget_list'] = render_to_string("phase1/nugget_list.html", context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def api_load_nugget_list_partial(request):
+    response = {}
+    context = {}
+    context['highlights'] = []
+    highlight_ids = request.REQUEST.get("highlight_ids")
+    highlight_ids = highlight_ids.split()
+    for highlight_id in highlight_ids:
+        highlight = Highlight.objects.get(id = highlight_id)
+        context['highlights'].append(highlight.getAttr())
+    response['workbench_nugget_list'] = render_to_string("workbench-nuggets.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_load_claim_list_partial(request):
@@ -363,7 +398,11 @@ def get_claim_list(request):
     forum = Forum.objects.get(id=request.session['forum_id'])
     response = {}
     context = {}
-    claims = Claim.objects.filter(forum = forum)
+    theme_id = int(request.REQUEST.get('theme_id'))
+    if (theme_id > 0): 
+        claims = Claim.objects.filter(theme_id = theme_id)
+    else:
+        claims = Claim.objects.filter(forum = forum)
     context["claims"] = []
     for claim in claims:
         item = {}
@@ -374,15 +413,10 @@ def get_claim_list(request):
         item['id'] = claim.id
         item['author_name'] = claim.author.first_name + " " + claim.author.last_name
         item['is_author'] = (request.user == claim.author)
-        arr = []
+        item['highlight_ids'] = ""
         for highlight in claim.source_highlights.all():
-            arr.append(str(highlight.id))
-        item['highlight_ids'] = ",".join(arr)
-        item['themes'] = []
-        for claimAndTheme in ClaimAndTheme.objects.filter(claim = claim):
-            theme = claimAndTheme.theme
-            if theme not in item['themes']:
-                item['themes'].append(theme)
+            item['highlight_ids'] += (str(highlight.id) + " ")
+        item['highlight_ids'].strip(" ")
         context["claims"].append(item)
     context['claims'].sort(key = lambda x: x["created_at_used_for_sort"], reverse=True)
     response['workbench_claims'] = render_to_string("phase2/claim_list.html", context)

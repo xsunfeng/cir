@@ -13,6 +13,7 @@ import chatter_views
 import vis_views
 import sankey_views
 
+import phase1
 import phase2
 
 
@@ -60,7 +61,15 @@ urlpatterns = patterns('',
     url(r'^workbench/api_get_doc_by_doc_id/$', workbench_views.api_get_doc_by_doc_id),
     url(r'^workbench/api_get_init_doc/$', workbench_views.api_get_init_doc),
 
-    url(r'^phase2/get_claim/$', phase2.get_claim),
+    url(r'^phase1/get_nugget_list/$', phase1.get_nugget_list),
+    url(r'^phase1/get_highlights/$', phase1.get_highlights),
+    url(r'^phase1/get_nugget_comment_list/$', phase1.get_nugget_comment_list),
+    url(r'^phase1/put_nugget_comment/$', phase1.put_nugget_comment),
+
+    url(r'^phase2/get_claim_list/$', phase2.get_claim_list),
+    url(r'^phase2/get_nugget_list/$', phase2.get_nugget_list),
+    url(r'^phase2/get_theme_list/$', phase2.get_theme_list),
+    url(r'^phase2/put_claim/$', phase2.put_claim),
 
     url(r'^sankey/get_graph/$', sankey_views.get_graph),
     url(r'^sankey/get_doc/$', sankey_views.get_doc),
@@ -84,6 +93,8 @@ urlpatterns = patterns('',
     url(r'^dashboard/docs/$', facilitator_views.admin_document),
     url(r'^dashboard/phase/$', facilitator_views.admin_phase),
     url(r'^dashboard/user_mgmt/$', facilitator_views.user_mgmt),
+    url(r'^dashboard/get_pie/$', facilitator_views.get_pie),
+    url(r'^dashboard/get_highlights/$', facilitator_views.get_highlights),
 
     # these must be put last!
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)(/phase/(?P<phase_name>[a-zA-Z0-9_]+))?/?$', forum_views.enter_forum),

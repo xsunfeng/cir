@@ -1,0 +1,41 @@
+{% if claims %} 
+	{% for item in claims %}
+		<div class="ui segment workbench-claim-item" claim-id="{{ item.id }}" nugget-ids="{{ item.highlight_ids }}" theme-ids="{{ item.theme_ids }}">
+			<div class="content">
+				<div class="description workbench-claim-content">
+					{{ item.content }}
+				</div>
+			</div>
+			{% for theme in item.themes %}
+				<span class="ui label theme-label" theme-id={{ theme.id }}>{{ theme.name }}</span>
+			{% endfor %}
+			<div class="discription" style="color:rgba(0,0,0,.4);">
+				<span class="discription">
+					<div class="ui heart rating" data-rating="0" data-max-rating="1"></div>
+					<span> | </span>
+					<span>{{ item.author_name }}</span>
+					<span> | </span>
+					<span>{{ item.date }}</span>
+				</span>
+				<span style="float:right;">
+					{% if item.is_author %}
+						<a href="#" class="item remove-claim">remove</a>
+						<span> | </span>
+						<a href="#" class="item source-claim">source</a>
+					{% else %}
+						<a href="#" class="item source-claim">source</a>
+					{% endif %}
+				<span>
+			</div>
+		</div>
+	{% endfor %}
+{% else %}
+	<div class="ui segment workbench-claim-item">
+		<div class="content">
+			<div class="description">
+				No claims yet.
+			</div>
+		</div>
+	</div>
+{% endif %}
+
