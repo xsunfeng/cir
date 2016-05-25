@@ -221,7 +221,7 @@ define([
 		}
 		function likeClaimVersion(button) {
 			var _that = button;
-			var $menu = $(button).parent();
+			var $menu = $(button).parent().parent();
 			var id = $menu.attr('data-id');
 			$.ajax({
 				url: '/api_claim_vote/',
