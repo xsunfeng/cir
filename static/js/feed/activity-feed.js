@@ -27,7 +27,7 @@ define([
 				var url = '/api_claim_activities/';
 			}
 			var claimModule;
-			if (!require.defined('phase3/claim') && !require.defined('phase4/claim')) {
+			if (!require.defined('phase2/claim') && !require.defined('phase3/claim') && !require.defined('phase4/claim')) {
 				claimModule = null;
 			} else {
 				claimModule = require.defined('phase3/claim') ? require('phase3/claim') : require('phase4/claim');

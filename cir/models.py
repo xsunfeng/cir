@@ -417,6 +417,37 @@ class Event(models.Model):  # the behavior of a user on an entry
         attr['collective'] = self.collective
         return attr
 
+class ClaimThemeAssignment(Event):
+    EVENT_CHOICES = (
+        ('add_theme', 'Add a theme'),
+        ('remove_theme', 'Remove a theme'),
+    )
+    claim = models.ForeignKey(Claim)
+    theme = models.ForeignKey(ClaimTheme)
+    event_type = models.CharField(max_length=20, choices=EVENT_CHOICES)
+    def getAttr(self, forum):
+        attr = super(ClaimThemeAssignment, self).getAttr(forum)
+        attr['entry_type'] = 'claim_theme_assignment'
+        attr['action'] = self.event_type
+        attr['claim_id'] = self.entry.id
+        return attr
+
+class ClaimNuggetAssignment(Event):
+    EVENT_CHOICES = (
+        ('add', 'Add a nugget'),
+        ('remove', 'Remove a nugget'),
+    )
+    claim = models.ForeignKey(Claim)
+    nugget = models.ForeignKey(Highlight)
+    event_type = models.CharField(max_length=20, choices=EVENT_CHOICES)
+    def getAttr(self, forum):
+        attr = super(ClaimNuggetAssignment, self).getAttr(forum)
+        attr['entry_type'] = 'claim_nugget_assignment'
+        attr['action'] = self.event_type
+        attr['claim_id'] = self.claim.id
+        attr['nugget_id'] = self.nugget.id
+        return attr
+
 class SlotAssignment(Event):
     EVENT_CHOICES = (
         ('add', 'Add to slot'),

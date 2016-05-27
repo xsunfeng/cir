@@ -77,34 +77,16 @@
 <div style="font-size:1.2em; position:fixed; top:50px; bottom:0; left:50%; right:0;">
 	<div style="padding-left: 2em;">
 		<div class="ui text menu">
-			<div class="header item">claim</div>		
+			<div class="header item">claim</div>	
+			<div class="item" id="add-new-claim">
+				<button class="ui circular icon button"><i class="plus icon"></i></button>
+			</div>
 		</div>
 	</div>
-	<div style="overflow:auto; top:60px; bottom:0; position:absolute; padding:1em; left:0; right:0; padding-top: 0;">
-		<div id="candidate-nugget-list" style="margin-bottom: 1em;"></div>
-		<div class="ui form" id="claim-maker">
-			<div class="field">
-				<textarea></textarea>
-			</div>
-		</div>
-		<div class="ui text menu" style="margin-top:0.5em;">						
-<!-- 			<div class="header item">theme</div>
-			<select name="gender" class="ui dropdown item" id="nugget-list-order-by">
-				<option value="option1">latest</option>
-				<option value="option2">most popular</option>
-			</select> -->
-			<div class="right menu">
-				<button id="clear-claim" class="ui button">
-					clear
-				</button>
-				<button id="post-claim" class="ui primary button">
-					post
-				</button>
-			</div>
-		</div>
-		<div id="claim-list" class="ui segments" style="border-radius: 0;">
-		</div>		
-		<a href="#" id="claim-list-back" style="display:none;">back to full list</a>
+	<div id="feng-claim-panel" style="overflow:auto; top:60px; bottom:0; position:absolute; padding:1em; left:0; right:0; padding-top: 0;">
+		<a href="#" id="claim-list-back" style="display:none;"><i class="icon angle left"></i>back to full list</a>
+		<div id="claim-detail" class="ui segment" style="display:none; margin-top:0;"></div>
+		<div id="claim-list" class="ui segments" style="border-radius:0; margin-top:0;"></div>		
 	</div>
 </div>
 

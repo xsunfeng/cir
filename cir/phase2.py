@@ -233,20 +233,35 @@ def api_remove_claim(request):
 def put_claim(request):
     response = {}
     content = request.REQUEST.get('content')
-    theme_id = request.REQUEST.get('theme_id')
     data_hl_ids = request.REQUEST.get('data_hl_ids')
     category = "pending"
     now = timezone.now()
-    newClaim = Claim(forum_id=request.session['forum_id'], author=request.user, created_at=now, updated_at=now, content=content, theme_id=theme_id, claim_category=category)
+    newClaim = Claim(forum_id=request.session['forum_id'], author=request.user, created_at=now, updated_at=now, content=content, claim_category=category)
     newClaim.save()
-    claim_version = ClaimVersion(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, claim=newClaim)
+    claim_version = ClaimVersion(forum_id=request.session['forum_id'], author=request.user, content=content, created_at=now, updated_at=now, claim=newClaim, is_adopted=True)
     claim_version.save()
-    data_hl_ids_list = data_hl_ids.strip().split(",")
-    for data_hl_id in data_hl_ids_list:
-        newHighlightClaim = HighlightClaim(claim_id=newClaim.id, highlight_id=data_hl_id)
-        newHighlightClaim.save()
-        newClaimAndTheme = ClaimAndTheme(claim_id = newClaim.id, theme = Highlight.objects.get(id = data_hl_id).theme)
-        newClaimAndTheme.save()
+    if data_hl_ids != "":
+        data_hl_ids_list = data_hl_ids.strip().split(",")
+        for data_hl_id in data_hl_ids_list:
+            newHighlightClaim = HighlightClaim(claim_id=newClaim.id, highlight_id=data_hl_id)
+            newHighlightClaim.save()
+            newClaimAndTheme = ClaimAndTheme(claim_id = newClaim.id, theme = Highlight.objects.get(id = data_hl_id).theme)
+            newClaimAndTheme.save()
+    response["claim_id"] = newClaim.id;
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def suggest_claim(request):
+    response = {}
+    claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
+    content = request.REQUEST.get('content')
+    now = timezone.now()
+    new_version = ClaimVersion(forum_id = request.session['forum_id'], content = content, created_at = now, updated_at = now, is_adopted = False, claim = claim)
+    if 'actual_user_id' in request.session:
+        new_version.author = actual_author
+        new_version.delegator = request.user
+    else:
+        new_version.author = request.user
+    new_version.save()
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_assign_nugget(request):
@@ -359,6 +374,169 @@ def api_edit_claim(request):
     response = {}
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
+def get_claim_activity(request):
+    response = {}
+    action = request.REQUEST.get('action')
+    if action == 'load-thread':
+        print "slot_id", request.REQUEST.get('slot_id')
+        claim = Claim.objects.get(id = request.REQUEST.get('slot_id'))
+        forum = Forum.objects.get(id = request.session['forum_id'])
+        context = {}
+        context['entries'] = []
+        posts = claim.comments_of_entry.all()
+        for post in posts:
+            for comment in post.getTree(exclude_root = False):
+                context['entries'].append(comment.getAttr(forum))
+        # performed rewording
+        for version in claim.versions.all():
+            version_info = version.getAttr(forum)
+            context['entries'].append(version_info)
+            posts = version.comments_of_entry.all()
+            for post in posts:
+                for comment in post.getTree(exclude_root = False):
+                    context['entries'].append(comment.getAttr(forum))
+        for claimNuggetAssignment in ClaimNuggetAssignment.objects.filter(claim = claim):
+            nugget_assignment_info = claimNuggetAssignment.getAttr(forum)
+            context['entries'].append(nugget_assignment_info)
+        # slot assignment events
+        # slotassignments = SlotAssignment.objects.filter(slot=slot)
+        # for slotassignment in slotassignments:
+        #     context['entries'].append(slotassignment.getAttr(forum))
+        context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'], reverse=True)
+        context['nuggets'] = []
+        highlightClaims = HighlightClaim.objects.filter(claim_id = claim.id)
+        for highlightClaim in highlightClaims:
+            context['nuggets'].append(highlightClaim.highlight.getAttr())
+        context['claim'] = claim
+        response['html'] = render_to_string('phase2/claim_detail.html', context)
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def adopt_claim(request):
+    response = {}
+    version = ClaimVersion.objects.get(id=request.REQUEST.get('version_id'))
+    ClaimVersion.objects.filter(claim_id = version.claim.id).update(is_adopted=False)
+    version.is_adopted = True
+    version.save()
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def get_claim_activity_part(request):
+    response = {}
+    action = request.REQUEST.get('action')
+    if action == 'load-thread':
+        print "slot_id", request.REQUEST.get('slot_id')
+        claim = Claim.objects.get(id = request.REQUEST.get('slot_id'))
+        forum = Forum.objects.get(id = request.session['forum_id'])
+        context = {}
+        context['entries'] = []
+        posts = claim.comments_of_entry.all()
+        for post in posts:
+            for comment in post.getTree(exclude_root = False):
+                context['entries'].append(comment.getAttr(forum))
+        # performed rewording
+        for version in claim.versions.all():
+            version_info = version.getAttr(forum)
+            context['entries'].append(version_info)
+            posts = version.comments_of_entry.all()
+            for post in posts:
+                for comment in post.getTree(exclude_root = False):
+                    context['entries'].append(comment.getAttr(forum))
+        for claimNuggetAssignment in ClaimNuggetAssignment.objects.filter(claim = claim):
+            nugget_assignment_info = claimNuggetAssignment.getAttr(forum)
+            context['entries'].append(nugget_assignment_info)
+        # slot assignment events
+        # slotassignments = SlotAssignment.objects.filter(slot=slot)
+        # for slotassignment in slotassignments:
+        #     context['entries'].append(slotassignment.getAttr(forum))
+        context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'], reverse=True)
+        context['nuggets'] = []
+        highlightClaims = HighlightClaim.objects.filter(claim_id = claim.id)
+        for highlightClaim in highlightClaims:
+            context['nuggets'].append(highlightClaim.highlight.getAttr())
+        context['claim'] = claim
+        response['html'] = render_to_string('phase2/claim_activity.html', context)
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def add_nugget_to_claim(request):
+    response = {}
+    context = {}
+    highlight_id = request.REQUEST.get('highlight_id')
+    claim_id = request.REQUEST.get('claim_id')
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    newHighlightClaim = HighlightClaim(claim_id = claim_id, highlight_id = highlight_id)
+    newHighlightClaim.save()
+    newClaimAndTheme = ClaimAndTheme(claim_id = claim_id, theme = Highlight.objects.get(id = highlight_id).theme)
+    newClaimAndTheme.save()
+    now = timezone.now()
+    if 'actual_user_id' in request.session:
+        newClaimNuggetAssignment = ClaimNuggetAssignment(forum=forum, user=actual_author, delegator=request.user, entry_id=claim_id, created_at=now, nugget_id = highlight_id, claim_id=claim_id, event_type='add')
+    else:
+        newClaimNuggetAssignment = ClaimNuggetAssignment(forum=forum, user=request.user, entry_id=claim_id, created_at=now, claim_id=claim_id, nugget_id = highlight_id, event_type='add')
+    newClaimNuggetAssignment.save()
+    context['nuggets'] = []
+    highlightClaims = HighlightClaim.objects.filter(claim_id = claim_id)
+    for highlightClaim in highlightClaims:
+        context['nuggets'].append(highlightClaim.highlight.getAttr())
+    response['html'] = render_to_string('phase2/candidate_nugget_list.html', context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def remove_nugget_from_claim(request):
+    response = {}
+    context = {}
+    highlight_id = request.REQUEST.get('highlight_id')
+    claim_id = request.REQUEST.get('claim_id')
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    HighlightClaim.objects.filter(claim_id = claim_id, highlight_id = highlight_id).delete()
+    ClaimAndTheme.objects.filter(claim_id = claim_id).delete()
+    for highlightClaim in HighlightClaim.objects.filter(claim_id = claim_id):
+        newClaimAndTheme = ClaimAndTheme(claim_id = claim_id, theme = highlightClaim.highlight.theme)
+        newClaimAndTheme.save()
+    now = timezone.now()
+    if 'actual_user_id' in request.session:
+        newClaimNuggetAssignment = ClaimNuggetAssignment(forum=forum, user=actual_author, delegator=request.user, entry_id=claim_id, created_at=now, nugget_id = highlight_id, claim_id=claim_id, event_type='remove')
+    else:
+        newClaimNuggetAssignment = ClaimNuggetAssignment(forum=forum, user=request.user, entry_id=claim_id, created_at=now, claim_id=claim_id, nugget_id = highlight_id, event_type='remove')
+    newClaimNuggetAssignment.save()
+    context['nuggets'] = []
+    highlightClaims = HighlightClaim.objects.filter(claim_id = claim_id)
+    for highlightClaim in highlightClaims:
+        context['nuggets'].append(highlightClaim.highlight.getAttr())
+    response['html'] = render_to_string('phase2/candidate_nugget_list.html', context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def add_comment_to_claim(request):
+    response = {}
+    if not request.user.is_authenticated():
+        return HttpResponse("Please log in first.", status=403)
+    now = timezone.now()
+    newPost = Post(forum_id=request.session['forum_id'], content_type='comment', created_at=now, updated_at=now)
+    if 'actual_user_id' in request.session:
+        newPost.author = User.objects.get(id=request.session['actual_user_id'])
+        newPost.delegator = request.user
+    else:
+        newPost.author = request.user
+    newPost.content = request.REQUEST.get('content')
+    reply_type = request.REQUEST.get('reply_type')
+    if reply_type:  # replying another post, or event
+        reply_id = request.REQUEST.get('reply_id')
+        if reply_type == 'event':
+            event = Event.objects.get(id=reply_id)
+            newPost.target_event = event
+        elif reply_type == 'entry':
+            entry = Entry.objects.get(id=reply_id)
+            newPost.target_entry = entry
+    else:  # targeting at a highlight or a claim
+        source = request.REQUEST.get('type')
+        if source == 'highlight':
+            highlight = Highlight.objects.get(id=request.REQUEST.get('highlight_id'))
+            newPost.highlight = highlight
+        elif source == 'claim':
+            slot = Claim.objects.get(id=request.REQUEST.get('claim_id'))
+            newPost.target_entry = slot
+    newPost.save()
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
 def get_claim_list(request):
     forum = Forum.objects.get(id=request.session['forum_id'])
     response = {}
@@ -366,11 +544,12 @@ def get_claim_list(request):
     claims = Claim.objects.filter(forum = forum)
     context["claims"] = []
     for claim in claims:
+        print "claim_id = ", claim.id
         item = {}
         item['date'] = utils.pretty_date(claim.updated_at)
         item['created_at'] = utils.pretty_date(claim.created_at)
         item['created_at_used_for_sort'] = claim.created_at
-        item['content'] = unicode(ClaimVersion.objects.filter(claim_id = claim.id)[0]) 
+        item['content'] = unicode(ClaimVersion.objects.filter(claim_id = claim.id, is_adopted = True)[0]) 
         item['id'] = claim.id
         item['author_name'] = claim.author.first_name + " " + claim.author.last_name
         item['is_author'] = (request.user == claim.author)

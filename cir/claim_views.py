@@ -35,6 +35,7 @@ def api_get_claim(request):
     if action == 'get-claim':
         for claim in claims:
             context['claims_cnt'] += 1
+            print "claims_id", claim.id
             context['claims'].append(claim.getAttr(forum))
         context['claims'] = sorted(context['claims'], key=lambda c: c['updated_at_full'], reverse=True)
         response['html'] = render_to_string("claim-common/claim-overview.html", context)
