@@ -36,6 +36,8 @@ DATABASES = {
     'dev': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'cir_backup_20160318',  # Or path to database file if using sqlite3.
+        # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        # The following settings are not used with sqlite3:
         'USER': 'postgres',
         'PASSWORD': 'asdf1234',
         'HOST': SERVER_HOST,
