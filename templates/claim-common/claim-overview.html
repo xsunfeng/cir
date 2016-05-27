@@ -1,8 +1,11 @@
 {% if claims %}{% for claim in claims %}
 <div class="ui top attached secondary claim menu" data-id="{{ claim.id }}">
-	<div class="item">
+	<div class="label item">
 		<div class="ui label">C{{ claim.id }}</div>
 	</div>
+	{% if claim.theme %}
+		<div class="label item"><div class="ui label">Theme: {{ claim.theme }}</div></div>
+	{% endif %}
 	<div class="right menu">
 		<div class="item claim-addstmt-handle"><i class="move icon"></i>Drag to statement</div>
 	</div>
@@ -17,9 +20,6 @@
 		</div>
 		<div class="claim-metainfo">
 			Composed by <a class="user {{ claim.author_role }}" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a> <abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>
-		{% if claim.theme %}
-			<div class="ui label">Theme: {{ claim.theme }}</div>
-		{% endif %}
 		</div>
 	</div>
 </section>

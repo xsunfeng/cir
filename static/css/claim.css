@@ -38,7 +38,13 @@
 	border: none;
 	border-radius: 0;
 }
-
+#claim-pane-overview .ui.menu .item.label {
+	margin: 0;
+	padding-right: 0;
+}
+#claim-pane-overview .ui.menu .item>.label {
+	margin: 0;
+}
 .claim.column > .ui.menu {
 	-webkit-box-shadow: none;
 	-moz-box-shadow: none;
@@ -56,6 +62,10 @@
 }
 .ui.secondary.menu .claim-addstmt-handle {
 	cursor: move;
+	color: #999999;
+}
+.ui.secondary.menu .claim-addstmt-handle:hover {
+	color: #000;
 }
 #claim-pane-overview .claim-content {
 	font-size: 1.2em;

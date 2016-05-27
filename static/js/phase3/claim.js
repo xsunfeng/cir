@@ -3,6 +3,7 @@ define([
 	'claim-common/claim-filter',
 	'claim-common/draft-stmt',
 	'realtime/socket',
+	'doc/qa',
 	'utils',
 	'semantic-ui',
 ], function(
@@ -10,6 +11,7 @@ define([
 	ClaimFilter,
 	DraftStmt,
 	Socket,
+	QA,
 	Utils
 ) {
 	var module = {};
@@ -112,6 +114,7 @@ define([
 	DraftStmt.activeClaimModule = module;
 	Socket.activeClaimModule = module;
 	DraftStmt.update();
+	QA.updateQuestionList();
 	ClaimFilter.updateNavigator({'filter': true});
 	return module;
 });

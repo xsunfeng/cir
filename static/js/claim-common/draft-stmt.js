@@ -331,10 +331,15 @@ define([
 
 	function updateProgressBars() {
 		$.each(module.categories, function(idx, category) {
+			var value = module.stmtCount[category];
+			var total = module.stmtLimit[category];
+			if (value > total) {
+				$('#draft-stmt .' + category + '.stmt.progress').attr('data-percent', '100');
+			}
 			$('#draft-stmt .' + category + '.stmt.progress')
 				.progress({
-					value: module.stmtCount[category],
-					total: module.stmtLimit[category],
+					value: value,
+					total: total,
 					text: {
 						active: '{value}/{total} slots',
 						success: '{value}/{total} slots'

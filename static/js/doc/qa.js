@@ -1,11 +1,11 @@
 define([
+	'jquery',
 	'utils',
-	'doc/document',
 	'workbench2',
 	'feed/activity-feed'
 ], function(
-Utils,
-	Document,
+	$,
+	Utils,
 	Workbench
 ) {
 	var module = {};
