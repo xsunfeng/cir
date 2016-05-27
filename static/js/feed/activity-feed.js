@@ -23,7 +23,7 @@ define([
 				this.data('question_id', this.data('id'));
 				var url = '/api_qa/';
 			}
-			if (!require.defined('phase3/claim') && !require.defined('phase4/claim')) {
+			if (!require.defined('phase2/claim') && !require.defined('phase3/claim') && !require.defined('phase4/claim')) {
 				return;
 			}
 			var claimModule = require.defined('phase3/claim') ? require('phase3/claim') : require('phase4/claim');

@@ -21,13 +21,13 @@
 					<span style="float:right;" class="actions">
 						<a href="#" class="item source-nugget">context</a>
 						<span> | </span>
-						<a href="#" class="item comment-nugget">comment</a>
+<!-- 						<a href="#" class="item comment-nugget">comment</a> -->
 						{% if highlight.comment_number != 0 %}
 							<a href="#" class="item comment-nugget-number">({{ highlight.comment_number }})</a>
 						{% endif %}
-						<span> | </span>
-						<a href="#" class="item reassign-nugget">change theme</a>
-						<span> | </span>
+<!-- 						<span> | </span>
+						<a href="#" class="item reassign-nugget">change theme</a> -->
+<!-- 						<span> | </span> -->
 						<a href="#" class="item use-nugget">adopt</a>
 						<a href="#" class="item use-nugget-num"></a>
 					</span>
@@ -45,3 +45,8 @@
 		</div>
 {% endif %}
 
+<div id="document-container-modal" class="ui small modal">
+    <i class="close icon"></i>
+    <div class="content" id="nugget-comment-highlight" style="padding-bottom:0;"></div>
+    <div class="content" id="document-container"></div>
+</div>

@@ -42,6 +42,7 @@ def api_get_toc(request):
         m_doc = {}
         m_doc['name'] = doc.title
         m_doc['id'] = doc.id
+        m_doc['description'] = doc.description
         m_doc['content'] = []
         for section in doc.sections.all():
             m_sec = {}
@@ -62,6 +63,7 @@ def api_get_toc(request):
             m_doc = {}
             m_doc['name'] = doc.title
             m_doc['id'] = doc.id
+            m_doc['description'] = doc.description
             m_doc['content'] = []
             for section in doc.sections.all():
                 m_sec = {}
@@ -94,6 +96,7 @@ def api_get_doc_by_hl_id(request):
         context['sections'].append(section.getAttr(forum))
     response['workbench_document'] = render_to_string("workbench-document.html", context)
     response['doc_id'] = doc.id
+    response['highlight'] = hl.getAttr()
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_get_doc_by_sec_id(request):

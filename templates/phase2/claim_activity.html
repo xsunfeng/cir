@@ -1,0 +1,99 @@
+{% if entries %}
+<div class="ui feed" style="margin-top: 1em">
+{% for entry in entries %}
+	<div class="event" data-type="{{ entry.entry_type }}">
+		<div class="user-initial">
+			<div class="{{ entry.author_role }}{% if entry.collective %} collective{% endif %}">
+			{% if entry.author_role == 'facilitator' %}F
+			{% elif entry.collective %}C
+			{% elif entry.author_role == 'admin' %}A
+			{% else %}{{ entry.author_initial }}
+			{% endif %}
+			</div>
+		</div>
+		<div class="activity-content content">
+		{% if entry.is_deleted %}
+			<div class="summary">
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a><div class="date">updated <abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div> [deleted]
+			</div>
+		{% elif entry.parent_name %}
+			<div class="summary">
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> replied to <a class="user">{{ entry.parent_name }}</a>
+				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+			</div>
+			<div class="extra text">
+				{{ entry.content }}
+			</div>
+			<div class="ui red secondary post small menu">
+				<div class="right menu">
+					<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+					<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+				</div>
+			</div>
+		{% elif entry.entry_type == 'question' %}
+			<div class="summary">
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> raised a question.
+				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+			</div>
+			<div class="extra text">
+				{{ entry.content }}
+			</div>
+			<div class="ui red secondary post fitted menu">
+				<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+				<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+			</div>
+		{% elif entry.entry_type == 'comment' %}
+			<div class="summary">
+			{% if entry.collective %}
+				The panel reached a conclusion on this slot:
+			{% else %}
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> commented:
+			{% endif %}
+				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+			</div>
+			<div class="extra text">
+				{{ entry.content }}
+			</div>
+<!-- 			<div class="ui red secondary post small menu">
+				<div class="right menu">
+					<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+					<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+				</div>
+			</div> -->
+		{% elif entry.entry_type == 'claim version' %}
+			<div class="summary">
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> suggested a claim:
+				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+			</div>
+			<div class="extra improved text"><div class="ui label">C{{ entry.version_id }}</div>
+				{{ entry.content | safe }}
+				{% if entry.is_adopted %}
+					<div class="ui blue label">Adopted</div>
+				{% endif %}
+			</div>
+			<div class="ui red secondary improve small menu" data-id="{{ entry.version_id }}">
+				<div class="right menu">
+<!-- 					<a class="item feed-reply-entry" data-id="{{ entry.version_id }}">Reply</a>
+ -->					{% if entry.is_adopted %}
+					{% else %}
+						<a class="item feed-adopt-claim-version facilitator-only adopt-claim" data-action="adopt" version-id="{{ entry.version_id }}">Adopt</a>
+					{% endif %}
+				</div>
+			</div>
+		{% elif entry.entry_type == 'claim_nugget_assignment' %}
+			<div class="summary">
+			{% if entry.action == 'add' %}
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> added nugget <div class="ui label">N{{ entry.nugget_id }}</div> into this claim.
+			{% else %}
+				<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> removed nugget <div class="ui label">N{{ entry.nugget_id }}</div> from this claim.
+			{% endif %}
+				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
+			</div>	
+		{% endif %}
+		</div>
+	</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="ui info message">No activities to show</div>
+{% endif %}

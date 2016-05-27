@@ -1,0 +1,47 @@
+<div id="claim-content" class="ui segment">
+	{{ claim }}
+</div>
+<div id="candidate-nugget-list-container">
+	{% include 'phase2/candidate_nugget_list.html' %}
+</div>
+
+<div class="ui accordion" id="claim-maker" claim-id="{{ claim.id }}">
+	<div class="title">
+	<i class="dropdown icon"></i>
+		Suggest a claim
+	</div>
+	<div class="content">
+		<div class="ui form" >
+			<div class="field">
+				<textarea></textarea>
+			</div>
+		</div>
+		<div class="ui text menu" style="margin-top:0.5em;">						
+		<!-- 			<div class="header item">theme</div>
+			<select name="gender" class="ui dropdown item" id="nugget-list-order-by">
+				<option value="option1">latest</option>
+				<option value="option2">most popular</option>
+			</select> -->
+			<div class="right menu">
+				<button id="clear-claim" class="ui button">
+					clear
+				</button>
+				<button id="suggest-claim" class="ui primary button">
+					suggest
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<form id="activity-comment-form" class="ui form">
+	<div class="field">
+		<label><span>Add a comment</span></label>
+		<textarea rows="2"></textarea>
+	</div>
+	<div class="ui primary submit button" id="add-comment-to-claim"><i class="send outline icon"></i>Post</div>
+</form>
+
+<div id="claim-activity">
+	{% include 'phase2/claim_activity.html' %}
+</div>
