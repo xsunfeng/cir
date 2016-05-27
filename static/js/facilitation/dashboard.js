@@ -3,6 +3,7 @@ define([
 	'facilitation/phase-manager',
 	'facilitation/forum-manager',
 	'facilitation/doc-manager',
+	'facilitation/message-manager',
 	'facilitation/vis/pie',
 	'facilitation/vis/dot',
 	'semantic-ui',
@@ -12,6 +13,7 @@ define([
 	PhaseManager,
 	ForumManager,
 	DocManager,
+	MessageManager,
 	Pie,
 	Dot
 ) {
@@ -27,6 +29,11 @@ define([
 		$('#nav-menu > .item[data-tab="document-tab"]').tab({
 			'onFirstLoad': function() {
 				DocManager.init();
+			}
+		});
+		$('#nav-menu > .item[data-tab="message-tab"]').tab({
+			'onFirstLoad': function() {
+				MessageManager.init();
 			}
 		});
 		$('#nav-menu > .item[data-tab="vis-tab"]').tab({

@@ -106,3 +106,43 @@ iframe[src^="//www.youtube.com"] {
 	font-size: 16px;
 	line-height: 1.4em;
 }
+
+#messages-modal {
+	height:80%;
+	overflow: auto;
+}
+#message-list {
+	padding:0 1em;
+
+}
+#message-list .message.item .header {
+	white-space: nowrap;
+	overflow: hidden;
+	margin: 0.5em 0;
+}
+
+#message-list .message.item.important {
+	background-color: #FFF4D3;
+}
+#message-list .message.item.done .mark-done {
+	display: none;
+}
+#message-list .message.item.read .header {
+	font-weight:inherit!important;
+}
+#message-list .message.item.done .header {
+	font-weight:inherit!important;
+	color: #999999!important;
+}
+#message-list:not(.show-done) .message.item.done {
+	display: none;
+}
+#message-list.important-only .message.item:not(.important) {
+	display: none;
+}
+#message-details {
+	background-color: aliceblue;
+}
+#message-details .highlight-found {
+	background-color: yellow;
+}

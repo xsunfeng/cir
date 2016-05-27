@@ -94,6 +94,7 @@ urlpatterns = patterns('',
     url(r'^dashboard/docs/$', facilitator_views.admin_document),
     url(r'^dashboard/phase/$', facilitator_views.admin_phase),
     url(r'^dashboard/user_mgmt/$', facilitator_views.user_mgmt),
+    url(r'^dashboard/msg/$', facilitator_views.admin_msg),
     url(r'^dashboard/get_pie/$', facilitator_views.get_pie),
     url(r'^dashboard/get_highlights/$', facilitator_views.get_highlights),
 

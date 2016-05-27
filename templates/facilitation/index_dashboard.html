@@ -70,7 +70,7 @@ text.value{
     <a href="#" class="red item" data-tab="forum-tab">Forum</a>
     <a href="#" class="red item" data-tab="users-tab">Users</a>
     <a href="#" class="red item" data-tab="document-tab">Documents</a>
-    <a href="#" class="red item" data-tab="messages-tab">Messages</a>
+    <a href="#" class="red item" data-tab="message-tab">Messages</a>
     <a href="#" class="red item" data-tab="log-tab">Access log</a>
     {% endif %}
 </div>
@@ -104,9 +104,6 @@ text.value{
 <div class="container">
 	<div class="ui main tab active" data-tab="overview-tab">
 		<div class="ui centered grid">
-			<div class="sixteen wide column">
-				<h3>Forum activities -- mockup</h3>
-			</div>
 			<div class="ten wide column">
 				<h3>Current phase of deliberation</h3>
 				<div class="ui segment">
@@ -269,10 +266,27 @@ text.value{
     <div class="ui main tab" data-tab="document-tab">
         <div class="ui loading segment" style="min-height:10em"></div>
     </div>
-	<div class="ui main tab" data-tab="messages-tab">
-		<div class="ui grid">
-			<div class="ten wide column">Under construction.</div>
-			<div class="six wide column"></div>
+	<div class="ui main tab" data-tab="message-tab">
+		<div class="ui centered grid">
+			<div class="ten wide column">
+				<h3>Send a message / task to the panel</h3>
+				<div class="ui segment">
+					<form id="send-msg-form" class="ui form">
+						<div class="field">
+							<textarea></textarea>
+						</div>
+						<div class="ui primary button">Send</div>
+					</form>
+				</div>
+				<h3>Previous messages</h3>
+				<div id="previous-messages" class="ui segment">
+
+				</div>
+
+			</div>
+			<div class="six wide column">
+				<div id="panelist-list"></div>
+			</div>
 		</div>
 	</div>
 	<div class="ui main tab" data-tab="log-tab">

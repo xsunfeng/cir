@@ -132,9 +132,9 @@ def api_highlight(request):
 def api_annotation(request):
     response = {}
     action = request.REQUEST.get('action')
+    forum = Forum.objects.get(id=request.session['forum_id'])
     if action == 'load-thread':
         context = {}
-        forum = Forum.objects.get(id=request.session['forum_id'])
         highlight_id = request.REQUEST.get('highlight_id')
         highlight = Highlight.objects.get(id=highlight_id)
         if (highlight.is_nugget):
@@ -164,15 +164,38 @@ def api_annotation(request):
         else:
             newPost.author = request.user
         newPost.content = request.REQUEST.get('content')
+
+        # depending on whether this post is a reply, decide who are to be notified
+        request_action = request.REQUEST.get('request_action', 'false')
+        request_action_bool = False
+        if request_action == 'true':
+            request_action_bool = True
         reply_type = request.REQUEST.get('reply_type')
         if reply_type:  # replying another post, or event
             reply_id = request.REQUEST.get('reply_id')
+            if request_action_bool:
+                message_type = 'reply-action'
+            else:
+                message_type = 'reply'
+
             if reply_type == 'event':
                 event = Event.objects.get(id=reply_id)
                 newPost.target_event = event
+                receiver = event.user
             elif reply_type == 'entry':
                 entry = Entry.objects.get(id=reply_id)
                 newPost.target_entry = entry
+                receiver = entry.author
+            newPost.save()
+            Message.objects.create(
+                forum=forum,
+                sender=newPost.author,
+                receiver=receiver,
+                content=newPost.content,
+                created_at=now,
+                content_type=message_type,
+                target_entry=newPost
+            )
         else:  # targeting at a highlight or a claim
             source = request.REQUEST.get('type')
             if source == 'highlight':
@@ -187,6 +210,22 @@ def api_annotation(request):
         else:
             newPost.collective = False
         newPost.save()
+
+        if not reply_type: # notify everyone
+            message_type = 'post'
+            if request_action_bool:
+                message_type = 'post-action'
+
+            for panelist in forum.members.filter(role='panelist'):
+                Message.objects.create(
+                    forum=forum,
+                    sender=newPost.author,
+                    receiver=panelist.user,
+                    content=newPost.content,
+                    created_at=now,
+                    content_type=message_type,
+                    target_entry=newPost
+                )
         return HttpResponse(json.dumps(response), mimetype='application/json')
     if action == 'delete':
         entry_id = request.REQUEST.get('entry_id')

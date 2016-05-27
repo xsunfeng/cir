@@ -89,6 +89,8 @@ def enter_forum(request, forum_url, phase_name):  # access /forum_name
     context['forum_url'] = forum.url
     context['phase_info'] = _get_phases(forum, phase_name)
 
+    # TODO are there unread messages?
+
     index_html = ''
     if phase_name == 'nugget':
         index_html = 'phase1/index.html'

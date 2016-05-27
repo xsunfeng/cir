@@ -531,6 +531,47 @@ class Post(Entry):  # in discussion
             attr['parent_id'] = self.target_event.id
         return attr
 
+class Message(models.Model):
+    forum = models.ForeignKey(Forum)
+    sender = models.ForeignKey(User, related_name='msg_of_sender')
+    receiver = models.ForeignKey(User, related_name='msg_of_receiver')
+    target_entry = models.ForeignKey(Entry, null=True, blank=True)
+    content = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField()
+    unread = models.BooleanField(default=True)
+    CONTENT_CHOICES = (
+        ('facilitation', 'Facilitation message'),
+        ('facilitation-action', 'Facilitation message - Action required'),
+        ('post', 'Post'),
+        ('post-action', 'Post - Attention requested'),
+        ('reply', 'Reply'),
+        ('reply-action', 'Reply - Attention requested'),
+        ('version', 'Version'),
+        ('version-action', 'Version - Attention requested'),
+    )
+    is_done = models.BooleanField(default=False)
+
+    content_type = models.CharField(max_length=20, choices=CONTENT_CHOICES)
+    def getAttr(self):
+        attr = {
+            'id': self.id,
+            'sender': self.sender.get_full_name(),
+            'receiver': self.receiver.get_full_name(),
+            'content': self.content,
+            'created_at_full': self.created_at,  # for sorting
+            'created_at': utils.pretty_date(self.created_at),
+            'content_type': self.content_type,
+        }
+        if 'facilitation' in self.content_type or 'action' in self.content_type:
+            attr['important'] = 'important'
+        if not self.unread:
+            attr['is_read'] = 'read'
+        if self.is_done:
+            attr['is_done'] = 'done'
+        if self.target_entry:
+            attr['source_id'] = self.target_entry.id
+        return attr
+
 class ChatMessage(models.Model):
     source = models.ForeignKey(User, related_name='get_source', on_delete=models.CASCADE)
     target = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)

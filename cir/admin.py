@@ -69,7 +69,10 @@ class ClaimAdmin(admin.ModelAdmin):
         return self.__unicode__()
 
     def version_author(self):
-        return "%s %s" % (self.adopted_version().author.first_name, self.adopted_version().author.last_name)
+        try:
+            return "%s %s" % (self.adopted_version().author.first_name, self.adopted_version().author.last_name)
+        except:
+            return "(multiple or no adopted version authors)"
 
     def delegator_name(self):
         if self.delegator:
