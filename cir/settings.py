@@ -4,7 +4,7 @@ import socket
 
 # automatically determine debug status
 if 'cai' in socket.getfqdn():
-    DEBUG = True
+    DEBUG = False
 else:
     DEBUG = True
 

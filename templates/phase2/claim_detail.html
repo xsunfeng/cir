@@ -1,11 +1,14 @@
+currently adopted claim
 <div id="claim-content" class="ui segment">
 	{{ claim }}
 </div>
+
+referred nuggets
 <div id="candidate-nugget-list-container">
 	{% include 'phase2/candidate_nugget_list.html' %}
 </div>
 
-<div class="ui accordion" id="claim-maker" claim-id="{{ claim.id }}">
+<div class="ui segment accordion" id="claim-maker" claim-id="{{ claim.id }}">
 	<div class="title">
 	<i class="dropdown icon"></i>
 		Suggest a claim
@@ -34,14 +37,7 @@
 	</div>
 </div>
 
-<form id="activity-comment-form" class="ui form">
-	<div class="field">
-		<label><span>Add a comment</span></label>
-		<textarea rows="2"></textarea>
-	</div>
-	<div class="ui primary submit button" id="add-comment-to-claim"><i class="send outline icon"></i>Post</div>
-</form>
-
+activity history (latest shows first)
 <div id="claim-activity">
 	{% include 'phase2/claim_activity.html' %}
 </div>

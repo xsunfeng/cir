@@ -136,6 +136,7 @@ class Migration(SchemaMigration):
         # Adding model 'Claim'
         db.create_table(u'cir_claim', (
             (u'entry_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['cir.Entry'], unique=True, primary_key=True)),
+            ('title', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('published', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('stmt_order', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
             ('claim_category', self.gf('django.db.models.fields.CharField')(max_length=20, null=True, blank=True)),
@@ -163,6 +164,32 @@ class Migration(SchemaMigration):
             ('collective', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
         db.send_create_signal(u'cir', ['Event'])
+
+        # Adding model 'ClaimThemeAssignment'
+        db.create_table(u'cir_claimthemeassignment', (
+            (u'event_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['cir.Event'], unique=True, primary_key=True)),
+            ('claim', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cir.Claim'])),
+            ('theme', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cir.ClaimTheme'])),
+            ('event_type', self.gf('django.db.models.fields.CharField')(max_length=20)),
+        ))
+        db.send_create_signal(u'cir', ['ClaimThemeAssignment'])
+
+        # Adding model 'ClaimNuggetAssignment'
+        db.create_table(u'cir_claimnuggetassignment', (
+            (u'event_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['cir.Event'], unique=True, primary_key=True)),
+            ('claim', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cir.Claim'])),
+            ('nugget', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cir.Highlight'])),
+            ('event_type', self.gf('django.db.models.fields.CharField')(max_length=20)),
+        ))
+        db.send_create_signal(u'cir', ['ClaimNuggetAssignment'])
+
+        # Adding model 'SlotAssignment'
+        db.create_table(u'cir_slotassignment', (
+            (u'event_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['cir.Event'], unique=True, primary_key=True)),
+            ('slot', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cir.Claim'])),
+            ('event_type', self.gf('django.db.models.fields.CharField')(max_length=20)),
+        ))
+        db.send_create_signal(u'cir', ['SlotAssignment'])
 
         # Adding model 'Vote'
         db.create_table(u'cir_vote', (
@@ -218,16 +245,13 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'cir', ['HighlightClaim'])
 
-        # Adding model 'NuggetComment'
-        db.create_table(u'cir_nuggetcomment', (
+        # Adding model 'ClaimAndTheme'
+        db.create_table(u'cir_claimandtheme', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('forum', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cir.Forum'])),
-            ('author', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-            ('theme', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cir.ClaimTheme'], null=True, blank=True)),
-            ('content', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('created_at', self.gf('django.db.models.fields.DateTimeField')()),
+            ('claim', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cir.Claim'])),
+            ('theme', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cir.ClaimTheme'])),
         ))
-        db.send_create_signal(u'cir', ['NuggetComment'])
+        db.send_create_signal(u'cir', ['ClaimAndTheme'])
 
         # Adding model 'SankeyWorkbench'
         db.create_table(u'cir_sankeyworkbench', (
@@ -276,6 +300,61 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'cir', ['NuggetLensInteraction'])
 
+        # Adding model 'NuggetComment'
+        db.create_table(u'cir_nuggetcomment', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('text', self.gf('django.db.models.fields.CharField')(unique=True, max_length=50)),
+            ('parent', self.gf('mptt.fields.TreeForeignKey')(blank=True, related_name='children', null=True, to=orm['cir.NuggetComment'])),
+            ('author', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+            ('highlight', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cir.Highlight'])),
+            ('created_at', self.gf('django.db.models.fields.DateTimeField')()),
+            (u'lft', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
+            (u'rght', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
+            (u'tree_id', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
+            (u'level', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
+        ))
+        db.send_create_signal(u'cir', ['NuggetComment'])
+
+        # Adding model 'ClaimComment'
+        db.create_table(u'cir_claimcomment', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('text', self.gf('django.db.models.fields.CharField')(unique=True, max_length=50)),
+            ('parent', self.gf('mptt.fields.TreeForeignKey')(blank=True, related_name='children', null=True, to=orm['cir.ClaimComment'])),
+            ('author', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+            ('claim', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cir.Claim'])),
+            ('created_at', self.gf('django.db.models.fields.DateTimeField')()),
+            ('comment_type', self.gf('django.db.models.fields.CharField')(max_length=10)),
+            ('is_answered', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('forum', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cir.Forum'], null=True, blank=True)),
+            (u'lft', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
+            (u'rght', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
+            (u'tree_id', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
+            (u'level', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
+        ))
+        db.send_create_signal(u'cir', ['ClaimComment'])
+
+        # Adding model 'ClaimQuestionVote'
+        db.create_table(u'cir_claimquestionvote', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('question', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cir.ClaimComment'])),
+            ('voter', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+            ('created_at', self.gf('django.db.models.fields.DateTimeField')()),
+            ('upvote', self.gf('django.db.models.fields.BooleanField')(default=True)),
+        ))
+        db.send_create_signal(u'cir', ['ClaimQuestionVote'])
+
+        # Adding model 'Genre'
+        db.create_table(u'cir_genre', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=50)),
+            ('parent', self.gf('mptt.fields.TreeForeignKey')(blank=True, related_name='children', null=True, to=orm['cir.Genre'])),
+            (u'lft', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
+            (u'rght', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
+            (u'tree_id', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
+            (u'level', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
+        ))
+        db.send_create_signal(u'cir', ['Genre'])
+
 
     def backwards(self, orm):
         # Deleting model 'UserLogin'
@@ -320,6 +399,15 @@ class Migration(SchemaMigration):
         # Deleting model 'Event'
         db.delete_table(u'cir_event')
 
+        # Deleting model 'ClaimThemeAssignment'
+        db.delete_table(u'cir_claimthemeassignment')
+
+        # Deleting model 'ClaimNuggetAssignment'
+        db.delete_table(u'cir_claimnuggetassignment')
+
+        # Deleting model 'SlotAssignment'
+        db.delete_table(u'cir_slotassignment')
+
         # Deleting model 'Vote'
         db.delete_table(u'cir_vote')
 
@@ -338,8 +426,8 @@ class Migration(SchemaMigration):
         # Deleting model 'HighlightClaim'
         db.delete_table(u'cir_highlightclaim')
 
-        # Deleting model 'NuggetComment'
-        db.delete_table(u'cir_nuggetcomment')
+        # Deleting model 'ClaimAndTheme'
+        db.delete_table(u'cir_claimandtheme')
 
         # Deleting model 'SankeyWorkbench'
         db.delete_table(u'cir_sankeyworkbench')
@@ -355,6 +443,18 @@ class Migration(SchemaMigration):
 
         # Deleting model 'NuggetLensInteraction'
         db.delete_table(u'cir_nuggetlensinteraction')
+
+        # Deleting model 'NuggetComment'
+        db.delete_table(u'cir_nuggetcomment')
+
+        # Deleting model 'ClaimComment'
+        db.delete_table(u'cir_claimcomment')
+
+        # Deleting model 'ClaimQuestionVote'
+        db.delete_table(u'cir_claimquestionvote')
+
+        # Deleting model 'Genre'
+        db.delete_table(u'cir_genre')
 
 
     models = {
@@ -404,7 +504,45 @@ class Migration(SchemaMigration):
             'published': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'source_highlights': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['cir.Highlight']", 'through': u"orm['cir.HighlightClaim']", 'symmetrical': 'False'}),
             'stmt_order': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'theme': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cir.ClaimTheme']", 'null': 'True', 'blank': 'True'})
+            'theme': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cir.ClaimTheme']", 'null': 'True', 'blank': 'True'}),
+            'title': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'})
+        },
+        u'cir.claimandtheme': {
+            'Meta': {'object_name': 'ClaimAndTheme'},
+            'claim': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cir.Claim']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'theme': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cir.ClaimTheme']"})
+        },
+        u'cir.claimcomment': {
+            'Meta': {'object_name': 'ClaimComment'},
+            'author': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"}),
+            'claim': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cir.Claim']"}),
+            'comment_type': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
+            'created_at': ('django.db.models.fields.DateTimeField', [], {}),
+            'forum': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cir.Forum']", 'null': 'True', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'is_answered': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            u'level': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
+            u'lft': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
+            'parent': ('mptt.fields.TreeForeignKey', [], {'blank': 'True', 'related_name': "'children'", 'null': 'True', 'to': u"orm['cir.ClaimComment']"}),
+            u'rght': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
+            'text': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
+            u'tree_id': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'})
+        },
+        u'cir.claimnuggetassignment': {
+            'Meta': {'object_name': 'ClaimNuggetAssignment', '_ormbases': [u'cir.Event']},
+            'claim': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cir.Claim']"}),
+            u'event_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['cir.Event']", 'unique': 'True', 'primary_key': 'True'}),
+            'event_type': ('django.db.models.fields.CharField', [], {'max_length': '20'}),
+            'nugget': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cir.Highlight']"})
+        },
+        u'cir.claimquestionvote': {
+            'Meta': {'object_name': 'ClaimQuestionVote'},
+            'created_at': ('django.db.models.fields.DateTimeField', [], {}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'question': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cir.ClaimComment']"}),
+            'upvote': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'voter': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"})
         },
         u'cir.claimreference': {
             'Meta': {'object_name': 'ClaimReference'},
@@ -419,6 +557,13 @@ class Migration(SchemaMigration):
             'forum': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cir.Forum']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
+        },
+        u'cir.claimthemeassignment': {
+            'Meta': {'object_name': 'ClaimThemeAssignment', '_ormbases': [u'cir.Event']},
+            'claim': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cir.Claim']"}),
+            u'event_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['cir.Event']", 'unique': 'True', 'primary_key': 'True'}),
+            'event_type': ('django.db.models.fields.CharField', [], {'max_length': '20'}),
+            'theme': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cir.ClaimTheme']"})
         },
         u'cir.claimversion': {
             'Meta': {'object_name': 'ClaimVersion', '_ormbases': [u'cir.Entry']},
@@ -492,6 +637,16 @@ class Migration(SchemaMigration):
             'stmt_preamble': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'url': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
+        u'cir.genre': {
+            'Meta': {'object_name': 'Genre'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            u'level': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
+            u'lft': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
+            'parent': ('mptt.fields.TreeForeignKey', [], {'blank': 'True', 'related_name': "'children'", 'null': 'True', 'to': u"orm['cir.Genre']"}),
+            u'rght': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
+            u'tree_id': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'})
+        },
         u'cir.highlight': {
             'Meta': {'object_name': 'Highlight'},
             'author': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"}),
@@ -515,11 +670,15 @@ class Migration(SchemaMigration):
         u'cir.nuggetcomment': {
             'Meta': {'object_name': 'NuggetComment'},
             'author': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"}),
-            'content': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'created_at': ('django.db.models.fields.DateTimeField', [], {}),
-            'forum': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cir.Forum']"}),
+            'highlight': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cir.Highlight']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'theme': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cir.ClaimTheme']", 'null': 'True', 'blank': 'True'})
+            u'level': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
+            u'lft': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
+            'parent': ('mptt.fields.TreeForeignKey', [], {'blank': 'True', 'related_name': "'children'", 'null': 'True', 'to': u"orm['cir.NuggetComment']"}),
+            u'rght': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
+            'text': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
+            u'tree_id': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'})
         },
         u'cir.nuggetlensinteraction': {
             'Meta': {'object_name': 'NuggetLensInteraction'},
@@ -565,6 +724,12 @@ class Migration(SchemaMigration):
             'content': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'forum': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cir.Forum']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
+        },
+        u'cir.slotassignment': {
+            'Meta': {'object_name': 'SlotAssignment', '_ormbases': [u'cir.Event']},
+            u'event_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['cir.Event']", 'unique': 'True', 'primary_key': 'True'}),
+            'event_type': ('django.db.models.fields.CharField', [], {'max_length': '20'}),
+            'slot': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['cir.Claim']"})
         },
         u'cir.tag': {
             'Meta': {'object_name': 'Tag', '_ormbases': [u'cir.Highlight']},

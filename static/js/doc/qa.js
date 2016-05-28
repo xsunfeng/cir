@@ -10,6 +10,52 @@ define([
 ) {
 	var module = {};
 
+	$("#qa-wrapper").on("click", ".reply-comment-save", function(){
+		var text = $(this).closest("form").find("textarea").val();
+		var claim_id = $("#claim-maker").attr("claim-id");
+		var parent_id = $(this).attr("parent-id");
+		var question_id = $(this).closest(".question").attr("data-id");
+		$.ajax({
+			url: '/phase2/add_comment_to_claim/',
+			type: 'post',
+			data: {
+				parent_id: 		parent_id,
+				text: 			text,
+				claim_id: 		claim_id,
+				comment_type: 	"comment",
+			},
+			success: function(xhr) {
+				$("#qa-wrapper .refresh-list").click();
+				setTimeout(function() {
+					$("#qa-wrapper .question.item[data-id=" + question_id + "]").find(".expand-thread").click();
+				}, 500);
+			},
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			}
+		});	
+	}).on("click", ".reply-comment-cancel", function(){
+	 	var textarea = $(this).closest("form").find("textarea");
+		textarea.val("");
+		textarea.closest(".form").hide();
+	}).on("click", ".reply-comment", function(){
+	 	$(this).closest(".content").find(".form").show();
+	}).on("click", ".question-resolved", function () {
+		// become unresolved
+		$(this).closest(".event").find(".question-unresolved").show();
+		$(this).hide();
+		var question_id = $(this).closest(".event").find(".summary").attr("comment-id");
+		changeQuestionStatus(question_id, "false");
+	}).on("click", ".question-unresolved", function () {
+		// become resolved
+		$(this).closest(".event").find(".question-resolved").show();
+		$(this).hide();
+		var question_id = $(this).closest(".event").find(".summary").attr("comment-id");
+		changeQuestionStatus(question_id, "true");
+	});
+
 	$('#qa-wrapper')
 		.on('click', '.refresh-list', function() {
 			module.updateQuestionList();
@@ -122,7 +168,7 @@ define([
 				}
 			});			
 						
-		}).on('click', '.new.question .submit.button', function(e) {
+		}).on('click', '.make-comment', function(e) {
 			e.preventDefault();
 			var content = $('#qa-wrapper .new.question textarea').val();
 			if (content.length == 0) {
@@ -131,7 +177,7 @@ define([
 			}
 			_qaUpdater({
 				'action': 'raise-question',
-				'content': content
+				'text': content
 			}).done(function() {
 				$('#qa-wrapper .new.question.segment').addClass('hidden');
 				// dispatch the event
@@ -164,10 +210,38 @@ define([
 			}
 		});
 
-	module.updateQuestionList = function() {
-		_qaUpdater({
-			'action': 'get-all-questions'
+		$("body").on("click", "#qa-panel-toggle", function() {
+			if ($("#qa-wrapper").is(":visible")) {
+				$("#qa-wrapper").hide();
+				$("#qa-panel-toggle").css("right", 0);
+			} else {
+				$("#qa-wrapper").show();
+				$("#qa-panel-toggle").css("right", (0.4 * $(window).width()) - 10);
+			}
 		});
+
+	module.updateQuestionList = function() {
+		// _qaUpdater({
+		// 	'action': 'get-all-questions'
+		// });
+		_qaUpdater({
+			'action': 'get-question-list'
+		});
+		// $.ajax({
+		// 	url: "/api_question/",
+		// 	type: 'post',
+		// 	data: {
+		// 		action: 'get-question-list'
+		// 	},
+		// 	success: function(xhr) {
+		// 		$("#qa-list").html(xhr.html);
+		// 	},
+		// 	error: function(xhr) {
+		// 		if (xhr.status == 403) {
+		// 			Utils.notify('error', xhr.responseText);
+		// 		}
+		// 	},
+		// });
 	};
 
 	module.newQuestionAdded = function(data) {

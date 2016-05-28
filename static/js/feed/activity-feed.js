@@ -23,10 +23,17 @@ define([
 				this.data('question_id', this.data('id'));
 				var url = '/api_qa/';
 			}
-			if (!require.defined('phase2/claim') && !require.defined('phase3/claim') && !require.defined('phase4/claim')) {
+			if (!require.defined('phase2/layout') && !require.defined('phase3/claim') && !require.defined('phase4/claim')) {
 				return;
 			}
-			var claimModule = require.defined('phase3/claim') ? require('phase3/claim') : require('phase4/claim');
+			var claimModule;
+			if (require.defined('phase2/layout')) {
+				claimModule = require.defined('phase2/layout');
+			} else if (require.defined('phase3/claim')) {
+				claimModule = require.defined('phase3/claim');
+			} else if (require.defined('phase4/claim')) {
+				claimModule = require.defined('phase4/claim');
+			}
 			_this.updater = $.ajax({
 				url: url,
 				type: 'post',

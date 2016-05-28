@@ -194,25 +194,6 @@ def api_get_init_doc(request):
     response['doc_id'] = doc_id
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
-def add_nugget_comment(request):
-    response = {}
-    context = {}
-    context['nugget_comments'] = []
-    author = request.user
-    forum_id = request.session['forum_id']
-    theme_id = request.REQUEST.get('theme_id')
-    content = request.REQUEST.get('content')
-    now = timezone.now()
-    nugget_comments = NuggetComment.objects.filter(forum_id = forum_id, theme_id = theme_id).order_by('created_at')
-    if (content != ""):
-        newNuggetComment = NuggetComment(author = author, forum_id = forum_id, theme_id = theme_id, content = content, created_at = now)
-        newNuggetComment.save()
-        nugget_comments = NuggetComment.objects.filter(forum_id = forum_id, theme_id = theme_id).order_by('created_at')
-    for nugget_comment in nugget_comments:
-        context['nugget_comments'].append(nugget_comment)
-    response['workbench_nugget_comments'] = render_to_string("workbench_nugget_comments.html", context)
-    return HttpResponse(json.dumps(response), mimetype='application/json')
-
 def get_theme_list(request):
     response = {}
     context = {}
