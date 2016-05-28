@@ -3,11 +3,18 @@
 		<label><span>Add a comment</span> (Ctrl + Enter to post)</label>
 		<textarea rows="2"></textarea>
 	</div>
-	<div class="ui checkbox facilitator-only" style="display:none">
-		<label>Collective</label>
-		<input type="checkbox" name="collective">
+	<div class="field">
+		<div class="ui primary submit button"><i class="send outline icon"></i>Post</div>
+		<div class="ui collective checkbox facilitator-only" style="display:none">
+			<label>Collective</label>
+			<input type="checkbox" name="collective">
+		</div>
+		<div class="ui request-action checkbox">
+			<label>Request panel attention</label>
+			<input type="checkbox" name="request">
+		</div>
 	</div>
-	<div class="ui primary submit button"><i class="send outline icon"></i>Post</div>
+
 </form>
 <form id="activity-reply-form" class="ui form" style="display:none">
 	<div class="field">
@@ -15,11 +22,15 @@
 		<textarea rows="2"></textarea>
 	</div>
 	<div class="ui primary submit button"><i class="send outline icon"></i>Post</div>
+	<div class="ui request-action checkbox">
+		<label>Request panel attention</label>
+		<input type="checkbox" name="request">
+	</div>
 </form>
 {% if entries %}
 <div class="ui feed" style="margin-top: 1em">
 {% for entry in entries %}
-	<div class="event" data-type="{{ entry.entry_type }}">
+	<div class="event" data-type="{{ entry.entry_type }}" data-id="{{ entry.id }}">
 		<div class="user-initial">
 			<div class="{{ entry.author_role }}{% if entry.collective %} collective{% endif %}">
 			{% if entry.author_role == 'facilitator' %}F

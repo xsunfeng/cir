@@ -1,0 +1,14 @@
+
+<h3>Panelists</h3>
+<div class="ui bulleted list">
+	{% for user in panelists %}
+		<div class="item" data-id="{{ user.id }}">{{ user.name }}</div>
+	{% endfor %}
+</div>
+
+<h3>Staff</h3>
+<div class="ui bulleted list">
+{% for user in staff %}
+	<div class="item" data-id="{{ user.id }}">{{ user.name }}</div>
+{% endfor %}
+</div>

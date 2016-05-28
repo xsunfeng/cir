@@ -219,9 +219,11 @@ def api_claim(request):
             version.save()
         claim.save()
     elif action == 'reword':
+        forum = Forum.objects.get(id=request.session['forum_id'])
         slot = Claim.objects.get(id=request.REQUEST.get('slot_id'))
         content = request.REQUEST.get('content')
         collective = request.REQUEST.get('collective')
+        request_action = request.REQUEST.get('request_action', 'false')
         now = timezone.now()
         new_version = ClaimVersion(forum_id=request.session['forum_id'], content=content, created_at=now,
             updated_at=now, is_adopted=False, claim=slot)
@@ -237,6 +239,22 @@ def api_claim(request):
         else:
             new_version.author = request.user
         new_version.save()
+
+        # send messages
+        message_type = 'version'
+        if request_action == 'true':
+            message_type = 'version-action'
+
+        for panelist in forum.members.filter(role='panelist'):
+            Message.objects.create(
+                forum=forum,
+                sender=new_version.author,
+                receiver=panelist.user,
+                content=new_version.content,
+                created_at=now,
+                content_type=message_type,
+                target_entry=new_version
+            )
     elif action == 'merge':
         now = timezone.now()
         content = request.REQUEST.get('content')
@@ -291,10 +309,29 @@ def api_claim_activities(request):
     response = {}
     action = request.REQUEST.get('action')
     if action == 'load-thread':
-        slot = Claim.objects.get(id=request.REQUEST.get('slot_id'))
-        forum = Forum.objects.get(id=request.session['forum_id'])
         context = {}
         context['entries'] = []
+        forum = Forum.objects.get(id=request.session['forum_id'])
+
+        if request.REQUEST.get('root_id'):
+            try:
+                # entry is a post -- trace back to slot
+                root = Post.objects.get(id=request.REQUEST.get('root_id'))
+                while True:
+                    try:
+                        root = root.post.target_entry
+                    except:
+                        break
+                try:
+                    slot = root.claim
+                except:
+                    slot = root.claimversion.claim
+            except:
+                root = ClaimVersion.objects.get(id=request.REQUEST.get('root_id'))
+                slot = root.claim
+        else:
+            slot = Claim.objects.get(id=request.REQUEST.get('slot_id'))
+
         posts = slot.comments_of_entry.all()
         for post in posts:
             for comment in post.getTree(exclude_root=False):

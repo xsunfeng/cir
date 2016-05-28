@@ -17,7 +17,7 @@ define([
 			} else {
 				sessionStorage.setItem('user_id', $('#header-user-name').attr('data-id'));
 				sessionStorage.setItem('user_name', $('#header-user-name').text());
-
+				require(['message']);
 				initUserBtns();
 				// check if within a specific forum
 				if ($('#header-user-name').attr('data-role')) {
@@ -203,6 +203,10 @@ define([
 					});
 				}
 			});
+		});
+		$('#show-messages').click(function() {
+			$('#messages-modal').modal('show');
+			require('message').updateMessageList();
 		});
 	}
 	function initVisitorBtns() {

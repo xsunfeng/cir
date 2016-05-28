@@ -1,4 +1,5 @@
 import json
+import pytz
 from sets import Set
 
 from django.template.loader import render_to_string
@@ -228,7 +229,7 @@ def user_mgmt(request):
     response = {}
     forum = Forum.objects.get(id=request.session['forum_id'])
     action = request.REQUEST.get('action')
-    if action == 'get_user_list':
+    if action == 'get_user_list' or 'get_user_list_msg':
         context = {}
         context['panelists'] = []
         context['staff'] = []
@@ -244,7 +245,47 @@ def user_mgmt(request):
             })
         context['user_id'] = request.user.id
         context['user_name'] = request.user.get_full_name()
-        response['html'] = render_to_string('header/user_switch_menu.html', context)
+        if action == 'get_user_list':
+            response['html'] = render_to_string('header/user_switch_menu.html', context)
+        else:
+            response['html'] = render_to_string('facilitation/msg-userlist.html', context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def admin_msg(request):
+    response = {}
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    action = request.REQUEST.get('action')
+    if action == 'get-history':
+        context = {'msgs': []}
+        for msg in Message.objects.filter(forum=forum, content_type='facilitation'):
+            context['msgs'].append(msg.getAttr())
+        response['html'] = render_to_string('facilitation/msg-history.html', context)
+    if action == 'send-msg':
+        now = timezone.now()
+        content = request.REQUEST.get('content')
+        for panelist in forum.members.filter(role='panelist'):
+            Message.objects.create(
+                forum=forum,
+                sender=request.user,
+                receiver=panelist.user,
+                content=content,
+                created_at=now,
+                content_type='facilitation'
+            )
+    if action == 'retrieve-msg':
+        context = {'msgs': []}
+        for msg in Message.objects.filter(forum=forum, receiver=request.user):
+            context['msgs'].append(msg.getAttr())
+        context['msgs'] = sorted(context['msgs'], key=lambda en: en['created_at_full'], reverse=True)
+        response['html'] = render_to_string('msg-list.html', context)
+    if action == 'mark-read':
+        msg = Message.objects.get(id=request.REQUEST.get('msg_id'))
+        msg.unread = False
+        msg.save()
+    if action == 'mark-done':
+        msg = Message.objects.get(id=request.REQUEST.get('msg_id'))
+        msg.is_done = True
+        msg.save()
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def get_pie(request):

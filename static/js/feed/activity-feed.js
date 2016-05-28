@@ -7,9 +7,9 @@ define([
 	Utils,
 	DraftStmt
 ) {
-	jQuery.fn.feed = function(action, data) {
+	jQuery.fn.feed = function(action, data, callback) {
 		var _this = this;
-		this.update = function() {
+		this.update = function(callback) {
 			if (_this.updater) {
 				_this.updater.abort();
 			}
@@ -22,6 +22,9 @@ define([
 			} else if (this.data('type') == 'question') {
 				this.data('question_id', this.data('id'));
 				var url = '/api_qa/';
+			} else if (this.data('type') == 'post') { // only show subset of activities
+				this.data('root_id', this.data('id'));
+				var url = '/api_claim_activities/';
 			}
 			if (!require.defined('phase2/layout') && !require.defined('phase3/claim') && !require.defined('phase4/claim')) {
 				return;
@@ -42,29 +45,21 @@ define([
 				}, _this.data()),
 				success: function(xhr) {
 					_this.html(xhr.html);
-					//_this.find('abbr').popup();
 
 					showDeleteButtons();
 
-					if (_this.data('type') == 'claim' && claimModule.display_type == 'fullscreen') {
+					if (_this.data('type') == 'claim' && claimModule && claimModule.display_type == 'fullscreen') {
 						_this.find('.filter.buttons .button').removeClass('loading').removeClass('active');
 						_this.find('.filter.buttons .button[data-filter="' + _this.data('filter') + '"]').addClass('active');
 
 						loadAlternativeVersions();
 					}
 					// init UI elements
-					_this.find('.nopublish-wrapper').checkbox({
-						onChecked: function() {
-							$(this).parent().next().text('Save');
-						},
-						onUnchecked: function() {
-							$(this).parent().next().text('Publish');
-						}
-					});
 					_this.find('.ui.checkbox').checkbox();
 					if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (!sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
 						_this.find('.facilitator-only').show();
 					}
+					if (typeof callback == 'function') callback();
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -188,12 +183,18 @@ define([
 				if (typeof data.reply_id == 'undefined') {
 					data.reply_id = _this.data('question_id');
 				}
+				if ($form.find('.request-action.checkbox').length) {
+					data.request_action = $form.find('.request-action.checkbox').checkbox('is checked');
+				}
 			} else if (type == 'comment') {
 				// in document/claim thread, you always need to specify a target
 				data.reply_id = $form.find('span').attr('data-reply-id');
 				data.reply_type = $form.find('span').attr('data-reply-type');
-				if ($form.find('.ui.checkbox').length) {
-					data.collective = $form.find('.ui.checkbox').checkbox('is checked');
+				if ($form.find('.collective.checkbox').length) {
+					data.collective = $form.find('.collective.checkbox').checkbox('is checked');
+				}
+				if ($form.find('.request-action.checkbox').length) {
+					data.request_action = $form.find('.request-action.checkbox').checkbox('is checked');
 				}
 			}
 			$.ajax({
@@ -213,6 +214,9 @@ define([
 						require('realtime/socket').dispatchNewPost({
 							'target': _this.data('question_id')
 						});
+					}
+					if (data.request_action) {
+						// TODO realtime notify others
 					}
 				},
 				error: function(xhr) {
@@ -315,10 +319,12 @@ define([
 			}).on('click', '.feed-adopt-claim-version', function() {
 				adoptClaimVersion(this);
 			}).on('click', '#activity-comment-form div.submit', function(e) {
-				var content = $('#activity-comment-form textarea').val();
+				var $form = $(this).parents('form');
+				var content = $form.find('textarea').val();
 				submitComment(content, 'comment');
 			}).on('click', '#activity-reply-form div.submit', function(e) {
-				var content = $('#activity-reply-form textarea').val();
+				var $form = $(this).parents('form');
+				var content = $form.find('textarea').val();
 				submitComment(content, 'reply');
 			}).on('keydown', 'textarea', function(e) {
 				if ((e.ctrlKey || e.metaKey) && e.keyCode == 13) {
@@ -329,7 +335,7 @@ define([
 			if (typeof data == 'object') {
 				this.data(data);
 			}
-			return this.update();
+			return this.update(callback);
 		} else if (action == 'get_id') {
 			return _this.data('id');
 		}

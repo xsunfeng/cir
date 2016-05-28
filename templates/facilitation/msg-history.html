@@ -1,0 +1,24 @@
+<table class="ui celled table">
+	<thead><tr>
+		<th>Sender</th>
+		<th>Receiver</th>
+		<th>Content</th>
+		<th>Time</th>
+		<th>Read?</th>
+	</tr></thead>
+	<tbody>
+	{% if msgs %}{% for msg in msgs %}
+		<tr>
+			<td>{{ msg.sender }}</td>
+			<td>{{ msg.receiver }}</td>
+			<td>{{ msg.content }}</td>
+			<td>{{ msg.created_at_full }}</td>
+			<td>{% if msg.is_read %}<i class="checkmark circle icon"></i>{% else %}
+				<i class="remove circle icon"></i>{% endif %}
+			</td>
+		</tr>
+	{% endfor %}{% else %}
+	<tr>No messages.</tr>
+	{% endif %}
+	</tbody>
+</table>

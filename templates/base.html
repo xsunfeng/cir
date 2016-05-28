@@ -48,7 +48,19 @@
 	<div id="sticked-notification" class="ui warning message" style="display:none"></div>
 	{% block body %}
 	{% endblock %}
-
+	<div id="messages-modal" class="ui modal">
+		<div class="ui secondary menu">
+			<div id="important-filter" class="ui slider checkbox item">
+				<input type="checkbox">
+				<label>Only show important messages</label>
+			</div>
+			<div id="completed-filter" class="ui slider checkbox item">
+				<input type="checkbox">
+				<label>Show completed</label>
+			</div>
+		</div>
+		<div id="message-list"></div>
+	</div>
 	{% include 'signin-signup.html' %}
 	{% block extralib %}{% endblock %}
 	{% block delaylib %}{% endblock %}

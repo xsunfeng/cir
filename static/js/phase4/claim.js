@@ -24,7 +24,8 @@ define([
 				Utils.notify('error', 'Content must not be empty.');
 				return;
 			}
-			var collective = $('#claim-pane-fullscreen .reword.form input[name="collective"]').val();
+			var collective = false;
+			var request_action = $('.reword.form .request-action.checkbox').checkbox('is checked');
 			$.ajax({
 				url: '/api_claim/',
 				type: 'post',
@@ -32,7 +33,8 @@ define([
 					action: 'reword',
 					content: content,
 					slot_id: module.slot_id,
-					collective: collective
+					collective: collective,
+					request_action: request_action
 				},
 				success: function(xhr) {
 					if (collective == 'true') {
@@ -46,6 +48,7 @@ define([
 						$('#claim-pane-fullscreen .claim.reword.editor').val('');
 						$('#claim-pane-fullscreen .reword.form').transition('slide down', '500ms');
 					}
+					// TODO realtime notify everyone
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -62,6 +65,8 @@ define([
 				.val($.trim($('#claim-pane .claim-content').text()));
 			$('#claim-pane .reword.form').transition('slide down', '500ms');
 		});
+
+
 	};
 
 
@@ -89,6 +94,7 @@ define([
 					'type': 'claim',
 					'id': module.slot_id,
 				});
+				$('.reword.form .request-action.checkbox').checkbox();
 				if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (!sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
 					$('#claim-pane-fullscreen .facilitator-only').show();
 				}

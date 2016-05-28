@@ -397,10 +397,6 @@ a.morelink {
   display: none;
 }
 
-.ui.checkbox {
-  display: block;
-  padding: 6px;
-}
 
 #container {
     margin: auto;
