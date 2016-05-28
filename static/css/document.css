@@ -93,6 +93,26 @@
 	margin-bottom: 0.75em;
 }
 
+#qa-wrapper {
+  position: fixed;
+  left: 60%;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow: scroll;
+  background: white;
+  border: #fbbd08 solid 5px;
+  z-index: 1000;
+
+}
+
+#qa-panel-toggle {
+  position: fixed;
+  right: 0;
+  top: 100px;
+  z-index: 1000;
+}
+
 #qa-wrapper .new.question.segment {
 	width: 100%;
 	left: 1px;
@@ -133,7 +153,6 @@
 	display: block;
 }
 #qa-list .question.item .content {
-	width: 100%;
 	border: 1px solid;
 }
 #qa-thread {

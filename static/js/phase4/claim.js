@@ -1,4 +1,5 @@
 define([
+	'doc/qa',
 	'jquery',
 	'utils',
 	'claim-common/draft-stmt',
@@ -6,6 +7,7 @@ define([
 	'feed/activity-feed',
 	'semantic-ui'
 ], function(
+	QA,
 	$,
 	Utils,
 	DraftStmt,
@@ -111,6 +113,7 @@ define([
 	DraftStmt.activeClaimModule = module;
 	Socket.activeClaimModule = module;
 	DraftStmt.update();
+	QA.updateQuestionList();
 	module.initClaimView();
 	return module;
 });

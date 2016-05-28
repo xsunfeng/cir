@@ -1,10 +1,15 @@
 define([
+	'doc/qa',
 	'semantic-ui',
 	'realtime/socket',
 	'feed/activity-feed'
 ], function(
+	QA
 ) {
 	console.log("phase2");
+
+	QA.updateQuestionList();
+
 	var module = {};
 	
 	// theme object
@@ -167,7 +172,7 @@ define([
 				},
 				success: function(xhr) {
 					$("#candidate-nugget-list-container").html(xhr.html);
-					showClaimActivityPart(claim_id);
+					showClaimActivity(claim_id);
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -189,7 +194,7 @@ define([
 				},
 				success: function(xhr) {
 					$("#candidate-nugget-list-container").html(xhr.html);
-					showClaimActivityPart(claim_id);
+					showClaimActivity(claim_id);
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -363,26 +368,6 @@ define([
 					}
 				}
 			});
-		}).on("click", "#add-comment-to-claim", function(e) {
-			var content = $("#activity-comment-form").find("textarea").val();
-			var claim_id = $("#claim-maker").attr("claim-id");
-			$.ajax({
-				url: '/phase2/add_comment_to_claim/',
-				type: 'post',
-				data: {
-					content: content,
-					claim_id: claim_id,
-					type: "claim",
-				},
-				success: function(xhr) {
-					showClaimActivityPart($("#claim-maker").attr("claim-id"));
-				},
-				error: function(xhr) {
-					if (xhr.status == 403) {
-						Utils.notify('error', xhr.responseText);
-					}
-				}
-			});			
 		});
 
 
@@ -482,26 +467,6 @@ define([
 			});
 		}
 
-		var showClaimActivityPart = function(claim_id) {
-			$.ajax({
-				url: "/phase2/get_claim_activity_part/",
-				type: 'post',
-				data: {
-					"slot_id": claim_id,
-					action: 'load-thread'
-				},
-				success: function(xhr) {
-					$("#claim-activity").html(xhr.html);
-				},
-				error: function(xhr) {
-					if (xhr.status == 403) {
-						Utils.notify('error', xhr.responseText);
-					}
-				},
-			});
-		}
-
-
 		var showNuggetCommentModal = function(highlight_id) {
 			$.ajax({
 				url: '/phase1/get_nugget_comment_list/',
@@ -543,64 +508,91 @@ define([
 			});	
 		}
 
-		$("#nugget-comment-modal").on("click", ".nugget-comment-post", function(){
-			var text = $(this).closest("form").find("textarea").val();
-		 	var parent_id = "";
-		 	var highlight_id = $("#nugget-comment-modal").find(".workbench-nugget").attr("data-hl-id");
-		 	var textarea = $(this).closest("form").find("textarea");
+		$("#claim-detail").on("click", ".make-comment", function(event){
+			event.preventDefault()
+			var text = $("#activity-comment-form").find("textarea").val();
+			var claim_id = $("#claim-maker").attr("claim-id");
+			var comment_type = "comment";
+			if ($('#activity-comment-form input[name="question"]').is(":checked")) {
+				comment_type = "question";
+			}
 			$.ajax({
-				url: '/phase1/put_nugget_comment/',
+				url: '/phase2/add_comment_to_claim/',
 				type: 'post',
 				data: {
-					'text': text,
-					'parent_id': parent_id,
-					'highlight_id': highlight_id,
+					parent_id: 		"",
+					text: 			text,
+					claim_id: 		claim_id,
+					comment_type: 	comment_type
 				},
 				success: function(xhr) {
-					textarea.val("");
-					updateNuggetCommentList();
+					showClaimActivity($("#claim-maker").attr("claim-id"));
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
 						Utils.notify('error', xhr.responseText);
 					}
 				}
-			});
-		});
-		$("#nugget-comment-modal").on("click", ".nugget-comment-reply-save", function(){
+			});	
+		}).on("click", ".reply-comment-save", function(){
 			var text = $(this).closest("form").find("textarea").val();
-		 	var parent_id = $(this).closest(".comment").attr("comment-id");
-		 	var highlight_id = $("#nugget-comment-modal").find(".workbench-nugget").attr("data-hl-id");
-		 	var textarea = $(this).closest("form").find("textarea");
+			var claim_id = $("#claim-maker").attr("claim-id");
+			var parent_id = $(this).attr("parent-id");
 			$.ajax({
-				url: '/phase1/put_nugget_comment/',
+				url: '/phase2/add_comment_to_claim/',
 				type: 'post',
 				data: {
-					'text': text,
-					'parent_id': parent_id,
-					'highlight_id': highlight_id,
+					parent_id: 		parent_id,
+					text: 			text,
+					claim_id: 		claim_id,
+					comment_type: 	"comment",
 				},
 				success: function(xhr) {
-					textarea.val("");
-					textarea.closest(".form").hide();
-					updateNuggetCommentList();
+					showClaimActivity($("#claim-maker").attr("claim-id"));
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
 						Utils.notify('error', xhr.responseText);
 					}
 				}
-			});
-		});
-		$("#nugget-comment-modal").on("click", ".nugget-comment-reply-cancel", function(){
+			});	
+		}).on("click", ".reply-comment-cancel", function(){
 		 	var textarea = $(this).closest("form").find("textarea");
 			textarea.val("");
 			textarea.closest(".form").hide();
-		});
-		$("#nugget-comment-modal").on("click", ".nugget-comment-reply", function(){
-		 	$(this).closest(".content").find(".form").show()
+		}).on("click", ".reply-comment", function(){
+		 	$(this).closest(".content").find(".form").show();
+		}).on("click", ".question-resolved", function () {
+			// become unresolved
+			$(this).closest(".event").find(".question-unresolved").show();
+			$(this).hide();
+			var question_id = $(this).closest(".event").find(".summary").attr("comment-id");
+			changeQuestionStatus(question_id, "false");
+		}).on("click", ".question-unresolved", function () {
+			// become resolved
+			$(this).closest(".event").find(".question-resolved").show();
+			$(this).hide();
+			var question_id = $(this).closest(".event").find(".summary").attr("comment-id");
+			changeQuestionStatus(question_id, "true");
 		});
 
+		var changeQuestionStatus = function(question_id, is_resolved) {
+			$.ajax({
+				url: '/phase2/update_question_isresolved/',
+				type: 'post',
+				data: {
+					question_id: 		question_id,
+					is_resolved: 		is_resolved,
+				},
+				success: function(xhr) {
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});	
+		}
 	};
 
 	module.initLayout = function() {

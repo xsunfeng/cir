@@ -139,14 +139,14 @@ text.value{
 		</div>
 	</div>
 
-	<div class="ui main tab" data-tab="vis-tab">
+	<div class="ui main tab" data-tab="vis-tab" style="position: fixed; top: 50px; bottom: 0; left: 0; right: 0;">
 		<div class="ui compact pointing menu" style="margin-bottom: 30px; margin-left:calc(50% - 150px);">
 			<a id="pie-btn" class="vis-btn active item"><i class="gamepad icon"></i>Games</a>
 			<a id="dot-btn" class="vis-btn item"><i class="video camera icon"></i>Channels</a>
 			<a id="another-btn" class="vis-btn item"><i class="video play icon"></i>Videos</a>
 		</div>
 		<div id="pie-container" class="vis-container">
-			<div style="position:absolute; left:0; width:200px;">
+			<div style="position:absolute; left:0; width:200px; top:0; bottom:0;">
 				<div class="ui segments">
 					<div class="ui segment">
 						<div class="ui form">
@@ -169,9 +169,7 @@ text.value{
 					</div>
 				</div>
 			</div>
-			<div style="position:absolute; left:200px;">
-				<div id="pie">
-				</div>
+			<div div id="pie" style="position:absolute; left:200px; top:0; bottom:0;">
 			</div>
 		</div>
 		<div id="dot-container" class="vis-container" style="display:none;">

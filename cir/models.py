@@ -663,14 +663,37 @@ class NuggetLensInteraction(models.Model):
     forum = models.ForeignKey(Forum, null=True, blank=True, on_delete=models.CASCADE)
 
 class NuggetComment(MPTTModel):
-    text = models.CharField(max_length=50, unique=True)
+    text = models.CharField(max_length=999)
     parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     highlight = models.ForeignKey(Highlight)
     created_at = models.DateTimeField()
 
-class Genre(MPTTModel):
-    name = models.CharField(max_length=50, unique=True)
+class ClaimComment(MPTTModel):
+    text = models.CharField(max_length=999)
     parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
-    class MPTTMeta:
-        order_insertion_by = ['name']
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    claim = models.ForeignKey(Claim, null=True, blank=True)
+    created_at = models.DateTimeField()
+    CONTENT_CHOICES = (
+        ('question', 'Question'),
+        ('comment', 'Comment'),
+    )
+    comment_type = models.CharField(max_length=10, choices=CONTENT_CHOICES)
+    is_answered = models.BooleanField(default=False)
+    forum = models.ForeignKey(Forum, null=True, blank=True, on_delete=models.CASCADE)
+    def getAttr(self):
+        attr = {}
+        attr['id'] = self.id
+        attr['author_id'] = self.author.id
+        attr['author_name'] = self.author.get_full_name()
+        attr['text'] = self.text
+        attr['created_at_full'] = self.created_at  # for sorting
+        attr['created_at_pretty'] = utils.pretty_date(self.created_at)
+        return attr
+
+class ClaimQuestionVote(models.Model):
+    question = models.ForeignKey(ClaimComment)
+    voter = models.ForeignKey(User)
+    created_at = models.DateTimeField()
+    upvote = models.BooleanField(default=True)

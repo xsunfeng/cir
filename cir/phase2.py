@@ -398,6 +398,18 @@ def get_claim_activity(request):
         for claimNuggetAssignment in ClaimNuggetAssignment.objects.filter(claim = claim):
             nugget_assignment_info = claimNuggetAssignment.getAttr(forum)
             context['entries'].append(nugget_assignment_info)
+        for root_comment in ClaimComment.objects.filter(claim = claim, parent__isnull = True):
+            entry = {}
+            entry["root_comment"] = root_comment
+            entry["id"] = root_comment.id
+            entry["is_answered"] = root_comment.is_answered
+            entry["created_at_full"] = root_comment.created_at
+            entry['comments'] = root_comment.get_descendants(include_self=True)
+            entry["entry_type"] = "claim_" + str(root_comment.comment_type)
+            entry["author_name"] = root_comment.author.first_name + " " + root_comment.author.last_name
+            entry["author_role"] = Role.objects.get(user = root_comment.author, forum =forum).role
+            entry["created_at_pretty"] = utils.pretty_date(root_comment.created_at)
+            context['entries'].append(entry)
         # slot assignment events
         # slotassignments = SlotAssignment.objects.filter(slot=slot)
         # for slotassignment in slotassignments:
@@ -506,35 +518,33 @@ def remove_nugget_from_claim(request):
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def add_comment_to_claim(request):
-    response = {}
+    # log in to comment
     if not request.user.is_authenticated():
         return HttpResponse("Please log in first.", status=403)
-    now = timezone.now()
-    newPost = Post(forum_id=request.session['forum_id'], content_type='comment', created_at=now, updated_at=now)
-    if 'actual_user_id' in request.session:
-        newPost.author = User.objects.get(id=request.session['actual_user_id'])
-        newPost.delegator = request.user
-    else:
-        newPost.author = request.user
-    newPost.content = request.REQUEST.get('content')
-    reply_type = request.REQUEST.get('reply_type')
-    if reply_type:  # replying another post, or event
-        reply_id = request.REQUEST.get('reply_id')
-        if reply_type == 'event':
-            event = Event.objects.get(id=reply_id)
-            newPost.target_event = event
-        elif reply_type == 'entry':
-            entry = Entry.objects.get(id=reply_id)
-            newPost.target_entry = entry
-    else:  # targeting at a highlight or a claim
-        source = request.REQUEST.get('type')
-        if source == 'highlight':
-            highlight = Highlight.objects.get(id=request.REQUEST.get('highlight_id'))
-            newPost.highlight = highlight
-        elif source == 'claim':
-            slot = Claim.objects.get(id=request.REQUEST.get('claim_id'))
-            newPost.target_entry = slot
-    newPost.save()
+    # initialize
+    response = {}
+    context = {}
+    author = request.user
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    parent_id = request.REQUEST.get('parent_id')
+    claim_id = request.REQUEST.get('claim_id')
+    comment_type = request.REQUEST.get('comment_type')
+    text = request.REQUEST.get('text')
+    created_at = timezone.now()
+    newClaimComment = ClaimComment(author = author, text = text, claim_id = claim_id, created_at = created_at, comment_type = comment_type, forum = forum)
+    if parent_id != "": #not root node
+        newClaimComment.parent_id = parent_id
+    newClaimComment.save()
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def update_question_isresolved(request):
+    author = request.user
+    question_id = request.REQUEST.get('question_id')
+    is_resolved = request.REQUEST.get('is_resolved')
+    claimComment = ClaimComment.objects.get(id = question_id)
+    claimComment.is_answered = (is_resolved == "true")
+    claimComment.save()
+    response = {}
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def get_claim_list(request):
@@ -544,7 +554,6 @@ def get_claim_list(request):
     claims = Claim.objects.filter(forum = forum)
     context["claims"] = []
     for claim in claims:
-        print "claim_id = ", claim.id
         item = {}
         item['date'] = utils.pretty_date(claim.updated_at)
         item['created_at'] = utils.pretty_date(claim.created_at)
