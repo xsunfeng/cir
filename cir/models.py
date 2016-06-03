@@ -26,12 +26,12 @@ class Forum(models.Model):
         ('paused', 'Paused'),
         ('not_started', 'Not started'),
         ('tagging', 'Tagging'),
-        ('nugget', 'Nugget extraction'), # phase 1
-        ('extract', 'Claim construction'), # phase 2
-        ('categorize', 'Claim categorization'), # phase 3
+        ('nugget', 'Extract nugget'), # phase 1
+        ('extract', 'Assemble Claim'), # phase 2
+        ('categorize', 'Categorize Claim'), # phase 3
         ('theming', 'Claim theme identification'), 
-        ('improve', 'Claim refinement'), # phase 4
-        ('finished', 'Finished') # phase 5 statements
+        ('improve', 'Refine statements'), # phase 4
+        ('finished', 'Finalize statements') # phase 5 statements
     )
     access_level = models.CharField(max_length=100, choices=ACCESS_CHOICES, default='private')
     phase = models.CharField(max_length=100, choices=PHASE_CHOICES, default='not_started')
@@ -681,6 +681,7 @@ class ClaimComment(MPTTModel):
     )
     comment_type = models.CharField(max_length=10, choices=CONTENT_CHOICES)
     is_answered = models.BooleanField(default=False)
+    is_expert = models.BooleanField(default=False)
     forum = models.ForeignKey(Forum, null=True, blank=True, on_delete=models.CASCADE)
     def getAttr(self):
         attr = {}

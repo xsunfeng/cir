@@ -111,6 +111,7 @@ define([
 			});
 		}
 	}, function(err) {
+		console.log("socket.io.js cannot be loaded");
 		// socket.io.js cannot be loaded
 		// fail silently and skip all socket initialization.
 		if (err.requireModules && err.requireModules[0] == 'socket.io') {

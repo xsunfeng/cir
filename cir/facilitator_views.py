@@ -67,17 +67,7 @@ def enter_dashboard(request, forum_url):
         for tag in tagSet:
             print tag
             context['tag_theme'][theme.name].append(tag)
-    return render(request, 'facilitation/index_dashboard.html', context)
-
-def admin_phase(request):
-    response = {}
-    action = request.REQUEST.get('action')
-    forum = Forum.objects.get(id=request.session['forum_id'])
-    if action == 'change-phase':
-        phase = request.REQUEST.get('phase')
-        forum.phase = phase
-        forum.save()
-        return HttpResponse(json.dumps(response), mimetype='application/json')
+    return render(request, 'facilitation/index.html', context)
 
 def admin_forum(request):
     response = {}
@@ -332,4 +322,49 @@ def get_highlights(request):
     time_lower_bound = timezone.localtime(time_lower_bound).strftime("%Y %m %d %H %M")
     response["time_upper_bound"] = time_upper_bound
     response["time_lower_bound"] = time_lower_bound
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def theme(request):
+    forum = Forum.objects.get(id = request.session['forum_id'])
+    action = request.REQUEST.get('action')
+    response = {}
+    context = {}
+    if (action == "save-theme"):
+        theme_id = request.REQUEST.get("theme_id")
+        theme_name = request.REQUEST.get("theme_name")
+        theme_description = request.REQUEST.get("theme_description")
+        if (theme_id == ""): 
+            theme = ClaimTheme(name = theme_name, forum = forum, description = theme_description)
+        else:
+            theme = ClaimTheme.objects.get(id = theme_id)
+            theme.name = theme_name
+            theme.description = theme_description
+        theme.save()
+    elif (action == "remove-theme"):
+        theme_id = request.REQUEST.get("theme_id")
+        theme = ClaimTheme.objects.get(id = theme_id)
+        theme.delete()
+    themes = ClaimTheme.objects.filter(forum = forum)
+    context["themes"] = []
+    for theme in themes:
+        item = {}
+        item["id"] = str(theme.id)
+        item["name"] = str(theme.name)
+        item["description"] = str(theme.description)
+        context["themes"].append(item)
+    response["html"] = render_to_string('facilitation/theme.html', context);
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def phase(request):
+    forum = Forum.objects.get(id = request.session['forum_id'])
+    action = request.REQUEST.get('action')
+    response = {}
+    context = {}
+    if (action == "change-phase"):
+        phase = request.REQUEST.get('phase')
+        forum.phase = phase
+        forum.save()
+    elif (action == "get-phase"):
+        context["phase"] = forum.phase
+        response["html"] = render_to_string('facilitation/phase.html', context);
     return HttpResponse(json.dumps(response), mimetype='application/json')

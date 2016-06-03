@@ -1,0 +1,30 @@
+				<h3>Current phase of deliberation</h3>
+				<div class="ui segment">
+					<div class="ui info message">
+						<ul class="list">
+							<li>Paused: used during deliberation; forum is read-only, all activities paused.</li>
+							<li>Not started: used before deliberation; forum is read-only.</li>
+                            <li>Tagging: collaborative &amp; individual tagging and sensemaking.</li>
+							<li>Extract: document-level activities - creating highlights, commenting, Q &amp; A and claim extraction thereupon.</li>
+							<li>Categorize: claim categorization and commenting thereupon.</li>
+							<li>Prioritize and Improve: suggestion of rewording and merging, performing rewording and merging, prioritizing, and commenting on these behaviors.</li>
+							<li>Finished: used after deliberation; forum is read-only, Citizens' Statement available.</li>
+						</ul>
+					</div>
+					<div class="ui form">
+						<div class="field">
+							<select class="ui phase fluid dropdown">
+								<option value="paused" {% if phase == 'paused' %} selected{% endif %}>Paused</option>
+								<option value="not_started" {% if phase == 'not_started' %} selected{% endif %}>Not started</option>
+                                <option value="nugget" {% if phase == 'nugget' %} selected{% endif %}>Nugget extraction</option>
+								<option value="extract" {% if phase == 'extract' %} selected{% endif %}>Claim construction</option>
+								<option value="categorize" {% if phase == 'categorize' %} selected{% endif %}>Claim categorization</option>
+								<option value="improve" {% if phase == 'improve' %} selected{% endif %}>Claim refinement</option>
+								<option value="finished" {% if phase == 'finished' %} selected{% endif %}>Finished</option>
+							</select>
+						</div>
+						<div class="field">
+							<div class="ui phase update primary button">Update</div>
+						</div>
+					</div>
+				</div>

@@ -9,8 +9,9 @@
 			<div class="description">
 				<b>Raised by</b>
 				<a class="user {{ question.author_role }}" data-id="{{ question.author_id }}">{{ question.author_name }}</a>
-				<abbr title="{{ question.updated_at_full }}">{{ question.updated_at }}</abbr><br />
+				<abbr title="{{ question.updated_at_full }}">{{ question.updated_at }}</abbr>
 				{% if question.last_reply %}
+				<span> | </span>
 				<b>Last reply:</b>
 				<abbr title="{{ question.last_reply_full }}">{{ question.last_reply }}</abbr>
 				{% endif %}

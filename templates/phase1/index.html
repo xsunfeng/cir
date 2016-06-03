@@ -4,7 +4,8 @@
 {% block extralib %}
     <script>
         require([
-            'phase1/layout'
+            'phase1/layout',
+            'realtime/socket'
         ]);
     </script>
 {% endblock %}
@@ -34,7 +35,7 @@
 	</div>
 	<div style="overflow:auto; top:60px; bottom:0; position:absolute; left:0; right:0; padding:1em; padding-top:0;" id="workbench-document-panel">
 		<div id="workbench-document-container" class="ui segment" style="border-radius: 0;">
-			<img style="width:100%;" src="http://imageprocessor.websimages.com/width/874/crop/0,0,874x640/geodeliberation.webs.com/CIR%20(1).png">
+			<!-- <img style="width:100%;" src="http://imageprocessor.websimages.com/width/874/crop/0,0,874x640/geodeliberation.webs.com/CIR%20(1).png"> -->
 		</div>		
 	</div>
 </div>
@@ -68,6 +69,8 @@
 		</div>
 	</div>
 </div>
+
+{% include 'qa/qa-wrapper.html' %}
 
 {% if role != 'visitor' %}
 	{% include 'chatter.html' %}

@@ -118,6 +118,14 @@
 	left: 1px;
 }
 
+#qa-list .claim-question-vote.voted {
+  color: green;
+}
+
+#qa-list .claim-question-expert.experted {
+  color: green;
+}
+
 #qa-list .question.item {
 	border: 10px solid aliceblue;
 	background-color: #fff;

@@ -1,11 +1,15 @@
 define([
+	'doc/qa',
 	'semantic-ui',
 	'realtime/socket',
 	'ext/colorbrewer',
 	'feed/activity-feed'
 ], function(
+	QA
 ) {
 	console.log("phase1");
+
+	QA.updateQuestionList();
 
 	var module = {};
 	
@@ -144,6 +148,7 @@ define([
 			},
 			success: function(xhr) {
 				$("#document-toc-container").html(xhr.document_toc);
+				$("#workbench-document-container").html(xhr.document_toc);
 				$(".document-toc-doc-link").click(function(e) {
 					var doc_id = e.target.getAttribute("data-id");			
 					module.get_document_content(doc_id);
