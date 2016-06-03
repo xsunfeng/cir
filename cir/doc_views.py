@@ -260,6 +260,7 @@ def api_qa(request):
         newClaimComment = ClaimComment(author = author, text = text, created_at = created_at, comment_type = comment_type, forum = forum)
         newClaimComment.save()
     if action == 'get-question-list'  or action == 'raise-question':
+        author = request.user
         context = {
             'questions': []
         }
@@ -269,7 +270,6 @@ def api_qa(request):
             entry = {}
             entry["reply_count"] = question.get_descendant_count()
             if (entry["reply_count"] > 0):
-                print "yes"
                 entry["last_reply_pretty"] = utils.pretty_date(question.get_descendants(include_self=True).order_by("-created_at")[0].created_at)
             entry["text"] = question.text
             entry["id"] = question.id
@@ -280,49 +280,18 @@ def api_qa(request):
             entry["author_name"] = question.author.first_name + " " + question.author.last_name
             entry["author_role"] = Role.objects.get(user = question.author, forum =forum).role
             entry["created_at_pretty"] = utils.pretty_date(question.created_at)
-            context['questions'].append(entry)
-        context['questions'] = sorted(context['questions'], key=lambda en: (en['is_answered'], en['created_at']), reverse=True)
-        response['html'] = render_to_string('qa/question-list.html', context)
-    return HttpResponse(json.dumps(response), mimetype='application/json')
-
-def api_question(request):
-    response = {}
-    forum = Forum.objects.get(id=request.session['forum_id'])
-    action = request.REQUEST.get('action')
-    if action == 'load-thread':
-        # given a question, load its discussions
-        question = Post.objects.get(id=request.REQUEST.get('question_id'))
-        context = {
-            'entries': [],
-            'source': 'qa'
-        }
-        for post in question.getTree(exclude_root=True): # don't include root
-            context['entries'].append(post.getAttr(forum))
-        context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'], reverse=True)
-        response['html'] = render_to_string("feed/activity-feed-doc.html", context)
-    if action == 'raise-question':
-        now = timezone.now()
-        content = request.REQUEST.get('content')
-        Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content,
-            created_at=now, updated_at=now, content_type='question')
-    if action == 'get-question-list':
-        context = {
-            'questions': []
-        }
-        claims = Claim.objects.filter(forum = forum)
-        questions = ClaimComment.objects.filter(claim__in = claims, comment_type='question')
-        context['questions']
-        for question in questions:
-            entry = {}
-            entry["root_comment"] = question
-            entry["id"] = question.id
-            entry["is_answered"] = question.is_answered
-            entry["created_at"] = question.created_at
-            entry['comments'] = question.get_descendants(include_self=True)
-            entry["entry_type"] = "claim_" + str(question.comment_type)
-            entry["author_name"] = question.author.first_name + " " + question.author.last_name
-            entry["author_role"] = Role.objects.get(user = question.author, forum =forum).role
-            entry["created_at_pretty"] = utils.pretty_date(question.created_at)
+            entry["vote_count"] = ClaimQuestionVote.objects.filter(question_id = question.id).count()
+            entry["is_expert"] = question.is_expert
+            if (ClaimQuestionVote.objects.filter(voter = author, question_id = question.id).count() > 0):
+                entry["voted"] = True
+            try:
+                claimVersion = ClaimVersion.objects.filter(claim = question.claim, is_adopted = True).order_by("-created_at")[0]
+                entry['claim_id'] = question.claim.id
+                entry['claim_content'] = claimVersion.content
+                entry['claim_author'] = question.claim.author.first_name + " " + question.claim.author.last_name
+                entry['claim_created_at'] = utils.pretty_date(question.claim.created_at)
+            except:
+                pass
             context['questions'].append(entry)
         context['questions'] = sorted(context['questions'], key=lambda en: (en['is_answered'], en['created_at']), reverse=True)
         response['html'] = render_to_string('qa/question-list.html', context)

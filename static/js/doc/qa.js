@@ -25,10 +25,11 @@ define([
 				comment_type: 	"comment",
 			},
 			success: function(xhr) {
-				$("#qa-wrapper .refresh-list").click();
-				setTimeout(function() {
+				_qaUpdater({
+					'action': 'get-question-list'
+				}).done(function() {
 					$("#qa-wrapper .question.item[data-id=" + question_id + "]").find(".expand-thread").click();
-				}, 500);
+				});
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -61,7 +62,7 @@ define([
 			module.updateQuestionList();
 		}).on('click', '.new-question', function() {
 			$(this).toggleClass('active');
-			$('#qa-wrapper .new.question.segment').toggleClass('hidden');
+			$('#qa-wrapper .new.question.segment').toggle();
 		}).on('click', '.find-in-doc', function() {
 			var doc_id = this.getAttribute('data-id');
 			var highlight_id = this.getAttribute('data-highlight-id');
@@ -208,6 +209,78 @@ define([
 						id: question_id
 					});
 			}
+		}).on('click', '.claim-question-vote', function() {
+			var $container = $(this).closest('.question.item');
+			question_id = $container.attr("data-id");
+			$vote_btn = $container.find(".claim-question-vote");
+			var vote = "true"
+			if ($vote_btn.hasClass("voted")) {
+				$vote_btn.removeClass("voted");
+				$vote_btn.css("color", "");
+				vote = "false"
+			} else {
+				$vote_btn.addClass("voted");
+				$vote_btn.css("color", "green");			
+			}
+			$.ajax({
+				url: '/phase2/vote_question/',
+				type: 'post',
+				data: {
+					vote: 			vote,
+					question_id: 	question_id,
+				},
+				success: function(xhr) {
+					var cnt = Number($container.find(".vote-cnt").text());
+					if (vote === "true") {
+						$container.find(".vote-cnt").text(cnt + 1);
+					} else {
+						$container.find(".vote-cnt").text(cnt - 1);
+					}
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});
+		}).on('click', '.claim-question-expert', function() {
+			var $container = $(this).closest('.question.item');
+			question_id = $container.attr("data-id");
+			$expert_btn = $container.find(".claim-question-expert");
+			var expert = "true"
+			if ($expert_btn.hasClass("experted")) {
+				$expert_btn.removeClass("experted");
+				$expert_btn.css("color", "");
+				expert = "false"
+			} else {
+				$expert_btn.addClass("experted");
+				$expert_btn.css("color", "green");			
+			}
+			$.ajax({
+				url: '/phase2/expert_question/',
+				type: 'post',
+				data: {
+					expert: 		expert,
+					question_id: 	question_id,
+				},
+				success: function(xhr) {
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});
+		}).on('click', '.show-all', function() {
+			$(this).addClass("active");
+			$("#qa-wrapper .show-expert").removeClass("active");
+			$("#qa-wrapper .question.item").show();
+		}).on('click', '.show-expert', function() {
+			$(this).addClass("active");
+			$("#qa-wrapper .show-all").removeClass("active");
+			$( "#qa-wrapper .question.item" ).filter(function() {
+				return (! $(this).find(".claim-question-expert").hasClass("experted"))
+			}).hide();
 		});
 
 		$("body").on("click", "#qa-panel-toggle", function() {
@@ -221,27 +294,9 @@ define([
 		});
 
 	module.updateQuestionList = function() {
-		// _qaUpdater({
-		// 	'action': 'get-all-questions'
-		// });
 		_qaUpdater({
 			'action': 'get-question-list'
 		});
-		// $.ajax({
-		// 	url: "/api_question/",
-		// 	type: 'post',
-		// 	data: {
-		// 		action: 'get-question-list'
-		// 	},
-		// 	success: function(xhr) {
-		// 		$("#qa-list").html(xhr.html);
-		// 	},
-		// 	error: function(xhr) {
-		// 		if (xhr.status == 403) {
-		// 			Utils.notify('error', xhr.responseText);
-		// 		}
-		// 	},
-		// });
 	};
 
 	module.newQuestionAdded = function(data) {
@@ -270,6 +325,12 @@ define([
 				$('#qa-list').html(xhr.html);
 				$('#qa-list').css('opacity', '1.0');
 				$('#qa-thread').feed('init');
+				$('.find-in-claim').popup({
+					on: 'click'
+				});
+				if ($("#qa-wrapper .show-expert").hasClass("active")) {
+					$("#qa-wrapper .show-expert").click();
+				}
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {

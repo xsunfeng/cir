@@ -35,7 +35,7 @@ define([
 		}
 	};
 	$('#chatter-wrapper .titlebar').click(function() {
-		$("#chatter-notebook").toggle();
+		// $("#chatter-notebook").toggle();
 		$('#chatter-wrapper').toggleClass('minimized');
 		if (!$('#chatter-wrapper').hasClass('minimized')) {
 			scrollToBottom();

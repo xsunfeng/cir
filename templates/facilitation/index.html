@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load compressed %}
+{% block extralib %}
+    <script>
+        require([
+            'facilitation/layout'
+        ]);
+    </script>
+    <script src="//cdn.ckeditor.com/4.5.3/standard/ckeditor.js"></script>
+{% endblock %}
+{% block delaylib %}
+{% endblock %}
+{% block extracss %}
+	{% compressed_css 'cir_dashboard' %}
+{% endblock %}
+{% block header %}
+
+{% endblock %}
+{% block body %}
+    <style>
+    	.menu .menu {
+    		margin-left: 0.1em !important;
+    	}
+    </style>
+
+
+
+<div class="ui grid" style="max-width:1000px; margin:auto;">
+
+<div class="ui five small ordered steps" style="padding:0;">
+	<a href="#" class="step">
+		<div class="content">
+		<div class="title">Shipping</div>
+		</div>
+	</a>
+	<a class="active step">
+		<div class="content">
+		<div class="title">Billing</div>
+		</div>
+	</a>
+	<a class="step">
+		<div class="content">
+		<div class="title">Confirm Order</div>
+		</div>
+	</a>
+	<a class="step">
+		<div class="content">
+		<div class="title">Confirm Order</div>
+		</div>
+	</a>
+	<a class="step">
+		<div class="content">
+		<div class="title">Confirm Order</div>
+		</div>
+	</a>
+</div>
+
+
+	<div class="four wide column">
+
+		<div class="ui vertical menu" id="feng-button-group">
+			<div class="item">
+				<div class="ui input"><input type="text" placeholder="Search..."></div>
+			</div>
+			<div class="item">
+				Shortcuts
+				<div class="menu">
+					<a class="item active feng-button">Overview</a>
+				</div>
+			</div>
+			<div class="item">
+				Control Panel
+				<div class="menu">
+					<a class="item feng-button" data-content="phase">Phases</a>
+					<a class="item feng-button">Messages</a>
+					<a class="item feng-button">Users</a>
+					<a class="item feng-button" data-content="theme">Themes</a>
+					<a class="item feng-button" data-content="document">Documents</a>
+				</div>
+			</div>
+			<div class="item">
+				Dashboard
+				<div class="menu">
+					<a class="item feng-button">Overview</a>
+					<a class="item feng-button">Phase1</a>
+					<a class="item feng-button">Phase2</a>
+					<a class="item feng-button">Phase3</a>
+					<a class="item feng-button">Phase4</a>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<div class="twelve wide column" id="feng-container">
+	</div>
+</div>
+
+
+<div id="feng-theme-modal" class="ui small modal">
+    <div class="header" theme-id="">Add theme</div>
+    <div class="content">
+        <form class="ui form">
+            <div class="ui error message"></div>
+            <div class="field required">
+                <div class="ui icon input">
+                    <input type="text" name="name" placeholder="Theme name" class="theme-name">
+                </div>
+            </div>
+            <div class="field">
+                <label>Description</label>
+                <textarea name="description" class="theme-description"></textarea>
+            </div>
+            <div class="ui submit primary button feng-theme-save">Save</div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

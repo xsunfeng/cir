@@ -26,11 +26,13 @@ define([
 				this.data('root_id', this.data('id'));
 				var url = '/api_claim_activities/';
 			}
-			if (!require.defined('phase2/layout') && !require.defined('phase3/claim') && !require.defined('phase4/claim')) {
+			if (!require.defined('phase1/layout') && !require.defined('phase2/layout') && !require.defined('phase3/claim') && !require.defined('phase4/claim')) {
 				return;
 			}
 			var claimModule;
-			if (require.defined('phase2/layout')) {
+			if (require.defined('phase1/layout')) {
+				claimModule = require.defined('phase1/layout');
+			} else if (require.defined('phase2/layout')) {
 				claimModule = require.defined('phase2/layout');
 			} else if (require.defined('phase3/claim')) {
 				claimModule = require.defined('phase3/claim');

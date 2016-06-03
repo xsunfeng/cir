@@ -537,6 +537,38 @@ def add_comment_to_claim(request):
     newClaimComment.save()
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
+def vote_question(request):
+    # log in to comment
+    if not request.user.is_authenticated():
+        return HttpResponse("Please log in first.", status=403)
+    # initialize
+    response = {}
+    author = request.user
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    question_id = request.REQUEST.get('question_id')
+    vote = request.REQUEST.get('vote')
+    created_at = timezone.now()
+    if (vote == "true"):
+        if (ClaimQuestionVote.objects.filter(voter = author, question_id = question_id).count() == 0):
+            newClaimQuestionVote = ClaimQuestionVote(voter = author, question_id = question_id, created_at = created_at, upvote = True)
+            newClaimQuestionVote.save()
+    else:
+        ClaimQuestionVote.objects.filter(voter = author, question_id = question_id).delete()
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def expert_question(request):
+    # log in to comment
+    if not request.user.is_authenticated():
+        return HttpResponse("Please log in first.", status=403)
+    # initialize
+    question_id = request.REQUEST.get('question_id')
+    expert = request.REQUEST.get('expert')
+    claimComment = ClaimComment.objects.get(id = question_id)
+    claimComment.is_expert = (expert == "true")
+    claimComment.save()
+    response = {}
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
 def update_question_isresolved(request):
     author = request.user
     question_id = request.REQUEST.get('question_id')
