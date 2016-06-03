@@ -67,7 +67,7 @@ def enter_dashboard(request, forum_url):
         for tag in tagSet:
             print tag
             context['tag_theme'][theme.name].append(tag)
-    return render(request, 'facilitation/index.html', context)
+    return render(request, 'facilitation/index_dashboard.html', context)
 
 def admin_forum(request):
     response = {}
@@ -356,6 +356,20 @@ def theme(request):
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def phase(request):
+    forum = Forum.objects.get(id = request.session['forum_id'])
+    action = request.REQUEST.get('action')
+    response = {}
+    context = {}
+    if (action == "change-phase"):
+        phase = request.REQUEST.get('phase')
+        forum.phase = phase
+        forum.save()
+    elif (action == "get-phase"):
+        context["phase"] = forum.phase
+        response["html"] = render_to_string('facilitation/phase.html', context);
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def document(request):
     forum = Forum.objects.get(id = request.session['forum_id'])
     action = request.REQUEST.get('action')
     response = {}
