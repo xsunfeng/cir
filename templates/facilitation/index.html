@@ -18,83 +18,85 @@
 
 {% endblock %}
 {% block body %}
-    <style>
-    	.menu .menu {
-    		margin-left: 0.1em !important;
-    	}
-    </style>
 
+<div style="max-width:1200px; margin:auto;">
 
-
-<div class="ui grid" style="max-width:1000px; margin:auto;">
-
-<div class="ui five small ordered steps" style="padding:0;">
-	<a href="#" class="step">
-		<div class="content">
-			<div class="title">Extract Nuggets</div>
-		</div>
-	</a>
-	<a class="active step">
-		<div class="content">
-			<div class="title">Asseble Claims</div>
-		</div>
-	</a>
-	<a class="step">
-		<div class="content">
-			<div class="title">Categorize Claims</div>
-		</div>
-	</a>
-	<a class="step">
-		<div class="content">
-			<div class="title">Refine Statements</div>
-		</div>
-	</a>
-	<a class="step">
-		<div class="content">
-			<div class="title">Finalize Statements</div>
-		</div>
-	</a>
-</div>
-
-
-	<div class="four wide column">
-
-		<div class="ui vertical menu" id="feng-button-group">
-			<div class="item">
-				<div class="ui input"><input type="text" placeholder="Search..."></div>
-			</div>
-			<div class="item">
-				Shortcuts
-				<div class="menu">
-					<a class="item active feng-button">Overview</a>
-				</div>
-			</div>
-			<div class="item">
-				Control Panel
-				<div class="menu">
-					<a class="item feng-button" data-content="phase">Phases</a>
-					<a class="item feng-button">Messages</a>
-					<a class="item feng-button">Users</a>
-					<a class="item feng-button" data-content="theme">Themes</a>
-					<a class="item feng-button" data-content="document">Documents</a>
-				</div>
-			</div>
-			<div class="item">
-				Dashboard
-				<div class="menu">
-					<a class="item feng-button">Overview</a>
-					<a class="item feng-button">Phase1</a>
-					<a class="item feng-button">Phase2</a>
-					<a class="item feng-button">Phase3</a>
-					<a class="item feng-button">Phase4</a>
-				</div>
-			</div>
-		</div>
-
+	<div id="feng-button-group" class="ui five item menu">
+		<a href="/{{ forum_url }}/dashboard/overview" class="item feng-button active" data-content="overview">Overview</a>
+		<a href="/{{ forum_url }}/dashboard/phase" class="item feng-button" data-content="phase">Phase Control</a>
+		<a href="/{{ forum_url }}/dashboard/message" class="item feng-button">Message Center</a>
+		<a href="/{{ forum_url }}/dashboard/theme" class="item feng-button" data-content="theme">Theme Management</a>
+		<a href="/{{ forum_url }}/dashboard/document" class="item feng-button" data-content="document">Document Management</a>
 	</div>
 
-	<div class="twelve wide column" id="feng-container">
+	<div class="ui five small ordered steps" style="padding:0;">
+		<a href="#" class="completed step">
+			<div class="content">
+				<div class="title">Extract Nuggets</div>
+			</div>
+		</a>
+		<a class="active step">
+			<div class="content">
+				<div class="title">Asseble Claims</div>
+			</div>
+		</a>
+		<a class="step">
+			<div class="content">
+				<div class="title">Categorize Claims</div>
+			</div>
+		</a>
+		<a class="step">
+			<div class="content">
+				<div class="title">Refine Statements</div>
+			</div>
+		</a>
+		<a class="step">
+			<div class="content">
+				<div class="title">Finalize Statements</div>
+			</div>
+		</a>
 	</div>
+
+	<div class="ui grid">
+		<div class="three wide column">
+
+			<div class="ui vertical menu" id="feng-button-group" style="width:100%; max-width:15rem;">
+				<div class="item">
+					<div class="menu">
+						<a class="item active feng-button">Overview</a>
+					</div>
+				</div>
+				<div class="item">
+					Control Panel
+					<div class="menu">
+						<a class="item feng-button" data-content="phase">Process Control</a>
+						<a class="item feng-button">Message Center</a>
+						<a class="item feng-button">User Management</a>
+						<a class="item feng-button" data-content="theme">Theme Management</a>
+						<a class="item feng-button" data-content="document">Document Management</a>
+					</div>
+				</div>
+				<div class="item">
+					Dashboard
+					<div class="menu">
+						<a class="item feng-button">Overview</a>
+						<a class="item feng-button">Phase1</a>
+						<a class="item feng-button">Phase2</a>
+						<a class="item feng-button">Phase3</a>
+						<a class="item feng-button">Phase4</a>
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+		<div class="thirteen wide column" id="feng-container">
+			<div class="thirteen wide column view" id="feng-document-container" style="display:none;"></div>
+			<div class="thirteen wide column view" id="feng-theme-container" style="display:none;"></div>
+			<div class="thirteen wide column view" id="feng-phase-container" style="display:none;"></div>
+		</div>
+	</div>
+
 </div>
 
 
@@ -116,5 +118,82 @@
         </form>
     </div>
 </div>
+
+<div id="new-folder-form" class="ui small modal">
+    <div class="header">New folder</div>
+    <div class="content">
+        <form class="ui form">
+            <div class="ui error message"></div>
+            <div class="field required">
+                <div class="ui icon input">
+                    <input type="text" name="name" placeholder="Folder name">
+                </div>
+            </div>
+            <div class="field">
+                <label>Description/instructions</label>
+                <textarea name="description"></textarea>
+            </div>
+            <div class="ui submit primary button">Add</div>
+        </form>
+    </div>
+</div>
+<div id="edit-folder-form" class="ui small modal">
+    <div class="header">Edit folder</div>
+    <div class="content">
+        <form class="ui form">
+            <div class="ui error message"></div>
+            <div class="field required">
+                <div class="ui icon input">
+                    <input type="text" name="name" placeholder="Folder name">
+                </div>
+            </div>
+            <div class="field">
+                <label>Description/instructions</label>
+                <textarea name="description"></textarea>
+            </div>
+            <div class="ui submit primary button">Submit</div>
+        </form>
+    </div>
+</div>
+<div id="new-doc-form" class="ui small modal">
+    <div class="header">New document</div>
+    <div class="content">
+        <form class="ui form">
+            <div class="ui message">
+                Create a document here. You'll be able to fill in sections later.
+            </div>
+            <div class="ui error message"></div>
+            <div class="field required">
+                <div class="ui icon input">
+                    <input type="text" name="title" placeholder="Document title">
+                </div>
+            </div>
+            <div class="field">
+                <label>Description/instructions</label>
+                <textarea name="description"></textarea>
+            </div>
+            <div class="ui submit primary button">Add</div>
+        </form>
+    </div>
+</div>
+<div id="edit-doc-form" class="ui small modal">
+    <div class="header">Edit document</div>
+    <div class="content">
+        <form class="ui form">
+            <div class="ui error message"></div>
+            <div class="field required">
+                <div class="ui icon input">
+                    <input type="text" name="title" placeholder="Document title">
+                </div>
+            </div>
+            <div class="field">
+                <label>Description/instructions</label>
+                <textarea name="description"></textarea>
+            </div>
+            <div class="ui submit primary button">Submit</div>
+        </form>
+    </div>
+</div>
+
 
 {% endblock %}

@@ -1,0 +1,61 @@
+<div class="ui card phase-card" data-content="{{ phase.name }}" style="width:100%;">
+    <div class="content">
+        <div class="header">{{ phase.full_name }}</div>
+    </div>
+    <div class="content">
+        <h4 class="ui sub header">{{ phase.name }}</h4>
+        <div class="ui small feed">
+            <div class="event">
+                <div class="content">
+                    <div class="summary">
+                        {{ phase.description }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="extra content">
+        from {{ phase.start_time }} to {{ phase.end_time }} 
+        <div style="float:right;">
+            <button class="ui button">Edit</button>
+            <button class="ui primary button launch-phase">Launch</button>
+        </div>
+    </div>
+</div>
+
+<h4>Pinned Messages</h4>
+<table class="ui celled padded table">
+    <thead>
+    <tr>
+        <th>Content</th>
+        <th>Shown?</th>
+        <th>Actions</th>
+    </tr></thead>
+    <tbody>
+        {% for message in messages %}
+        <tr>
+            <td class="message-content">
+                {{ message.content }}
+            </td>
+            <td class="message-shown">
+                {{ message.is_show }}
+            </td>
+            <td>
+                <div class="ui basic buttons">
+                    <div class="ui button feng-message-remove" message-id="{{ message.id }}">Remove</div>
+                    <div class="ui button feng-message-edit" message-id="{{ message.id }}">Edit</div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot class="full-width">
+        <tr>
+            <th colspan="3">
+                <div class="ui small right floated basic button feng-message-add">
+                 Add
+                </div>
+            </th>
+        </tr>
+    </tfoot>
+</table>

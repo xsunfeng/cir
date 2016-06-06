@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load compressed %}
+{% block extralib %}
+    <script>
+        require([
+            'facilitation/theme/layout'
+        ]);
+    </script>
+    <script src="//cdn.ckeditor.com/4.5.3/standard/ckeditor.js"></script>
+{% endblock %}
+{% block delaylib %}
+{% endblock %}
+{% block extracss %}
+	{% compressed_css 'cir_dashboard' %}
+{% endblock %}
+{% block header %}
+
+{% endblock %}
+{% block body %}
+
+<div style="max-width:1200px; margin:auto;">
+    <div id="feng-button-group" class="ui five item menu">
+        <a href="/{{ forum_url }}/dashboard/overview" class="item feng-button" data-content="overview">Overview</a>
+        <a href="/{{ forum_url }}/dashboard/phase" class="item feng-button" data-content="phase">Phase Control</a>
+        <a href="/{{ forum_url }}/dashboard/message" class="item feng-button">Message Center</a>
+        <a href="/{{ forum_url }}/dashboard/theme" class="item feng-button active" data-content="theme">Theme Management</a>
+        <a href="/{{ forum_url }}/dashboard/document" class="item feng-button" data-content="document">Document Management</a>
+    </div>
+
+    <div id="feng-theme-container">
+    </div>
+</div>
+
+<div id="feng-theme-modal" class="ui small modal">
+    <div class="header" theme-id="">Add theme</div>
+    <div class="content">
+        <form class="ui form">
+            <div class="ui error message"></div>
+            <div class="field required">
+                <div class="ui icon input">
+                    <input type="text" name="name" placeholder="Theme name" class="theme-name">
+                </div>
+            </div>
+            <div class="field">
+                <label>Description</label>
+                <textarea name="description" class="theme-description"></textarea>
+            </div>
+            <div class="ui submit primary button feng-theme-save">Save</div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+

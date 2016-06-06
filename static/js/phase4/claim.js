@@ -66,7 +66,7 @@ define([
 			$('#claim-pane .reword.form').transition('slide down', '500ms');
 		});
 
-
+		$('.ui.accordion').accordion();
 	};
 
 

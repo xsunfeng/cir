@@ -99,20 +99,21 @@ urlpatterns = patterns('',
     url(r'^api_register_delegator/$', facilitator_views.register_delegator), # include other apps
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^password_reset/', include('password_reset.urls')),
-    url(r'^dashboard/forum/$', facilitator_views.admin_forum),
-    url(r'^dashboard/docs/$', facilitator_views.admin_document),
-    url(r'^dashboard/phase/$', facilitator_views.phase),
-    url(r'^dashboard/user_mgmt/$', facilitator_views.user_mgmt),
-    url(r'^dashboard/msg/$', facilitator_views.admin_msg),
-    url(r'^dashboard/get_pie/$', facilitator_views.get_pie),
-    url(r'^dashboard/get_highlights/$', facilitator_views.get_highlights),
-    url(r'^dashboard/theme/$', facilitator_views.theme),
+    url(r'^api_dashboard/forum/$', facilitator_views.admin_forum),
+    url(r'^api_dashboard/docs/$', facilitator_views.admin_document),
+    url(r'^api_dashboard/phase/$', facilitator_views.phase),
+    url(r'^api_dashboard/user_mgmt/$', facilitator_views.user_mgmt),
+    url(r'^api_dashboard/msg/$', facilitator_views.admin_msg),
+    url(r'^api_dashboard/get_pie/$', facilitator_views.get_pie),
+    url(r'^api_dashboard/get_highlights/$', facilitator_views.get_highlights),
+    url(r'^api_dashboard/theme/$', facilitator_views.theme),
+    url(r'^api_dashboard/document/$', facilitator_views.document),
 
     # these must be put last!
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)(/phase/(?P<phase_name>[a-zA-Z0-9_]+))?/?$', forum_views.enter_forum),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/workbench/?$', forum_views.enter_workbench),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/sankey/?$', forum_views.enter_sankey),
-    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/dashboard/?$', facilitator_views.enter_dashboard),
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)(/dashboard/(?P<dashboard_tab>[a-zA-Z0-9_]+))?/?$', facilitator_views.enter_dashboard),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/statement/?$', forum_views.enter_statement)
     
 )

@@ -22,7 +22,7 @@ def register_delegator(request):
         request.session['actual_user_id'] = user_id
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
-def enter_dashboard(request, forum_url):
+def enter_dashboard(request, forum_url, dashboard_tab):
     try:
         forum = Forum.objects.get(url=forum_url)
     except:  # 404
@@ -56,18 +56,42 @@ def enter_dashboard(request, forum_url):
         for tag in tags:
             undecidedTagSet.add(tag.content)
     for tag in undecidedTagSet:
-        print tag
         context['tag_theme']['undecided'].append(tag)
     for theme in ClaimTheme.objects.filter(forum_id=request.session['forum_id']):
-        print theme.name
         context['tag_theme'][theme.name] = []
         tagSet = Set()
         for tag in theme.tags.all():
             tagSet.add(tag.content)
         for tag in tagSet:
-            print tag
             context['tag_theme'][theme.name].append(tag)
-    return render(request, 'facilitation/index_dashboard.html', context)
+    if (dashboard_tab == "document"):
+        return render(request, 'facilitation/document/index.html', context)
+    elif (dashboard_tab == "theme"):
+        return render(request, 'facilitation/theme/index.html', context)
+    elif (dashboard_tab == "phase"):
+        context["phase"] = {}
+        context["phase_status"] = {}
+        phase_name = forum.phase
+        complexPhase = ComplexPhase.objects.filter(forum = forum, name = phase_name)[0]
+        context["phase"]["start_time"] = complexPhase.start_time
+        context["phase"]["end_time"] = complexPhase.end_time
+        context["phase"]["description"] = complexPhase.description
+        flag = False
+        for phase_name_tmp in ['nugget', 'extract', 'categorize', 'improve', 'finished']:
+            if (not flag):
+                if (forum.phase == phase_name_tmp):
+                    context["phase_status"][phase_name_tmp] = 1
+                    flag = True
+                else:
+                    context["phase_status"][phase_name_tmp] = 0
+            else:
+                context["phase_status"][phase_name_tmp] = 2
+        print forum.phase
+        print context["phase_status"]
+        return render(request, 'facilitation/phase/index.html', context)
+    elif (dashboard_tab == "message"):
+        return render(request, 'facilitation/message/index.html', context)
+    return render(request, 'facilitation/overview/index.html', context)
 
 def admin_forum(request):
     response = {}
@@ -352,7 +376,7 @@ def theme(request):
         item["name"] = str(theme.name)
         item["description"] = str(theme.description)
         context["themes"].append(item)
-    response["html"] = render_to_string('facilitation/theme.html', context);
+    response["html"] = render_to_string('facilitation/theme/theme-table.html', context);
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def phase(request):
@@ -360,25 +384,160 @@ def phase(request):
     action = request.REQUEST.get('action')
     response = {}
     context = {}
+    if (action == "save-message"):
+        message_id = request.REQUEST.get("message_id")
+        message_content = request.REQUEST.get("message_content")
+        phase_name = request.REQUEST.get('phase_name')
+        complexPhase = ComplexPhase.objects.filter(forum = forum, name = phase_name)[0]
+        is_show = True if (request.REQUEST.get('is_show') == "true") else False
+        if (message_id == ""): 
+            pinMessage = PinMessage(content = message_content, phase = complexPhase, is_show = is_show)
+        else:
+            pinMessage = PinMessage.objects.get(id = message_id)
+            pinMessage.content = message_content
+            pinMessage.is_show = is_show
+        pinMessage.save()
+    elif (action == "remove-message"):
+        message_id = request.REQUEST.get("message_id")
+        message = PinMessage.objects.get(id = message_id)
+        message.delete()
     if (action == "change-phase"):
         phase = request.REQUEST.get('phase')
         forum.phase = phase
         forum.save()
-    elif (action == "get-phase"):
-        context["phase"] = forum.phase
-        response["html"] = render_to_string('facilitation/phase.html', context);
+    context["phase"] = {}
+    context["phase_status"] = {}
+    if (request.REQUEST.get('phase_name')):
+        phase_name = request.REQUEST.get('phase_name')
+    else:
+        phase_name = forum.phase
+    complexPhase = ComplexPhase.objects.filter(forum = forum, name = phase_name)[0]
+    context["phase"]["full_name"] = complexPhase.get_name_display()
+    context["phase"]["name"] = complexPhase.name
+    context["phase"]["start_time"] = complexPhase.start_time
+    context["phase"]["end_time"] = complexPhase.end_time
+    context["phase"]["description"] = complexPhase.description
+    flag = False
+    for phase_name_tmp in ['nugget', 'extract', 'categorize', 'improve', 'finished']:
+        if (not flag):
+            if (forum.phase == phase_name_tmp):
+                context["phase_status"][phase_name_tmp] = 1
+                flag = True
+            else:
+                context["phase_status"][phase_name_tmp] = 0
+        else:
+            context["phase_status"][phase_name_tmp] = 2
+    context["phase"]["status"] = complexPhase.status
+    context["messages"] = []
+    for message in PinMessage.objects.filter(phase = complexPhase):
+        context["messages"].append(message)
+    response["html"] = render_to_string('facilitation/phase/phase-detail.html', context);
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def document(request):
-    forum = Forum.objects.get(id = request.session['forum_id'])
-    action = request.REQUEST.get('action')
     response = {}
-    context = {}
-    if (action == "change-phase"):
-        phase = request.REQUEST.get('phase')
-        forum.phase = phase
-        forum.save()
-    elif (action == "get-phase"):
-        context["phase"] = forum.phase
-        response["html"] = render_to_string('facilitation/phase.html', context);
-    return HttpResponse(json.dumps(response), mimetype='application/json')
+    action = request.REQUEST.get('action')
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    if action == 'get-categories':
+        context = {}
+        try:
+            # retrieve docs in a folder
+            folders = EntryCategory.objects.filter(forum=forum, category_type='doc')
+            context['folders'] = []
+            for folder in folders:
+                folder_info = folder.getAttr()
+                folder_info['docs'] = []
+                docs = Doc.objects.filter(folder=folder)
+                for doc in docs:
+                    folder_info['docs'].append(doc.getAttr())
+                context['folders'].append(folder_info)
+            # retrieve docs not in any folder
+            context['root_docs'] = []
+            root_docs = Doc.objects.filter(forum_id=request.session['forum_id'], folder__isnull=True)
+            for doc in root_docs:
+                context['root_docs'].append(doc.getAttr())
+            response['html'] = render_to_string("facilitation/document.html", context)
+            return HttpResponse(json.dumps(response), mimetype='application/json')
+        except:
+            return HttpResponse('Unknown error.', status=403)
+    elif action == 'new-folder':
+        name = request.REQUEST.get('name')
+        description = request.REQUEST.get('description')
+        EntryCategory.objects.create(forum=forum, name=name, instructions=description, category_type='doc')
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+    elif action == 'edit-folder':
+        folder = EntryCategory.objects.get(id=request.REQUEST.get('folder_id'))
+        name = request.REQUEST.get('name')
+        description = request.REQUEST.get('description')
+        folder.name = name
+        folder.instructions = description
+        folder.save()
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+    elif action == 'new-doc':
+        title = request.REQUEST.get('title')
+        folder_id = request.REQUEST.get('folder_id')
+        description = request.REQUEST.get('description')
+        if folder_id == '-1': # add to root folder
+            Doc.objects.create(forum=forum, title=title, description=description)
+        else:
+            folder = EntryCategory.objects.get(id=folder_id)
+            Doc.objects.create(forum=forum, title=title, description=description, folder=folder)
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+    elif action == 'get-doc':
+        doc_id = request.REQUEST.get('doc_id')
+        doc = Doc.objects.get(id=doc_id)
+        context = {}
+        context['doc_id'] = doc.id
+        context['title'] = doc.title
+        context['sections'] = []
+        ordered_sections = doc.sections.filter(order__isnull=False).order_by('order')
+        for section in ordered_sections:
+            context['sections'].append(section.getAttrAdmin())
+        unordered_sections = doc.sections.filter(order__isnull=True).order_by('updated_at')
+        for section in unordered_sections:
+            context['sections'].append(section.getAttrAdmin())
+        response['html'] = render_to_string("facilitation/document/doc-content.html", context)
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+    elif action == 'edit-doc':
+        doc = Doc.objects.get(id=request.REQUEST.get('doc_id'))
+        title = request.REQUEST.get('title')
+        description = request.REQUEST.get('description')
+        doc.title = title
+        doc.description = description
+        doc.save()
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+
+    elif action == 'new-docsection':
+        now = timezone.now()
+        title = request.REQUEST.get('title')
+        content = request.REQUEST.get('content')
+        doc_id = request.REQUEST.get('doc_id')
+        doc = Doc.objects.get(id=doc_id)
+        DocSection.objects.create(
+            forum=forum,
+            author=request.user,
+            content=content,
+            created_at=now,
+            updated_at=now,
+            title=title,
+            doc=doc
+            # leave order blank
+        )
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+    elif action == 'reorder':
+        orders = json.loads(request.REQUEST.get('order'))
+        for section_id in orders:
+            section = DocSection.objects.get(id=section_id)
+            section.order = orders[section_id]
+            section.save()
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+    elif action == 'delete-item':
+        item_type = request.REQUEST.get('item_type')
+        item_id = request.REQUEST.get('item_id')
+        if item_type == 'folder':
+            EntryCategory.objects.get(id=item_id).delete()
+        elif item_type == 'doc':
+            Doc.objects.get(id=item_id).delete()
+        elif item_type == 'docsection':
+            DocSection.objects.get(id=item_id).delete()
+        return HttpResponse(json.dumps(response), mimetype='application/json')

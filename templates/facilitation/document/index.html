@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load compressed %}
+{% block extralib %}
+    <script>
+        require([
+            'facilitation/document/layout'
+        ]);
+    </script>
+    <script src="//cdn.ckeditor.com/4.5.3/standard/ckeditor.js"></script>
+{% endblock %}
+{% block delaylib %}
+{% endblock %}
+{% block extracss %}
+	{% compressed_css 'cir_dashboard' %}
+{% endblock %}
+{% block header %}
+
+{% endblock %}
+{% block body %}
+
+<div style="max-width:1200px; margin:auto;">
+    <div id="feng-button-group" class="ui five item menu">
+        <a href="/{{ forum_url }}/dashboard/overview" class="item feng-button" data-content="overview">Overview</a>
+        <a href="/{{ forum_url }}/dashboard/phase" class="item feng-button" data-content="phase">Phase Control</a>
+        <a href="/{{ forum_url }}/dashboard/message" class="item feng-button">Message Center</a>
+        <a href="/{{ forum_url }}/dashboard/theme" class="item feng-button" data-content="theme">Theme Management</a>
+        <a href="/{{ forum_url }}/dashboard/document" class="item feng-button active" data-content="document">Document Management</a>
+    </div>
+
+    <div id="feng-document-container">
+    </div>
+</div>
+
+<div id="new-folder-form" class="ui small modal">
+    <div class="header">New folder</div>
+    <div class="content">
+        <form class="ui form">
+            <div class="ui error message"></div>
+            <div class="field required">
+                <div class="ui icon input">
+                    <input type="text" name="name" placeholder="Folder name">
+                </div>
+            </div>
+            <div class="field">
+                <label>Description/instructions</label>
+                <textarea name="description"></textarea>
+            </div>
+            <div class="ui submit primary button">Add</div>
+        </form>
+    </div>
+</div>
+<div id="edit-folder-form" class="ui small modal">
+    <div class="header">Edit folder</div>
+    <div class="content">
+        <form class="ui form">
+            <div class="ui error message"></div>
+            <div class="field required">
+                <div class="ui icon input">
+                    <input type="text" name="name" placeholder="Folder name">
+                </div>
+            </div>
+            <div class="field">
+                <label>Description/instructions</label>
+                <textarea name="description"></textarea>
+            </div>
+            <div class="ui submit primary button">Submit</div>
+        </form>
+    </div>
+</div>
+<div id="new-doc-form" class="ui small modal">
+    <div class="header">New document</div>
+    <div class="content">
+        <form class="ui form">
+            <div class="ui message">
+                Create a document here. You'll be able to fill in sections later.
+            </div>
+            <div class="ui error message"></div>
+            <div class="field required">
+                <div class="ui icon input">
+                    <input type="text" name="title" placeholder="Document title">
+                </div>
+            </div>
+            <div class="field">
+                <label>Description/instructions</label>
+                <textarea name="description"></textarea>
+            </div>
+            <div class="ui submit primary button">Add</div>
+        </form>
+    </div>
+</div>
+<div id="edit-doc-form" class="ui small modal">
+    <div class="header">Edit document</div>
+    <div class="content">
+        <form class="ui form">
+            <div class="ui error message"></div>
+            <div class="field required">
+                <div class="ui icon input">
+                    <input type="text" name="title" placeholder="Document title">
+                </div>
+            </div>
+            <div class="field">
+                <label>Description/instructions</label>
+                <textarea name="description"></textarea>
+            </div>
+            <div class="ui submit primary button">Submit</div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

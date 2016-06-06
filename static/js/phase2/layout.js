@@ -32,12 +32,11 @@ define([
 			data: {},
 			success: function(xhr) {
 				module.theme.init();
-				module.theme.put("All", "-1");
 				for (var i = 0; i < xhr.themes.length; i++) {
 					var theme = xhr.themes[i];
 					module.theme.put(theme.name, theme.id);
 				}
-				$("#nugget-list-theme").empty();
+				$("#nugget-list-theme").append('<option value="-1">All</option>');
 				for (var theme_name in module.theme.themes) {
 					$("#nugget-list-theme").append('<option value="' + module.theme.themes[theme_name] + '">' + theme_name + '</option>');
 				}
@@ -149,6 +148,7 @@ define([
 		});
 
 		$('.ui.rating').rating();
+		$('.ui.accordion').accordion();
 
 		// nugget button group
 		$("body").on("click", ".use-nugget", function(e) {

@@ -30,6 +30,10 @@ define([
 					}
 				}
 			}
+
+			$("body").on("click", "#instruction-btn", function(){
+				$("#instruction-modal").modal("show");
+			})
 		}
 	};
 

@@ -56,7 +56,7 @@ define([
 			onSuccess: function(e) {
 				e.preventDefault();
 				$.ajax({
-					url: '/dashboard/forum/',
+					url: '/api_dashboard/forum/',
 					data: $.extend({}, $('#forum-option-form').form('get values'), {
 						'action': 'update-forum-info',
 						'stmt_preamble': CKEDITOR.instances.stmt_preamble.getData()

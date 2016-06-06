@@ -11,7 +11,7 @@ define([
 	module.container = $("#feng-theme-container");
 
 	module.init = function() {
-		$("#feng-container").on("click", ".feng-theme-add", function() {
+		module.container.on("click", ".feng-theme-add", function() {
 			$("#feng-theme-modal .header").text("Add new theme");
 			$("#feng-theme-modal .header").attr("theme-id", "");
 			$("#feng-theme-modal .theme-name").val("");
@@ -56,5 +56,19 @@ define([
 			})
 		});
 	}
+
+	module.init();
+
+	$.ajax({
+		url: '/api_dashboard/theme/',
+		type: 'post',
+		data: {
+			'action': 'get-theme',
+		},
+		success: function(xhr) {
+			$("#feng-theme-container").html(xhr.html);
+		}
+	});
+
 	return module;
 });

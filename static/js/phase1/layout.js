@@ -224,7 +224,9 @@ define([
 		    popup: '#document-toc-container', 
 		    position: 'bottom left',
 		});
+		
 		$('.ui.rating').rating();
+		$('.ui.accordion').accordion();
 
 		$("#nugget-list-theme").change(function() {
 			module.applyFilter();

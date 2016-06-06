@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load compressed %}
+{% block extralib %}
+    <script>
+        require([
+            'facilitation/vis/layout'
+        ]);
+    </script>
+    <script src="//cdn.ckeditor.com/4.5.3/standard/ckeditor.js"></script>
+    <style>
+
+        path.slice{
+            stroke-width:2px;
+        }
+
+        polyline{
+            opacity: .3;
+            stroke: black;
+            stroke-width: 2px;
+            fill: none;
+        }
+
+        body{
+            font-family: Arial, sans-serif;
+            font-size:10px;
+        }
+        .axis path,.axis line {
+            fill: none;
+            stroke:#b6b6b6;
+            shape-rendering: crispEdges;
+        }
+        /*.tick line{fill:none;stroke:none;}*/
+        .tick text{
+            fill:#999;
+        }
+        g.journal.active{
+            cursor:pointer;
+        }
+        text.label{
+            font-size:12px;
+            font-weight:bold;
+            cursor:pointer;
+        }
+        text.value{
+            font-size:12px;
+            font-weight:bold;
+        }
+
+    </style>
+{% endblock %}
+{% block delaylib %}
+{% endblock %}
+{% block extracss %}
+	{% compressed_css 'cir_dashboard' %}
+{% endblock %}
+{% block header %}
+
+{% endblock %}
+{% block body %}
+
+<div style="max-width:1200px; margin:auto;">
+
+    <div id="feng-button-group" class="ui five item menu">
+        <a href="/{{ forum_url }}/dashboard/overview" class="item feng-button active" data-content="overview">Overview</a>
+        <a href="/{{ forum_url }}/dashboard/phase" class="item feng-button" data-content="phase">Phase Control</a>
+        <a href="/{{ forum_url }}/dashboard/message" class="item feng-button">Message Center</a>
+        <a href="/{{ forum_url }}/dashboard/theme" class="item feng-button" data-content="theme">Theme Management</a>
+        <a href="/{{ forum_url }}/dashboard/document" class="item feng-button" data-content="document">Document Management</a>
+    </div>
+
+    {{ forum_name }}
+
+    <div id="pie1"></div>
+    <div id="pie2"></div>
+    <div id="dot"></div>
+
+{% endblock %}
