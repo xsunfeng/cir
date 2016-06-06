@@ -81,6 +81,11 @@ def enter_forum(request, forum_url, phase_name):  # access /forum_name
         phase = forum.phase
         return redirect('/' + forum_url + '/phase/' + phase)
 
+    for phase_name_tmp in ['nugget', 'extract', 'categorize', 'improve', 'finished']:
+        if (ComplexPhase.objects.filter(forum = forum, name = phase_name_tmp).count() == 0):
+            complexPhase = ComplexPhase(name = phase_name_tmp, description = "", start_time = timezone.now(), end_time = timezone.now(), forum = forum)
+            complexPhase.save()
+
     # load forum info
     request.session['forum_id'] = forum.id
     request.session['selected_phase'] = phase_name
@@ -89,7 +94,11 @@ def enter_forum(request, forum_url, phase_name):  # access /forum_name
     context['forum_url'] = forum.url
     context['phase_info'] = _get_phases(forum, phase_name)
 
-    # TODO are there unread messages?
+    context["pinmessages"] = []
+    complexPhase = ComplexPhase.objects.filter(forum = forum, name = phase_name)[0]
+    pinMessages = PinMessage.objects.filter(phase = complexPhase, is_show = True)
+    for pinMessage in pinMessages:
+        context["pinmessages"].append(pinMessage)
 
     index_html = ''
     if phase_name == 'nugget':

@@ -30,8 +30,8 @@ class Forum(models.Model):
         ('extract', 'Assemble Claim'), # phase 2
         ('categorize', 'Categorize Claim'), # phase 3
         ('theming', 'Claim theme identification'), 
-        ('improve', 'Refine statements'), # phase 4
-        ('finished', 'Finalize statements') # phase 5 statements
+        ('improve', 'Refine Statements'), # phase 4
+        ('finished', 'Finalize Statements') # phase 5 statements
     )
     access_level = models.CharField(max_length=100, choices=ACCESS_CHOICES, default='private')
     phase = models.CharField(max_length=100, choices=PHASE_CHOICES, default='not_started')
@@ -698,3 +698,27 @@ class ClaimQuestionVote(models.Model):
     voter = models.ForeignKey(User)
     created_at = models.DateTimeField()
     upvote = models.BooleanField(default=True)
+
+class ComplexPhase(models.Model):
+    PHASE_CHOICES = (
+        ('paused', 'Paused'),
+        ('not_started', 'Not started'),
+        ('tagging', 'Tagging'),
+        ('nugget', 'Extract nugget'), # phase 1
+        ('extract', 'Assemble Claim'), # phase 2
+        ('categorize', 'Categorize Claim'), # phase 3
+        ('theming', 'Claim theme identification'), 
+        ('improve', 'Refine Statements'), # phase 4
+        ('finished', 'Finalize Statements') # phase 5 statements
+    )
+    name = models.CharField(max_length=20, choices=PHASE_CHOICES)
+    description = models.TextField(null=True, blank=True)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    forum = models.ForeignKey(Forum)
+    status = models.SmallIntegerField(default=2) # 0 complete, 1 current focus, 2 to complete
+
+class PinMessage(models.Model):
+    content = models.TextField(null=True, blank=True)
+    phase = models.ForeignKey(ComplexPhase, related_name='pin_messages')
+    is_show = models.BooleanField(default=False)

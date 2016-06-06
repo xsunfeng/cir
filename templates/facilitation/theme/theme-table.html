@@ -1,0 +1,35 @@
+<table class="ui celled padded table">
+	<thead>
+	<tr>
+		<th class="single line">Theme</th>
+		<th>Description</th>
+		<th>Actions</th>
+	</tr></thead>
+	<tbody>
+		{% for theme in themes %}
+		<tr>
+			<td class="theme-name">
+				<h2 class="ui center aligned header">{{ theme.name }}</h2>
+			</td>
+			<td class="theme-description">
+				{{ theme.description }}
+			</td>
+			<td>
+				<div class="ui basic buttons">
+					<div class="ui button feng-theme-remove" theme-id="{{ theme.id }}">Remove</div>
+					<div class="ui button feng-theme-edit" theme-id="{{ theme.id }}">Edit</div>
+				</div>
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+	<tfoot class="full-width">
+		<tr>
+			<th colspan="3">
+				<div class="ui small right floated basic button feng-theme-add">
+				 Add
+				</div>
+			</th>
+		</tr>
+	</tfoot>
+</table>

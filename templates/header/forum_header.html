@@ -10,6 +10,7 @@
 		{% endfor %}
 		</div>
 	</div>
+	<div class="ui dropdown item" id="instruction-btn">Instructions {% if pinmessages|length > 1 %}<div class="ui red horizontal label">{{ pinmessages|length }}</div>{% endif %}</div>
 	{% if user_id == '-1' %}
 	<div id="header-visitor-wrapper" class="right menu" style="display:flex">
 		<a class="item">
@@ -32,7 +33,7 @@
 			</div>
 		</div>
 		{% if role == 'facilitator' or role == 'admin' %}
-		<a href="/{{ forum_url }}/dashboard" target="_blank" class="item">
+		<a href="/{{ forum_url }}/dashboard/overview" target="_blank" class="item">
 			<i class="icon dashboard"></i>
 		</a>
 		<div id="user-switch-menu" class="ui dropdown item" tabindex="0">
@@ -45,4 +46,22 @@
 		{% endif %}
 	</div>
 	{% endif %}
+</div>
+
+<div class="ui modal" id="instruction-modal">
+  	<i class="close icon"></i>
+	<div class="header">
+		Instructions
+	</div>
+	<div class="content">
+		<div class="ui relaxed divided list">
+			{% for message in pinmessages %}
+			<div class="item">
+				<div class="content">
+					{{ message.content }}
+				</div>
+			</div>
+			{% endfor %}
+		</div>	
+	</div>
 </div>

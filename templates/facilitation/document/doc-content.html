@@ -1,0 +1,31 @@
+<div class="ui top attached tertiary segment">
+    Selected document: {{ title }}
+</div>
+{% if sections %}
+    {% for section in sections %}
+    <div class="section ui attached segment" data-id="{{ section.id }}">
+        <h3 class="ui header section-title">
+            {% if section.title %}{{ section.title }}{% else %}(No title){% endif %}
+        </h3>
+        <div class="ui label">({% if section.order %}order: {{ section.order }}{% else %}not ordered{% endif %})</div>
+        <div class="ui label">
+            created by {{ section.author_name }}
+        </div>
+        <div class="ui label">
+            <i class="calendar icon"></i>updated at {{ section.updated_at_full }}
+        </div>
+        (<a class="edit-docsection" data-id="{{ section.id }}">edit</a>)
+        (<a class="delete-item" data-type="docsection" data-id="{{ section.id }}">delete section</a>)
+        <div class="section-content noselect" data-id="{{ section.id }}">
+            {{ section.content|safe }}
+        </div>
+    </div>
+    {% endfor %}
+    <div class="ui bottom attached info message">
+        Click and drag section titles to reorder sections.
+    </div>
+{% else %}
+    <div class="ui bottom attached info message">
+        No sections in this document.
+    </div>
+{% endif %}

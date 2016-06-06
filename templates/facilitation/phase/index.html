@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load compressed %}
+{% block extralib %}
+    <script>
+        require([
+            'facilitation/phase/layout'
+        ]);
+    </script>
+    <script src="//cdn.ckeditor.com/4.5.3/standard/ckeditor.js"></script>
+{% endblock %}
+{% block delaylib %}
+{% endblock %}
+{% block extracss %}
+	{% compressed_css 'cir_dashboard' %}
+{% endblock %}
+{% block header %}
+
+{% endblock %}
+{% block body %}
+
+<div style="max-width:1200px; margin:auto;">
+
+    <div id="feng-button-group" class="ui five item menu">
+        <a href="/{{ forum_url }}/dashboard/overview" class="item feng-button" data-content="overview">Overview</a>
+        <a href="/{{ forum_url }}/dashboard/phase" class="item feng-button active" data-content="phase">Phase Control</a>
+        <a href="/{{ forum_url }}/dashboard/message" class="item feng-button">Message Center</a>
+        <a href="/{{ forum_url }}/dashboard/theme" class="item feng-button" data-content="theme">Theme Management</a>
+        <a href="/{{ forum_url }}/dashboard/document" class="item feng-button" data-content="document">Document Management</a>
+    </div>
+
+<div class="ui grid">
+    <div class="four wide column">
+        <div class="ui vertical ordered small steps" id="phase-steps">
+            <a href="#" class="{% if phase_status.nugget == 0 %}completed{% elif phase_status.nugget == 1 %}active{% endif %} step" data-content="nugget">
+                <div class="content">
+                    <div class="title">Extract Nuggets {% if phase_status.nugget == 1 %}(Active){% endif %}</div>
+                </div>
+            </a>
+            <a class="{% if phase_status.extract == 0 %}completed{% elif phase_status.extract == 1 %}active{% endif %} step" data-content="extract">
+                <div class="content">
+                    <div class="title">Asseble Claims {% if phase_status.extract == 1 %}(Active){% endif %}</div>
+                </div>
+            </a>
+            <a class="{% if phase_status.categorize == 0 %}completed{% elif phase_status.categorize == 1 %}active{% endif %} step" data-content="categorize">
+                <div class="content">
+                    <div class="title">Categorize Claims {% if phase_status.categorize == 1 %}(Active){% endif %}</div>
+                </div>
+            </a>
+            <a class="{% if phase_status.improve == 0 %}completed{% elif phase_status.improve == 1 %}active{% endif %} step" data-content="improve">
+                <div class="content">
+                    <div class="title">Refine Statements {% if phase_status.improve == 1 %}(Active){% endif %}</div>
+                </div>
+            </a>
+            <a class="{% if phase_status.finished == 0 %}completed{% elif phase_status.finished == 1 %}active{% endif %} step" data-content="finished">
+                <div class="content">
+                    <div class="title">Finalize Statements {% if phase_status.finished == 1 %}(Active){% endif %}</div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div id="feng-phase-container" class="twelve wide column"></div>
+</div>
+
+<div id="feng-message-modal" class="ui small modal">
+    <div class="header" theme-id="">Add theme</div>
+    <div class="content">
+        <form class="ui form">
+            <div class="ui error message"></div>
+            <div class="field">
+                <label>Content</label>
+                <textarea name="description" class="message-content"></textarea>
+            </div>
+        </form>
+        <div class="ui checkbox message-show">
+            <input type="checkbox" name="example">
+            <label>Make this message visible</label>
+        </div>
+    </div>
+    <div class="actions">
+        <div class="ui primary button feng-message-save">Save</div>
+    </div>
+</div>
+
+
+{% endblock %}

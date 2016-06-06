@@ -10,7 +10,7 @@ define([
 		$("#feng-container").on('click', ".phase.update.button", function() {
 			var selected = $("#feng-container").find('.phase.dropdown').val();
 			$.ajax({
-				url: '/dashboard/phase/',
+				url: '/api_dashboard/phase/',
 				type: 'post',
 				data: {
 					'action': 'change-phase',
