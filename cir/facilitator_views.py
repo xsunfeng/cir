@@ -317,11 +317,11 @@ def get_highlights(request):
     for highlight in highlights:
         highlight_info = {}
         highlight_info["id"] = highlight.id
-        highlight_info["date"] = timezone.localtime(highlight.created_at).strftime("%Y %m %d %H %M")
+        highlight_info["date"] = timezone.localtime(highlight.created_at).strftime("%Y %m %d %H %M %S")
         highlight_info["doc_id"] = DocSection.objects.get(id = highlight.context.id).doc.id
         highlight_info["theme_id"] = highlight.theme.id
         highlight_info["author_id"] = highlight.author.id
-        highlight_info["author_name"] = str(highlight.author)
+        highlight_info["author_name"] = str(highlight.author.first_name + " " + highlight.author.last_name)
         highlight_info["theme_name"] = str(highlight.theme.name)
         response['highlights'].append(highlight_info)
     # we only consider root docs by this moment

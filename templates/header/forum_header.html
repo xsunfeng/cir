@@ -10,7 +10,7 @@
 		{% endfor %}
 		</div>
 	</div>
-	<div class="ui dropdown item" id="instruction-btn">Instructions {% if pinmessages|length > 1 %}<div class="ui red horizontal label">{{ pinmessages|length }}</div>{% endif %}</div>
+	<div class="ui dropdown item" id="instruction-btn">Instructions {% if pinmessages|length > 0 %}<div class="ui red horizontal label">{{ pinmessages|length }}</div>{% endif %}</div>
 	{% if user_id == '-1' %}
 	<div id="header-visitor-wrapper" class="right menu" style="display:flex">
 		<a class="item">

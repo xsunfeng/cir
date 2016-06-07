@@ -8,6 +8,7 @@
         ]);
     </script>
     <script src="//cdn.ckeditor.com/4.5.3/standard/ckeditor.js"></script>
+    <link href="{% static 'css/ext/eventDrops/eventDrops.css' %}" rel="stylesheet"/>
     <style>
 
         path.slice{
@@ -70,9 +71,10 @@
     </div>
 
     {{ forum_name }}
-
+    <div id="chart_placeholder"></div>
     <div id="pie1"></div>
     <div id="pie2"></div>
     <div id="dot"></div>
+
 
 {% endblock %}
