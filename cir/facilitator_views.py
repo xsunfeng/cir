@@ -461,7 +461,9 @@ def document(request):
         except:
             return HttpResponse('Unknown error.', status=403)
     elif action == 'new-folder':
+        print "--------------------------------------"
         name = request.REQUEST.get('name')
+        print "name = ", name
         description = request.REQUEST.get('description')
         EntryCategory.objects.create(forum=forum, name=name, instructions=description, category_type='doc')
         return HttpResponse(json.dumps(response), mimetype='application/json')
