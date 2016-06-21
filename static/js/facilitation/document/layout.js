@@ -1,16 +1,12 @@
 define([
 	'semantic-ui',
-	'jquery',
-	'jquery.ui', // for sortable
+	'jquery.ui' // for sortable
 ], function(
+
 ) {
-	// initialize vars
 	var module = {};
 	module.$el = $('#feng-document-container');
-
-	// initialize funcs
 	module.init = function() {
-
 		module.$el.on('click', '.open-doc', function() {
 			var doc_id = this.getAttribute('data-id');
 			var doc_title = $(this).text();
@@ -26,7 +22,6 @@ define([
 					$('#doc-content').html(xhr.html);
 					$('#doc-content').css('opacity', 1.0);
 					$('.new-docsection.segment').show();
-					initEditor();
 					$('#doc-dest-name').text(doc_title);
 					$('#doc-content .section-title').mousedown(function() {
 						$('#doc-content .section').addClass('shortened');
@@ -62,7 +57,6 @@ define([
 							})
 						}
 					});
-					updateCategories();
 				}
 			});
 		}).on('click', '#add-folder', function() {
@@ -121,11 +115,11 @@ define([
 			success: function(xhr) {
 				if (options.full_page) {
 					module.$el.html(xhr.html);
+					initEditor();
 					initForms();
 				} else {
 					module.$el.find('#doc-categories').html($(xhr.html).filter('#doc-categories').children());
 				}
-
 			},
 			error: function(xhr) {
 
@@ -133,12 +127,6 @@ define([
 		});
 	}
 	function initEditor() {
-
-		var editor = CKEDITOR.instances['newdocsection'];
-	    if (editor) { 
-	    	editor.destroy(true); 
-	    }
-
 		CKEDITOR.replace('newdocsection', {
 			// allow vertical resizing
 			resize_enabled: true,
@@ -269,7 +257,8 @@ define([
 				});
 			}
 		});
-		(module.$el).on("click", ".new-docsection.segment .submit.button", function(e){
+		$('.new-docsection.segment form').form({
+			onSuccess: function(e) {
 				e.preventDefault();
 				var content = CKEDITOR.instances.newdocsection.getData();
 				content = content.replace('&nbsp;', ' ');
@@ -287,9 +276,9 @@ define([
 								// update #doc-content pane
 								$('#doc-categories .open-doc[data-id="' + module.currentDocId + '"]').trigger('click');
 							});
-
 					}
 				});
+			}
 		})
 	}
 

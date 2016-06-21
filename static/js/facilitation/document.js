@@ -56,7 +56,6 @@ define([
 							})
 						}
 					});
-					updateCategories();
 				}
 			});
 		}).on('click', '#add-folder', function() {
