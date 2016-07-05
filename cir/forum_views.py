@@ -92,6 +92,7 @@ def enter_forum(request, forum_url, phase_name):  # access /forum_name
     context['forum_id'] = forum.id
     context['forum_name'] = forum.full_name
     context['forum_url'] = forum.url
+    context['forum_description'] = forum.description
     context['phase_info'] = _get_phases(forum, phase_name)
 
     context["pinmessages"] = []

@@ -34,6 +34,11 @@ define([
 			$("body").on("click", "#instruction-btn", function(){
 				$("#instruction-modal").modal("show");
 			})
+
+			$('#issue-desc-btn').popup({
+				position : 'bottom center',
+				target   : '#issue-desc-btn'
+			});
 		}
 	};
 
