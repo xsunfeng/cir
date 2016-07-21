@@ -1,6 +1,8 @@
 <div class="ui top fixed menu">
-	<a href="/"><img style="height:40px;vertical-align:middle;margin:0 1em;" src="/media/gdlogo.png" alt="Geodeliberator Logo"></a>
-	<div class="title item">{{ forum_name }}</div>
+	<!-- <a href="/"><img style="height:40px;vertical-align:middle;margin:0 1em;" src="/media/gdlogo.png" alt="Geodeliberator Logo"></a> -->
+	<div id="issue-desc-btn" class="item" data-content="{{ forum_description }}" data-variation="very wide">
+		{{ forum_name }}
+	</div>
 	<div class="ui dropdown blue item" tabindex="0">
 		{{ phase_info.selected_phase_name }}
 		<i class="icon dropdown" tabindex="0"></i>
@@ -11,10 +13,6 @@
 		</div>
 	</div>
 	<div class="ui dropdown item" id="instruction-btn">Instructions {% if pinmessages|length > 0 %}<div class="ui red horizontal label">{{ pinmessages|length }}</div>{% endif %}</div>	
-
-	<div id="issue-desc-btn" class="ui item" data-content="{{ forum_description }}" data-variation="very wide">
-		Issue description
-	</div>
 
 	{% if user_id == '-1' %}
 	<div id="header-visitor-wrapper" class="right menu" style="display:flex">

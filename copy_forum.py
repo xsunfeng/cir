@@ -1,8 +1,8 @@
 # open manage.py shell
 # then: from cir.models import *
 
-src_forum = Forum.objects.get(id=16)
-new_url = 'cho0324_t8'
+src_forum = Forum.objects.get(id=24)
+new_url = 'tax2'
 
 new_forum = Forum(
     full_name=src_forum.full_name,
@@ -17,11 +17,27 @@ new_forum = Forum(
     )
 new_forum.save()
 
+for old_folder in EntryCategory.objects.filter(forum=src_forum):
+    new_folder = EntryCategory(
+        name = old_folder.name, 
+        category_type = old_folder.category_type, 
+        forum = new_forum, 
+        visible = old_folder.visible,
+        can_create = old_folder.can_create,
+        can_edit = old_folder.can_edit,
+        can_delete = old_folder.can_delete,
+        can_extract = old_folder.can_extract,
+        can_prioritize = old_folder.can_prioritize,
+        instructions = old_folder.instructions
+    )
+    new_folder.save()
+
 for old_doc in Doc.objects.filter(forum=src_forum):
     new_doc = Doc(forum=new_forum,
         title=old_doc.title,
         description=old_doc.description,
-        )
+        folder = EntryCategory.objects.get(forum = src_forum, name = old_doc.folder.name)
+    )
     new_doc.save()
     for old_docsection in DocSection.objects.filter(doc=old_doc):
         DocSection.objects.create(

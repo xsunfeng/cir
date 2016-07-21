@@ -1,6 +1,8 @@
 import json
-import pytz
 from sets import Set
+from datetime import datetime, date, timedelta
+import time
+import pytz
 
 from django.template.loader import render_to_string
 from django.shortcuts import render
@@ -240,6 +242,7 @@ def tag_theme(request):
     return HttpResponse()
 
 def user_mgmt(request):
+    print "???"
     response = {}
     forum = Forum.objects.get(id=request.session['forum_id'])
     action = request.REQUEST.get('action')
@@ -338,8 +341,8 @@ def get_highlights(request):
         time_upper_bound = viewlogs.order_by("-created_at")[0].created_at
         time_lower_bound = viewlogs.order_by("created_at")[0].created_at
     else:
-        time_upper_bound = datetime(2011, 8, 15, 8, 15, 12, 0, pytz.UTC)
-        time_lower_bound = datetime(2021, 8, 15, 8, 15, 12, 0, pytz.UTC)
+        time_upper_bound = datetime.datetime(2011, 8, 15, 8, 15, 12, 0, pytz.UTC)
+        time_lower_bound = datetime.datetime(2021, 8, 15, 8, 15, 12, 0, pytz.UTC)
     print time_upper_bound
     print time_lower_bound
     time_upper_bound = timezone.localtime(time_upper_bound).strftime("%Y %m %d %H %M")

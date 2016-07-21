@@ -133,6 +133,41 @@ def enter_forum(request, forum_url, phase_name):  # access /forum_name
 
     return render(request, index_html, context)
 
+
+def enter_vis(request, forum_url):
+    context = {}
+    # check for possible errors
+    try:
+        forum = Forum.objects.get(url=forum_url)
+    except:
+        context['load_error'] = '404'
+        context['error_msg'] = 'The requested forum is not valid: <b>' + forum_url + '</b>'
+        return render(request, 'error_index.html', context)
+    # get docs, themes, and authors
+
+    context["docs"] = []
+    docs = Doc.objects.filter(forum=forum).order_by("order")
+    for doc in docs:
+        item = {}
+        item["id"] = "doc-" + str(doc.id)
+        item["name"] = str(doc.title)
+        context["docs"].append(item)
+    context["themes"] = []
+    themes = ClaimTheme.objects.filter(forum=forum)
+    for theme in themes:
+        item = {}
+        item["id"] = "theme-" + str(theme.id)
+        item["name"] = str(theme.name)
+        context["themes"].append(item)
+    context["authors"] = []
+    for role in Role.objects.filter(forum=forum, role="panelist"):
+        author = role.user
+        item = {}
+        item["id"] = "author-" + str(author.id)
+        item["name"] = str(author.first_name) + " " + str(author.last_name)
+        context["authors"].append(item)
+    return render(request, "vis/index.html", context)
+
 def _get_phases(forum, selected_phase):
     results = {}
     results['phase'] = forum.phase

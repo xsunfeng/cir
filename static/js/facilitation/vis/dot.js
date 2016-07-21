@@ -31,7 +31,7 @@ define([
 				var map = {}
 				for (var i = 0; i < module.Highlight.data.length; i++) {
 					var highlight = module.Highlight.data[i];
-					if (highlight.author_name.includes("Feng Sun")) continue;
+					// if (highlight.author_name.includes("Feng Sun")) continue;
 					if (!(highlight.author_name in map)) {
 						map[highlight.author_name] = []
 					}
@@ -77,10 +77,6 @@ define([
 
 				d3.select(".event-drops-chart").style("width", 960);
 
-
-
-
-				drawDot("#dot");
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {

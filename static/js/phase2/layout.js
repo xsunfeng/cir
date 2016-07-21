@@ -1,9 +1,11 @@
 define([
+	'utils',
 	'doc/qa',
 	'semantic-ui',
 	'realtime/socket',
 	'feed/activity-feed'
 ], function(
+	Utils,
 	QA
 ) {
 	console.log("phase2");
@@ -152,34 +154,39 @@ define([
 
 		// nugget button group
 		$("body").on("click", ".use-nugget", function(e) {
-			var container = $(this).closest(".workbench-nugget");
-			// container.find(".nugget-select-mark").show();
-			var data_hl_id = container.attr('data-hl-id');
-			var content = container.find(".description").attr("data");
-			var textarea = $("#claim-maker").find("textarea");
-			if (textarea.attr("data-id") !== undefined) {
-				textarea.val(textarea.val() + "\n" + "\n" + content).attr("data-id", textarea.attr("data-id")  + "," +  data_hl_id);
+			// if someone wants to adopt a nugget, but currently not in claim-detail view, then open claim-detail first by creating a new one;
+			if ($("#claim-detail").is(":visible") === false) {
+				Utils.notify('warning', "Please create a new claim first.");
 			} else {
-				textarea.val(content).attr("data-id", data_hl_id);
-			}
-			var claim_id = $("#claim-maker").attr("claim-id");
-			$.ajax({
-				url: '/phase2/add_nugget_to_claim/',
-				type: 'post',
-				data: {
-					'highlight_id': data_hl_id,
-					'claim_id': claim_id
-				},
-				success: function(xhr) {
-					$("#candidate-nugget-list-container").html(xhr.html);
-					showClaimActivity(claim_id);
-				},
-				error: function(xhr) {
-					if (xhr.status == 403) {
-						Utils.notify('error', xhr.responseText);
-					}
+				var container = $(this).closest(".workbench-nugget");
+				// container.find(".nugget-select-mark").show();
+				var data_hl_id = container.attr('data-hl-id');
+				var content = container.find(".description").attr("data");
+				var textarea = $("#claim-maker").find("textarea");
+				if (textarea.attr("data-id") !== undefined) {
+					textarea.val(textarea.val() + "\n" + "\n" + content).attr("data-id", textarea.attr("data-id")  + "," +  data_hl_id);
+				} else {
+					textarea.val(content).attr("data-id", data_hl_id);
 				}
-			});		
+				var claim_id = $("#claim-maker").attr("claim-id");
+				$.ajax({
+					url: '/phase2/add_nugget_to_claim/',
+					type: 'post',
+					data: {
+						'highlight_id': data_hl_id,
+						'claim_id': claim_id
+					},
+					success: function(xhr) {
+						$("#candidate-nugget-list-container").html(xhr.html);
+						showClaimActivity(claim_id);
+					},
+					error: function(xhr) {
+						if (xhr.status == 403) {
+							Utils.notify('error', xhr.responseText);
+						}
+					}
+				});						
+			}
 		}).on("click", ".remove-nugget", function(e) {
 			var container = $(this).closest(".workbench-nugget");
 			// container.find(".nugget-select-mark").show();
@@ -231,28 +238,6 @@ define([
 					}
 				}
 			});						
-		}).on("click", ".reassign-nugget", function(e) {
-			console.log(module.theme.themes);
-			var container = $(this).closest(".workbench-nugget");
-			var html = "<div class='reassign-options'><div style='overflow:hidden;'><button class='workbench-nugget-reassign-close' style='float:right;'><i class='remove icon'></i>close</button></div>";
-			for (var theme_name in module.theme.themes) {
-				var theme_name = theme_name;
-				var theme_id = module.theme.themes[theme_name];
-				html = html + '<button class="reassign-btn" data-id=' + theme_id + '>' + theme_name + '</button>';
-			}			
-			html = html + "</div>";	
-			container.append(html);
-			container.on("click", ".reassign-btn", function(e) {
-				// var data_hl_ids = $(this).parents(".card").attr('data-hl-id');
-				// var highlight_id = $list_container.attr('data-hl-id');
-				// var theme_id = $(this).attr("data-id");
-				// assign_nugget(highlight_id, theme_id);
-				// load_nugget_list();
-			});
-			container.on("click", ".workbench-nugget-reassign-close", function(e) {
-				var html = $(this).closest(".workbench-nugget").find(".reassign-options");
-				html.remove();
-			});
 		});
 
 		$("body").on("click", "#clear-claim", function(e) {
@@ -306,11 +291,16 @@ define([
 			});
 		}).on("click", ".source-claim", function(e) {
 			var container = $(this).closest(".workbench-claim-item");
-			var highlight_ids = container.attr("nugget-ids").trim().split(",");
-			$("#workbench-nugget-list .workbench-nugget").hide();
-			$("#nugget-list-back").show();
-			for (var i = 0; i < highlight_ids.length; i++){
-				$("#workbench-nugget-list .workbench-nugget[data-hl-id=" + highlight_ids[i] + "]").show();
+			if (container.attr("nugget-ids").trim() != "") {
+				var highlight_ids = container.attr("nugget-ids").trim().split(",");
+				$("#workbench-nugget-list .workbench-nugget").hide();
+				$("#nugget-list-back").show();
+				if (highlight_ids)
+				for (var i = 0; i < highlight_ids.length; i++){
+					$("#workbench-nugget-list .workbench-nugget[data-hl-id=" + highlight_ids[i] + "]").show();
+				}
+			} else {
+				Utils.notify('error', "No nuggets are asscoaited with the claim you click.");
 			}
 		}).on("click", ".expand-claim", function(e) {
 			var container = $(this).closest(".workbench-claim-item");

@@ -259,7 +259,7 @@ def put_claim(request):
         newHighlightClaim.save()
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
-def api_assign_nugget(request):
+def change_nugget_theme(request):
     highlight_id = request.REQUEST.get("highlight_id")
     theme_id = request.REQUEST.get("theme_id")
     highlight = Highlight.objects.get(id=highlight_id)
@@ -269,7 +269,6 @@ def api_assign_nugget(request):
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 # nugget list zone
-
 def api_change_to_nugget(request):
     # input: highlight_ids, output: set as nugget
     response = {}

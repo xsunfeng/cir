@@ -42,28 +42,41 @@
             });
         </script>
     </head>
-    <body id="cir" {% if forum_id %}forum-id="{{ forum_id }}" {% endif %}{% if phase_info %}data-phase="{{ phase_info.selected_phase }}"{% endif %}>
-	{% block header %}
-	{% endblock %}
-	<div id="popup-notification" class="ui message hidden"></div>
-	<div id="sticked-notification" class="ui warning message" style="display:none"></div>
-	{% block body %}
-	{% endblock %}
-	<div id="messages-modal" class="ui modal">
-		<div class="ui secondary menu">
-			<div id="important-filter" class="ui slider checkbox item">
-				<input type="checkbox">
-				<label>Only show important messages</label>
-			</div>
-			<div id="completed-filter" class="ui slider checkbox item">
-				<input type="checkbox">
-				<label>Show completed</label>
-			</div>
-		</div>
-		<div id="message-list"></div>
-	</div>
-	{% include 'signin-signup.html' %}
-	{% block extralib %}{% endblock %}
-	{% block delaylib %}{% endblock %}
+    <body id="cir" 
+        {% if forum_id %}
+            forum-id="{{ forum_id }}" 
+        {% endif %}
+        {% if phase_info %}
+            data-phase="{{ phase_info.selected_phase }}"
+        {% endif %}
+    >
+    	{% block header %}
+    	{% endblock %}
+    	<div id="popup-notification" class="ui message hidden"></div>
+    	<div id="sticked-notification" class="ui warning message" style="display:none"></div>
+        {% for message in pinmessages %}
+            <div class="ui floating green message pin-message" style="z-index:9999; margin-top:0;">
+                <i class="close icon"></i>
+                <div class="content"><p>{{ message.content }}</p></div>
+            </div>
+        {% endfor %}
+    	{% block body %}
+    	{% endblock %}
+    	<div id="messages-modal" class="ui modal">
+    		<div class="ui secondary menu">
+    			<div id="important-filter" class="ui slider checkbox item">
+    				<input type="checkbox">
+    				<label>Only show important messages</label>
+    			</div>
+    			<div id="completed-filter" class="ui slider checkbox item">
+    				<input type="checkbox">
+    				<label>Show completed</label>
+    			</div>
+    		</div>
+    		<div id="message-list"></div>
+    	</div>
+    	{% include 'signin-signup.html' %}
+    	{% block extralib %}{% endblock %}
+    	{% block delaylib %}{% endblock %}
     </body>
 </html>

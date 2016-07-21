@@ -32,20 +32,30 @@ define([
 			}
 
 			$("body").on("click", "#instruction-btn", function(){
-				$("#instruction-modal").modal("show");
+				// $("#instruction-modal").modal("show");
+				$(".pin-message").removeClass("hidden");
 			})
 
 			$('#issue-desc-btn').popup({
-				position : 'bottom center',
+				position : 'bottom right',
 				target   : '#issue-desc-btn'
 			});
+
+			$('.pin-message .close')
+			  .on('click', function() {
+			    $(this)
+			      .closest('.message')
+			      .transition('fade')
+			    ;
+			  })
+			;
 		}
 	};
 
 	function initFacilitatorBtns() {
 		// populate users list
 		$.ajax({
-			url: '/dashboard/user_mgmt/',
+			url: '/api_dashboard/user_mgmt/',
 			type: 'post',
 			data: {
 				'action': 'get_user_list'

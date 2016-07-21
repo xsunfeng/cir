@@ -1,6 +1,8 @@
 {% if questions %}
 <div class="ui relaxed list">
 {% for question in questions %}
+    {% if question.is_answered %}
+    {% else %}
 	<div class="question item" data-id="{{ question.id }}">
 		<div class="ui info refresh prompt message">New activities in this thread.</div>
 		<div class="content">
@@ -49,6 +51,7 @@
 			</div>
 		</div>
 	</div>
+	{% endif %}
 {% endfor %}
 </div>
 {% else %}

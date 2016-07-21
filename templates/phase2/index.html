@@ -49,7 +49,7 @@
 
 <!-- left panel -->
 <div style="font-size:1.2em; position:fixed; top:50px; bottom:0; left:0; right:50%;">
-	<div style="padding-left: 2em;">
+	<div style="padding-left: 2em; position:absolute; width:100%; max-width:640px; right:0;">
 		<div class="ui text menu">
 			<div class="header item">nugget list</div>
 	
@@ -64,7 +64,7 @@
 			</select>
 		</div>
 	</div>
-	<div style="overflow:auto; top:60px; bottom:0; position:absolute; padding:1em; padding-top:0; left:0; right:0;">
+	<div style="overflow:auto; top:60px; bottom:0; position:absolute; padding:1em; padding-top:0; width:100%; max-width:640px; right:0;">
 		<div id="workbench-nugget-list" class="ui segments" style="border-radius: 0;">
 			<div class="ui segment">
 				<div class="ui active small inline loader"></div>loading
@@ -84,7 +84,7 @@
 			</div>
 		</div>
 	</div>
-	<div id="feng-claim-panel" style="overflow:auto; top:60px; bottom:0; position:absolute; padding:1em; left:0; right:0; padding-top: 0;">
+	<div id="feng-claim-panel" style="overflow:auto; top:60px; bottom:0; position:absolute; padding:1em; left:0; width:100%; max-width:640px;  padding-top: 0;">
 		<a href="#" id="claim-list-back" style="display:none;"><i class="icon angle left"></i>back to full list</a>
 		<div id="claim-detail" class="ui segment" style="display:none; margin-top:0;"></div>
 		<div id="claim-list" class="ui segments" style="border-radius:0; margin-top:0;"></div>		

@@ -7,12 +7,13 @@ define([
 ], function(
 	QA
 ) {
-	console.log("phase1");
-
 	QA.updateQuestionList();
 
 	var module = {};
 	
+	module.put_viewlog_interval = 3 * 1000;
+	module.idle_reset_time = 30 * 1000;
+
 	// theme object
 	module.Theme = {}
 	module.Theme.themes = {};
@@ -283,11 +284,25 @@ define([
 			html = html + "</div>";	
 			container.append(html);
 			container.on("click", ".reassign-btn", function(e) {
-				// var data_hl_ids = $(this).parents(".card").attr('data-hl-id');
-				// var highlight_id = $list_container.attr('data-hl-id');
-				// var theme_id = $(this).attr("data-id");
-				// assign_nugget(highlight_id, theme_id);
-				// load_nugget_list();
+				var $nugget = $(this).parents(".workbench-nugget")
+				var highlight_id = $nugget.attr('data-hl-id');
+				var theme_id = $(this).attr("data-id");
+				$.ajax({
+					url: '/phase1/change_nugget_theme/',
+					type: 'post',
+					data: {
+						'highlight_id': highlight_id,
+						'theme_id': theme_id
+					},
+					success: function(xhr) {		
+						module.get_nugget_list();
+					},
+					error: function(xhr) {
+						if (xhr.status == 403) {
+							Utils.notify('error', xhr.responseText);
+						}
+					}
+				});
 			});
 			container.on("click", ".workbench-nugget-reassign-close", function(e) {
 				var html = $(this).closest(".workbench-nugget").find(".reassign-options");
@@ -447,7 +462,24 @@ define([
 					module.Highlight.newHighlight.text = text;
 					$('#doc-highlight-toolbar').show();
 					$('#doc-highlight-toolbar').css('left', e.pageX).css('top', e.pageY);
+
+					// document inner container upper bound relative to document
+					var tmp2 = $("#workbench-document-panel").offset().top;
+					// distance scroll to the top
+					var tmp3 = $("#workbench-document-panel").scrollTop()
+					// start and end of nugget relative to document
+					var st = $(this).find('.tk.highlighted')[0]
+					var ed = $(this).find('.tk.highlighted')[$(this).find('.tk.highlighted').length - 1]
+					var top = $(st).offset().top;
+					var bottom = $(ed).offset().top;
+					top = top - tmp2 + tmp3;
+					bottom = bottom - tmp2 + tmp3;
+					// overall height
+					var height = $(".workbench-doc-item").height();
+					module.Highlight.newHighlight.upper_bound = top / height;
+					module.Highlight.newHighlight.lower_bound = bottom / height;
 				}
+
 			} else { // just clicking
 				$('#doc-highlight-toolbar').removeAttr('style');
 				$(this).find('.tk').removeClass('highlighted');
@@ -462,6 +494,7 @@ define([
 		    	module.applyFilter();
 		    }
 		});
+		$("#doc-only").checkbox("uncheck");
 
 		$("body").on("click", "#create-nugget", function() {
 			$.ajax({
@@ -472,6 +505,26 @@ define([
 					theme_id: $("#nugget-tool-bar-themes").val(),
 				}, module.Highlight.newHighlight, $('#doc-claim-form').form('get values')),
 				success: function(xhr) {
+					// send nugget map
+					$.ajax({
+						url: '/sankey/put_nuggetmap/',
+						type: 'post',
+						data: {
+							"upper_bound": 	module.Highlight.newHighlight.upper_bound,
+							"lower_bound": 	module.Highlight.newHighlight.lower_bound,
+							"doc_id": 		$(".workbench-doc-item").attr("data-id"),
+							"author_id": 	sessionStorage.getItem('user_id'),
+							"theme_id":		$("#nugget-tool-bar-themes").val()
+						},
+						success: function(xhr) {
+						},
+						error: function(xhr) {
+							$('#doc-highlight-toolbar .button').removeClass('loading');
+							if (xhr.status == 403) {
+								Utils.notify('error', xhr.responseText);
+							}
+						}
+					});
 					afterAddHighlight(xhr.highlight_id);
 				},
 				error: function(xhr) {
@@ -528,7 +581,43 @@ define([
 			  	module.initEvents();
 			});		
 		});
-		// helper functions
+
+		// put heatmap
+		idleTime = 0
+		idleInterval = setInterval(function() {
+			idleTime = idleTime + 1;
+			if (idleTime < Math.floor(module.idle_reset_time / module.put_viewlog_interval) && $(".workbench-doc-item").is(":visible")) {
+			  if ($("#header-user-name").attr("data-role") !== "panelist") return;
+			  console.log("idleTime=" + idleTime);
+			  var upper = $("#workbench-document-panel").scrollTop();
+			  var lower = $("#workbench-document-panel").scrollTop() + $("#workbench-document-panel").height();
+			  var height = $("#workbench-document-container").height();
+			  var doc_id = $(".workbench-doc-item").attr("data-id");
+			  var author_id = $("#header-user-name").attr("data-id");
+			  $.ajax({
+					url: '/sankey/put_viewlog/',
+					type: 'post',
+					data: {
+					  "doc_id": 	doc_id,
+					  "lower": 		lower,
+					  "upper": 		upper,
+					  "height": 	height,
+					  "author_id": 	author_id
+					},
+					success: function(xhr) {
+					},
+					error: function(xhr) {
+					  if (xhr.status == 403) {
+					    Utils.notify('error', xhr.responseText);
+					  }
+					}
+				});
+			}
+		}, module.put_viewlog_interval); // every 5s
+		$("body").on("mousemove", "#workbench-document-container", function(e){
+			idleTime = 0;
+		})
+
 	}
 	module.initLayout();
 });

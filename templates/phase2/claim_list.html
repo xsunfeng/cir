@@ -1,18 +1,17 @@
 {% if claims %} 
 	{% for item in claims %}
-		<div class="ui segment workbench-claim-item" claim-id="{{ item.id }}" nugget-ids="{{ item.highlight_ids }}" theme-ids="{{ item.theme_ids }}">
+		<div class="ui segment workbench-claim-item" style="margin: 5px;" claim-id="{{ item.id }}" nugget-ids="{{ item.highlight_ids }}" theme-ids="{{ item.theme_ids }}">
 			<div class="content">
 				<div class="description workbench-claim-content">
 					{{ item.content }}
 				</div>
 			</div>
+			<div class="ui divider" style="margin: 5px 0;"></div>
 			{% for theme in item.themes %}
 				<span class="ui label theme-label" theme-id={{ theme.id }}>{{ theme.name }}</span>
 			{% endfor %}
 			<div class="discription" style="color:rgba(0,0,0,.4);">
 				<span class="discription">
-					<div class="ui heart rating" data-rating="0" data-max-rating="1"></div>
-					<span> | </span>
 					<span>{{ item.author_name }}</span>
 					<span> | </span>
 					<span>{{ item.date }}</span>

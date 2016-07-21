@@ -66,6 +66,7 @@ urlpatterns = patterns('',
     url(r'^phase1/get_highlights/$', phase1.get_highlights),
     url(r'^phase1/get_nugget_comment_list/$', phase1.get_nugget_comment_list),
     url(r'^phase1/put_nugget_comment/$', phase1.put_nugget_comment),
+    url(r'^phase1/change_nugget_theme/$', phase1.change_nugget_theme),
 
     url(r'^phase2/get_claim_list/$', phase2.get_claim_list),
     url(r'^phase2/get_nugget_list/$', phase2.get_nugget_list),
@@ -111,6 +112,7 @@ urlpatterns = patterns('',
 
     # these must be put last!
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)(/phase/(?P<phase_name>[a-zA-Z0-9_]+))?/?$', forum_views.enter_forum),
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/vis/?$', forum_views.enter_vis),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/workbench/?$', forum_views.enter_workbench),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/sankey/?$', forum_views.enter_sankey),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)(/dashboard/(?P<dashboard_tab>[a-zA-Z0-9_]+))?/?$', facilitator_views.enter_dashboard),

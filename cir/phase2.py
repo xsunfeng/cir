@@ -590,7 +590,12 @@ def get_claim_list(request):
         item['date'] = utils.pretty_date(claim.updated_at)
         item['created_at'] = utils.pretty_date(claim.created_at)
         item['created_at_used_for_sort'] = claim.created_at
-        item['content'] = unicode(ClaimVersion.objects.filter(claim_id = claim.id, is_adopted = True)[0]) 
+        print "claim_id = ", claim.id
+        if (ClaimVersion.objects.filter(claim_id = claim.id, is_adopted = True).count() > 0):
+            item['content'] = unicode(ClaimVersion.objects.filter(claim_id = claim.id, is_adopted = True)[0])
+            item['content'] = item['content'] if (not item['content'] == "") else "(No content)"
+        else:
+            item['content'] = "(No adopted version)"
         item['id'] = claim.id
         item['author_name'] = claim.author.first_name + " " + claim.author.last_name
         item['is_author'] = (request.user == claim.author)

@@ -364,7 +364,8 @@ class Claim(Entry):
             attr['claims'].append({
                 'id': claimref.from_claim.id,
                 'content': claimref.from_claim.adopted_version().content,
-                'theme': claimref.from_claim.theme.name
+                # 'theme': claimref.from_claim.theme.name
+                'theme': "null"
             })
         return attr
 

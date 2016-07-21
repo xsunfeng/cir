@@ -18,10 +18,10 @@
 
 {% block body %}
 
-
 <!-- left panel -->
 <div style="font-size:1.2em; position:fixed; top:50px; bottom:0; left:0; right:50%;">
-	<div>
+	<!-- real container -->
+	<div style="position:absolute; width:100%; max-width:640px; right:0;">
 		<div style="padding-left:2em;" class="ui text menu">
 			<div class="header item">document</div>				
 			<button id="document-toc-button" class="ui blue basic button">Table of contents</button>
@@ -34,7 +34,7 @@
 			</div> -->
 		</div>
 	</div>
-	<div style="overflow:auto; top:60px; bottom:0; position:absolute; left:0; right:0; padding:1em; padding-top:0;" id="workbench-document-panel">
+	<div style="overflow:auto; top:60px; bottom:0; position:absolute; right:0; padding:1em; padding-top:0; width:100%; max-width:640px;" id="workbench-document-panel">
 		<div id="workbench-document-container" class="ui segment" style="border-radius: 0;">
 			<!-- <img style="width:100%;" src="http://imageprocessor.websimages.com/width/874/crop/0,0,874x640/geodeliberation.webs.com/CIR%20(1).png"> -->
 		</div>		
@@ -56,13 +56,13 @@
 			<select name="gender" class="ui dropdown item" id="nugget-list-theme">
 			</select>
 
-			<div class="ui checked checkbox item" id="doc-only">
+			<div class="ui checkbox item" id="doc-only">
 				<input type="checkbox" checked="">
 				<label>this document only</label>
 			</div>
 		</div>
 	</div>
-	<div style="overflow:auto; top:60px; bottom:0; position:absolute; left:0; right:0; padding:1em; padding-top:0;">
+	<div style="overflow:auto; top:60px; bottom:0; position:absolute; left:0; width:100%; max-width:640px; padding:1em; padding-top:0;">
 		<div id="workbench-nugget-list" class="ui segments" style="border-radius: 0;">
 			<div class="ui segment">
 				<div class="ui active small inline loader"></div>loading
