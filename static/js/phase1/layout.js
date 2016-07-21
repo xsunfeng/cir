@@ -588,7 +588,6 @@ define([
 			idleTime = idleTime + 1;
 			if (idleTime < Math.floor(module.idle_reset_time / module.put_viewlog_interval) && $(".workbench-doc-item").is(":visible")) {
 			  if ($("#header-user-name").attr("data-role") !== "panelist") return;
-			  console.log("idleTime=" + idleTime);
 			  var upper = $("#workbench-document-panel").scrollTop();
 			  var lower = $("#workbench-document-panel").scrollTop() + $("#workbench-document-panel").height();
 			  var height = $("#workbench-document-container").height();

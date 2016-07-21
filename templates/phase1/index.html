@@ -23,15 +23,13 @@
 	<!-- real container -->
 	<div style="position:absolute; width:100%; max-width:640px; right:0;">
 		<div style="padding-left:2em;" class="ui text menu">
-			<div class="header item">document</div>				
-			<button id="document-toc-button" class="ui blue basic button">Table of contents</button>
+			<div class="header item">document</div>
+			<div id="document-toc-button" class="ui floating labeled icon dropdown basic button">
+  				<span class="text">Table of contents</span>
+  				<i class="dropdown icon"></i>
+  			</div>
 			<div id="document-toc-container" class="ui special popup" style="min-width:80%; max-height:500px; overflow:auto;"></div>
-
-
-<!-- 			<div class="ui checked checkbox item">
-				<input type="checkbox" checked="">
-				<label>collaborative mode</label>
-			</div> -->
+			<a href='#' class="ui basic button" onclick='javascript:window.open("../vis", "_blank", "scrollbars=1,resizable=1,height=800,width=1200");' title='NuggetLens'>NuggetLens</a>	
 		</div>
 	</div>
 	<div style="overflow:auto; top:60px; bottom:0; position:absolute; right:0; padding:1em; padding-top:0; width:100%; max-width:640px;" id="workbench-document-panel">
