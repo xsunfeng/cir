@@ -1,7 +1,7 @@
 {% if highlights %}
 	{% for highlight in highlights %}
-		<div class="ui segment workbench-nugget nugget-related" style="margin: 5px;" data-hl-id = {{ highlight.id }} doc-id = {{ highlight.doc_id }} theme-id = {{ highlight.theme_id }}>
-			{% if highlight.is_nugget %}
+		{% if highlight.is_nugget %}
+			<div class="ui segment workbench-nugget nugget-related" style="margin: 5px;" data-hl-id = {{ highlight.id }} doc-id = {{ highlight.doc_id }} theme-id = {{ highlight.theme_id }}>
 				<a class="ui small red right corner label nugget-select-mark" style="display:none;">
 					<i class="checkmark icon"></i>
 				</a>
@@ -26,10 +26,14 @@
 							{% endif %}
 						<span> | </span>
 						<a href="#" class="item reassign-nugget">change theme</a>
+						{% if highlight.is_author %}
+							<span> | </span>
+							<a href="#" class="item delete-nugget">delete</a>
+						{% endif %}
 					</div>
 				</div>
-			{% endif %}
-		</div>
+			</div>
+		{% endif %}
 	{% endfor %}
 {% else %}
 		<div class="ui card" style="background: PapayaWhip;">

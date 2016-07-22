@@ -324,6 +324,7 @@ def get_nugget_list(request):
             for highlight in highlights:
                 highlight_info = highlight.getAttr()
                 highlight_info["doc_id"] = DocSection.objects.get(id=highlight.context.id).doc.id
+                highlight_info["is_author"] = (highlight.author == request.user)
                 highlight_info["comment_number"] = NuggetComment.objects.filter(highlight_id = highlight.id).count()
                 context['highlights'].append(highlight_info)
     context['highlights'].sort(key = lambda x: x["created_at"], reverse=True)

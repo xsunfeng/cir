@@ -310,10 +310,9 @@ def api_remove_nugget(request):
     context = {}
     hl_id = request.REQUEST.get("hl_id")
     hl = Highlight.objects.get(id = hl_id)
-    hl.is_nugget = False
-    hl.save()
-    context['highlight'] = hl.getAttr()
-    response['workbench_single_nugget'] = render_to_string("workbench-single-nugget.html", context)
+    # hl.is_nugget = False
+    # hl.save()
+    hl.delete()
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_load_nugget_list(request):

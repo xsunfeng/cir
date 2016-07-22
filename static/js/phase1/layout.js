@@ -12,7 +12,7 @@ define([
 	var module = {};
 	
 	module.put_viewlog_interval = 3 * 1000;
-	module.idle_reset_time = 30 * 1000;
+	module.idle_reset_time = 15 * 1000;
 
 	// theme object
 	module.Theme = {}
@@ -99,10 +99,14 @@ define([
 				}
 				module.Theme.initColorSchema();
 				$("#nugget-list-theme").empty();
-				$("#nugget-list-theme").append('<option value="-1">All</option>');
-				for (var theme_name in module.Theme.themes) {
-					var theme_id = module.Theme.themes[theme_name];
-					$("#nugget-list-theme").append('<option value="' + theme_id + '">' + theme_name + '</option>');
+				var content_alltheme = "All themes are shown."
+				$("#nugget-list-theme").append('<option value="-1" data-content="' + content_alltheme + '">All</option>');
+				$("#theme-info-popup .content").text(content_alltheme);
+				for (var i = 0; i < xhr.themes.length; i++) {
+					var theme_name = xhr.themes[i].name
+					var theme_id = xhr.themes[i].id
+					var theme_description = xhr.themes[i].description
+					$("#nugget-list-theme").append('<option value="' + theme_id + '" data-content="' + theme_description + '">' + theme_name + '</option>');
 					$("#nugget-tool-bar-themes").append('<option value="' + theme_id + '">' + theme_name + '</option>');
 				}
 			},
@@ -220,6 +224,12 @@ define([
 	}
 
 	module.initEvents = function() {
+
+		$("#theme-info").popup({
+			position: 	'bottom center',
+		    popup: 		'#theme-info-popup'
+		})
+
 		$('#document-toc-button').popup({
 			on: 'click',
 		    popup: '#document-toc-container', 
@@ -230,9 +240,32 @@ define([
 		$('.ui.accordion').accordion();
 
 		$("#nugget-list-theme").change(function() {
+			var content = $("#nugget-list-theme option[value=" + $(this).val() + "]").attr("data-content");
+			$("#theme-info-popup .content").text(content);
 			module.applyFilter();
 		});
 
+		$("body").on("click", ".delete-nugget", function(e) {
+			var container = $(this).closest(".workbench-nugget");
+			var hl_id = container.attr("data-hl-id");
+			$.ajax({
+				url: '/workbench/api_remove_nugget/',
+				type: 'post',
+				data: {
+					hl_id: hl_id,
+				},
+				success: function(xhr) {
+					var doc_id = $(".workbench-doc-item").attr("data-id");
+					module.get_document_content(doc_id);
+					module.get_nugget_list();
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});
+		});
 		$("body").on("click", ".source-nugget", function(e) {
 			var container = $(this).closest(".workbench-nugget");
 			var hl_id = container.attr("data-hl-id");

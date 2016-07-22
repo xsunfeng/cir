@@ -9,6 +9,7 @@ from cir.models import *
 from datetime import datetime, date, timedelta
 import time
 import pytz
+import utils
 
 from . import preprocessing
 
@@ -29,9 +30,6 @@ def get_graph(request):
 	forum_id = request.session['forum_id']
 	forum = Forum.objects.get(id = forum_id)
 	highlights = Highlight.objects.all()
-	print "-------------------", highlights.count()
-	print time_upper_bound
-	print time_lower_bound
 	highlights = highlights.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound)
 	if (author_ids[0] != ""):
 		highlights = highlights.filter(author_id__in = author_ids)
@@ -41,7 +39,6 @@ def get_graph(request):
 		sec_ids = ""
 		for sec in DocSection.objects.filter(doc_id__in = doc_ids):
 			sec_ids = sec_ids + " " + str(sec.id)
-			print sec_ids
 		highlights = highlights.filter(context_id__in = sec_ids.strip().split(" "))
 
 	print "-------------------", highlights.count()
@@ -334,8 +331,6 @@ def get_highlights2(request):
 	else:
 		time_upper_bound = datetime(2014, 8, 15, 8, 15, 12, 0, pytz.UTC)
 		time_lower_bound = datetime(2018, 8, 15, 8, 15, 12, 0, pytz.UTC)
-	print time_upper_bound
-	print time_lower_bound
 	time_upper_bound = timezone.localtime(time_upper_bound).strftime("%Y %m %d %H %M")
 	time_lower_bound = timezone.localtime(time_lower_bound).strftime("%Y %m %d %H %M")
 	response["time_upper_bound"] = time_upper_bound
@@ -366,22 +361,19 @@ def get_doc_coverage(request):
 			doc_id__in = doc_ids, 
 			author_id = author_id)
 		if viewlogs.count() >= 2:
-			print "viewlogs.count()", viewlogs.count()
 			arr1 = viewlogs.order_by("-created_at")[0].heatmap.split(",")
 			arr2 = viewlogs.order_by("-created_at")[1].heatmap.split(",")
 			if len(arr1) == len(arr2):
 				l1 = np.array([int(x) for x in arr1])
 				l2 = np.array([int(x) for x in arr2])
 				l = (l1 - l2).tolist()
-				print l
 				item = {}
 				item["doc_id"] = viewlogs.order_by("-created_at")[0].doc_id
 				first = l.index(1)
 				last = len(l) - l[::-1].index(1) - 1
 				item["work_on"] = (first + last) / 2
 				item["author_name"] = User.objects.get(id = author_id).first_name + " " + User.objects.get(id = author_id).last_name
-				print item["author_name"]
-				print item["doc_id"]
+				item["time"] = utils.pretty_date(viewlogs.order_by("-created_at")[0].created_at)
 				response["author_activity_map"][author_id] = item
 	# nuggetmap
 	response["nuggetmaps"] = {}
@@ -442,7 +434,6 @@ def put_viewlog(request):
 	lower = request.REQUEST.get('lower')
 	height = request.REQUEST.get('height')
 	doc_id = request.REQUEST.get('doc_id')
-	print doc_id
 	author_id = request.REQUEST.get('author_id')
 	viewlogs = ViewLog.objects.filter(doc_id = doc_id, author_id = author_id)
 	if (viewlogs.count() > 1):
@@ -456,6 +447,7 @@ def put_viewlog(request):
 		heatmap = [0] * length
 	left = int(round(length * (float)(upper) / (float)(height)))
 	right = int(round(length * (float)(lower) / (float)(height)))
+	right = min(right, length)
 	for i in range(left, right): # include start and exclude end
 		heatmap[i] = heatmap[i] + 1
 	heatmap = ",".join(str(x) for x in heatmap)
@@ -481,8 +473,6 @@ def get_timerange(request):
 	else:
 		time_upper_bound = datetime(2020, 1, 1, 1, 1)
 		time_lower_bound = datetime(2010, 1, 1, 1, 1)
-	print time_upper_bound
-	print time_lower_bound
 	time_upper_bound = timezone.localtime(time_upper_bound).strftime("%Y %m %d %H %M %S")
 	time_lower_bound = timezone.localtime(time_lower_bound).strftime("%Y %m %d %H %M %S")
 	response = {}

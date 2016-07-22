@@ -19,6 +19,7 @@ define([
   var module = {};
 
   module.init = function() {
+    $($("title")[0]).text("NuggetLens");
     timerange_num_interval = 100;
     module.focus_node = "";
     module.threshold_default = 50;
@@ -134,9 +135,12 @@ define([
             }) 
             .append("svg")
             .attr("class", "chart")
-            .attr("width", container_width)
+            .attr("width", cell_width * distribution.length)
             .attr("height", cell_height)
-            .attr("display", "block");
+            .attr("display", "block")
+            .style("border-top", "1px solid")
+            .style("border-left", "1px solid")
+            .style("border-right", "1px solid");
 
           var color1 = d3.scale.linear()
                     .domain([0, 1])
@@ -158,9 +162,12 @@ define([
             }) 
             .append("svg")
             .attr("class", "chart")
-            .attr("width", container_width)
+            .attr("width", cell_width * distribution.length)
             .attr("height", cell_height)
-            .attr("display", "block");
+            .attr("display", "block")
+            .style("border-bottom", "1px solid")
+            .style("border-left", "1px solid")
+            .style("border-right", "1px solid");
 
           var color2 = d3.scale.linear()
                     .domain([0, threshold ])
@@ -186,11 +193,13 @@ define([
               data = xhr.author_activity_map[author_id],
               doc_id = data.doc_id,
               work_on = data.work_on,
-              author_name = data.author_name;
+              author_name = data.author_name,
+              time = data.time;
           $($(".documap-item[doc-id=doc-" + doc_id + "]").find("rect")[work_on])
             .attr("class", "latest-activity")
             .attr("author-id",author_id)
-            .attr("author-name",author_name);
+            .attr("author-name",author_name)
+            .attr("time",time);
         }
 
         // add author lastest activity
@@ -198,8 +207,9 @@ define([
         $(".latest-activity").each(function(){
             var author_id = $(this).attr("author-id");
             var author_name = $(this).attr("author-name");
+            var time = $(this).attr("time");
             $documap_item = $(this).closest(".documap-item");
-            $documap_item.append('<div class="ui pointing basic label" author-id=' + author_id + '><i class="user icon"></i>' + author_name + '</div>');
+            $documap_item.append('<div class="ui pointing basic label" author-id=' + author_id + '><i class="user icon"></i>' + author_name + ' | ' + time + '</div>');
             $label = $(this).closest(".documap-item").find(".label[author-id=" + author_id + "]");
             $label.css({"position": "absolute", "left":Number($(this).attr("x")) - ($label.width() / 2), "top":+30});
 

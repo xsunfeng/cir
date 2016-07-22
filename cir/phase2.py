@@ -188,6 +188,7 @@ def get_theme_list(request):
         item = {}
         item["name"] = theme.name
         item["id"] = theme.id
+        item["description"] = theme.description
         response["themes"].append(item)
     context["phase"] = PHASE_CONTROL[forum.phase]
 
