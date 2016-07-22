@@ -675,6 +675,7 @@ class ClaimComment(MPTTModel):
     parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     claim = models.ForeignKey(Claim, null=True, blank=True)
+    nugget = models.ForeignKey(Highlight, null=True, blank=True)
     created_at = models.DateTimeField()
     CONTENT_CHOICES = (
         ('question', 'Question'),

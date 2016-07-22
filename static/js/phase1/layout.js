@@ -29,7 +29,7 @@ define([
 	module.Theme.initColorSchema = function() {
 		var i = 0;
 		for (var theme_name in module.Theme.themes) {
-			module.Theme.colorMap[module.Theme.themes[theme_name]] = colorbrewer["Pastel2"][8][i];
+			module.Theme.colorMap[module.Theme.themes[theme_name]] = colorbrewer["Pastel1"][8][i];
 			i++;
 		}
 	}
@@ -55,25 +55,38 @@ define([
 					var $context = $("#workbench-document-container").find('.section-content[data-id="' + highlight.context_id + '"]');
 					// assume orginal claims are nuggets now 
 					var className = '';
-					if (highlight.author_id == sessionStorage.getItem('user_id')) {
-						if (highlight.type !== 'comment') className = 'this_nugget';
-					} else {
-						if (highlight.type !== 'comment') className = 'other_nugget';
-					}
-					// loop over all words in the highlight
-					var text = [];
-					for (var i = highlight.start; i <= highlight.end; i++) {
-						var $token = $context.find('.tk[data-id="' + i + '"]');
-						text.push($token.text());
-						if (typeof $token.attr('data-hl-id') == 'undefined') { // new highlight for this word
-							$token.addClass(className).attr('data-hl-id', highlight.id).attr("theme_id", highlight.theme_id);
-							$token.css("background-color", module.Theme.colorMap[highlight.theme_id]);
-						} else {
-							var curr_id = $token.attr('data-hl-id'); // append highlight for this word
-							var cur_theme_id = $token.attr('theme_id');
-							$token.addClass(className).attr('data-hl-id', curr_id + ' ' + highlight.id).attr("theme_id", cur_theme_id + ' ' + highlight.theme_id);
+					if (! module.Highlight.highlights[j].is_nugget) {
+						className = 'this_is_a_question';
+						// loop over all words in the highlight
+						var text = [];
+						for (var i = highlight.start; i <= highlight.end; i++) {
+							var $token = $context.find('.tk[data-id="' + i + '"]');
+							text.push($token.text());
+							if (typeof $token.attr('data-hl-id') == 'undefined') { // new highlight for this word
+								$token.addClass(className).attr('data-hl-id', highlight.id);
+								$token.css("border-bottom", "3px solid red");
+							} else {
+								var curr_id = $token.attr('data-hl-id'); // append highlight for this word
+								$token.addClass(className).attr('data-hl-id', curr_id + ' ' + highlight.id).attr("theme_id", cur_theme_id + ' ' + highlight.theme_id);
+							}
 						}
+					} else {
+						// loop over all words in the highlight
+						var text = [];
+						for (var i = highlight.start; i <= highlight.end; i++) {
+							var $token = $context.find('.tk[data-id="' + i + '"]');
+							text.push($token.text());
+							if (typeof $token.attr('data-hl-id') == 'undefined') { // new highlight for this word
+								$token.addClass(className).attr('data-hl-id', highlight.id).attr("theme_id", highlight.theme_id);
+								$token.css("background-color", module.Theme.colorMap[highlight.theme_id]);
+							} else {
+								var curr_id = $token.attr('data-hl-id'); // append highlight for this word
+								var cur_theme_id = $token.attr('theme_id');
+								$token.addClass(className).attr('data-hl-id', curr_id + ' ' + highlight.id).attr("theme_id", cur_theme_id + ' ' + highlight.theme_id);
+							}
+						}						
 					}
+
 					module.Highlight.textMap[highlight.id] = text.join('');
 				}
 			},
@@ -450,9 +463,22 @@ define([
 		
 		$("#workbench-document-container").on('click', '.tk', function(e) {
 			e.stopPropagation();
-			if (this.hasAttribute('data-hl-id')) {
-				var highlight_ids = $(this).attr('data-hl-id').split(' ');
-				showNuggetCommentModal(highlight_ids[0]);				
+			if ($(this).attr("data-hl-id") !== undefined) {
+				if ($(this).hasClass("this_is_a_question")) {
+					// open qa panel
+					if (!$("#qa-wrapper").is(":visible")) {
+						$("#qa-wrapper").show();
+						$("#qa-panel-toggle").css("right", (0.4 * $(window).width()) - 10);
+					}
+					var nugget_id = $(this).attr("data-hl-id");
+					$question = $(".find-in-doc[data-highlight-id = " + nugget_id + "]").closest(".question");
+					$question.find(".expand-thread").click();
+					$("#qa-wrapper").scrollTop(0);
+					$("#qa-wrapper").scrollTop($question.position().top);
+				}else {
+					var highlight_ids = $(this).attr('data-hl-id').split(' ');
+					showNuggetCommentModal(highlight_ids[0]);
+				}			
 			}
 		}).on('mousedown', '.section-content', function(e) {
 			$('#doc-highlight-toolbar').removeAttr('style');
@@ -537,6 +563,7 @@ define([
 				data: $.extend({
 					action: 'create',
 					theme_id: $("#nugget-tool-bar-themes").val(),
+					hl_type: "nugget"
 				}, module.Highlight.newHighlight, $('#doc-claim-form').form('get values')),
 				success: function(xhr) {
 					// send nugget map
@@ -568,6 +595,35 @@ define([
 					}
 				}
 			});
+		}).on("click", "#ask-question-about-nugget", function() {
+			$.ajax({
+				url: '/api_highlight/',
+				type: 'post',
+				data: $.extend({
+					action: 'create',
+					theme_id: $("#nugget-tool-bar-themes").val(),
+					hl_type: "question"
+				}, module.Highlight.newHighlight, $('#doc-claim-form').form('get values')),
+				success: function(xhr) {
+					// send nugget map
+					// open q&a panel 
+					sessionStorage.setItem("active_nugget_id", xhr.highlight_id);
+					if (!$("#qa-wrapper").is(":visible")) {
+						$("#qa-wrapper").show();
+						$("#qa-panel-toggle").css("right", (0.4 * $(window).width()) - 10);
+					}
+					if(!$(".make-comment").is(":visible")) {
+						$("#qa-wrapper .new-question").click();
+					}
+					afterAddHighlight(xhr.highlight_id);
+				},
+				error: function(xhr) {
+					$('#doc-highlight-toolbar .button').removeClass('loading');
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});			
 		});
 
 		function afterAddHighlight(newHighlightId) {

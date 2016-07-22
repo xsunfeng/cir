@@ -82,7 +82,11 @@ def api_highlight(request):
         text = request.REQUEST.get('text')
         # create highlight object
         context = Entry.objects.get(id=context_id)
-        highlight = Highlight(start_pos=start, end_pos=end, context=context, author=request.user, text=text, created_at = now)
+        hl_type = request.REQUEST.get('hl_type')
+        if (hl_type == "question"):
+            highlight = Highlight(start_pos=start, end_pos=end, context=context, author=request.user, text=text, created_at = now, is_nugget = False)
+        else: # real nugget
+            highlight = Highlight(start_pos=start, end_pos=end, context=context, author=request.user, text=text, created_at = now, is_nugget = True)
         if (request.REQUEST.get('theme_id')):
             theme_id = request.REQUEST.get('theme_id')
             highlight.theme = ClaimTheme.objects.get(id = theme_id)
@@ -257,7 +261,11 @@ def api_qa(request):
         text = request.REQUEST.get('text')
         print "-------------------", text
         created_at = timezone.now()
-        newClaimComment = ClaimComment(author = author, text = text, created_at = created_at, comment_type = comment_type, forum = forum)
+        nugget_id = request.REQUEST.get('nugget_id')
+        if (nugget_id == ""):
+            newClaimComment = ClaimComment(author = author, text = text, created_at = created_at, comment_type = comment_type, forum = forum)
+        else:
+            newClaimComment = ClaimComment(author = author, text = text, created_at = created_at, comment_type = comment_type, forum = forum, nugget_id = nugget_id)
         newClaimComment.save()
     if action == 'get-question-list'  or action == 'raise-question':
         author = request.user
@@ -265,7 +273,7 @@ def api_qa(request):
             'questions': []
         }
         questions = ClaimComment.objects.filter(forum = forum, comment_type='question', parent__isnull = True)
-        context['questions']
+        context['questions'] = context['questions']
         for question in questions:
             entry = {}
             entry["reply_count"] = question.get_descendant_count()
@@ -292,6 +300,10 @@ def api_qa(request):
                 entry['claim_created_at'] = utils.pretty_date(question.claim.created_at)
             except:
                 pass
+            if (question.nugget):
+                docsection = DocSection.objects.get(id=question.nugget.context.id)
+                entry['doc_id'] = docsection.doc.id
+                entry['nugget_id'] = question.nugget.id
             context['questions'].append(entry)
         context['questions'] = sorted(context['questions'], key=lambda en: (en['is_answered'], en['created_at']), reverse=True)
         response['html'] = render_to_string('qa/question-list.html', context)

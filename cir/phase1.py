@@ -223,6 +223,7 @@ def get_highlights(request):
             highlight_info = highlight.getAttr()
             highlight_info["cur_theme"] = True if highlight.theme.id == theme_id else False
             highlight_info["doc_id"] = DocSection.objects.get(id=highlight.context.id).doc.id
+            highlight_info["is_nugget"] = highlight.is_nugget
             response['highlights'].append(highlight_info)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 

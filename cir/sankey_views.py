@@ -30,7 +30,7 @@ def get_graph(request):
 	forum_id = request.session['forum_id']
 	forum = Forum.objects.get(id = forum_id)
 	highlights = Highlight.objects.all()
-	highlights = highlights.filter(created_at__lte = time_upper_bound).filter(created_at__gte = time_lower_bound)
+	highlights = highlights.filter(created_at__lte = time_upper_bound, created_at__gte = time_lower_bound, is_nugget = True)
 	if (author_ids[0] != ""):
 		highlights = highlights.filter(author_id__in = author_ids)
 	if (theme_ids[0] != ""):
