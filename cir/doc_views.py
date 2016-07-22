@@ -297,50 +297,50 @@ def api_qa(request):
         response['html'] = render_to_string('qa/question-list.html', context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
-def api_qa_backup(request):
-    response = {}
-    forum = Forum.objects.get(id=request.session['forum_id'])
-    action = request.REQUEST.get('action')
-    if action == 'load-thread':
-        # given a question, load its discussions
-        question = Post.objects.get(id=request.REQUEST.get('question_id'))
-        context = {
-            'entries': [],
-            'source': 'qa'
-        }
-        for post in question.getTree(exclude_root=True): # don't include root
-            context['entries'].append(post.getAttr(forum))
-        context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'], reverse=True)
-        response['html'] = render_to_string("feed/activity-feed-doc.html", context)
-    if action == 'raise-question':
-        now = timezone.now()
-        content = request.REQUEST.get('content')
-        Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content,
-            created_at=now, updated_at=now, content_type='question')
-    if action == 'get-all-questions' or action == 'raise-question':
-        context = {
-            'questions': []
-        }
-        questions = Post.objects.filter(forum=forum, content_type='question', is_deleted=False)
-        for question in questions:
-            question_info = question.getAttr(forum)
-            all_replies = question.getTree(exclude_root=True)
-            question_info['treesize'] = len(all_replies)
-            if question_info['treesize'] > 0:
-                last_reply = sorted(all_replies, key=lambda en: en.created_at, reverse=True)[0]
-                last_reply_info = last_reply.getAttr(forum)
-                question_info['last_reply'] = last_reply_info['updated_at']
-                question_info['last_reply_full'] = last_reply_info['updated_at_full']
-            else:
-                question_info['last_reply_full'] = question_info['created_at_full']
-            try:
-                docsection = DocSection.objects.get(id=question.highlight.context.id)
-                question_info['doc_name'] = docsection.doc.title
-                question_info['doc_id'] = docsection.doc.id
-                question_info['highlight_id'] = question.highlight.id
-            except:
-                pass
-            context['questions'].append(question_info)
-        context['questions'] = sorted(context['questions'], key=lambda en: (en['last_reply_full'], en['created_at_full']), reverse=True)
-        response['html'] = render_to_string('doc/qa-panel.html', context)
-    return HttpResponse(json.dumps(response), mimetype='application/json')
+# def api_qa_backup(request):
+#     response = {}
+#     forum = Forum.objects.get(id=request.session['forum_id'])
+#     action = request.REQUEST.get('action')
+#     if action == 'load-thread':
+#         # given a question, load its discussions
+#         question = Post.objects.get(id=request.REQUEST.get('question_id'))
+#         context = {
+#             'entries': [],
+#             'source': 'qa'
+#         }
+#         for post in question.getTree(exclude_root=True): # don't include root
+#             context['entries'].append(post.getAttr(forum))
+#         context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'], reverse=True)
+#         response['html'] = render_to_string("feed/activity-feed-doc.html", context)
+#     if action == 'raise-question':
+#         now = timezone.now()
+#         content = request.REQUEST.get('content')
+#         Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content,
+#             created_at=now, updated_at=now, content_type='question')
+#     if action == 'get-all-questions' or action == 'raise-question':
+#         context = {
+#             'questions': []
+#         }
+#         questions = Post.objects.filter(forum=forum, content_type='question', is_deleted=False)
+#         for question in questions:
+#             question_info = question.getAttr(forum)
+#             all_replies = question.getTree(exclude_root=True)
+#             question_info['treesize'] = len(all_replies)
+#             if question_info['treesize'] > 0:
+#                 last_reply = sorted(all_replies, key=lambda en: en.created_at, reverse=True)[0]
+#                 last_reply_info = last_reply.getAttr(forum)
+#                 question_info['last_reply'] = last_reply_info['updated_at']
+#                 question_info['last_reply_full'] = last_reply_info['updated_at_full']
+#             else:
+#                 question_info['last_reply_full'] = question_info['created_at_full']
+#             try:
+#                 docsection = DocSection.objects.get(id=question.highlight.context.id)
+#                 question_info['doc_name'] = docsection.doc.title
+#                 question_info['doc_id'] = docsection.doc.id
+#                 question_info['highlight_id'] = question.highlight.id
+#             except:
+#                 pass
+#             context['questions'].append(question_info)
+#         context['questions'] = sorted(context['questions'], key=lambda en: (en['last_reply_full'], en['created_at_full']), reverse=True)
+#         response['html'] = render_to_string('doc/qa-panel.html', context)
+#     return HttpResponse(json.dumps(response), mimetype='application/json')

@@ -209,6 +209,11 @@ define([
 						id: question_id
 					});
 			}
+		}).on('click', '.direct-reply', function() {
+			$(this).closest(".question").find(".expand-thread").click();
+			setTimeout(function(){
+				$($(".question[data-id=47]").find(".reply-comment")[0]).click();
+			}, 1000);
 		}).on('click', '.claim-question-vote', function() {
 			var $container = $(this).closest('.question.item');
 			question_id = $container.attr("data-id");

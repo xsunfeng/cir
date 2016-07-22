@@ -120,6 +120,7 @@ define([
 	}
 
 	module.get_document_content = function(doc_id) {
+		$("#doc-only").show();
 		$.ajax({
 			url: '/workbench/api_get_doc_by_doc_id/',
 			type: 'post',

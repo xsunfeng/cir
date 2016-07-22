@@ -26,6 +26,7 @@
 			</div>
 			<div class="ui text menu" style="margin:0;">
 				<a class="item expand-thread" data-id="{{ question.id }}">Show thread</a>
+				<a class="item direct-reply" data-id="{{ question.id }}">Reply</a>
 				{% if question.doc_id %}
 					<a class="item find-in-doc" data-id="{{ question.doc_id }}" data-highlight-id="{{ question.highlight_id }}">Reveal in document</a>
 				{% elif question.claim_id %}
