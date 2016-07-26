@@ -12,23 +12,24 @@
 				</div>
 				<div class="ui divider" style="margin: 5px 0;"></div>
 				<div class="discription" style="color:rgba(0,0,0,.4);">
-					<span class="ui label theme-label" theme-id={{ highlight.theme_id }}>{{ highlight.theme }}</span>
-					<span> | </span>
-					<span>{{ highlight.author_name }}</span>
-					<span> | </span>
-					<span>{{ highlight.created_at_pretty }}</span>
-					<div class="actions">
-						<a href="#" class="item source-nugget">context</a>
+					<a class="ui basic label theme-label" theme-id="{{ highlight.theme_id }}" data-content="{{ highlight.theme_desc }}">{{ highlight.theme }}</a>
+					<a class="ui basic image label avatar1" data-id="{{ highlight.author_id }}" data-content="{{ highlight.author_intro }}" data-inverted="">
+						<img src="{{ STATIC_URL }}/static/pictures/{{ highlight.author_id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
+						{{ highlight.author_name }}
+					</a>
+					<span class="ui basic label">{{ highlight.created_at_pretty }}</span>
+					<div class="actions" style="margin-top:5px;">
+						<a href="#" class="item source-nugget">Context</a>
 						<span> | </span>
-							<a href="#" class="item comment-nugget">comment</a>
+							<a href="#" class="item comment-nugget">Comment</a>
 							{% if highlight.comment_number != 0 %}
 								<a href="#" class="item comment-nugget-number">({{ highlight.comment_number }})</a>
 							{% endif %}
 						<span> | </span>
-						<a href="#" class="item reassign-nugget">change theme</a>
+						<a href="#" class="item reassign-nugget">Change theme</a>
 						{% if highlight.is_author %}
 							<span> | </span>
-							<a href="#" class="item delete-nugget">delete</a>
+							<a href="#" class="item delete-nugget">Delete</a>
 						{% endif %}
 					</div>
 				</div>

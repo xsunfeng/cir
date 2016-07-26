@@ -191,7 +191,6 @@ def get_theme_list(request):
         item["description"] = theme.description
         response["themes"].append(item)
     context["phase"] = PHASE_CONTROL[forum.phase]
-
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_load_highlights(request):
@@ -329,6 +328,11 @@ def get_nugget_list(request):
             highlights = section.highlights.all()
             for highlight in highlights:
                 highlight_info = highlight.getAttr()
+                highlight_info["doc_id"] = DocSection.objects.get(id=highlight.context.id).doc.id
+                highlight_info["theme_desc"] = highlight.theme.description
+                highlight_info["is_author"] = (highlight.author == request.user)
+                highlight_info["author_intro"] = UserInfo.objects.get(user = highlight.author).description
+                highlight_info["author_id"] = highlight.author.id
                 highlight_info["comment_number"] = NuggetComment.objects.filter(highlight_id = highlight.id).count()
                 context['highlights'].append(highlight_info)
     context['highlights'].sort(key = lambda x: x["created_at"], reverse=True)
@@ -391,6 +395,7 @@ def get_claim_activity(request):
         # performed rewording
         for version in claim.versions.all():
             version_info = version.getAttr(forum)
+            version_info["author_intro"] = version.getAuthor()["author_intro"]
             context['entries'].append(version_info)
             posts = version.comments_of_entry.all()
             for post in posts:
@@ -409,6 +414,8 @@ def get_claim_activity(request):
             entry["entry_type"] = "claim_" + str(root_comment.comment_type)
             entry["author_name"] = root_comment.author.first_name + " " + root_comment.author.last_name
             entry["author_role"] = Role.objects.get(user = root_comment.author, forum =forum).role
+            entry["author_intro"] = UserInfo.objects.get(user = claim.author).description
+            entry["author_id"] = root_comment.author.id
             entry["created_at_pretty"] = utils.pretty_date(root_comment.created_at)
             context['entries'].append(entry)
         # slot assignment events
@@ -551,10 +558,45 @@ def vote_question(request):
     created_at = timezone.now()
     if (vote == "true"):
         if (ClaimQuestionVote.objects.filter(voter = author, question_id = question_id).count() == 0):
-            newClaimQuestionVote = ClaimQuestionVote(voter = author, question_id = question_id, created_at = created_at, upvote = True)
+            newClaimQuestionVote = ClaimQuestionVote(voter = author, question_id = question_id, created_at = created_at)
             newClaimQuestionVote.save()
     else:
         ClaimQuestionVote.objects.filter(voter = author, question_id = question_id).delete()
+    response["vote_count"] = ClaimQuestionVote.objects.filter(question_id = question_id).count()
+    if (response["vote_count"] > 0):
+        tmp = []
+        for vote in ClaimQuestionVote.objects.filter(question_id = question_id):
+            tmp.append(vote.voter.last_name + " " + vote.voter.first_name)
+        response["voted_authors"] = ", ".join(tmp)
+    else:
+        response["voted_authors"] = ""
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def vote_expert(request):
+    # log in to comment
+    if not request.user.is_authenticated():
+        return HttpResponse("Please log in first.", status=403)
+    # initialize
+    response = {}
+    author = request.user
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    question_id = request.REQUEST.get('question_id')
+    vote = request.REQUEST.get('vote')
+    created_at = timezone.now()
+    if (vote == "true"):
+        if (QuestionNeedExpertVote.objects.filter(voter = author, question_id = question_id).count() == 0):
+            newQuestionNeedExpertVote = QuestionNeedExpertVote(voter = author, question_id = question_id, created_at = created_at)
+            newQuestionNeedExpertVote.save()
+    else:
+        QuestionNeedExpertVote.objects.filter(voter = author, question_id = question_id).delete()
+    response["vote_count"] = QuestionNeedExpertVote.objects.filter(question_id = question_id).count()
+    if (response["vote_count"] > 0):
+        tmp = []
+        for vote in QuestionNeedExpertVote.objects.filter(question_id = question_id):
+            tmp.append(vote.voter.last_name + " " + vote.voter.first_name)
+        response["voted_authors"] = ", ".join(tmp)
+    else:
+        response["voted_authors"] = ""
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def expert_question(request):
@@ -599,6 +641,8 @@ def get_claim_list(request):
             item['content'] = "(No adopted version)"
         item['id'] = claim.id
         item['author_name'] = claim.author.first_name + " " + claim.author.last_name
+        item["author_intro"] = UserInfo.objects.get(user = claim.author).description
+        item["author_id"] = claim.author.id
         item['is_author'] = (request.user == claim.author)
         arr = []
         for highlight in claim.source_highlights.all():

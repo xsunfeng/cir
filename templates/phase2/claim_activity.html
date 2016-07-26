@@ -1,3 +1,4 @@
+new comment
 <form id="activity-comment-form" class="ui form">
 	<div class="field">
 		<!-- <label><span>Add a comment</span></label> -->
@@ -13,6 +14,7 @@
 		</div>
 	</div>
 </form>
+activity history (latest shows first)
 {% if entries %}
 <div class="ui feed" style="margin-top: 1em">
 {% for entry in entries %}
@@ -23,7 +25,8 @@
 			{% if entry.author_role == 'facilitator' %}F
 			{% elif entry.collective %}C
 			{% elif entry.author_role == 'admin' %}A
-			{% else %}{{ entry.author_initial }}
+			{% else %}
+				<img style="width:42px;" src="{{ STATIC_URL }}/static/pictures/{{ entry.author_id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
 			{% endif %}
 			</div>
 		</div>
@@ -56,24 +59,24 @@
 			{% recursetree entry.comments %}
 				<div class="comment" comment-id="{{ node.id }}">
 					<a class="avatar">
-						<img src="http://a.kym-cdn.com/assets/avatar_default_small.png">
+						<img src="{{ STATIC_URL }}/static/pictures/{{ node.author.id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
 					</a>
 					<div class="content">
-						<a class="author">{{ node.author }}</a>
+						<a class="author avatar1" data-content="{{ node.getAttr.author_intro }}">{{ node.getAttr.author_name }}</a>
 						<div class="metadata">
-							<span class="date">{{ node.created_at }}</span>
+							<span class="date">{{ node.getAttr.created_at_pretty }}</span>
 						</div>
 						<div class="text">
 							<p>{{ node.text|safe }}</p>
 						</div>
 						<div class="actions">
-							<a class="reply nugget-comment-reply">Reply</a>
+							<a class="reply reply-comment">Reply</a>
 						</div>
 						<form class="ui form" style="display:none;">
 							<div class="field" style="margin-bottom:0;">
 								<textarea rows="2"></textarea>
 							</div>
-							<a href="#" class="reply nugget-comment-reply-save">save</a><span> | </span><a href="#" class="reply nugget-comment-reply-cancel">cancel</a>
+							<a href="#" class="reply reply-comment-save" parent-id="{{ node.id }}">save</a><span> | </span><a href="#" class="reply reply-comment-cancel">cancel</a>
 						</form>
 					</div>	
 
@@ -104,12 +107,12 @@
 			{% recursetree entry.comments %}
 				<div class="comment" comment-id="{{ node.id }}">
 					<a class="avatar">
-						<img src="http://a.kym-cdn.com/assets/avatar_default_small.png">
+						<img src="{{ STATIC_URL }}/static/pictures/{{ node.author.id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
 					</a>
 					<div class="content">
-						<a class="author">{{ node.author }}</a>
+						<a class="author avatar1" data-content="{{ node.getAttr.author_intro }}">{{ node.getAttr.author_name }}</a>
 						<div class="metadata">
-							<span class="date">{{ node.created_at }}</span>
+							<span class="date">{{ node.getAttr.created_at_pretty }}</span>
 						</div>
 						<div class="text">
 							<p>{{ node.text|safe }}</p>
@@ -155,8 +158,9 @@
 			</div>
 		{% elif entry.entry_type == 'claim version' %}
 			<div class="summary">
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> suggested a claim:
-				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+				<a class="user {{ entry.author_role }} avatar1" data-id="{{ entry.author_id }}" data-content="{{ entry.author_intro }}">
+					{{ entry.author_name }}
+				</a> suggested a claim:<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
 			</div>
 			<div class="extra improved text"><div class="ui label">C{{ entry.version_id }}</div>
 				{{ entry.content | safe }}
@@ -165,21 +169,23 @@
 				{% endif %}
 			</div>
 			<div class="ui red secondary improve small menu" data-id="{{ entry.version_id }}">
-				<div class="right menu">
-<!-- 					<a class="item feed-reply-entry" data-id="{{ entry.version_id }}">Reply</a>
- -->					{% if entry.is_adopted %}
+				<div class="menu">
+					{% if entry.is_adopted %}
 					{% else %}
-						<a class="item feed-adopt-claim-version facilitator-only adopt-claim" data-action="adopt" version-id="{{ entry.version_id }}">Adopt</a>
+						<button class="ui basic button item feed-adopt-claim-version facilitator-only adopt-claim" data-action="adopt" version-id="{{ entry.version_id }}">Adopt</button>
 					{% endif %}
 				</div>
 			</div>
 		{% elif entry.entry_type == 'claim_nugget_assignment' %}
 			<div class="summary">
-			{% if entry.action == 'add' %}
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> added nugget <div class="ui label">N{{ entry.nugget_id }}</div> into this claim.
-			{% else %}
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> removed nugget <div class="ui label">N{{ entry.nugget_id }}</div> from this claim.
-			{% endif %}
+				<a class="user {{ entry.author_role }} avatar1" data-id="{{ entry.user_id }}" data-content="{{ entry.author_intro }}">
+					{{ entry.user_name }}
+				</a> 
+				{% if entry.action == 'add' %}
+					added nugget <div class="ui label">N{{ entry.nugget_id }}</div> into this claim.
+				{% else %}
+					removed nugget <div class="ui label">N{{ entry.nugget_id }}</div> from this claim.
+				{% endif %}
 				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
 			</div>	
 		{% endif %}

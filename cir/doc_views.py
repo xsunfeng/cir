@@ -259,7 +259,6 @@ def api_qa(request):
         forum = Forum.objects.get(id=request.session['forum_id'])
         comment_type = "question"
         text = request.REQUEST.get('text')
-        print "-------------------", text
         created_at = timezone.now()
         nugget_id = request.REQUEST.get('nugget_id')
         if (nugget_id == ""):
@@ -286,12 +285,32 @@ def api_qa(request):
             entry['comments'] = question.get_descendants(include_self=True)
             entry["entry_type"] = "claim_" + str(question.comment_type)
             entry["author_name"] = question.author.first_name + " " + question.author.last_name
+            entry["author_id"] = question.author.id
+            entry["author_intro"] = UserInfo.objects.get(user = question.author).description
             entry["author_role"] = Role.objects.get(user = question.author, forum =forum).role
             entry["created_at_pretty"] = utils.pretty_date(question.created_at)
+            # vote for importance
             entry["vote_count"] = ClaimQuestionVote.objects.filter(question_id = question.id).count()
-            entry["is_expert"] = question.is_expert
+            if (entry["vote_count"] > 0):
+                tmp = []
+                for vote in ClaimQuestionVote.objects.filter(question_id = question.id):
+                    tmp.append(vote.voter.last_name + " " + vote.voter.first_name)
+                entry["voted_authors"] = ", ".join(tmp)
+            # vote for experts
+            entry["expert_vote_count"] = QuestionNeedExpertVote.objects.filter(question_id = question.id).count()
+            entry["has_facilitator_vote"] = False
+            if (entry["expert_vote_count"] > 0):
+                tmp = []
+                for vote in QuestionNeedExpertVote.objects.filter(question_id = question.id):
+                    tmp.append(vote.voter.last_name + " " + vote.voter.first_name)
+                    print Role.objects.get(user = vote.voter, forum =forum).role
+                    if (Role.objects.get(user = vote.voter, forum =forum).role == "facilitator"):
+                        entry["has_facilitator_vote"] = True
+                entry["expert_voted_authors"] = ", ".join(tmp)
             if (ClaimQuestionVote.objects.filter(voter = author, question_id = question.id).count() > 0):
                 entry["voted"] = True
+            if (QuestionNeedExpertVote.objects.filter(voter = author, question_id = question.id).count() > 0):
+                entry["expert_voted"] = True
             try:
                 claimVersion = ClaimVersion.objects.filter(claim = question.claim, is_adopted = True).order_by("-created_at")[0]
                 entry['claim_id'] = question.claim.id

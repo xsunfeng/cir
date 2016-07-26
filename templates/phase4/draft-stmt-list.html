@@ -3,7 +3,7 @@
 		<div class="ui top attached secondary segment">
 			<i class="reorder-handle vertical resize icon"></i>
 			<div class="slot-title{% if not slot_info.slot_title %} empty{% endif %}">
-				{% if slot_info.slot_title %}{{ slot_info.slot_title }}{% else %}(Click to name this slot){% endif %}
+				{% if slot_info.slot_title %}{{ slot_info.slot_title }}{% else %} Slot {{ forloop.counter }} (Click to name this slot){% endif %}
 			</div>
 		</div>
 		<div class="ui attached segment slot-hidden" style="display:none;background-color:#f3f4f5">

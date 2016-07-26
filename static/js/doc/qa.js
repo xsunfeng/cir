@@ -131,26 +131,32 @@ define([
 		}).on('click', '.expand-thread', function() {
 			var question_id = this.getAttribute('data-id');
 			var $content = $(this).parents('.question.item .content');
-			if ($(this).text() == 'Hide thread') {
-				$('#qa-thread').hide();
-				$(this).text('Show thread');
-			} else {
-				$(this).parents('.question.item').removeClass('need-refresh');
-				// refresh thread when expanding thread
-				$('#qa-list .expand-thread').text('Show thread');
-				$(this).text('Hide thread');
-				$('#qa-thread')
-					.appendTo($content) // place thread under the question
-					.show()
-					.feed('update', {
-						type: 'question',
-						id: question_id
-					});
-			}
+			$content.find(".expand-thread").hide();
+			$content.find(".collapse-thread").show();
+			$(this).parents('.question.item').removeClass('need-refresh');
+			// refresh thread when expanding thread
+			$('#qa-thread')
+				.appendTo($content) // place thread under the question
+				.show()
+				.feed('update', {
+					type: 'question',
+					id: question_id
+				});
+			// I cannot find where the thread is loaded, so have to defer this events
+			setTimeout(function(){
+				$(".avatar1").popup('remove popup').popup('destroy');
+				$(".avatar1").popup();
+			}, 500);
+		}).on('click', '.collapse-thread', function() {
+			var question_id = this.getAttribute('data-id');
+			var $content = $(this).parents('.question.item .content');
+			$content.find(".expand-thread").show();
+			$content.find(".collapse-thread").hide();
+			$('#qa-thread').hide();
 		}).on('click', '.direct-reply', function() {
 			$(this).closest(".question").find(".expand-thread").click();
 			setTimeout(function(){
-				$($(".question[data-id=47]").find(".reply-comment")[0]).click();
+				$($(".reply-comment")[0]).click();
 			}, 1000);
 		}).on('click', '.claim-question-vote', function() {
 			var $container = $(this).closest('.question.item');
@@ -173,12 +179,36 @@ define([
 					question_id: 	question_id,
 				},
 				success: function(xhr) {
-					var cnt = Number($container.find(".vote-cnt").text());
-					if (vote === "true") {
-						$container.find(".vote-cnt").text(cnt + 1);
-					} else {
-						$container.find(".vote-cnt").text(cnt - 1);
+					module.updateQuestionList();
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
 					}
+				}
+			});
+		}).on('click', '.claim-expert-vote', function() {
+			var $container = $(this).closest('.question.item');
+			question_id = $container.attr("data-id");
+			$vote_btn = $container.find(".claim-expert-vote");
+			var vote = "true"
+			if ($vote_btn.hasClass("voted")) {
+				$vote_btn.removeClass("voted");
+				$vote_btn.css("color", "");
+				vote = "false"
+			} else {
+				$vote_btn.addClass("voted");
+				$vote_btn.css("color", "green");			
+			}
+			$.ajax({
+				url: '/phase2/vote_expert/',
+				type: 'post',
+				data: {
+					vote: 			vote,
+					question_id: 	question_id,
+				},
+				success: function(xhr) {
+					module.updateQuestionList();
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {

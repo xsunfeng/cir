@@ -10,25 +10,25 @@
 			<div class="description">
 				<span>
 					<b>Raised by</b>
-					<a class="user {{ question.author_role }}" data-id="{{ question.author_id }}">{{ question.author_name }}</a>
+					<a class="ui basic image label avatar1" data-id="{{ question.author_id }}" data-content="{{ question.author_intro }}" data-inverted="">
+						<img src="{{ STATIC_URL }}/static/pictures/{{ question.author_id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
+						{{ question.author_name }}
+					</a>
 					<abbr title="{{ question.created_at_pretty }}">{{ question.created_at_pretty }}</abbr>
 					{% if question.last_reply_pretty %}
 						<span> | </span>
 						<b>Last reply:</b>
 						<abbr title="{{ question.last_reply_pretty }}">{{ question.last_reply_pretty }}</abbr>
 					{% endif %}
-					(<span class="reply-cnt">{{ question.reply_count }}</span> replies)
 				</span>
-			{% if question.doc_id %}
-				<div>Raised in document <b>{{ question.doc_name }}</b></div>
-			{% endif %}
 
 			</div>
 			<div class="ui text menu" style="margin:0;">
-				<a class="item expand-thread" data-id="{{ question.id }}">Show thread</a>
+				<a class="item expand-thread" data-id="{{ question.id }}">Show thread ({{ question.reply_count }})</a>
+				<a class="item collapse-thread" style="display:none;" data-id="{{ question.id }}">Hide thread</a>
 				<a class="item direct-reply" data-id="{{ question.id }}">Reply</a>
 				{% if question.nugget_id %}
-					<a class="item find-in-doc" data-id="{{ question.doc_id }}" data-highlight-id="{{ question.nugget_id }}">Reveal in document</a>
+					<a class="item find-in-doc" data-id="{{ question.doc_id }}" data-highlight-id="{{ question.nugget_id }}">Context</a>
 				{% elif question.claim_id %}
 					<a class="item find-in-claim" claim-id="{{ question.claim_id }}" data-variation="very wide" 
 						data-html='
@@ -41,14 +41,14 @@
 								</div>'
 					>Preview related claim</a>
 				{% endif %}
-				<div class="right menu">
-					<a class="item claim-question-vote {% if question.voted %}voted{% endif %}">
-						Vote (<span class="vote-cnt">{{ question.vote_count }}</span>)
-					</a>
-					<a class="item claim-question-expert {% if question.is_expert %}experted{% endif %}">
-						Need experts
-					</a>
-				</div>
+				<a class="item">
+					<span class="claim-question-vote {% if question.voted %}voted{% endif %}" data-tooltip="Vote if you think this is important.">Vote </span> 
+					(<span class="vote-cnt" data-tooltip="{{ question.voted_authors }}">{{ question.vote_count }}</span>)
+				</a>
+				<a class="item"  style="{% if question.has_facilitator_vote %} color:red; {% endif %}">
+					<span class="claim-expert-vote {% if question.expert_voted %}voted{% endif %}" data-tooltip="Vote if you think this needs experts to answer.">Expert </span> 
+					(<span class="expert-vote-cnt" data-tooltip="{{ question.expert_voted_authors }}">{{ question.expert_vote_count }}</span>)
+				</a>
 			</div>
 		</div>
 	</div>

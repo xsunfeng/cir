@@ -154,6 +154,12 @@ class Entry(models.Model):
         attr['collective'] = self.collective
         return attr
 
+    def getAuthor(self):
+        attr = {}
+        attr['author_id'] = self.author.id
+        attr['author_name'] = self.author.get_full_name()
+        attr['author_intro'] = UserInfo.objects.get(user = self.author).description
+        return attr
 
 class Doc(models.Model):
     forum = models.ForeignKey(Forum, on_delete=models.CASCADE)
@@ -405,6 +411,7 @@ class Event(models.Model):  # the behavior of a user on an entry
         attr['id'] = self.id
         attr['user_id'] = self.user.id
         attr['user_name'] = self.user.get_full_name()
+        attr['author_intro'] = UserInfo.objects.get(user = self.user).description
         try:
             attr['author_role'] = Role.objects.get(user=self.user, forum=forum).role
         except:
@@ -552,6 +559,9 @@ class Post(Entry):  # in discussion
     def getAttr(self, forum):
         attr = super(Post, self).getAttr(forum)
         attr['entry_type'] = self.content_type
+        attr['author_id'] = self.author.id
+        attr['author_name'] = self.author.get_full_name()
+        attr['author_intro'] = UserInfo.objects.get(user = self.author).description
         if self.target_entry:
             try:
                 order = self.target_entry.stmt_order # see if it's a slot
@@ -690,6 +700,7 @@ class ClaimComment(MPTTModel):
         attr['id'] = self.id
         attr['author_id'] = self.author.id
         attr['author_name'] = self.author.get_full_name()
+        attr['author_intro'] = UserInfo.objects.get(user = self.author).description
         attr['text'] = self.text
         attr['created_at_full'] = self.created_at  # for sorting
         attr['created_at_pretty'] = utils.pretty_date(self.created_at)
@@ -699,7 +710,11 @@ class ClaimQuestionVote(models.Model):
     question = models.ForeignKey(ClaimComment)
     voter = models.ForeignKey(User)
     created_at = models.DateTimeField()
-    upvote = models.BooleanField(default=True)
+
+class QuestionNeedExpertVote(models.Model):
+    question = models.ForeignKey(ClaimComment)
+    voter = models.ForeignKey(User)
+    created_at = models.DateTimeField()
 
 class ComplexPhase(models.Model):
     PHASE_CHOICES = (

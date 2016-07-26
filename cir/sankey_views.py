@@ -362,7 +362,8 @@ def get_doc_coverage(request):
 			author_id = author_id)
 		if viewlogs.count() >= 2:
 			arr1 = viewlogs.order_by("-created_at")[0].heatmap.split(",")
-			arr2 = viewlogs.order_by("-created_at")[1].heatmap.split(",")
+			last_doc_id = viewlogs.order_by("-created_at")[0].doc.id
+			arr2 = viewlogs.filter(doc_id = last_doc_id).order_by("-created_at")[1].heatmap.split(",")
 			if len(arr1) == len(arr2):
 				l1 = np.array([int(x) for x in arr1])
 				l2 = np.array([int(x) for x in arr2])

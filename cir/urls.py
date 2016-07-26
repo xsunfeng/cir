@@ -80,6 +80,7 @@ urlpatterns = patterns('',
     url(r'^phase2/add_comment_to_claim/$', phase2.add_comment_to_claim),
     url(r'^phase2/update_question_isresolved/$', phase2.update_question_isresolved),
     url(r'^phase2/vote_question/$', phase2.vote_question),
+    url(r'^phase2/vote_expert/$', phase2.vote_expert),
     url(r'^phase2/expert_question/$', phase2.expert_question),
 
     url(r'^sankey/get_graph/$', sankey_views.get_graph),

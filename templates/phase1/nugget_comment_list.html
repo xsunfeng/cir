@@ -16,7 +16,7 @@
 	{% recursetree comments %}
 		<div class="comment" comment-id="{{ node.id }}">
 			<a class="avatar">
-				<img src="http://a.kym-cdn.com/assets/avatar_default_small.png">
+				<img style="width:40px;" src="{{ STATIC_URL }}/static/pictures/{{ node.author.id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
 			</a>
 			<div class="content">
 				<a class="author">{{ node.author }}</a>

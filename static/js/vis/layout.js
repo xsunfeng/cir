@@ -1,6 +1,5 @@
 define([
   'd3',
-  'd3-tooltip',
   'sankey',
   'jquery',
   'semantic-ui',
@@ -8,7 +7,6 @@ define([
   'workbench2'
 ], function(
   d3,
-  tip,
   sankey_module,
   $,
   semantic,
@@ -212,20 +210,6 @@ define([
             $documap_item.append('<div class="ui pointing basic label" author-id=' + author_id + '><i class="user icon"></i>' + author_name + ' | ' + time + '</div>');
             $label = $(this).closest(".documap-item").find(".label[author-id=" + author_id + "]");
             $label.css({"position": "absolute", "left":Number($(this).attr("x")) - ($label.width() / 2), "top":+30});
-
-            // if (your_id === author_id) {
-            //   var tooltip = "You recently worked at this place";
-            //   var arrow = '<div class="latest-activity-arrow" data-tooltip="' + tooltip + '" author-id="' + author_id + '" style="position:fixed;">' +
-            //       '<i class="icon big red user"></i>' +
-            //     '</div>';       
-            // } else {
-            //   var tooltip = author_name + " recently worked at this place";
-            //   var arrow = '<div class="latest-activity-arrow" data-tooltip="' + tooltip + '" author-id="' + author_id + '" style="position:fixed;">' +
-            //           '<i class="icon big olive user"><b>' + author_name + '</b></i>' +
-            //     '</div>';  
-            // }
-            // $("#latest-activity-container").append(arrow);
-            // $(".latest-activity-arrow[author-id=" + author_id +  "]").css("left", $(this).offset().left).css("top", $(this).offset().top - 10);
         })
       },
       error: function(xhr) {

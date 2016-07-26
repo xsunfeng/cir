@@ -55,7 +55,9 @@ define([
 	$('#chatter-wrapper .titlebar').click(function() {
 		// $("#chatter-notebook").toggle();
 		$('#chatter-wrapper').toggleClass('minimized');
+		$('#chatter-wrapper .close-icon').hide();
 		if (!$('#chatter-wrapper').hasClass('minimized')) {
+			$('#chatter-wrapper .close-icon').show();
 			scrollToBottom();
 			setTimeout(function() {
 				$('#chatter-wrapper textarea').focus();

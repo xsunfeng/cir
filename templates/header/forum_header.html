@@ -12,7 +12,16 @@
 		{% endfor %}
 		</div>
 	</div>
-	<div class="ui dropdown item" id="instruction-btn">Instructions {% if pinmessages|length > 0 %}<div class="ui red horizontal label">{{ pinmessages|length }}</div>{% endif %}</div>	
+	
+	<a class="ui item" id="instruction-btn">
+		{% if pinmessages|length > 0 %}
+			{% with pinmessages|first as message %}
+	    		{{ message.content|truncatechars:100 }} <div class="ui teal basic label">more</div>
+			{% endwith %}
+		{% else %}
+			(No pinned message)
+		{% endif %}
+	</a>
 
 	{% if user_id == '-1' %}
 	<div id="header-visitor-wrapper" class="right menu" style="display:flex">
@@ -49,22 +58,4 @@
 		{% endif %}
 	</div>
 	{% endif %}
-</div>
-
-<div class="ui modal" id="instruction-modal">
-  	<i class="close icon"></i>
-	<div class="header">
-		Instructions
-	</div>
-	<div class="content">
-		<div class="ui relaxed divided list">
-			{% for message in pinmessages %}
-			<div class="item">
-				<div class="content">
-					{{ message.content }}
-				</div>
-			</div>
-			{% endfor %}
-		</div>	
-	</div>
 </div>

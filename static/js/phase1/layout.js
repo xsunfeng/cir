@@ -218,12 +218,14 @@ define([
 			        $(this).prev().toggle();
 			        return false;
 			    });  	
-		        $('.ui.rating').rating();
 
 		        for (var theme_name in module.Theme.themes) {
 					var theme_id = module.Theme.themes[theme_name];
 					$(".theme-label[theme-id=" + theme_id + "]").css("background-color", module.Theme.colorMap[theme_id]);
 				}
+
+				$(".avatar1").popup('remove popup').popup('destroy');
+				$(".avatar1").popup();
 
 				module.applyFilter();
 			},			
@@ -243,6 +245,10 @@ define([
 			position: 	'bottom center',
 		    popup: 		'#theme-info-popup'
 		})
+
+		$(".avatar1").popup('remove popup').popup('destroy');
+		$(".avatar1").popup();
+		$(".theme-label").popup();
 
 		$('#document-toc-button').popup({
 			on: 'click',
@@ -370,7 +376,6 @@ define([
 					'highlight_id': highlight_id,
 				},
 				success: function(xhr) {		
-					var highlight_id = xhr.nugget_comment_highlight.id;
 					$('#nugget-comment-highlight').html(xhr.nugget_comment_highlight);
 					$('#nugget-comment-list').html(xhr.nugget_comment_list);
 					$('#nugget-comment-modal').modal('show');
@@ -426,8 +431,7 @@ define([
 					}
 				}
 			});
-		});
-		$("#nugget-comment-modal").on("click", ".nugget-comment-reply-save", function(){
+		}).on("click", ".nugget-comment-reply-save", function(){
 			var text = $(this).closest("form").find("textarea").val();
 		 	var parent_id = $(this).closest(".comment").attr("comment-id");
 		 	var highlight_id = $("#nugget-comment-modal").find(".workbench-nugget").attr("data-hl-id");
@@ -451,13 +455,11 @@ define([
 					}
 				}
 			});
-		});
-		$("#nugget-comment-modal").on("click", ".nugget-comment-reply-cancel", function(){
+		}).on("click", ".nugget-comment-reply-cancel", function(){
 		 	var textarea = $(this).closest("form").find("textarea");
 			textarea.val("");
 			textarea.closest(".form").hide();
-		});
-		$("#nugget-comment-modal").on("click", ".nugget-comment-reply", function(){
+		}).on("click", ".nugget-comment-reply", function(){
 		 	$(this).closest(".content").find(".form").show()
 		});
 		
