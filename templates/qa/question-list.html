@@ -46,7 +46,9 @@
 					(<span class="vote-cnt" data-tooltip="{{ question.voted_authors }}">{{ question.vote_count }}</span>)
 				</a>
 				<a class="item"  style="{% if question.has_facilitator_vote %} color:red; {% endif %}">
-					<span class="claim-expert-vote {% if question.expert_voted %}voted{% endif %}" data-tooltip="Vote if you think this needs experts to answer.">Expert </span> 
+					<span class="claim-expert-vote {% if question.expert_voted %}voted{% endif %}
+						{% if question.expert_vote_count > 0 %} experted {% endif %}
+					" data-tooltip="Vote if you think this needs experts to answer.">Expert </span> 
 					(<span class="expert-vote-cnt" data-tooltip="{{ question.expert_voted_authors }}">{{ question.expert_vote_count }}</span>)
 				</a>
 			</div>

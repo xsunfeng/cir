@@ -252,7 +252,7 @@ define([
 			$(this).addClass("active");
 			$("#qa-wrapper .show-all").removeClass("active");
 			$( "#qa-wrapper .question.item" ).filter(function() {
-				return (! $(this).find(".claim-question-expert").hasClass("experted"))
+				return (! $(this).find(".claim-expert-vote").hasClass("experted"))
 			}).hide();
 		});
 
