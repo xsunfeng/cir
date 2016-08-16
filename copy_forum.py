@@ -36,7 +36,7 @@ for old_doc in Doc.objects.filter(forum=src_forum):
     new_doc = Doc(forum=new_forum,
         title=old_doc.title,
         description=old_doc.description,
-        folder = EntryCategory.objects.get(forum = src_forum, name = old_doc.folder.name)
+        folder = EntryCategory.objects.filter(forum = new_forum, name = old_doc.folder.name)[0]
     )
     new_doc.save()
     for old_docsection in DocSection.objects.filter(doc=old_doc):
