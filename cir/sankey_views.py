@@ -328,6 +328,9 @@ def get_highlights2(request):
 		time_lower_bound = datetime(2021, 8, 15, 8, 15, 12, 0, pytz.UTC)
 	print time_upper_bound
 	print time_lower_bound
+	# manually set up the time window
+	time_upper_bound = datetime(2016, 3, 23, 21, 59, 59, 0, pytz.UTC)
+	time_lower_bound = datetime(2016, 3, 23, 22, 59, 59, 0, pytz.UTC)
 	time_upper_bound = timezone.localtime(time_upper_bound).strftime("%Y %m %d %H %M")
 	time_lower_bound = timezone.localtime(time_lower_bound).strftime("%Y %m %d %H %M")
 	response["time_upper_bound"] = time_upper_bound

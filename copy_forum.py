@@ -1,8 +1,8 @@
 # open manage.py shell
 # then: from cir.models import *
 
-src_forum = Forum.objects.get(id=16)
-new_url = 'cho0324_t8'
+src_forum = Forum.objects.get(id=28)
+new_url = 'tax2'
 
 new_forum = Forum(
     full_name=src_forum.full_name,
@@ -26,7 +26,7 @@ for old_doc in Doc.objects.filter(forum=src_forum):
     for old_docsection in DocSection.objects.filter(doc=old_doc):
         DocSection.objects.create(
             forum=new_forum,
-            author=User.objects.get(id=2),
+            author=User.objects.get(id=16),
             content=old_docsection.content,
             created_at=old_docsection.created_at,
             updated_at=old_docsection.updated_at,

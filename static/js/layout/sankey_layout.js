@@ -944,7 +944,7 @@ define([
             } else {
               var tooltip = author_name + " recently worked at this place";
               var arrow = '<div class="latest-activity-arrow" data-tooltip="' + tooltip + '" author-id="' + author_id + '" style="position:fixed;">' +
-                      '<i class="icon big olive user"><b>' + author_name + '</b></i>' +
+                      '<i class="icon big olive user"><b>P' + author_id + '</b></i>' +
                 '</div>';  
             }
             $("#latest-activity-container").append(arrow);
