@@ -63,6 +63,7 @@ define([
 		}).on('click', '.add-document', function() {
 			module.new_doc_folder_id = this.getAttribute('data-folder-id');
 			$('#new-doc-form').modal('show');
+			initForms();
 		}).on('click', '.edit-folder', function() {
 			module.edit_folder_id = this.getAttribute('data-folder-id');
 			var name = $(this).parents('.folder.content').find('.folder-name').text();

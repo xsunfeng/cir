@@ -121,6 +121,7 @@ define([
 					var theme_description = xhr.themes[i].description
 					$("#nugget-list-theme").append('<option value="' + theme_id + '" data-content="' + theme_description + '">' + theme_name + '</option>');
 					$("#nugget-tool-bar-themes").append('<option value="' + theme_id + '">' + theme_name + '</option>');
+					$("#theme-top").append('<a class="ui label" ' + 'data-tooltip="' + theme_description + '" data-position="right center">'+ theme_name +'</a>');
 				}
 			},
 			error: function(xhr) {
@@ -228,6 +229,8 @@ define([
 				$(".avatar1").popup();
 
 				module.applyFilter();
+				$(".workbench-nugget .action-bar").hide();
+				$(".workbench-nugget .divider").hide();
 			},			
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -240,6 +243,13 @@ define([
 	}
 
 	module.initEvents = function() {
+
+		$("body").on("click", ".workbench-nugget", function(){
+			$(".workbench-nugget .action-bar").hide();
+			$(".workbench-nugget .divider").hide();
+			$($(this).find(".action-bar")).show();
+			$($(this).find(".divider")).show();
+		});
 
 		$("#theme-info").popup({
 			position: 	'bottom center',

@@ -107,6 +107,8 @@ define([
 		        $(".avatar1").popup('remove popup').popup('destroy');
 				$(".avatar1").popup();
 			    module.applyFilter();
+				$(".workbench-nugget .action-bar").hide();
+				$(".workbench-nugget .divider").hide();
 			},			
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -147,6 +149,13 @@ define([
 	};
 
 	module.initEvents = function() {
+
+		$("body").on("click", ".workbench-nugget", function(){
+			$(".workbench-nugget .action-bar").hide();
+			$(".workbench-nugget .divider").hide();
+			$($(this).find(".action-bar")).show();
+			$($(this).find(".divider")).show();
+		});
 
 		$(".theme-label").popup();
 
