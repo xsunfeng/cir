@@ -617,7 +617,6 @@ define([
 					hl_type: "question"
 				}, module.Highlight.newHighlight, $('#doc-claim-form').form('get values')),
 				success: function(xhr) {
-					// send nugget map
 					// open q&a panel 
 					sessionStorage.setItem("active_nugget_id", xhr.highlight_id);
 					if (!$("#qa-wrapper").is(":visible")) {
@@ -626,6 +625,7 @@ define([
 					}
 					if(!$(".make-comment").is(":visible")) {
 						$("#qa-wrapper .new-question").click();
+						$('#qa-wrapper .new.question textarea').val("Please edit your nugget-related question here.")
 					}
 					afterAddHighlight(xhr.highlight_id);
 				},

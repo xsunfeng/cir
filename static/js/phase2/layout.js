@@ -150,6 +150,20 @@ define([
 
 	module.initEvents = function() {
 
+
+
+		$("body").on("click", ".all-activity", function(){
+			$(".activity-filter a").removeClass("active");
+			$(this).addClass("active");
+			$(".event").show();
+		}).on("click", ".suggested-claim", function(){
+			$(".activity-filter a").removeClass("active");
+			$(this).addClass("active");
+			$(".event").each(function(){
+		        if ($(this).attr("data-type") != "claim version") $(this).hide()
+		    });		
+		});
+
 		$("body").on("click", ".workbench-nugget", function(){
 			$(".workbench-nugget .action-bar").hide();
 			$(".workbench-nugget .divider").hide();

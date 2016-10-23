@@ -2,7 +2,7 @@ new comment
 <form id="activity-comment-form" class="ui form">
 	<div class="field">
 		<!-- <label><span>Add a comment</span></label> -->
-		<textarea rows="2"></textarea>
+		<textarea rows="2" placeholder="Make a comment or raise a question here..."></textarea>
 	</div>
 	<div>
 		<div class="ui text menu">
@@ -14,11 +14,11 @@ new comment
 		</div>
 	</div>
 </form>
-<div class="ui compact pointing menu">
-	<a class="item active">
+<div class="ui compact pointing menu activity-filter">
+	<a class="all-activity item active">
 		all activities
 	</a>
-	<a class="item">
+	<a class="suggested-claim item">
 		suggested claims only
 	</a>
 </div>
@@ -169,7 +169,7 @@ new comment
 			<div class="summary">
 				<a class="user {{ entry.author_role }} avatar1" data-id="{{ entry.author_id }}" data-content="{{ entry.author_intro }}">
 					{{ entry.author_name }}
-				</a> suggested a claim:<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+				</a>{% if entry.content %} suggested a claim: {% else %} created a claim: {% endif %}<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
 			</div>
 			<div class="extra improved text"><div class="ui label">C{{ entry.version_id }}</div>
 				{{ entry.content | safe }}
