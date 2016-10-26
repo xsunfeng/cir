@@ -638,7 +638,7 @@ def get_claim_list(request):
             item['content'] = unicode(ClaimVersion.objects.filter(claim_id = claim.id, is_adopted = True)[0])
             item['content'] = item['content'] if (not item['content'] == "") else "(No content)"
         else:
-            item['content'] = "(No adopted version)"
+            item['content'] = "(The claim is under construction and currently thre is no adopted version)."
         item['id'] = claim.id
         item['author_name'] = claim.author.first_name + " " + claim.author.last_name
         item["author_intro"] = UserInfo.objects.get(user = claim.author).description

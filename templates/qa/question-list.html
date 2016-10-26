@@ -41,10 +41,10 @@
 								</div>'
 					>Preview related claim</a>
 				{% endif %}
-				<a class="item">
+<!-- 				<a class="item">
 					<span class="claim-question-vote {% if question.voted %}voted{% endif %}" data-tooltip="Vote if you think this is important.">Vote </span> 
 					(<span class="vote-cnt" data-tooltip="{{ question.voted_authors }}">{{ question.vote_count }}</span>)
-				</a>
+				</a> -->
 				<a class="item"  style="{% if question.has_facilitator_vote %} color:red; {% endif %}">
 					<span class="claim-expert-vote {% if question.expert_voted %}voted{% endif %}
 						{% if question.expert_vote_count > 0 %} experted {% endif %}

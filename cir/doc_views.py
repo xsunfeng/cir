@@ -287,6 +287,7 @@ def api_qa(request):
             entry["author_name"] = question.author.first_name + " " + question.author.last_name
             entry["author_id"] = question.author.id
             entry["author_intro"] = UserInfo.objects.get(user = question.author).description
+            print entry["author_name"]
             entry["author_role"] = Role.objects.get(user = question.author, forum =forum).role
             entry["created_at_pretty"] = utils.pretty_date(question.created_at)
             # vote for importance
