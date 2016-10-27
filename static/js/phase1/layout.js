@@ -133,6 +133,28 @@ define([
 		return promise;
 	}
 
+
+	module.get_author_list = function() {
+		var promise = $.ajax({
+			url: '/phase2/get_author_list/',
+			type: 'post',
+			data: {},
+			success: function(xhr) {
+				for (var i = 0; i < xhr.authors.length; i++) {
+					var author_name = xhr.authors[i].name
+					var author_id = xhr.authors[i].id
+					$("#nugget-list-author").append('<option value="' + author_id + '">' + author_name + '</option>');
+				}
+			},
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			}
+		});	
+		return promise;
+	}
+
 	module.get_document_content = function(doc_id) {
 		$("#doc-only").show();
 		$.ajax({
@@ -192,7 +214,7 @@ define([
 			},
 			success: function(xhr) {
 				$("#workbench-nugget-list").html(xhr.workbench_nugget_list);
-			
+
 				// show more... / less
 				var showChar = 300;
 			    var ellipsestext = "...";
@@ -272,6 +294,10 @@ define([
 		$("#nugget-list-theme").change(function() {
 			var content = $("#nugget-list-theme option[value=" + $(this).val() + "]").attr("data-content");
 			$("#theme-info-popup .content").text(content);
+			module.applyFilter();
+		});
+
+		$("#nugget-list-author").change(function() {
 			module.applyFilter();
 		});
 
@@ -668,6 +694,12 @@ define([
 				return $(this);
 			}
 		}).filter(function() {
+			if ($("#nugget-list-author").val() !== "-1") {
+				return $(this).attr("author-id") == $("#nugget-list-author").val();
+			} else {
+				return $(this);
+			}
+		}).filter(function() {
 			if ($('#doc-only').hasClass("checked")) {
 				return $(this).attr("doc-id") == $(".workbench-doc-item").attr("data-id");
 			} else {
@@ -683,6 +715,8 @@ define([
 			  	module.initEvents();
 			});		
 		});
+
+		module.get_author_list();
 
 		// put heatmap
 		idleTime = 0

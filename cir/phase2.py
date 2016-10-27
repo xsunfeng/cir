@@ -193,6 +193,22 @@ def get_theme_list(request):
     context["phase"] = PHASE_CONTROL[forum.phase]
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
+def get_author_list(request):
+    response = {}
+    context = {}
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    context['forum_name'] = forum.full_name
+    context['forum_url'] = forum.url    
+    roles = Role.objects.filter(forum = forum, role = "panelist")
+    response["authors"] = []
+    for role in roles:
+        item = {}
+        item["name"] = role.user.first_name + " " + role.user.last_name
+        item["id"] = role.user.id
+        response["authors"].append(item)
+    context["phase"] = PHASE_CONTROL[forum.phase]
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
 def api_load_highlights(request):
     response = {}
     response['highlights'] = []
@@ -609,6 +625,24 @@ def expert_question(request):
     claimComment = ClaimComment.objects.get(id = question_id)
     claimComment.is_expert = (expert == "true")
     claimComment.save()
+    response = {}
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def delete_question(request):
+    # log in to comment
+    if not request.user.is_authenticated():
+        return HttpResponse("Please log in first.", status=403)
+    # initialize
+    question_id = request.REQUEST.get('question_id')
+    expert = request.REQUEST.get('expert')
+    claimComment = ClaimComment.objects.get(id = question_id)
+    claimComment.delete()
+    nugget_id = request.REQUEST.get('nugget_id')
+    print "---------------------"
+    print nugget_id
+    if (nugget_id != ""):
+        hl = Highlight.objects.get(id = nugget_id)
+        hl.delete()
     response = {}
     return HttpResponse(json.dumps(response), mimetype='application/json')
 

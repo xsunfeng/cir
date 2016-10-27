@@ -254,6 +254,27 @@ define([
 			$( "#qa-wrapper .question.item" ).filter(function() {
 				return (! $(this).find(".claim-expert-vote").hasClass("experted"))
 			}).hide();
+		}).on('click', '.delete-question', function() {
+			var question_id = $(this).attr("question-id");
+			var nugget_id = $(this).attr("nugget-id");
+			$.ajax({
+				url: '/phase2/delete_question/',
+				type: 'post',
+				data: {
+					question_id: 	question_id,
+					nugget_id:		nugget_id,
+				},
+				success: function(xhr) {
+					module.updateQuestionList();
+					var doc_id = $(".workbench-doc-item").attr("data-id");
+					$(".document-toc-doc-link[data-id=" + doc_id + "]").click();
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});
 		});
 
 		$("body").on("click", "#qa-panel-toggle", function() {

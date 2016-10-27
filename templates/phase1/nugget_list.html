@@ -1,7 +1,7 @@
 {% if highlights %}
 	{% for highlight in highlights %}
 		{% if highlight.is_nugget %}
-			<div class="ui segment workbench-nugget nugget-related" style="margin: 5px;" data-hl-id = {{ highlight.id }} doc-id = {{ highlight.doc_id }} theme-id = {{ highlight.theme_id }}>
+			<div class="ui segment workbench-nugget nugget-related" style="margin: 5px;" data-hl-id = {{ highlight.id }} author-id = "{{ highlight.author_id }}" doc-id = {{ highlight.doc_id }} theme-id = {{ highlight.theme_id }}>
 				<a class="ui small red right corner label nugget-select-mark" style="display:none;">
 					<i class="checkmark icon"></i>
 				</a>

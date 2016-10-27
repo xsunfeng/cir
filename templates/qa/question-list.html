@@ -21,7 +21,6 @@
 						<abbr title="{{ question.last_reply_pretty }}">{{ question.last_reply_pretty }}</abbr>
 					{% endif %}
 				</span>
-
 			</div>
 			<div class="ui text menu" style="margin:0;">
 				<a class="item expand-thread" data-id="{{ question.id }}">Show thread ({{ question.reply_count }})</a>
@@ -45,6 +44,9 @@
 					<span class="claim-question-vote {% if question.voted %}voted{% endif %}" data-tooltip="Vote if you think this is important.">Vote </span> 
 					(<span class="vote-cnt" data-tooltip="{{ question.voted_authors }}">{{ question.vote_count }}</span>)
 				</a> -->
+				{% if question.is_author %}
+					<a href="#" class="item delete-question" nugget-id="{{ question.nugget_id }}" question-id="{{ question.id }}">Delete</a>
+				{% endif %}
 				<a class="item"  style="{% if question.has_facilitator_vote %} color:red; {% endif %}">
 					<span class="claim-expert-vote {% if question.expert_voted %}voted{% endif %}
 						{% if question.expert_vote_count > 0 %} experted {% endif %}

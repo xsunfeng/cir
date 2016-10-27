@@ -73,7 +73,6 @@ def api_highlight(request):
     if action == 'create':
         if not request.user.is_authenticated():
             return HttpResponse("Please log in first.", status=403)
-        print request.REQUEST
         content = request.REQUEST.get('content')
         content_type = request.REQUEST.get('type')
         start = request.REQUEST.get('start')
@@ -286,8 +285,8 @@ def api_qa(request):
             entry["entry_type"] = "claim_" + str(question.comment_type)
             entry["author_name"] = question.author.first_name + " " + question.author.last_name
             entry["author_id"] = question.author.id
+            entry["is_author"] = (question.author == request.user)
             entry["author_intro"] = UserInfo.objects.get(user = question.author).description
-            print entry["author_name"]
             entry["author_role"] = Role.objects.get(user = question.author, forum =forum).role
             entry["created_at_pretty"] = utils.pretty_date(question.created_at)
             # vote for importance
