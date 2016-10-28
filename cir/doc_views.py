@@ -286,6 +286,7 @@ def api_qa(request):
             entry["author_name"] = question.author.first_name + " " + question.author.last_name
             entry["author_id"] = question.author.id
             entry["is_author"] = (question.author == request.user)
+            entry["is_facilitator"] = (Role.objects.get(user = request.user, forum =forum).role == "facilitator")
             entry["author_intro"] = UserInfo.objects.get(user = question.author).description
             entry["author_role"] = Role.objects.get(user = question.author, forum =forum).role
             entry["created_at_pretty"] = utils.pretty_date(question.created_at)
@@ -303,7 +304,6 @@ def api_qa(request):
                 tmp = []
                 for vote in QuestionNeedExpertVote.objects.filter(question_id = question.id):
                     tmp.append(vote.voter.last_name + " " + vote.voter.first_name)
-                    print Role.objects.get(user = vote.voter, forum =forum).role
                     if (Role.objects.get(user = vote.voter, forum =forum).role == "facilitator"):
                         entry["has_facilitator_vote"] = True
                 entry["expert_voted_authors"] = ", ".join(tmp)

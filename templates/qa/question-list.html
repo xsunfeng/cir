@@ -44,7 +44,7 @@
 					<span class="claim-question-vote {% if question.voted %}voted{% endif %}" data-tooltip="Vote if you think this is important.">Vote </span> 
 					(<span class="vote-cnt" data-tooltip="{{ question.voted_authors }}">{{ question.vote_count }}</span>)
 				</a> -->
-				{% if question.is_author %}
+				{% if question.is_author or question.is_facilitator %}
 					<a href="#" class="item delete-question" nugget-id="{{ question.nugget_id }}" question-id="{{ question.id }}">Delete</a>
 				{% endif %}
 				<a class="item"  style="{% if question.has_facilitator_vote %} color:red; {% endif %}">
