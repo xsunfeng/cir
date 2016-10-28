@@ -104,6 +104,7 @@ define([
 		}).on('click', '.make-comment', function(e) {
 			e.preventDefault();
 			var content = $('#qa-wrapper .new.question textarea').val();
+			$('#qa-wrapper .new.question textarea').val("");
 			if (content.length == 0) {
 				Utils.notify('error', 'Content must not be empty.');
 				return;
