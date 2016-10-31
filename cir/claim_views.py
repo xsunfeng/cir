@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.utils import timezone
 
 from cir.models import *
+import random
 
 VISITOR_ROLE = 'visitor'
 
@@ -37,7 +38,8 @@ def api_get_claim(request):
             context['claims_cnt'] += 1
             print "claims_id", claim.id
             context['claims'].append(claim.getAttr(forum))
-        context['claims'] = sorted(context['claims'], key=lambda c: c['updated_at_full'], reverse=True)
+        #context['claims'] = sorted(context['claims'], key=lambda c: c['updated_at_full'], reverse=True)
+        random.shuffle(context['claims'])
         response['html'] = render_to_string("claim-common/claim-overview.html", context)
 
     elif action == 'navigator':

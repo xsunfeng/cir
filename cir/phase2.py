@@ -9,6 +9,7 @@ import claim_views
 
 from cir.phase_control import PHASE_CONTROL
 import utils
+import random
 
 def api_load_all_documents(request):
     response = {}
@@ -338,7 +339,7 @@ def get_nugget_list(request):
     response = {}
     context = {}
     docs = Doc.objects.filter(forum_id=request.session["forum_id"])
-    context['highlights'] = []
+    items = []
     for doc in docs:
         for section in doc.sections.all():
             highlights = section.highlights.all()
@@ -350,8 +351,11 @@ def get_nugget_list(request):
                 highlight_info["author_intro"] = UserInfo.objects.get(user = highlight.author).description
                 highlight_info["author_id"] = highlight.author.id
                 highlight_info["comment_number"] = NuggetComment.objects.filter(highlight_id = highlight.id).count()
-                context['highlights'].append(highlight_info)
-    context['highlights'].sort(key = lambda x: x["created_at"], reverse=True)
+                items.append(highlight_info)
+    # context['highlights'].sort(key = lambda x: x["created_at"], reverse=True)
+    # random order nugget list
+    random.shuffle(items)
+    context['highlights'] = items
     response['highlight2claims'] = {}
     for highlight in context['highlights']:
         highlightClaims = HighlightClaim.objects.filter(highlight_id=highlight['id'])
@@ -661,7 +665,7 @@ def get_claim_list(request):
     response = {}
     context = {}
     claims = Claim.objects.filter(forum = forum)
-    context["claims"] = []
+    items = []
     for claim in claims:
         item = {}
         item['date'] = utils.pretty_date(claim.updated_at)
@@ -687,8 +691,11 @@ def get_claim_list(request):
             theme = claimAndTheme.theme
             if theme not in item['themes']:
                 item['themes'].append(theme)
-        context["claims"].append(item)
-    context['claims'].sort(key = lambda x: x["created_at_used_for_sort"], reverse=True)
+        items.append(item)
+    # context['claims'].sort(key = lambda x: x["created_at_used_for_sort"], reverse=True)
+    # random order nugget list
+    random.shuffle(items)
+    context['claims'] = items
     response['workbench_claims'] = render_to_string("phase2/claim_list.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')   
 
