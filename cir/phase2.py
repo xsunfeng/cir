@@ -665,7 +665,7 @@ def get_claim_list(request):
     response = {}
     context = {}
     claims = Claim.objects.filter(forum = forum)
-    items = []
+    context['claims'] = []
     for claim in claims:
         item = {}
         item['date'] = utils.pretty_date(claim.updated_at)
@@ -691,11 +691,10 @@ def get_claim_list(request):
             theme = claimAndTheme.theme
             if theme not in item['themes']:
                 item['themes'].append(theme)
-        items.append(item)
-    # context['claims'].sort(key = lambda x: x["created_at_used_for_sort"], reverse=True)
+        context['claims'].append(item)
+    context['claims'].sort(key = lambda x: x["created_at_used_for_sort"], reverse=True)
     # random order nugget list
-    random.shuffle(items)
-    context['claims'] = items
+    # random.shuffle(items)
     response['workbench_claims'] = render_to_string("phase2/claim_list.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')   
 
