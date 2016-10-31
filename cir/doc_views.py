@@ -286,10 +286,10 @@ def api_qa(request):
             entry["author_name"] = question.author.first_name + " " + question.author.last_name
             entry["author_id"] = question.author.id
             entry["is_author"] = (question.author == request.user)
-            entry["is_facilitator"] = (Role.objects.get(user = request.user, forum =forum).role) == "facilitator"
-            print entry["is_facilitator"]
+            if (Role.objects.filter(user_id = request.user.id, forum =forum).count == 0):
+                entry["is_facilitator"] = (Role.objects.get(user = request.user, forum =forum).role) == "facilitator"
+                entry["author_role"] = Role.objects.get(user = question.author, forum =forum).role
             entry["author_intro"] = UserInfo.objects.get(user = question.author).description
-            entry["author_role"] = Role.objects.get(user = question.author, forum =forum).role
             entry["created_at_pretty"] = utils.pretty_date(question.created_at)
             # vote for importance
             entry["vote_count"] = ClaimQuestionVote.objects.filter(question_id = question.id).count()
@@ -308,9 +308,9 @@ def api_qa(request):
                     if (Role.objects.get(user = vote.voter, forum =forum).role == "facilitator"):
                         entry["has_facilitator_vote"] = True
                 entry["expert_voted_authors"] = ", ".join(tmp)
-            if (ClaimQuestionVote.objects.filter(voter = author, question_id = question.id).count() > 0):
+            if (ClaimQuestionVote.objects.filter(voter_id = author.id, question_id = question.id).count() > 0):
                 entry["voted"] = True
-            if (QuestionNeedExpertVote.objects.filter(voter = author, question_id = question.id).count() > 0):
+            if (QuestionNeedExpertVote.objects.filter(voter_id = author.id, question_id = question.id).count() > 0):
                 entry["expert_voted"] = True
             try:
                 claimVersion = ClaimVersion.objects.filter(claim = question.claim, is_adopted = True).order_by("-created_at")[0]
