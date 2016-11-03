@@ -22,6 +22,7 @@ new comment
 		suggested claims only
 	</a>
 </div>
+(most recent activities come first)
 <div class="ui buttons">
 </div>
 {% if entries %}
@@ -171,7 +172,7 @@ new comment
 					{{ entry.author_name }}
 				</a>{% if entry.content %} suggested a claim: {% else %} created a claim: {% endif %}<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
 			</div>
-			<div class="extra improved text"><div class="ui label">C{{ entry.version_id }}</div>
+			<div class="extra improved text">
 				{{ entry.content | safe }}
 				{% if entry.is_adopted %}
 					<div class="ui blue label">Adopted</div>
@@ -191,11 +192,14 @@ new comment
 					{{ entry.user_name }}
 				</a> 
 				{% if entry.action == 'add' %}
-					added nugget <div class="ui label">N{{ entry.nugget_id }}</div> into this claim.
+					added a nugget into this claim.
 				{% else %}
-					removed nugget <div class="ui label">N{{ entry.nugget_id }}</div> from this claim.
+					removed a nugget from this claim.
 				{% endif %}
 				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
+				<div class="extra improved text">
+					"{{ entry.nugget_content }}"
+				</div>
 			</div>	
 		{% endif %}
 		</div>

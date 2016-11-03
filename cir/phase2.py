@@ -279,6 +279,10 @@ def suggest_claim(request):
     else:
         new_version.author = request.user
     new_version.save()
+    if (ClaimVersion.objects.filter(claim = claim).count() == 2):
+        ClaimVersion.objects.filter(claim = claim).update(is_adopted=False)
+        new_version.is_adopted = True
+        new_version.save()
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_assign_nugget(request):
@@ -423,6 +427,8 @@ def get_claim_activity(request):
                     context['entries'].append(comment.getAttr(forum))
         for claimNuggetAssignment in ClaimNuggetAssignment.objects.filter(claim = claim):
             nugget_assignment_info = claimNuggetAssignment.getAttr(forum)
+            nugget_id = nugget_assignment_info["nugget_id"]
+            nugget_assignment_info["nugget_content"] = Highlight.objects.get(id = nugget_id).text
             context['entries'].append(nugget_assignment_info)
         for root_comment in ClaimComment.objects.filter(claim = claim, parent__isnull = True):
             entry = {}
