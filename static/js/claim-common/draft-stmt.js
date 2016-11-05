@@ -265,8 +265,14 @@ define([
 				'claim_id': module.draggingClaimId,
 				'order': module.order,
 				'list_type': list_type
-			}).done(function() {
-				$('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId + '"]').addClass('stmt');
+			}).done(function(xhr) {
+				$claim = $('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId + '"]');
+				$claim.addClass('stmt');
+				if ($claim.find(".slot-assignment").children().length == 0) {
+					$claim.find(".slot-assignment").append('<i class="warning sign icon"></i>This claim has been categorized into:');
+				}
+				$claim.find(".slot-assignment").append(list_type + xhr.slot_order);
+				$('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId + '"]')
 				delete module.draggingClaimId;
 				Socket.slotChange({
 					'forum_id': $('body').attr('forum-id'),
@@ -278,8 +284,13 @@ define([
 				'action': 'add-to-slot',
 				'slot_id': module.target_id,
 				'claim_id': module.draggingClaimId,
-			}).done(function() {
-				$('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId + '"]').addClass('stmt');
+			}).done(function(xhr) {
+				$claim = $('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId + '"]');
+				$claim.addClass('stmt');
+				if ($claim.find(".slot-assignment").children().length == 0) {
+					$claim.find(".slot-assignment").append('<i class="warning sign icon"></i>This claim has been categorized into:');
+				}
+				$claim.find(".slot-assignment").append(list_type + xhr.slot_order);
 				delete module.draggingClaimId;
 				Socket.slotChange({
 					'forum_id': $('body').attr('forum-id'),
@@ -375,6 +386,27 @@ define([
 				if (xhr.status == 403) {
 					Utils.notify('error', xhr.responseText);
 				}
+			}
+		});
+	}
+
+	function _update_claim_list() {
+		$.ajax({
+			url: '/api_get_claim/',
+			type: 'post',
+			data: {
+				'action': 'get-claim',
+				'display_type': 'overview',
+			},
+			success: function(xhr) {
+				$('#claim-pane-overview').html(xhr.html);
+			},
+			error: function(xhr) {
+				$('#claim-pane-overview').removeClass('loading');
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+				$('#claim-filter-pane .ui.dropdown').removeClass('disabled');
 			}
 		});
 	}

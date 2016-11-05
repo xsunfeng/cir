@@ -670,7 +670,8 @@ def get_claim_list(request):
     forum = Forum.objects.get(id=request.session['forum_id'])
     response = {}
     context = {}
-    claims = Claim.objects.filter(forum = forum)
+    claims = Claim.objects.filter(forum=forum, is_deleted=False, published=True, stmt_order__isnull=True)
+    # claims = Claim.objects.filter(forum = forum, stmt_order__isnull = True)
     context['claims'] = []
     for claim in claims:
         item = {}
@@ -680,9 +681,9 @@ def get_claim_list(request):
         print "claim_id = ", claim.id
         if (ClaimVersion.objects.filter(claim_id = claim.id, is_adopted = True).count() > 0):
             item['content'] = unicode(ClaimVersion.objects.filter(claim_id = claim.id, is_adopted = True)[0])
-            item['content'] = item['content'] if (not item['content'] == "") else "(No content)"
+            item['content'] = item['content'] if (not item['content'] == "") else "(The claim is under construction.)"
         else:
-            item['content'] = "(The claim is under construction and currently thre is no adopted version)."
+            item['content'] = "(The claim is under construction.)"
         item['id'] = claim.id
         item['author_name'] = claim.author.first_name + " " + claim.author.last_name
         item["author_intro"] = UserInfo.objects.get(user = claim.author).description

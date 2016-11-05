@@ -19,7 +19,16 @@
 			{{ claim.content|safe }}
 		</div>
 		<div class="claim-metainfo">
-			Composed by <a class="user {{ claim.author_role }}" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a> <abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>
+			Composed by <a class="user {{ claim.author_role }}" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a> <abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr> 
+		</div>
+		
+		<div class="claim-metainfo slot-assignment">
+			{% if claim.slots %}
+				<i class="warning sign icon"></i>This claim has been categorized into:
+				{% for slot in claim.slots %}
+					{{ slot.slot_category }} {{ slot.slot_order }}{% if not forloop.last %}, {% endif %}
+				{% endfor %}
+			{% endif %}
 		</div>
 	</div>
 </section>

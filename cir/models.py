@@ -352,6 +352,14 @@ class Claim(Entry):
         if self.newer_versions.filter(refer_type='stmt').exists():
             # is used in statement
             attr['is_stmt'] = True
+        attr['slots'] = []
+        for claimref in ClaimReference.objects.filter(refer_type = "stmt", from_claim = self):       
+            slot = claimref.to_claim
+            attr['slots'].append({
+                'slot_id': slot.id,
+                'slot_category': slot.claim_category,
+                'slot_order': slot.stmt_order
+            })
         return attr
 
     def getAttrSlot(self, forum):

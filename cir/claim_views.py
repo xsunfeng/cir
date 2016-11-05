@@ -36,10 +36,10 @@ def api_get_claim(request):
     if action == 'get-claim':
         for claim in claims:
             context['claims_cnt'] += 1
-            print "claims_id", claim.id
+            print claim.getAttr(forum)
             context['claims'].append(claim.getAttr(forum))
-        #context['claims'] = sorted(context['claims'], key=lambda c: c['updated_at_full'], reverse=True)
-        random.shuffle(context['claims'])
+        context['claims'] = sorted(context['claims'], key=lambda c: c['updated_at_full'], reverse=True)
+        # random.shuffle(context['claims'])
         response['html'] = render_to_string("claim-common/claim-overview.html", context)
 
     elif action == 'navigator':
@@ -107,7 +107,7 @@ def api_draft_stmt(request):
                 slot.save()
         newSlot.stmt_order = order
         newSlot.save()
-
+        response["slot_order"] = order
         if actual_author:
             SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
                 entry=selected_claim, created_at=now, slot=newSlot, event_type='add')
@@ -131,7 +131,7 @@ def api_draft_stmt(request):
         else:
             SlotAssignment.objects.create(forum=forum, user=request.user,
                 entry=claim, created_at=now, slot=slot, event_type='add')
-
+        response["slot_order"] = slot.stmt_order
     if action == 'reorder':
         orders = json.loads(request.REQUEST.get('order'))
         for claim_id in orders:
