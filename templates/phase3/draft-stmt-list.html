@@ -7,7 +7,6 @@
 			</div>
 			{% for src_claim in slot_info.claims %}
 				<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}"><div class="ui label">C{{ src_claim.id }}</div>
-					{% if src_claim.theme %}<div class="ui label">Theme: {{ src_claim.theme }}</div>{% endif %}
 					{{ src_claim.content | safe }}
 					<div class="ui destmt circular icon red button"><i class="trash icon"></i></div>
 				</div>

@@ -337,3 +337,7 @@ a.claim-vote-btn.unready:hover {
 	padding: 0.5em 1em;
 	border-bottom: 1px #A9D5DE solid;
 }
+
+.active-1 {
+	border: 5px #A9D5DE solid;	
+}

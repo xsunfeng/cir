@@ -37,6 +37,7 @@ define([
 				'forum_id': $('body').attr('forum-id'),
 				'category': category,
 			});
+			_update_claim_list();
 		});
 	}).on('click', '.fullscreen.item', function() {
 		module.activeClaimModule.slot_id = this.getAttribute('data-id');
@@ -44,6 +45,8 @@ define([
 		module.activeClaimModule.updateClaimPane();
 		$('#draft-stmt li.item').removeClass('active');
 		$('#draft-stmt li.item[data-id="' + module.activeClaimModule.slot_id + '"]').addClass('active');
+		$('#draft-stmt li.item').removeClass('active-1');
+		$('#draft-stmt li.item[data-id="' + module.activeClaimModule.slot_id + '"]').addClass('active-1');
 		$('#draft-stmt li.item').find('.fullscreen.item').removeClass('active');
 		$('#draft-stmt li.item[data-id="' + module.activeClaimModule.slot_id + '"]').find('.fullscreen.item').addClass('active');
 
@@ -268,16 +271,13 @@ define([
 			}).done(function(xhr) {
 				$claim = $('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId + '"]');
 				$claim.addClass('stmt');
-				if ($claim.find(".slot-assignment").children().length == 0) {
-					$claim.find(".slot-assignment").append('<i class="warning sign icon"></i>This claim has been categorized into:');
-				}
-				$claim.find(".slot-assignment").append(list_type + xhr.slot_order);
 				$('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId + '"]')
 				delete module.draggingClaimId;
 				Socket.slotChange({
 					'forum_id': $('body').attr('forum-id'),
 					'category': list_type,
 				});
+				_update_claim_list();
 			});
 		} else if (module.action == 'merge') {
 			_stmtUpdater({
@@ -287,15 +287,12 @@ define([
 			}).done(function(xhr) {
 				$claim = $('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId + '"]');
 				$claim.addClass('stmt');
-				if ($claim.find(".slot-assignment").children().length == 0) {
-					$claim.find(".slot-assignment").append('<i class="warning sign icon"></i>This claim has been categorized into:');
-				}
-				$claim.find(".slot-assignment").append(list_type + xhr.slot_order);
 				delete module.draggingClaimId;
 				Socket.slotChange({
 					'forum_id': $('body').attr('forum-id'),
 					'category': list_type,
 				});
+				_update_claim_list();
 			});
 		}
 		clearDropStatus();
@@ -380,6 +377,7 @@ define([
 				}
 				initSortable();
 				updateProgressBars();
+				_update_claim_list();
 			},
 			error: function(xhr) {
 				$('#draft-stmt').css('opacity', '1.0');
@@ -391,24 +389,34 @@ define([
 	}
 
 	function _update_claim_list() {
-		$.ajax({
-			url: '/api_get_claim/',
-			type: 'post',
-			data: {
-				'action': 'get-claim',
-				'display_type': 'overview',
-			},
-			success: function(xhr) {
-				$('#claim-pane-overview').html(xhr.html);
-			},
-			error: function(xhr) {
-				$('#claim-pane-overview').removeClass('loading');
-				if (xhr.status == 403) {
-					Utils.notify('error', xhr.responseText);
+		var claim_to_slot_hash = {};
+		var slot_types = ["finding", "pro", "con"];
+		for (var i in slot_types) {
+			var slot_type = slot_types[i];
+			for (var i = 0; i < $('.list[data-list-type="'+ slot_type +'"] .item.slot').length; i++) {
+				var slot = $('.list[data-list-type="'+ slot_type +'"] .item.slot')[i];
+				var slot_id = i + 1;
+				for (var j = 0; j < $(slot).find(".src_claim").length; j++) {
+					var claim = $(slot).find(".src_claim")[j];
+					var claim_id = $(claim).attr("data-id");
+					if (claim_to_slot_hash[claim_id] === undefined) claim_to_slot_hash[claim_id] = [];
+					claim_to_slot_hash[claim_id].push(slot_type + slot_id);
 				}
-				$('#claim-filter-pane .ui.dropdown').removeClass('disabled');
 			}
-		});
+		}
+		for (var i = 0; i < $(".claim.stmt").length; i++) {
+			var claim = $(".claim.stmt")[i];
+			$(claim).find(".slot-assignment").empty();
+			var claim_id = $(claim).attr("data-id");
+			if (claim_id in claim_to_slot_hash) {
+				var html = '<i class="warning sign icon"></i>This claim has been categorized into: ';
+				for (var j = 0; j < claim_to_slot_hash[claim_id].length; j++){
+					html += claim_to_slot_hash[claim_id][j];
+					if (j != claim_to_slot_hash[claim_id].length - 1) html += ", ";
+				}	
+				$(claim).find(".slot-assignment").append(html);				
+			}
+		}
 	}
 
 	return module;

@@ -23,12 +23,6 @@
 		</div>
 		
 		<div class="claim-metainfo slot-assignment">
-			{% if claim.slots %}
-				<i class="warning sign icon"></i>This claim has been categorized into:
-				{% for slot in claim.slots %}
-					{{ slot.slot_category }} {{ slot.slot_order }}{% if not forloop.last %}, {% endif %}
-				{% endfor %}
-			{% endif %}
 		</div>
 	</div>
 </section>

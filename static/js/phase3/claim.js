@@ -45,6 +45,7 @@ define([
 					$('#claim-container .facilitator-only').show();
 				}
 				$('#claim-filter-pane .ui.dropdown').removeClass('disabled');
+				_update_claim_list();
 			},
 			error: function(xhr) {
 				$('#claim-pane-overview').removeClass('loading');
@@ -105,6 +106,37 @@ define([
 			}
 			$(this).removeClass('unready');
 		});
+	}
+
+	function _update_claim_list() {
+		var claim_to_slot_hash = {};
+		var slot_types = ["finding", "pro", "con"];
+		for (var i in slot_types) {
+			var slot_type = slot_types[i];
+			for (var i = 0; i < $('.list[data-list-type="'+ slot_type +'"] .item.slot').length; i++) {
+				var slot = $('.list[data-list-type="'+ slot_type +'"] .item.slot')[i];
+				var slot_id = i + 1;
+				for (var j = 0; j < $(slot).find(".src_claim").length; j++) {
+					var claim = $(slot).find(".src_claim")[j];
+					var claim_id = $(claim).attr("data-id");
+					if (claim_to_slot_hash[claim_id] === undefined) claim_to_slot_hash[claim_id] = [];
+					claim_to_slot_hash[claim_id].push(slot_type + slot_id);
+				}
+			}
+		}
+		for (var i = 0; i < $(".claim.stmt").length; i++) {
+			var claim = $(".claim.stmt")[i];
+			$(claim).find(".slot-assignment").empty();
+			var claim_id = $(claim).attr("data-id");
+			if (claim_id in claim_to_slot_hash) {
+				var html = '<i class="warning sign icon"></i>This claim has been categorized into: ';
+				for (var j = 0; j < claim_to_slot_hash[claim_id].length; j++){
+					html += claim_to_slot_hash[claim_id][j];
+					if (j != claim_to_slot_hash[claim_id].length - 1) html += ", ";
+				}	
+				$(claim).find(".slot-assignment").append(html);				
+			}
+		}
 	}
 
 	module.initClaimView();
