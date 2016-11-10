@@ -15,6 +15,14 @@ define([
 ) {
 	var module = {};
 	module.initClaimView = function() {
+
+        $("body").on("keypress", ".claim.reword.editor", function(){
+        	var textarea = $(this)[0];
+            if(textarea.scrollTop != 0){
+                textarea.style.height = textarea.scrollHeight + "px";
+            }
+        });
+
 		// static event listeners
 		$('#claim-pane-fullscreen').on('click', '.claim-reword-btn', function() {
 			$('#claim-pane-fullscreen .reword.form').transition('slide down', '500ms');
@@ -98,6 +106,7 @@ define([
 				if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (!sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
 					$('#claim-pane-fullscreen .facilitator-only').show();
 				}
+				$(".claim-reword-btn").click();
 			},
 			error: function(xhr) {
 				$('#claim-pane-fullscreen').html('');

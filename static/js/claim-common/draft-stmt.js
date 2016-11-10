@@ -49,7 +49,6 @@ define([
 		$('#draft-stmt li.item[data-id="' + module.activeClaimModule.slot_id + '"]').addClass('active-1');
 		$('#draft-stmt li.item').find('.fullscreen.item').removeClass('active');
 		$('#draft-stmt li.item[data-id="' + module.activeClaimModule.slot_id + '"]').find('.fullscreen.item').addClass('active');
-
 	}).on('click', '.slot-title', function() {
 		module.$slotTitleInput = $('<div class="slot-title-wrapper">')
 			.append('<input type="text" class="slot-title-input">')
