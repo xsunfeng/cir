@@ -16,6 +16,18 @@ define([
 	var module = {};
 	module.initClaimView = function() {
 
+		$("body").on("click", ".all-activity", function(){
+			$(".activity-filter a").removeClass("active");
+			$(this).addClass("active");
+			$(".event").show();
+		}).on("click", ".statement-candidate", function(){
+			$(".activity-filter a").removeClass("active");
+			$(this).addClass("active");
+			$(".event").each(function(){
+		        if ($(this).attr("data-type") != "claim version") $(this).hide()
+		    });		
+		});
+
         $("body").on("keypress", ".claim.reword.editor", function(){
         	var textarea = $(this)[0];
             if(textarea.scrollTop != 0){

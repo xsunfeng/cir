@@ -29,6 +29,14 @@
 </form>
 {% if entries %}
 <div class="ui feed" style="margin-top: 1em">
+	<div class="ui compact pointing menu activity-filter">
+		<a class="statement-candidate item">
+			candidate statements only
+		</a>
+		<a class="all-activity item active">
+			all activities
+		</a>
+	</div>
 {% for entry in entries %}
 	<div class="event" data-type="{{ entry.entry_type }}" data-id="{{ entry.id }}">
 		<div class="user-initial">
