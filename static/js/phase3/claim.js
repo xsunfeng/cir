@@ -24,6 +24,24 @@ define([
 				$slot.find(".segment").removeClass('highlight-found');
 			}, 1000);
 		});
+
+		$("body").on("click", ".statement-filter .item", function(){
+			$(".statement-filter .item").removeClass("active");
+			$(this).addClass("active");
+			if ($(this).hasClass("categorize-tab") && $("#draft-stmt").css("display") === "none") {
+				$("#draft-stmt").show();
+				$("#my-statement").hide();
+				$("#active-statement").hide();
+			} else if ($(this).hasClass("my-statement-tab") && $("#my-statement").css("display") === "none") {
+				$("#draft-stmt").hide();
+				$("#my-statement").show();
+				$("#active-statement").hide();
+			} else if ($(this).hasClass("active-statement-tab") && $("#active-statement").css("display") === "none") {
+				$("#draft-stmt").hide();
+				$("#my-statement").hide();
+				$("#active-statement").show();
+			}
+		});
 	};
 
 	module.updateClaimPane = function() {

@@ -36,7 +36,6 @@ def api_get_claim(request):
     if action == 'get-claim':
         for claim in claims:
             context['claims_cnt'] += 1
-            print claim.getAttr(forum)
             context['claims'].append(claim.getAttr(forum))
         context['claims'] = sorted(context['claims'], key=lambda c: c['updated_at_full'], reverse=True)
         # random.shuffle(context['claims'])
@@ -190,6 +189,21 @@ def api_draft_stmt(request):
     for category in category_list:
         context['categories'][category] = [slot.getAttrSlot(forum) for slot in slots.filter(claim_category=category).order_by('stmt_order')]
         response['slots_cnt'][category] += len(context['categories'][category])
+    
+    if request.user:
+        actual_author = request.user
+        context["my_statement"] = []
+        my_slot_ids = []
+        for slot_id in (SlotAssignment.objects.filter(user = actual_author, forum = forum).order_by('-created_at').values_list('slot', flat=True)):
+            if (slot_id not in my_slot_ids): my_slot_ids.append(slot_id)
+        for slot_id in my_slot_ids:
+            slot = Claim.objects.get(id = slot_id)
+            if (slot.is_deleted == False): context["my_statement"].append(slot.getAttrSlot(forum))
+        # for slot in Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False).order_by('created_at'):
+        #     if (SlotAssignment.objects.filter(slot = slot, user = actual_author).count() > 0):
+        #         context["my_statement"].append(slot.getAttrSlot(forum))
+        response['my_statement'] = render_to_string('phase3/my-statement.html', context)
+
     if request.session['selected_phase'] == 'categorize':
         response['html'] = render_to_string('phase3/draft-stmt.html', context)
     else:

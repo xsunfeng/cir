@@ -361,6 +361,7 @@ define([
 			type: 'post',
 			data: data,
 			success: function(xhr) {
+				$('#my-statement').html(xhr.my_statement);
 				$('#draft-stmt').css('opacity', '1.0');
 				if (data.category) {
 					$('#draft-stmt ol.list[data-list-type="' + data.category + '"]')

@@ -471,6 +471,7 @@ class SlotAssignment(Event):
     )
     slot = models.ForeignKey(Claim)
     event_type = models.CharField(max_length=20, choices=EVENT_CHOICES)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     def getAttr(self, forum):
         attr = super(SlotAssignment, self).getAttr(forum)
         attr['entry_type'] = 'slotassignment'
