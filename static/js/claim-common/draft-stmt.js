@@ -277,6 +277,8 @@ define([
 					'category': list_type,
 				});
 				module.update_claim_usage();
+				// phase 3, open workspace after drop
+				$(".show-workspace[data-id=" + xhr.slot_id + "]").click();
 			});
 		} else if (module.action == 'merge') {
 			_stmtUpdater({
@@ -292,6 +294,8 @@ define([
 					'category': list_type,
 				});
 				module.update_claim_usage();
+				// phase 3, open workspace after drop
+				$(".show-workspace[data-id=" + xhr.slot_id + "]").click();
 			});
 		}
 		clearDropStatus();
