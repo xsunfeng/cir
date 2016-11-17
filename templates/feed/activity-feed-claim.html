@@ -131,8 +131,10 @@
 			<div class="summary">
 			{% if entry.action == 'add' %}
 				<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> added claim <div class="ui label">C{{ entry.claim_id }}</div> into this slot.
+				<div class="ui message">{{ entry.claim_text }}</div>
 			{% else %}
 				<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> removed claim <div class="ui label">C{{ entry.claim_id }}</div> from this slot.
+				<div class="ui message">{{ entry.claim_text }}</div>
 			{% endif %}
 				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
 			</div>

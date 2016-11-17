@@ -477,6 +477,7 @@ class SlotAssignment(Event):
         attr['entry_type'] = 'slotassignment'
         attr['action'] = self.event_type
         attr['claim_id'] = self.entry.id
+        attr['claim_text'] = Claim.objects.get(id=self.entry.id).adopted_version().content
         return attr
 
 class Vote(Event):

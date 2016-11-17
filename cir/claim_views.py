@@ -84,7 +84,11 @@ def api_draft_stmt(request):
         now = timezone.now()
         claim_category = request.REQUEST.get('list_type')
         selected_claim = Claim.objects.get(id=request.REQUEST['claim_id'])
-        order = int(request.REQUEST['order']) # order of the slot
+        # order = int(request.REQUEST['order']) # order of the slot
+        order = 1
+        exist_slots = Claim.objects.filter(forum = forum, stmt_order__isnull = False, claim_category = claim_category)
+        if (exist_slots.count() > 0):
+            order = exist_slots.order_by("-stmt_order")[0].stmt_order + 1
 
         # the "claim" will have an unassigned theme by default.
         if 'actual_user_id' in request.session:
@@ -106,6 +110,7 @@ def api_draft_stmt(request):
                 slot.save()
         newSlot.stmt_order = order
         newSlot.save()
+        response["slot_id"] = newSlot.id
         response["slot_order"] = order
         if actual_author:
             SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
@@ -130,6 +135,7 @@ def api_draft_stmt(request):
         else:
             SlotAssignment.objects.create(forum=forum, user=request.user,
                 entry=claim, created_at=now, slot=slot, event_type='add')
+        response["slot_id"] = slot.id
         response["slot_order"] = slot.stmt_order
     if action == 'reorder':
         orders = json.loads(request.REQUEST.get('order'))
@@ -365,6 +371,7 @@ def api_claim_activities(request):
         # slot assignment events
         slotassignments = SlotAssignment.objects.filter(slot=slot)
         for slotassignment in slotassignments:
+            print slotassignment.getAttr(forum)
             context['entries'].append(slotassignment.getAttr(forum))
 
         context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'], reverse=True)

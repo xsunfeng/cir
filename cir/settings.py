@@ -20,9 +20,9 @@ SERVER_HOST =  '130.203.136.141'
 
 # dispatcher url
 if DEBUG:
-    DISPATCHER_URL = '127.0.0.1:8888'
+    DISPATCHER_URL = '127.0.0.1:443'
 else:
-    DISPATCHER_URL = '130.203.136.141:8888'
+    DISPATCHER_URL = '130.203.136.141:443'
 
 DATABASES = {
     'default': {
