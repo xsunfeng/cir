@@ -6,8 +6,21 @@
 				<span class="slot-title{% if not slot_info.slot_title %} empty{% endif %}">
 					{% if slot_info.slot_title %}{{ slot_info.slot_title }}{% else %} (Click to name this slot){% endif %}
 				</span>
-				<button class="show-workspace" data-id="{{ slot_info.id }}">show workspace</button>
+				<button class="show-workspace" data-id="{{ slot_info.id }}">open workspace</button>
 			</div>
+			{% if slot_info.adopted_versions %}
+				<span class="description">The following statement(s) have been produced by the CIR panel from this slot.</span>
+				{% for stmt in slot_info.adopted_versions %}
+					<div class="src_claim ui secondary segment" data-id="{{ stmt.id }}"><div class="ui label">Statement</div>
+						{{ stmt.content | safe }}
+						<div class="claim-metainfo">Composed by {{ stmt.author }}</div>
+					</div>
+				{% endfor %}
+			{% else %}
+				<div class="ui secondary segment">
+					No statement has been produced from this slot.
+				</div>
+			{% endif %}
 			{% for src_claim in slot_info.claims %}
 				<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}"><div class="ui label">C{{ src_claim.id }}</div>
 					{{ src_claim.content | safe }}
@@ -15,19 +28,6 @@
 				</div>
 			{% endfor %}
 		</div>
-		{% if slot_info.adopted_versions %}
-			<span class="description">The following statement(s) have been produced by the CIR panel from this slot.</span>
-			{% for stmt in slot_info.adopted_versions %}
-				<div class="src_claim ui secondary segment" data-id="{{ stmt.id }}"><div class="ui label">S{{ stmt.id }}</div>
-					{{ stmt.content | safe }}
-					<div class="claim-metainfo">Composed by {{ stmt.author }}</div>
-				</div>
-			{% endfor %}
-		{% else %}
-			<div class="ui secondary segment">
-				No statement has been produced from this slot.
-			</div>
-		{% endif %}
 		<div class = "slot-workspace" data-id="{{ slot_info.id }}">
 		</div>
 	</li>
