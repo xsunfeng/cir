@@ -71,48 +71,84 @@ def api_highlight(request):
     action = request.REQUEST.get('action')
     now = timezone.now()
     if action == 'create':
-        if not request.user.is_authenticated():
-            return HttpResponse("Please log in first.", status=403)
-        content = request.REQUEST.get('content')
-        content_type = request.REQUEST.get('type')
-        start = request.REQUEST.get('start')
-        end = request.REQUEST.get('end')
-        context_id = request.REQUEST.get('contextId')
-        text = request.REQUEST.get('text')
-        # create highlight object
-        context = Entry.objects.get(id=context_id)
-        hl_type = request.REQUEST.get('hl_type')
-        if (hl_type == "question"):
-            highlight = Highlight(start_pos=start, end_pos=end, context=context, author=request.user, text=text, created_at = now, is_nugget = False)
-        else: # real nugget
-            highlight = Highlight(start_pos=start, end_pos=end, context=context, author=request.user, text=text, created_at = now, is_nugget = True)
-        if (request.REQUEST.get('theme_id')):
-            theme_id = request.REQUEST.get('theme_id')
-            highlight.theme = ClaimTheme.objects.get(id = theme_id)
-        highlight.save()
-        response['highlight_id'] = highlight.id
-        # then create the content
-        
+        nugget_status = request.REQUEST.get('nugget_status')
+        if (nugget_status == 'new'):
+            if not request.user.is_authenticated():
+                return HttpResponse("Please log in first.", status=403)
+            content = request.REQUEST.get('content')
+            print "content = ", content
+            content_type = request.REQUEST.get('type')
+            start = request.REQUEST.get('start')
+            end = request.REQUEST.get('end')
+            context_id = request.REQUEST.get('contextId')
+            text = request.REQUEST.get('text')
+            # create highlight object
+            context = Entry.objects.get(id=context_id)
+            hl_type = request.REQUEST.get('hl_type')
+            if (hl_type == "question"):
+                highlight = Highlight(start_pos=start, end_pos=end, context=context, author=request.user, text=text, created_at = now, is_nugget = False)
+            else: # real nugget
+                highlight = Highlight(start_pos=start, end_pos=end, context=context, author=request.user, text=text, created_at = now, is_nugget = True)
+            if (request.REQUEST.get('theme_id')):
+                theme_id = request.REQUEST.get('theme_id')
+                highlight.theme = ClaimTheme.objects.get(id = theme_id)
+            highlight.save()
+            response['highlight_id'] = highlight.id
+            # then create the content
+            
+            if 'actual_user_id' in request.session:
+                actual_author = User.objects.get(id=request.session['actual_user_id'])
+            else:
+                actual_author = None
+            if content_type == 'comment':
+                if actual_author:
+                    Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user,
+                        content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
+                else:
+                    Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content,
+                        created_at=now, updated_at=now, highlight=highlight, content_type='comment')
+            elif content_type == 'question':
+                if actual_author:
+                    Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user,
+                        content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
+                else:
+                    Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content,
+                        created_at=now, updated_at=now, highlight=highlight, content_type='question')
+            elif content_type == 'claim':
+                print ""
+            # 2016/11/30: now a nugget is directly converted to a claim
+            print "----------------------"
+            category = request.REQUEST.get('category')
+            print "text = ", text
+            print "category = ", category
+            print "highlight = ", highlight.id
+            now = timezone.now()
+            newClaim = Claim(forum_id=request.session['forum_id'], author=request.user, created_at=now, updated_at=now, content=content, claim_category=category)
+            newClaim.save()
+            claim_version = ClaimVersion(forum_id=request.session['forum_id'], author=request.user, content=text, created_at=now, updated_at=now, claim=newClaim, is_adopted=True)
+            claim_version.save()
+            newHighlightClaim = HighlightClaim(claim_id=newClaim.id, highlight_id=highlight.id)
+            newHighlightClaim.save()
+            claim = newClaim
+        else: # if (nugget_status == 'exist'):
+            nugget_id = request.REQUEST['nugget_id'].split(" ")[0]
+            print "------------"
+            print nugget_id
+            claim = HighlightClaim.objects.filter(highlight_id= Highlight.objects.get(id=nugget_id))[0].claim
+        slot = Claim.objects.get(id=request.REQUEST['slot_id'])
+        if not ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=slot).exists():
+            ClaimReference.objects.create(refer_type='stmt', from_claim=claim, to_claim=slot)
         if 'actual_user_id' in request.session:
             actual_author = User.objects.get(id=request.session['actual_user_id'])
+            SlotAssignment.objects.create(forum_id=request.session['forum_id'], user=actual_author, delegator=request.user,
+                entry=claim, created_at=now, slot=slot, event_type='add')
         else:
-            actual_author = None
-        if content_type == 'comment':
-            if actual_author:
-                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user,
-                    content=content, created_at=now, updated_at=now, highlight=highlight, content_type='comment')
-            else:
-                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content,
-                    created_at=now, updated_at=now, highlight=highlight, content_type='comment')
-        elif content_type == 'question':
-            if actual_author:
-                Post.objects.create(forum_id=request.session['forum_id'], author=actual_author, delegator=request.user,
-                    content=content, created_at=now, updated_at=now, highlight=highlight, content_type='question')
-            else:
-                Post.objects.create(forum_id=request.session['forum_id'], author=request.user, content=content,
-                    created_at=now, updated_at=now, highlight=highlight, content_type='question')
-        elif content_type == 'claim':
-            print ""
+            SlotAssignment.objects.create(forum_id=request.session['forum_id'], user=request.user,
+                entry=claim, created_at=now, slot=slot, event_type='add')
+        print "from_claim = ", claim.id
+        print "to_slot = ", slot.id
+        response["slot_id"] = slot.id
+        response["slot_order"] = slot.stmt_order
         return HttpResponse(json.dumps(response), mimetype='application/json')
     if action == 'load-doc':
         doc_id = request.REQUEST.get('doc_id')

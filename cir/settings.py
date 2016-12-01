@@ -27,7 +27,7 @@ else:
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'cir_backup_20160318',  # Or path to database file if using sqlite3.
+        'NAME': 'cir_backup_20161125',  # Or path to database file if using sqlite3.
         'USER': 'postgres',
         'PASSWORD': 'asdf1234',
         'HOST': SERVER_HOST,
@@ -35,7 +35,7 @@ DATABASES = {
     },
     'dev': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'cir_backup_20160318',  # Or path to database file if using sqlite3.
+        'NAME': 'cir_backup_20161125',  # Or path to database file if using sqlite3.
         'USER': 'postgres',
         'PASSWORD': 'asdf1234',
         'HOST': SERVER_HOST,

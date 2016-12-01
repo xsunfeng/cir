@@ -1,13 +1,19 @@
 define([
 	'doc/qa',
+	'utils',
 	'semantic-ui',
 	'realtime/socket',
 	'ext/colorbrewer',
-	'feed/activity-feed'
+	'feed/activity-feed',
+	'jquery.ui'
 ], function(
-	QA
+	QA,
+	Utils
 ) {
 	QA.updateQuestionList();
+
+	sessionStorage.setItem('category', 'finding');
+	sessionStorage.setItem('statement-view', 'list');
 
 	var module = {};
 	
@@ -40,13 +46,90 @@ define([
 	module.Highlight.textMap = {};
 	module.Highlight.newHighlight = {};
 
+	module.drag_drop_events = function() {
+
+		$(".statement-entry").on("dragover", function(event) {
+		    event.preventDefault();  
+		    event.stopPropagation();
+		});
+
+		var dropTarget = $('.statement-entry'),
+		    showDrag = false,
+		    timeout = -1,
+		    counter = 0;
+
+		$('#doc-highlight-toolbar').bind('dragstart', function (event) {
+		    console.log('dragstart...'); 
+		});
+
+		$('.statement-entry').bind('dragenter', function (event) {
+		    event.preventDefault();  
+		    event.stopPropagation();
+		    counter++;
+		    $(this).addClass('dragging');
+		    $(this).css({
+		      backgroundColor : "#ddd"
+		    });
+		    showDrag = true; 
+		    console.log("dragenter...");
+		});
+		$('.statement-entry').bind('dragleave', function (event) {
+		    event.preventDefault();  
+		    event.stopPropagation();
+		    counter--;
+		    if (counter === 0) { 
+			    showDrag = false; 
+			    clearTimeout( timeout );
+			    timeout = setTimeout( function(){
+			        if( !showDrag ){  }
+			    }, 200 );
+			    $(this).addClass('dragging');
+			    $(this).css({
+			      backgroundColor : ""
+			    });
+			    console.log("dragleave...");
+		    }
+		});
+
+		$('.statement-entry').on('drop', function (event) {
+		    event.preventDefault();  
+		    event.stopPropagation();
+		    counter = 0;
+		    $(this).css({
+		      backgroundColor : ""
+		    });
+			console.log("drop...");
+			var slot_id = $(this).attr("data-id");
+		    _create_nugget(slot_id);
+		});
+	}
+
+	module.update_statement = function() {
+		return $.ajax({
+			url: '/api_draft_stmt/',
+			type: 'post',
+			data: {},
+			success: function(xhr) {
+				$('#statement-container').html(xhr.html);
+				module.drag_drop_events();
+				var category = sessionStorage.getItem("category");
+				$('.category-tab[data-id=' + category + ']').click();
+			},
+			error: function(xhr) {
+				$('#draft-stmt').css('opacity', '1.0');
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			}
+		});
+	}
+
 	module.render_highlights = function(doc_id) {
 		var promise = $.ajax({
 			url: '/phase1/get_highlights/',
 			type: 'post',
 			data: {
 				doc_id: doc_id,
-				theme_id: $("#nugget-list-theme").val(),
 			},
 			success: function(xhr) {
 				module.Highlight.highlights = xhr.highlights;
@@ -56,20 +139,20 @@ define([
 					// assume orginal claims are nuggets now 
 					var className = '';
 					if (! module.Highlight.highlights[j].is_nugget) {
-						className = 'this_is_a_question';
-						// loop over all words in the highlight
-						var text = [];
-						for (var i = highlight.start; i <= highlight.end; i++) {
-							var $token = $context.find('.tk[data-id="' + i + '"]');
-							text.push($token.text());
-							if (typeof $token.attr('data-hl-id') == 'undefined') { // new highlight for this word
-								$token.addClass(className).attr('data-hl-id', highlight.id);
-								$token.css("border-bottom", "3px solid red");
-							} else {
-								var curr_id = $token.attr('data-hl-id'); // append highlight for this word
-								$token.addClass(className).attr('data-hl-id', curr_id + ' ' + highlight.id).attr("theme_id", cur_theme_id + ' ' + highlight.theme_id);
-							}
-						}
+						// className = 'this_is_a_question';
+						// // loop over all words in the highlight
+						// var text = [];
+						// for (var i = highlight.start; i <= highlight.end; i++) {
+						// 	var $token = $context.find('.tk[data-id="' + i + '"]');
+						// 	text.push($token.text());
+						// 	if (typeof $token.attr('data-hl-id') == 'undefined') { // new highlight for this word
+						// 		$token.addClass(className).attr('data-hl-id', highlight.id);
+						// 		$token.css("border-bottom", "3px solid red");
+						// 	} else {
+						// 		var curr_id = $token.attr('data-hl-id'); // append highlight for this word
+						// 		$token.addClass(className).attr('data-hl-id', curr_id + ' ' + highlight.id);
+						// 	}
+						// }
 					} else {
 						// loop over all words in the highlight
 						var text = [];
@@ -77,13 +160,18 @@ define([
 							var $token = $context.find('.tk[data-id="' + i + '"]');
 							text.push($token.text());
 							if (typeof $token.attr('data-hl-id') == 'undefined') { // new highlight for this word
-								$token.addClass(className).attr('data-hl-id', highlight.id).attr("theme_id", highlight.theme_id);
-								$token.css("background-color", module.Theme.colorMap[highlight.theme_id]);
+								$token.addClass(className).attr('data-hl-id', highlight.id);
+								$token.attr('used_in_slots', highlight.used_in_slots);
+								if (highlight.used_in_slots.length == 0) {
+									$token.css("background-color", "rgb(222, 235, 247)");
+								} else {
+									$token.css("background-color", "rgb(158, 202, 225)");
+								}
 							} else {
 								var curr_id = $token.attr('data-hl-id'); // append highlight for this word
-								var cur_theme_id = $token.attr('theme_id');
-								$token.addClass(className).attr('data-hl-id', curr_id + ' ' + highlight.id).attr("theme_id", cur_theme_id + ' ' + highlight.theme_id);
+								$token.addClass(className).attr('data-hl-id', curr_id + ' ' + highlight.id);
 							}
+							
 						}						
 					}
 
@@ -264,7 +352,266 @@ define([
 
 	}
 
+	var _create_nugget = function (slot_id) {
+		
+		var nugget_status = "new";
+		if (sessionStorage.getItem("nugget-status") == "exist") nugget_status = "exist";
+		
+		$.ajax({
+			url: '/api_highlight/',
+			type: 'post',
+			data: $.extend({
+				nugget_status: nugget_status,
+				action: 'create',
+				hl_type: "nugget",
+				nugget_id: $("#doc-highlight-toolbar").attr("nugget-id"),
+				slot_id: slot_id,
+				category: $(".category-tab.active").attr("data-id"),
+			}, module.Highlight.newHighlight),
+			success: function(xhr) {
+				// send nugget map
+				afterAddHighlight(xhr.highlight_id);
+				var view = sessionStorage.getItem('statement-view');
+				if (view == "detail") {
+					$(".show-workspace[slot-id=" + slot_id + "]").click();
+				} else if (view == "list") {
+					module.update_statement();
+				} 
+			},
+			error: function(xhr) {
+				$('#doc-highlight-toolbar .button').removeClass('loading');
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			}
+		});
+	}
+
+	function afterAddHighlight(newHighlightId) {
+		// reset input boxes
+		$('#doc-highlight-toolbar').hide();
+
+		// dispatch to other users
+		//require('realtime/socket').dispatchNewHighlight(newHighlightData);
+
+		// update current highlights dataset
+		//module.highlightsData.push(newHighlightData);
+
+		// update question panel
+		// require('doc/qa').updateQuestionList();
+
+		var doc_id = $(".workbench-doc-item").attr("data-id");
+		module.get_document_content(doc_id);
+		module.get_nugget_list();
+	}
+
+	function _stmtUpdater(data) {
+		return $.ajax({
+			url: '/api_draft_stmt/',
+			type: 'post',
+			data: data,
+			success: function(xhr) {
+				
+			},
+			error: function(xhr) {
+				$('#draft-stmt').css('opacity', '1.0');
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			}
+		});
+	}
+
 	module.initEvents = function() {
+
+		$("body").on("click", ".all-activity", function(){
+			$(".activity-filter a").removeClass("active");
+			$(this).addClass("active");
+			$(".event").show();
+		}).on("click", ".statement-candidate", function(){
+			$(".activity-filter a").removeClass("active");
+			$(this).addClass("active");
+			$(".event").each(function(){
+		        if ($(this).attr("data-type") != "claim version") $(this).hide();
+		    });		
+		});
+
+		$("body").on('click', '.remove-claim', function(e) {
+			e.stopPropagation();
+			var result = confirm("Want to delete?");
+			if (result) {
+				// since a claim can be refered by multiple slots, both claim_id and slot_id are needed
+				var claim_id = $(this).parents('.src_claim').attr('data-id');
+				var slot_id = $(this).parents('.statement-entry').attr('data-id');
+				var category = $(".category-tab.active").attr("data-id");
+				_stmtUpdater({
+					'action': 'destmt',
+					'claim_id': claim_id,
+					'slot_id': slot_id
+				}).done(function() {
+					var view = sessionStorage.getItem('statement-view');
+					if (view == "detail") {
+						$(".show-workspace[slot-id=" + slot_id + "]").click();
+					} else if (view == "list") {
+						module.update_statement();
+					} 
+				});
+			}
+		});
+
+		$('body').on('mouseenter', '.src_claim', function() {
+			$(this).find(".src_claim_actions").show();
+		}).on('mouseleave', '.src_claim', function() {
+			$(this).find(".src_claim_actions").hide();
+		});;
+
+		// static event listeners
+		$('body').on('click', '.claim-reword-btn', function() {
+			var slot_id = $(this).parents(".slot").attr("data-id");
+			$('#slot-detail').find(".reword.form'").transition('slide down', '500ms');
+		}).on('click', '.reword.form .submit.button', function() {
+			var slot_id = $(this).parents(".slot").attr("data-id");
+			var content = $('#slot-detail').find(".claim.reword.editor").val();
+			if ($.trim(content).length == 0) {
+				Utils.notify('error', 'Content must not be empty.');
+				return;
+			}
+			var collective = false;
+			var request_action = $('.reword.form .request-action.checkbox').checkbox('is checked');
+			$.ajax({
+				url: '/api_claim/',
+				type: 'post',
+				data: {
+					action: 'reword',
+					content: content,
+					slot_id: slot_id,
+					collective: collective,
+					request_action: request_action
+				},
+				success: function(xhr) {
+					if (collective == 'true') {
+						// the new version is adopted!
+						$(".show-workspace[data-id=" + slot_id + "]").click();
+					} else {
+						$('#claim-activity-feed').feed('update', {
+							'type': 'claim',
+							'id': slot_id,
+						});
+						$('#claim-pane-fullscreen .claim.reword.editor').val('');
+						$('#claim-pane-fullscreen .reword.form').transition('slide down', '500ms');
+					}
+					// TODO realtime notify everyone
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});
+		}).on('click', '.reword.form .reset.button', function() {
+			$('#claim-pane-fullscreen .claim.reword.editor').val('');
+			$('#claim-pane-fullscreen .reword.form').transition('slide down', '500ms');
+		}).on('click', '.feed-reword-claim', function() {
+			$('#claim-pane .reword.form input[name="collective"]').val('true');
+			$('#claim-pane .claim.reword.editor')
+				.val($.trim($('#claim-pane .claim-content').text()));
+			$('#claim-pane .reword.form').transition('slide down', '500ms');
+		});
+
+		$("body").on("click", ".back-to-statement-list", function(){
+			$('#slot-overview').show();
+			module.update_statement();
+			$('#slot-detail').attr("slot-id","");
+			$('#slot-detail').hide();
+			sessionStorage.setItem('statement-view', 'list');
+		}).on("click", ".show-workspace", function(){
+			var slot_id = $(this).attr("slot-id");
+			$('#slot-detail').attr("slot-id",slot_id);
+			$.ajax({
+				url: '/api_get_slot/',
+				type: 'post',
+				data: {
+					'action': 'get-slot',
+					'slot_id': slot_id, // used only when display_type == 'fullscreen'
+				},
+				success: function(xhr) {
+					$('#slot-overview').hide();
+					$('#slot-detail').show();
+					$('#slot-detail .container').empty();
+					$('#slot-detail .container').html(xhr.html);
+					$('#slot-detail').find(".reword").show();
+					// load activities
+					$('#claim-activity-feed').feed('init');
+					$('#claim-activity-feed').feed('update', { // async
+						'type': 'claim',
+						'id': slot_id,
+					});
+					$('.reword.form .request-action.checkbox').checkbox();
+					if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (!sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
+						$('#slot-detail .facilitator-only').show();
+					}
+					$("#draft-stmt-container").animate({scrollTop: 0}, 0);
+					// var offset = $(".show-workspace[data-id=" + slot_id + "]").offset().top;
+					// $("#draft-stmt-container").animate({scrollTop: (offset - 100)}, 100);
+					module.drag_drop_events();
+					sessionStorage.setItem('statement-view', 'detail');
+				},
+				error: function(xhr) {
+					$('#claim-pane-fullscreen').html('');
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});		
+		});
+
+		$('body').on('click', '.create-new-slot-btn', function(){
+			$("#new-slot-modal").modal('show');
+			var category = $(".category-tab.active").attr("data-id").toUpperCase();
+			$("#new-slot-modal .label").text(category);
+		});
+
+		$('body').on('click', '.category-tab', function(){
+			$(".category-tab").removeClass("active");
+			$(this).addClass("active");
+			$('.category-list').hide();
+			var category = $(this).attr("data-id");
+			sessionStorage.setItem('category', category);
+			$('.category-list[data-list-type=' + category + ']').show();
+		});
+
+		$('body').on('click', '.statement-post-tab', function(){
+			$(".statement-post-tab").removeClass("active");	
+			$(".statement-post-tab").css("border-top", "");
+			$('.statement-post').hide();
+
+			$(this).css("border-top", "2px solid #DB2828");
+			$(this).addClass("active");
+			var category = $(this).attr("data-id");
+			$('.statement-post[data-id=' + category + ']').show();
+		});
+
+		$( "#doc-highlight-toolbar .remove").click(function(){
+			$("#doc-highlight-toolbar").hide();
+		});
+
+		$('#chat-opened').resizable({
+			handles: 'n,w',
+			maxHeight: 600,
+			maxWidth: 800,
+			minHeight: 300,
+			minWidth: 200
+		});
+
+		$("body").on("click", "#chat-opened .minus", function(){
+			$("#chat-opened").hide();
+			$("#chat-closed").show();
+		}).on("click", "#chat-closed", function(){
+			$("#chat-closed").hide();
+			$("#chat-opened").show();
+			var objDiv = document.getElementById("chat-msgs");
+			objDiv.scrollTop = objDiv.scrollHeight;
+		});
 
 		$("body").on("click", ".workbench-nugget", function(){
 			$(".workbench-nugget .action-bar").hide();
@@ -499,24 +846,48 @@ define([
 		 	$(this).closest(".content").find(".form").show()
 		});
 		
+		$("body").on('click', '.view-nugget-question', function(){
+			var nugget_id = $("#doc-highlight-toolbar").attr("nugget-id");
+			if (nugget_id !== "") {
+				showNuggetCommentModal(nugget_id);				
+			} else {
+				Utils.notify('warning', "Please Create a Nugget First");
+			}
+		});
+
 		$("#workbench-document-container").on('click', '.tk', function(e) {
+			
+			sessionStorage.setItem('nugget-status', 'exist');
+			
 			e.stopPropagation();
 			if ($(this).attr("data-hl-id") !== undefined) {
-				if ($(this).hasClass("this_is_a_question")) {
-					// open qa panel
-					if (!$("#qa-wrapper").is(":visible")) {
-						$("#qa-wrapper").show();
-						$("#qa-panel-toggle").css("right", (0.4 * $(window).width()) - 10);
-					}
-					var nugget_id = $(this).attr("data-hl-id");
-					$question = $(".find-in-doc[data-highlight-id = " + nugget_id + "]").closest(".question");
-					$question.find(".expand-thread").click();
-					$("#qa-wrapper").scrollTop(0);
-					$("#qa-wrapper").scrollTop($question.position().top);
-				}else {
-					var highlight_ids = $(this).attr('data-hl-id').split(' ');
-					showNuggetCommentModal(highlight_ids[0]);
-				}			
+				// if ($(this).hasClass("this_is_a_question")) {
+				// 	// open qa panel
+				// 	if (!$("#qa-wrapper").is(":visible")) {
+				// 		$("#qa-wrapper").show();
+				// 		$("#qa-panel-toggle").css("right", "85px");
+				// 	}
+				// 	var nugget_id = $(this).attr("data-hl-id");
+				// 	$question = $(".find-in-doc[data-highlight-id = " + nugget_id + "]").closest(".question");
+				// 	$question.find(".expand-thread").click();
+				// 	$("#qa-wrapper").scrollTop(0);
+				// 	$("#qa-wrapper").scrollTop($question.position().top);
+				// 	var highlight_ids = $(this).attr('data-hl-id').split(' ');
+				// 	showNuggetCommentModal(highlight_ids[0]);
+				// } else {
+
+				// }
+				$('#doc-highlight-toolbar').show();
+				$('#doc-highlight-toolbar').css('position', 'fixed');
+				$('#doc-highlight-toolbar').css('left', e.pageX).css('top', e.pageY);
+				var nugget_id = $(this).attr("data-hl-id").split(" ")[0];
+				$("#doc-highlight-toolbar").attr('nugget-id', nugget_id);
+				var text = $(this).siblings('.tk[data-hl-id="' + nugget_id + '"]').addBack().text();
+				$("#highlight-content").text(text);
+				$("#highlight-discussion").show();
+
+				var used_in_slots = $(this).attr("used_in_slots");
+				$('#doc-highlight-toolbar .used_in').text(used_in_slots);
 			}
 		}).on('mousedown', '.section-content', function(e) {
 			$('#doc-highlight-toolbar').removeAttr('style');
@@ -559,7 +930,11 @@ define([
 					};
 					module.Highlight.newHighlight.text = text;
 					$('#doc-highlight-toolbar').show();
+					$('#doc-highlight-toolbar').css('position', 'fixed');
 					$('#doc-highlight-toolbar').css('left', e.pageX).css('top', e.pageY);
+					$("#doc-highlight-toolbar").attr('nugget-id', "");
+					$("#highlight-discussion").hide();
+					$('#highlight-content').html(module.Highlight.newHighlight.text);
 
 					// document inner container upper bound relative to document
 					var tmp2 = $("#workbench-document-panel").offset().top;
@@ -576,6 +951,8 @@ define([
 					var height = $(".workbench-doc-item").height();
 					module.Highlight.newHighlight.upper_bound = top / height;
 					module.Highlight.newHighlight.lower_bound = bottom / height;
+
+					sessionStorage.setItem('nugget-status', 'new');
 				}
 
 			} else { // just clicking
@@ -594,46 +971,7 @@ define([
 		});
 		$("#doc-only").checkbox("uncheck");
 
-		$("body").on("click", "#create-nugget", function() {
-			$.ajax({
-				url: '/api_highlight/',
-				type: 'post',
-				data: $.extend({
-					action: 'create',
-					theme_id: $("#nugget-tool-bar-themes").val(),
-					hl_type: "nugget"
-				}, module.Highlight.newHighlight, $('#doc-claim-form').form('get values')),
-				success: function(xhr) {
-					// send nugget map
-					$.ajax({
-						url: '/sankey/put_nuggetmap/',
-						type: 'post',
-						data: {
-							"upper_bound": 	module.Highlight.newHighlight.upper_bound,
-							"lower_bound": 	module.Highlight.newHighlight.lower_bound,
-							"doc_id": 		$(".workbench-doc-item").attr("data-id"),
-							"author_id": 	sessionStorage.getItem('user_id'),
-							"theme_id":		$("#nugget-tool-bar-themes").val()
-						},
-						success: function(xhr) {
-						},
-						error: function(xhr) {
-							$('#doc-highlight-toolbar .button').removeClass('loading');
-							if (xhr.status == 403) {
-								Utils.notify('error', xhr.responseText);
-							}
-						}
-					});
-					afterAddHighlight(xhr.highlight_id);
-				},
-				error: function(xhr) {
-					$('#doc-highlight-toolbar .button').removeClass('loading');
-					if (xhr.status == 403) {
-						Utils.notify('error', xhr.responseText);
-					}
-				}
-			});
-		}).on("click", "#ask-question-about-nugget", function() {
+		$("body").on("click", "#ask-question-about-nugget", function() {
 			$.ajax({
 				url: '/api_highlight/',
 				type: 'post',
@@ -647,7 +985,7 @@ define([
 					sessionStorage.setItem("active_nugget_id", xhr.highlight_id);
 					if (!$("#qa-wrapper").is(":visible")) {
 						$("#qa-wrapper").show();
-						$("#qa-panel-toggle").css("right", (0.4 * $(window).width()) - 10);
+						$("#qa-panel-toggle").css("right", "85px");
 					}
 					if(!$(".make-comment").is(":visible")) {
 						$("#qa-wrapper .new-question").click();
@@ -663,25 +1001,6 @@ define([
 				}
 			});			
 		});
-
-		function afterAddHighlight(newHighlightId) {
-			// reset input boxes
-			$('#doc-highlight-toolbar').hide();
-
-			// dispatch to other users
-			//require('realtime/socket').dispatchNewHighlight(newHighlightData);
-
-			// update current highlights dataset
-			//module.highlightsData.push(newHighlightData);
-
-			// update question panel
-			// require('doc/qa').updateQuestionList();
-
-			var doc_id = $(".workbench-doc-item").attr("data-id");
-			module.get_document_content(doc_id);
-			module.get_nugget_list();
-		}
-
 	};
 
 	module.applyFilter = function() {
@@ -752,6 +1071,8 @@ define([
 		$("body").on("mousemove", "#workbench-document-container", function(e){
 			idleTime = 0;
 		})
+
+		module.update_statement();
 
 	}
 	module.initLayout();

@@ -281,7 +281,7 @@ define([
 		$("body").on("click", "#qa-panel-toggle", function() {
 			if ($("#qa-wrapper").is(":visible")) {
 				$("#qa-wrapper").hide();
-				$("#qa-panel-toggle").css("right", 0);
+				$("#qa-panel-toggle").css("right", "85px");
 			} else {
 				$("#qa-wrapper").show();
 				$("#qa-panel-toggle").css("right", (0.4 * $(window).width()) - 10);

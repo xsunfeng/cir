@@ -214,16 +214,21 @@ def get_theme_list(request):
 def get_highlights(request):
     response = {}
     response['highlights'] = []
-    theme_id = request.REQUEST.get('theme_id')
     doc_id = request.REQUEST.get('doc_id')
     doc = Doc.objects.get(id = doc_id)
     for section in doc.sections.all():
         highlights = section.highlights.all()
         for highlight in highlights:
             highlight_info = highlight.getAttr()
-            highlight_info["cur_theme"] = True if highlight.theme.id == theme_id else False
             highlight_info["doc_id"] = DocSection.objects.get(id=highlight.context.id).doc.id
             highlight_info["is_nugget"] = highlight.is_nugget
+            highlight_info["used_in_slots"] = []
+            if (HighlightClaim.objects.filter(highlight_id= Highlight.objects.get(id=highlight.id)).count() > 0):
+                claim = HighlightClaim.objects.filter(highlight_id= Highlight.objects.get(id=highlight.id))[0].claim
+                for ref in ClaimReference.objects.filter(refer_type='stmt', from_claim=claim):
+                    slot = ref.to_claim
+                    info = str(slot.claim_category.upper()[:1]) + "Q" + str(slot.stmt_order)
+                    highlight_info["used_in_slots"].append(info)
             response['highlights'].append(highlight_info)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
@@ -316,7 +321,7 @@ def api_remove_nugget(request):
 def get_nugget_list(request):
     response = {}
     context = {}
-    theme_id = int(request.REQUEST.get("theme_id"))
+    # theme_id = int(request.REQUEST.get("theme_id"))
     docs = Doc.objects.filter(forum_id=request.session["forum_id"])
     context['highlights'] = []
     for doc in docs:
@@ -328,7 +333,7 @@ def get_nugget_list(request):
                 highlight_info["is_author"] = (highlight.author == request.user)
                 highlight_info["author_intro"] = UserInfo.objects.get(user = highlight.author).description
                 highlight_info["author_id"] = highlight.author.id
-                highlight_info["theme_desc"] = highlight.theme.description
+                # highlight_info["theme_desc"] = highlight.theme.description
                 highlight_info["comment_number"] = NuggetComment.objects.filter(highlight_id = highlight.id).count()
                 context['highlights'].append(highlight_info)
     context['highlights'].sort(key = lambda x: x["created_at"], reverse=True)

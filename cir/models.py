@@ -253,8 +253,8 @@ class Highlight(models.Model):
         attr['is_nugget'] = self.is_nugget
         attr['is_used'] = HighlightClaim.objects.filter(highlight_id = self.id).count() > 0
         attr['author_name'] = self.author.first_name + " " + self.author.last_name
-        attr['theme'] = self.theme.name
-        attr['theme_id'] = self.theme.id
+        attr['theme'] = ""
+        attr['theme_id'] = ""
         try:
             tag = Tag.objects.get(highlight_ptr=self)
             attr['content'] = tag.content
@@ -367,6 +367,7 @@ class Claim(Entry):
         attr['slot_title'] = self.title
         attr['category'] = self.claim_category
         attr['claims'] = []
+        attr['stmt_order'] = self.stmt_order
         attr['adopted_versions'] = []
         for adopted_version in self.adopted_versions().all():
             attr['adopted_versions'].append({

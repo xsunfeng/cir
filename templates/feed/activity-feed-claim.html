@@ -1,148 +1,206 @@
-<form id="activity-comment-form" class="ui form">
-	<div class="field">
-		<label><span>Add a comment</span> (Ctrl + Enter to post)</label>
-		<textarea rows="2"></textarea>
-	</div>
-	<div class="field">
-		<div class="ui primary submit button"><i class="send outline icon"></i>Post</div>
-		<div class="ui collective checkbox facilitator-only" style="display:none">
-			<label>Collective</label>
-			<input type="checkbox" name="collective">
-		</div>
-<!-- 		<div class="ui request-action checkbox">
-			<label>Request panel attention</label>
-			<input type="checkbox" name="request">
-		</div> -->
-	</div>
-
-</form>
-<form id="activity-reply-form" class="ui form" style="display:none">
-	<div class="field">
-		<label><span></span> (Ctrl + Enter to post)</label>
-		<textarea rows="2"></textarea>
-	</div>
-	<div class="ui primary submit button"><i class="send outline icon"></i>Post</div>
-<!-- 	<div class="ui request-action checkbox">
-		<label>Request panel attention</label>
-		<input type="checkbox" name="request">
-	</div> -->
-</form>
-{% if entries %}
-<div class="ui feed" style="margin-top: 1em">
-	<div class="ui compact pointing menu activity-filter">
-		<a class="statement-candidate item">
-			candidate statements only
+<div>
+	<div class="ui top attached tabular menu">
+		<a class="statement-post-tab item active" style="border-top: 2px solid #DB2828;" data-id="statement">
+			Suggest a Statement
 		</a>
-		<a class="all-activity item active">
-			all activities
+		<a class="statement-post-tab item" data-id="comment">
+			Post a Comment
 		</a>
 	</div>
-{% for entry in entries %}
-	<div class="event" data-type="{{ entry.entry_type }}" data-id="{{ entry.id }}">
-		<div class="user-initial">
-			<div class="{{ entry.author_role }}{% if entry.collective %} collective{% endif %}">
-			{% if entry.author_role == 'facilitator' %}F
-			{% elif entry.collective %}C
-			{% elif entry.author_role == 'admin' %}A
-			{% else %}{{ entry.author_initial }}
-			{% endif %}
-			</div>
+	<div id="statement-container" class="ui bottom attached segment">
+		<div class="statement-post" data-id="statement">
+			<form class="ui form reword">
+				<div class="field">
+					<textarea rows="1" class="claim reword editor"></textarea>
+					<input type="hidden" name="collective">
+				</div>
+				<div class="ui primary submit button"><i class="send outline icon"></i>Suggest</div>
+				<div class="ui request-action checkbox">
+					<label>Request panel attention</label>
+					<input type="checkbox" name="request">
+				</div>
+			</form>
 		</div>
-		<div class="activity-content content">
-		{% if entry.is_deleted %}
-			<div class="summary">
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a><div class="date">updated <abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div> [deleted]
-			</div>
-		{% elif entry.parent_name %}
-			<div class="summary">
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> replied to <a class="user">{{ entry.parent_name }}</a>
-				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
-			</div>
-			<div class="extra text">
-				{{ entry.content }}
-			</div>
-			<div class="ui red secondary post small menu">
-				<div class="right menu">
-					<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
-					<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+		<div class="statement-post" data-id="comment" style="display:none;">
+			<form id="activity-comment-form" class="ui form">
+				<div class="field">
+					<textarea rows="2"></textarea>
 				</div>
-			</div>
-		{% elif entry.entry_type == 'question' %}
-			<div class="summary">
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> raised a question.
-				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
-			</div>
-			<div class="extra text">
-				{{ entry.content }}
-			</div>
-			<div class="ui red secondary post fitted menu">
-				<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
-				<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
-			</div>
-		{% elif entry.entry_type == 'comment' %}
-			<div class="summary">
-			{% if entry.collective %}
-				The panel reached a conclusion on this slot:
-			{% else %}
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> commented:
-			{% endif %}
-				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
-			</div>
-			<div class="extra text">
-				{{ entry.content }}
-			</div>
-			<div class="ui red secondary post small menu">
-				<div class="right menu">
-					<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
-					<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+				<div class="field">
+					<div class="ui primary submit button"><i class="send outline icon"></i>Post</div>
+					<div class="ui collective checkbox facilitator-only" style="display:none">
+						<label>Collective</label>
+						<input type="checkbox" name="collective">
+					</div>
+			<!-- 		<div class="ui request-action checkbox">
+						<label>Request panel attention</label>
+						<input type="checkbox" name="request">
+					</div> -->
 				</div>
-			</div>
-		{% elif entry.entry_type == 'claim version' %}
-			<div class="summary">
-			{% if entry.collective %}
-				The panel generated a statement product for this slot (written by <a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a>):
-			{% else %}
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> suggested a statement product for this slot:
-			{% endif %}
-				<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
-			</div>
 
-			<div class="extra improved text"><div class="ui label">S{{ entry.version_id }}</div>
-				{{ entry.content | safe }}
-				{% if entry.is_adopted %}
-					<div class="ui blue label">Adopted</div>
-				{% endif %}
-			</div>
-			{% if not entry.collective %}
-			<div class="ui red secondary improve small menu" data-id="{{ entry.version_id }}">
-				<div class="right menu">
-					<a class="item feed-like-claim-version" data-action="like"><i class="thumbs outline up icon"></i>Like<span></span></a>
-					<a class="item feed-reply-entry" data-id="{{ entry.version_id }}">Reply</a>
-					{% if entry.is_adopted %}
-						<a class="item feed-adopt-claim-version facilitator-only" data-action="deadopt" style="display: none;">Retract</a>
-					{% else %}
-						<a class="item feed-adopt-claim-version facilitator-only" data-action="adopt" style="display: none;">Adopt</a>
-					{% endif %}
-
+			</form>
+			<form id="activity-reply-form" class="ui form" style="display:none">
+				<div class="field">
+					<label><span></span> (Ctrl + Enter to post)</label>
+					<textarea rows="2"></textarea>
 				</div>
-			</div>
-			{% endif %}
-		{% elif entry.entry_type == 'slotassignment' %}
-			<div class="summary">
-			{% if entry.action == 'add' %}
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> added claim <div class="ui label">C{{ entry.claim_id }}</div> into this slot.
-				<div class="ui message">{{ entry.claim_text }}</div>
-			{% else %}
-				<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> removed claim <div class="ui label">C{{ entry.claim_id }}</div> from this slot.
-				<div class="ui message">{{ entry.claim_text }}</div>
-			{% endif %}
-				<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
-			</div>
-		{% endif %}
+				<div class="ui primary submit button"><i class="send outline icon"></i>Post</div>
+			<!-- 	<div class="ui request-action checkbox">
+					<label>Request panel attention</label>
+					<input type="checkbox" name="request">
+				</div> -->
+			</form>
 		</div>
 	</div>
-{% endfor %}
 </div>
-{% else %}
-<div class="ui info message">No activities to show</div>
-{% endif %}
+
+<div class="ui raised pink segment">
+	<div class="ui top attached tabular menu">
+		<div class="ui text menu" style="margin:0;">
+			<a id="document-toc-button" class="header item"> Activities
+			</a>
+		</div>
+		<div id="document-toc-container" class="ui special popup" style="min-width:400px; max-height:500px; overflow:auto;"></div>
+		<div class="right menu">
+			<div class="ui text menu activity-filter" style="margin:0;">
+				<div class="header item">Filter</div>
+				<a class="active item statement-candidate">
+					Statements
+				</a>
+				<a class="item all-activity">
+					All
+				</a>
+			</div>
+		</div>
+	</div>
+	{% if entries %}
+	<div class="ui feed" style="margin-top: 1em">
+	{% for entry in entries %}
+		<div class="event" data-type="{{ entry.entry_type }}" data-id="{{ entry.id }}">
+			<div class="user-initial">
+				<div class="{{ entry.author_role }}{% if entry.collective %} collective{% endif %}">
+				{% if entry.author_role == 'facilitator' %}F
+				{% elif entry.collective %}C
+				{% elif entry.author_role == 'admin' %}A
+				{% else %}{{ entry.author_initial }}
+				{% endif %}
+				</div>
+			</div>
+			<div class="activity-content content">
+			{% if entry.is_deleted %}
+				<div class="summary">
+					<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a><div class="date">updated <abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div> [deleted]
+				</div>
+			{% elif entry.parent_name %}
+				<div class="summary">
+					<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> replied to <a class="user">{{ entry.parent_name }}</a>
+					<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+				</div>
+				<div class="extra text">
+					{{ entry.content }}
+				</div>
+				<div class="ui red secondary post small menu">
+					<div class="right menu">
+						<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+						<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+					</div>
+				</div>
+			{% elif entry.entry_type == 'question' %}
+				<div class="summary">
+					<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> raised a question.
+					<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+				</div>
+				<div class="extra text">
+					{{ entry.content }}
+				</div>
+				<div class="ui red secondary post fitted menu">
+					<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+					<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+				</div>
+			{% elif entry.entry_type == 'comment' %}
+				<div class="summary">
+				{% if entry.collective %}
+					The panel reached a conclusion on this slot:
+				{% else %}
+					<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> commented:
+				{% endif %}
+					<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+				</div>
+				<div class="extra text">
+					{{ entry.content }}
+				</div>
+				<div class="ui red secondary post small menu">
+					<div class="right menu">
+						<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+						<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+					</div>
+				</div>
+			{% elif entry.entry_type == 'claim version' %}
+				<div class="summary">
+					{% if entry.collective %}
+						The panel generated a statement <div class="ui label">S{{ entry.version_id }}</div> for this slot (written by <a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a>):
+					{% else %}
+						<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> suggested a statement <div class="ui label">S{{ entry.version_id }}</div> for this slot:
+					{% endif %}
+					<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+				</div>
+
+				<div class="edited">
+					<div class="extra improved text">
+						<div class="content">{{ entry.content | safe }}</div>
+						{% if entry.is_adopted %}
+							<div class="ui blue label">Adopted</div>
+						{% endif %}
+					</div>
+
+					{% if not entry.collective %}
+					<div class="ui red secondary improve small menu" data-id="{{ entry.version_id }}">
+						<div class="right menu">
+							<a class="item feed-edit-claim" data-action="like"><i class="edit icon"></i>Edit<span></span></a>
+							<a class="item feed-like-claim-version" data-action="like"><i class="thumbs outline up icon"></i>Like<span></span></a>
+							<a class="item feed-reply-entry" data-id="{{ entry.version_id }}">Reply</a>
+							{% if entry.is_adopted %}
+								<a class="item feed-adopt-claim-version facilitator-only" data-action="deadopt" style="display: none;">Retract</a>
+							{% else %}
+								<a class="item feed-adopt-claim-version facilitator-only" data-action="adopt" style="display: none;">Adopt</a>
+							{% endif %}
+						</div>
+					</div>
+					{% endif %}
+				</div>
+				
+				<div class="editing" style="display:none;">
+					<div class="content">
+						<textarea style="width:100%;">{{ entry.content | safe }}</textarea>
+					</div>
+
+					{% if not entry.collective %}
+					<div class="ui red secondary improve small menu" data-id="{{ entry.version_id }}">
+						<div class="right menu">
+							<a class="item feed-edit-claim-save"><i class="save icon"></i>Save</a>
+							<a class="item feed-edit-claim-cancel"><i class="remove icon"></i>Cancel</a>
+						</div>
+					</div>
+					{% endif %}
+				</div>
+
+			{% elif entry.entry_type == 'slotassignment' %}
+				<div class="summary">
+				{% if entry.action == 'add' %}
+					<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> added claim <div class="ui label">C{{ entry.claim_id }}</div> into this slot.
+					<div class="ui message">{{ entry.claim_text }}</div>
+				{% else %}
+					<a class="user {{ entry.author_role }}" data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> removed claim <div class="ui label">C{{ entry.claim_id }}</div> from this slot.
+					<div class="ui message">{{ entry.claim_text }}</div>
+				{% endif %}
+					<div class="date"><abbr title="{{ entry.created_at_full }}">{{ entry.created_at }}</abbr></div>
+				</div>
+			{% endif %}
+			</div>
+		</div>
+	{% endfor %}
+	</div>
+	{% else %}
+	<div class="ui info message">No activities to show</div>
+	{% endif %}
+</div>

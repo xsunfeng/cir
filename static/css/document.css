@@ -51,6 +51,9 @@
 	left: -999999px;
 	top: -999999px;
 	z-index: 900;
+  width: 300px !important;
+  background:white !important;
+  border: 1px solid  !important; 
 }
 #doc-highlight-toolbar .labeled.menu,
 #doc-thread-popup .labeled.menu {
@@ -104,13 +107,6 @@
   border: #fbbd08 solid 5px;
   z-index: 1000;
 
-}
-
-#qa-panel-toggle {
-  position: fixed;
-  right: 0;
-  top: 100px;
-  z-index: 1000;
 }
 
 #qa-wrapper .new.question.segment {

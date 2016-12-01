@@ -22,23 +22,25 @@ define([
 		module.activeClaimModule.jumpTo(claim_id); // without changing display_type
 	}).on('click', '.destmt.button', function(e) {
 		e.stopPropagation();
-
-		// since a claim can be refered by multiple slots, both claim_id and slot_id are needed
-		var claim_id = $(this).parents('.src_claim').attr('data-id');
-		var slot_id = $(this).parents('.slot').attr('data-id');
-		var category = $(this).parents('ol.list').attr('data-list-type');
-		_stmtUpdater({
-			'action': 'destmt',
-			'claim_id': claim_id,
-			'slot_id': slot_id
-		}).done(function() {
-			$('#claim-pane-overview .claim.segment[data-id="' + claim_id + '"]').removeClass('stmt');
-			Socket.slotChange({
-				'forum_id': $('body').attr('forum-id'),
-				'category': category,
+		var result = confirm("Want to delete?");
+		if (result) {
+			// since a claim can be refered by multiple slots, both claim_id and slot_id are needed
+			var claim_id = $(this).parents('.src_claim').attr('data-id');
+			var slot_id = $(this).parents('.slot').attr('data-id');
+			var category = $(this).parents('ol.list').attr('data-list-type');
+			_stmtUpdater({
+				'action': 'destmt',
+				'claim_id': claim_id,
+				'slot_id': slot_id
+			}).done(function() {
+				$('#claim-pane-overview .claim.segment[data-id="' + claim_id + '"]').removeClass('stmt');
+				Socket.slotChange({
+					'forum_id': $('body').attr('forum-id'),
+					'category': category,
+				});
+				module.update_claim_usage();
 			});
-			module.update_claim_usage();
-		});
+		}
 	}).on('click', '.fullscreen.item', function() {
 		module.activeClaimModule.slot_id = this.getAttribute('data-id');
 		module.activeSlotId = this.getAttribute('data-id');

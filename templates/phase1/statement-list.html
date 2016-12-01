@@ -1,16 +1,17 @@
-<div class="slot" data-id="{{slot.id}}">
-	<div class="ui red raised segment statement-entry" data-id="{{slot.id}}">
-		<h3>{{ slot.category|title|slice:"1" }}Q{{slot.stmt_order}}: {{ slot.slot_title }}</h3>
+
+{% for slot_info in categories %}
+	<div class="ui red raised segment statement-entry" data-id="{{slot_info.id}}">
+		<h3>{{ slot_info.category|title|slice:"1" }}Q{{ slot_info.stmt_order }}: {{ slot_info.slot_title }}</h3>
 		<div class="ui divider" style="margin: 0.5rem 0;"></div>
-			{% if slot.adopted_versions %}
-				{% for stmt in slot.adopted_versions %}
+			{% if slot_info.adopted_versions %}
+				{% for stmt in slot_info.adopted_versions %}
 					<div class="src_claim" data-id="{{ stmt.id }}">
-						<h4 style="margin: 0;">[ST{{ forloop.counter }}] {{ stmt.content | safe }}</h4>
+						<h4 style="margin: 1rem 0;">[ST{{ forloop.counter }}] {{ stmt.content | safe }}</h4>
 					</div>
 				{% endfor %}
 			{% endif %}
 		<div class="ui stacked segments" style="margin-top:1rem;">
-			{% for src_claim in slot.claims %}
+			{% for src_claim in slot_info.claims %}
 				<div class="src_claim ui secondary segment" data-id="{{ src_claim.id }}" style="padding: 0.5rem 1rem;">
 					[N{{ forloop.counter }}] {{ src_claim.content | safe }}
 					<div class="src_claim_actions" style="position: absolute; right: 0rem; top: 0.2rem; display:none;">
@@ -22,12 +23,11 @@
 				</div>
 			{% endfor %}
 		</div>
-		<a style="display:none;" class = "show-workspace" slot-id="{{ slot.id }}">Details</a>
+		<span> | </span>
+		<span style="float:right">
+<!-- 			<a>8 Views</a> <span> | </span>
+			<a>3 Votes</a> <span> | </span> -->
+			<a href="#" class="show-workspace" slot-id="{{ slot_info.id }}">Open Workspace</a>
+		</span>
 	</div>
-
-	<div id="claim-activity-feed">
-		<div class="ui small active inline loader"></div>Loading activities ...
-	</div>
-</div>
-
-
+{% endfor %}

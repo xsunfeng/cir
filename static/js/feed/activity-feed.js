@@ -62,6 +62,14 @@ define([
 						_this.find('.facilitator-only').show();
 					}
 					if (typeof callback == 'function') callback();
+
+
+					$(".activity-filter a").removeClass("active");
+					$(".statement-candidate").addClass("active");
+					$(".event").each(function(){
+				        if ($(this).attr("data-type") != "claim version") $(this).hide();
+				    });		
+
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -304,6 +312,39 @@ define([
 				deleteEntry(entry_id);
 			}).on('click', '.feed-like-claim-version', function(e) {
 				likeClaimVersion(this);
+
+			}).on('click', '.feed-edit-claim', function(e) {
+				$(this).parents('.event').find(".edited").hide();
+				$(this).parents('.event').find(".editing").show();
+			}).on('click', '.feed-edit-claim-cancel', function(e) {
+				$(this).parents('.event').find(".editing").hide();
+				$(this).parents('.event').find(".edited").show();
+				var content = $container.find(".improved.text .content").text();
+				$container.find("textarea").val(content);
+			}).on('click', '.feed-edit-claim-save', function(e) {
+				$container = $(this).parents('.event');
+				var content = $container.find("textarea").val();
+				var claim_version_id = $container.attr("data-id");
+				$container.find(".improved.text .content").text(content);
+				$container.find("textarea").val(content);
+				$(this).parents('.event').find(".editing").hide();
+				$(this).parents('.event').find(".edited").show();
+				$.ajax({
+					url: '/api_claim/',
+					type: 'post',
+					data: {
+						action: 'update',
+						content: content,
+						claim_version_id: claim_version_id,
+					},
+					success: function(xhr) {
+					},
+					error: function(xhr) {
+						if (xhr.status == 403) {
+							Utils.notify('error', xhr.responseText);
+						}
+					}
+				});
 			}).on('click', '.feed-diff-claim-version', function() {
 				var $current_text = $(this).parents('.event').find('.improved.text');
 				var text = $current_text.text();

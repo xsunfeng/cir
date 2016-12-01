@@ -64,6 +64,7 @@ def api_get_slot(request):
         slot = Claim.objects.get(id=request.REQUEST.get('slot_id'))
         forum = Forum.objects.get(id=request.session['forum_id'])
         context['slot'] = slot.getAttrSlot(forum)
+        context['slot_order'] = Claim.objects.filter(forum = forum, claim_category = slot.claim_category, stmt_order__lte = slot.stmt_order).count()
     response['html'] = render_to_string("claim-common/claim-fullscreen.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
@@ -196,24 +197,25 @@ def api_draft_stmt(request):
         context['categories'][category] = [slot.getAttrSlot(forum) for slot in slots.filter(claim_category=category).order_by('stmt_order')]
         response['slots_cnt'][category] += len(context['categories'][category])
     
-    if request.user:
-        actual_author = request.user
-        context["my_statement"] = []
-        my_slot_ids = []
-        for slot_id in (SlotAssignment.objects.filter(user = actual_author, forum = forum).order_by('-created_at').values_list('slot', flat=True)):
-            if (slot_id not in my_slot_ids): my_slot_ids.append(slot_id)
-        for slot_id in my_slot_ids:
-            slot = Claim.objects.get(id = slot_id)
-            if (slot.is_deleted == False): context["my_statement"].append(slot.getAttrSlot(forum))
+    # if request.user:
+    #     actual_author = request.user
+    #     context["my_statement"] = []
+    #     my_slot_ids = []
+    #     for slot_id in (SlotAssignment.objects.filter(user = actual_author, forum = forum).order_by('-created_at').values_list('slot', flat=True)):
+    #         if (slot_id not in my_slot_ids): my_slot_ids.append(slot_id)
+    #     for slot_id in my_slot_ids:
+    #         slot = Claim.objects.get(id = slot_id)
+    #         if (slot.is_deleted == False): context["my_statement"].append(slot.getAttrSlot(forum))
         # for slot in Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False).order_by('created_at'):
         #     if (SlotAssignment.objects.filter(slot = slot, user = actual_author).count() > 0):
         #         context["my_statement"].append(slot.getAttrSlot(forum))
-        response['my_statement'] = render_to_string('phase3/my-statement.html', context)
+        # response['my_statement'] = render_to_string('phase3/my-statement.html', context)
 
-    if request.session['selected_phase'] == 'categorize':
-        response['html'] = render_to_string('phase3/draft-stmt.html', context)
-    else:
-        response['html'] = render_to_string('phase4/draft-stmt.html', context)
+    # if request.session['selected_phase'] == 'categorize':
+    #     response['html'] = render_to_string('phase3/draft-stmt.html', context)
+    # else:
+    #     response['html'] = render_to_string('phase4/draft-stmt.html', context)
+    response['html'] = render_to_string('phase1/statement.html', context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_claim(request):
@@ -371,7 +373,6 @@ def api_claim_activities(request):
         # slot assignment events
         slotassignments = SlotAssignment.objects.filter(slot=slot)
         for slotassignment in slotassignments:
-            print slotassignment.getAttr(forum)
             context['entries'].append(slotassignment.getAttr(forum))
 
         context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'], reverse=True)
@@ -379,20 +380,12 @@ def api_claim_activities(request):
         return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def _edit_claim(request):
-    private = request.REQUEST.get('nopublish')
     content = request.REQUEST.get('content')
     now = timezone.now()
-    claim = Claim.objects.get(id=request.REQUEST.get('claim_id'))
-    if content:
-        adopted_version = claim.adopted_version()
-        adopted_version.content = content
-        adopted_version.updated_at = now
-        adopted_version.save()
-        claim.updated_at = now
-    if private == 'false':
-        claim.published = True
-    claim.save()
-    return claim
+    claim_version = ClaimVersion.objects.get(id=request.REQUEST.get('claim_version_id'))
+    claim_version.content = content
+    claim_version.claim.updated_at = now
+    claim_version.save()
 
 def _add_claim(request, highlight):  # by this point user authentication must has been checked
     private = request.REQUEST.get('nopublish')
