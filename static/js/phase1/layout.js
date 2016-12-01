@@ -354,8 +354,7 @@ define([
 
 	var _create_nugget = function (slot_id) {
 		
-		var nugget_status = "new";
-		if (sessionStorage.getItem("nugget-status") == "exist") nugget_status = "exist";
+		var nugget_status = sessionStorage.getItem("nugget-status");
 		
 		$.ajax({
 			url: '/api_highlight/',
@@ -377,6 +376,8 @@ define([
 				} else if (view == "list") {
 					module.update_statement();
 				} 
+				$(this).hasClass("dragging")
+				sessionStorage.setItem("nugget-status", "new");
 			},
 			error: function(xhr) {
 				$('#doc-highlight-toolbar .button').removeClass('loading');
@@ -856,11 +857,9 @@ define([
 		});
 
 		$("#workbench-document-container").on('click', '.tk', function(e) {
-			
-			sessionStorage.setItem('nugget-status', 'exist');
-			
 			e.stopPropagation();
 			if ($(this).attr("data-hl-id") !== undefined) {
+				sessionStorage.setItem('nugget-status', 'exist');
 				// if ($(this).hasClass("this_is_a_question")) {
 				// 	// open qa panel
 				// 	if (!$("#qa-wrapper").is(":visible")) {
@@ -917,6 +916,7 @@ define([
 			var wasDragging = module.isDragging;
 			module.isDragging = false;
 			if (wasDragging) {
+				sessionStorage.setItem('nugget-status', 'new');
 				var min = Math.min(module.Highlight.newHighlight.start, module.Highlight.newHighlight.end);
 				var max = Math.max(module.Highlight.newHighlight.start, module.Highlight.newHighlight.end);
 				module.Highlight.newHighlight.start = min;
@@ -951,8 +951,6 @@ define([
 					var height = $(".workbench-doc-item").height();
 					module.Highlight.newHighlight.upper_bound = top / height;
 					module.Highlight.newHighlight.lower_bound = bottom / height;
-
-					sessionStorage.setItem('nugget-status', 'new');
 				}
 
 			} else { // just clicking
