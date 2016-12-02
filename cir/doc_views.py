@@ -76,7 +76,6 @@ def api_highlight(request):
             if not request.user.is_authenticated():
                 return HttpResponse("Please log in first.", status=403)
             content = request.REQUEST.get('content')
-            print "content = ", content
             content_type = request.REQUEST.get('type')
             start = request.REQUEST.get('start')
             end = request.REQUEST.get('end')
@@ -117,11 +116,7 @@ def api_highlight(request):
             elif content_type == 'claim':
                 print ""
             # 2016/11/30: now a nugget is directly converted to a claim
-            print "----------------------"
             category = request.REQUEST.get('category')
-            print "text = ", text
-            print "category = ", category
-            print "highlight = ", highlight.id
             now = timezone.now()
             newClaim = Claim(forum_id=request.session['forum_id'], author=request.user, created_at=now, updated_at=now, content=content, claim_category=category)
             newClaim.save()
@@ -132,12 +127,10 @@ def api_highlight(request):
             claim = newClaim
         else: # if (nugget_status == 'exist'):
             nugget_id = request.REQUEST['nugget_id'].split(" ")[0]
-            print "------------"
-            print nugget_id
             claim = HighlightClaim.objects.filter(highlight_id= Highlight.objects.get(id=nugget_id))[0].claim
         slot = Claim.objects.get(id=request.REQUEST['slot_id'])
         if not ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=slot).exists():
-            ClaimReference.objects.create(refer_type='stmt', from_claim=claim, to_claim=slot)
+            ClaimReference.objects.create(refer_type='stmt', from_claim=claim, to_claim=slot)      
         if 'actual_user_id' in request.session:
             actual_author = User.objects.get(id=request.session['actual_user_id'])
             SlotAssignment.objects.create(forum_id=request.session['forum_id'], user=actual_author, delegator=request.user,
@@ -145,8 +138,6 @@ def api_highlight(request):
         else:
             SlotAssignment.objects.create(forum_id=request.session['forum_id'], user=request.user,
                 entry=claim, created_at=now, slot=slot, event_type='add')
-        print "from_claim = ", claim.id
-        print "to_slot = ", slot.id
         response["slot_id"] = slot.id
         response["slot_order"] = slot.stmt_order
         return HttpResponse(json.dumps(response), mimetype='application/json')
