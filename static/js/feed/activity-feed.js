@@ -280,6 +280,8 @@ define([
 					} else {
 						$('#draft-stmt .src_claim[data-id="' + id + '"]').remove();
 					}
+					var slot_id = $(".slot").attr("data-id");
+					$(".show-workspace[slot-id=" + slot_id + "]").click();
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {

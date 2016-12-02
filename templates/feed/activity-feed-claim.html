@@ -160,9 +160,9 @@
 							<a class="item feed-like-claim-version" data-action="like"><i class="thumbs outline up icon"></i>Like<span></span></a>
 							<a class="item feed-reply-entry" data-id="{{ entry.version_id }}">Reply</a>
 							{% if entry.is_adopted %}
-								<a class="item feed-adopt-claim-version facilitator-only" data-action="deadopt" style="display: none;">Retract</a>
+								<a class="item feed-adopt-claim-version" data-action="deadopt">Retract</a>
 							{% else %}
-								<a class="item feed-adopt-claim-version facilitator-only" data-action="adopt" style="display: none;">Adopt</a>
+								<a class="item feed-adopt-claim-version" data-action="adopt">Adopt</a>
 							{% endif %}
 						</div>
 					</div>

@@ -14,6 +14,10 @@ define([
 
 	sessionStorage.setItem('category', 'finding');
 	sessionStorage.setItem('statement-view', 'list');
+	sessionStorage.setItem("read-mode", "collaborative");
+
+	var myWorkColor = "rgb(158, 202, 225)";
+	var otherWorkColor = "rgb(254, 227, 145)";
 
 	var module = {};
 	
@@ -162,11 +166,18 @@ define([
 							if (typeof $token.attr('data-hl-id') == 'undefined') { // new highlight for this word
 								$token.addClass(className).attr('data-hl-id', highlight.id);
 								$token.attr('used_in_slots', highlight.used_in_slots);
-								if (highlight.used_in_slots.length == 0) {
-									$token.css("background-color", "rgb(222, 235, 247)");
-								} else {
-									$token.css("background-color", "rgb(158, 202, 225)");
+								if (sessionStorage.getItem("read-mode") === "collaborative") {
+									if (highlight.used_in_slots.length > 0) {
+										$token.css("background-color", otherWorkColor);
+									}
 								}
+								if (highlight.author_id.toString() === sessionStorage.user_id.toString()) {
+									// my work
+									if (highlight.used_in_slots.length > 0) {
+										$token.css("background-color", myWorkColor);
+										$token.addClass("my-work");
+									}
+								} 
 							} else {
 								var curr_id = $token.attr('data-hl-id'); // append highlight for this word
 								$token.addClass(className).attr('data-hl-id', curr_id + ' ' + highlight.id);
@@ -425,6 +436,17 @@ define([
 
 	module.initEvents = function() {
 
+		
+
+		$("body").on("click", ".read-mode", function(){
+			$(".read-mode").removeClass("active");
+			$(this).addClass("active");
+			var mode = $(this).attr("data-id");
+			sessionStorage.setItem("read-mode", mode);
+			var doc_id = $(".workbench-doc-item").attr("data-id");
+			module.get_document_content(doc_id);
+		});
+
 		$("body").on("click", ".all-activity", function(){
 			$(".activity-filter a").removeClass("active");
 			$(this).addClass("active");
@@ -455,7 +477,9 @@ define([
 						$(".show-workspace[slot-id=" + slot_id + "]").click();
 					} else if (view == "list") {
 						module.update_statement();
-					} 
+					}
+					var doc_id = $(".workbench-doc-item").attr("data-id");
+					module.get_document_content(doc_id);
 				});
 			}
 		});
@@ -535,9 +559,11 @@ define([
 					'action': 'get-slot',
 					'slot_id': slot_id, // used only when display_type == 'fullscreen'
 				},
-				success: function(xhr) {
+				success: function(xhr) {					
 					$('#slot-overview').hide();
+				
 					$('#slot-detail').show();
+
 					$('#slot-detail .container').empty();
 					$('#slot-detail .container').html(xhr.html);
 					$('#slot-detail').find(".reword").show();
@@ -671,15 +697,15 @@ define([
 			});
 		});
 		$("body").on("click", ".source-nugget", function(e) {
-			var container = $(this).closest(".workbench-nugget");
-			var hl_id = container.attr("data-hl-id");
+			var claim_id = $(this).closest(".src_claim").attr("data-id");
 			$.ajax({
 				url: '/workbench/api_get_doc_by_hl_id/',
 				type: 'post',
 				data: {
-					'hl_id': hl_id,
+					'claim_id': claim_id,
 				},
 				success: function(xhr) {
+					var hl_id = xhr.hl_id;
 					var doc_id = $(".workbench-doc-item").attr("data-id");
 					if (xhr.doc_id == doc_id) {
 						_jump();						
@@ -696,10 +722,13 @@ define([
 						var tmp2 = $($(".tk[data-hl-id*='" + hl_id + "']")[0]).offsetParent().position().top;
 						var tmp = tmp1 + tmp2 - 200;
 						$("#workbench-document-panel").animate({scrollTop: tmp}, 0);
-						$(".tk[data-hl-id*='" + hl_id + "']").css("background-color", "red");	
+						var hl = $(".tk[data-hl-id*='" + hl_id + "']");
+						var prevColor = hl.css("background-color");
+						hl.css("background-color", "red");	
 						setTimeout(function() {
 							var hl = $(".tk[data-hl-id*='" + hl_id + "']");
-							hl.css("background-color", module.Theme.colorMap[hl.attr("theme_id").split(" ")[0]]);	
+							if (hl.hasClass("my-work")) hl.css("background-color", myWorkColor);	
+							else hl.css("background-color", otherWorkColor);	
 						}, 500);						
 					}
 				},
