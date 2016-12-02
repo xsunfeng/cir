@@ -170,12 +170,15 @@ def api_draft_stmt(request):
         response["slot_id"] = slot.id
         response["slot_order"] = slot.stmt_order
     if action == 'reorder':
-        orders = json.loads(request.REQUEST.get('order'))
-        for claim_id in orders:
-            claim = Claim.objects.get(id=claim_id)
-            claim.stmt_order = orders[claim_id]
-            claim.save()
-
+        claim_id = request.REQUEST['claim_id']
+        is_upvote = request.REQUEST['is_upvote']
+        print "is_upvote=",is_upvote
+        print "claim_id=",claim_id
+        # orders = json.loads(request.REQUEST.get('order'))
+        # for claim_id in orders:
+        #     claim = Claim.objects.get(id=claim_id)
+        #     claim.stmt_order = orders[claim_id]
+        #     claim.save()
     if action == 'destmt':
         now = timezone.now()
         claim = Claim.objects.get(id=request.REQUEST['claim_id'])

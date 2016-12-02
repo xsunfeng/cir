@@ -3,12 +3,19 @@
 		<h3>{{ slot.category|title|slice:"1" }}Q{{slot.stmt_order}}: {{ slot.slot_title }}</h3>
 		<div class="ui divider" style="margin: 0.5rem 0;"></div>
 			{% if slot.adopted_versions %}
+				<div class="ui stacked segments" style="margin-top:1rem;">
 				{% for stmt in slot.adopted_versions %}
-					<div class="src_claim" data-id="{{ stmt.id }}">
+					<div class="ui segment adopted-statement" data-id="{{ stmt.id }}">
 						<h4 style="margin: 0;">[ST{{ forloop.counter }}] {{ stmt.content | safe }}</h4>
+<!-- 						<div class="ui small basic icon buttons reorder-btns" style="position: absolute; right: 0.5rem; top: 0.5rem; display:none;">
+							<button class="ui basic button statement-reorder-up" style="padding:0.5rem;"><i class="icon arrow up"></i></button>
+							<button class="ui basic button statement-reorder-down" style="padding:0.5rem;"><i class="icon arrow down"></i></button>
+						</div> -->
 					</div>
 				{% endfor %}
+				</div>
 			{% endif %}
+
 		<div class="ui stacked segments" style="margin-top:1rem;">
 			{% for src_claim in slot.claims %}
 				<div class="src_claim ui secondary segment" data-id="{{ src_claim.id }}" style="padding: 0.5rem 1rem;">
@@ -16,7 +23,7 @@
 					<div class="src_claim_actions" style="position: absolute; right: 0rem; top: 0.2rem; display:none;">
 <!-- 						<button class="ui circular teal icon button context-claim"><i class="file text icon"></i></button>
 						<button class="ui circular red icon button remove-claim"><i class="remove icon"></i></button> -->
-						<button class="ui teal button context-claim" style="padding:0.5rem;"><i class="icon file text"></i>Context</button>
+						<button class="ui teal button source-nugget" style="padding:0.5rem;"><i class="icon file text"></i>Context</button>
 						<button class="ui red button remove-claim" style="padding:0.5rem;"><i class="icon remove"></i>Remove</button>
 					</div>
 				</div>

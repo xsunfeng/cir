@@ -484,6 +484,33 @@ define([
 			}
 		});
 
+		$('body').on('mouseenter', '.adopted-statement', function() {
+			$(this).find(".reorder-btns").show();
+		}).on('mouseleave', '.adopted-statement', function() {
+			$(this).find(".reorder-btns").hide();
+		}).on('click', '.statement-reorder-up', function() {
+			var claim_id = $(this).closest(".adopted-statement").attr("data-id");
+			reorderStatement(claim_id, true);
+		}).on('click', '.statement-reorder-down', function() {
+			var claim_id = $(this).closest(".adopted-statement").attr("data-id");
+			reorderStatement(claim_id, false);
+		});
+
+		var reorderStatement = function(claimId, isUpvote){
+			$.ajax({
+				url: '/api_draft_stmt/',
+				data: {
+					action: 'reorder',
+					claim_id: claimId,
+					is_upvote: isUpvote.toString(),
+				},
+				success: function() {
+					var slot_id = $(".slot").attr("data-id");
+					$(".show-workspace[slot-id=" + slot_id + "]").click();
+				},
+			})				
+		}
+
 		$('body').on('mouseenter', '.src_claim', function() {
 			$(this).find(".src_claim_actions").show();
 		}).on('mouseleave', '.src_claim', function() {

@@ -4,11 +4,13 @@
 		<h3>{{ slot_info.category|title|slice:"1" }}Q{{ slot_info.stmt_order }}: {{ slot_info.slot_title }}</h3>
 		<div class="ui divider" style="margin: 0.5rem 0;"></div>
 			{% if slot_info.adopted_versions %}
+				<div class="ui stacked segments" style="margin-top:1rem;">
 				{% for stmt in slot_info.adopted_versions %}
-					<div class="src_claim" data-id="{{ stmt.id }}">
+					<div class="src_claim ui segment" data-id="{{ stmt.id }}" style="padding: 0 1rem;">
 						<h4 style="margin: 1rem 0;">[ST{{ forloop.counter }}] {{ stmt.content | safe }}</h4>
 					</div>
 				{% endfor %}
+				</div>
 			{% endif %}
 		<div class="ui stacked segments" style="margin-top:1rem;">
 			{% for src_claim in slot_info.claims %}
