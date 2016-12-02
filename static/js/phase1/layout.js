@@ -969,6 +969,24 @@ define([
 		});
 		$("#doc-only").checkbox("uncheck");
 
+		$("body").on("click", "#create-empty-slot", function() {
+			var category = sessionStorage.getItem('category');
+			var content = $("#new-slot-modal textarea").val();
+			$.ajax({
+				url: '/api_draft_stmt/',
+				data: {
+					action: 'initiate-empty-slot',
+					category: category,
+					content: content,
+				},
+				success: function() {
+					$("#new-slot-modal textarea").val("");
+					module.update_statement();
+					$("#new-slot-modal").modal('hide');
+				},
+			})		
+		});
+
 		$("body").on("click", "#ask-question-about-nugget", function() {
 			$.ajax({
 				url: '/api_highlight/',

@@ -80,7 +80,38 @@ def api_draft_stmt(request):
         slot.title = new_title
         slot.save()
         return HttpResponse(json.dumps(response), mimetype='application/json')
+    if action == 'initiate-empty-slot':
+        now = timezone.now()
+        claim_category = request.REQUEST.get('category')
+        slot_title = request.REQUEST.get('content')
+        # order = int(request.REQUEST['order']) # order of the slot
+        order = 1
+        exist_slots = Claim.objects.filter(forum = forum, stmt_order__isnull = False, claim_category = claim_category)
+        if (exist_slots.count() > 0):
+            order = exist_slots.order_by("-stmt_order")[0].stmt_order + 1
 
+        # the "claim" will have an unassigned theme by default.
+        if 'actual_user_id' in request.session:
+            actual_author = User.objects.get(id=request.session['actual_user_id'])
+        else:
+            actual_author = None
+
+        if actual_author:
+            newSlot = Claim(forum=forum, author=actual_author, delegator=request.user,
+                created_at=now, updated_at=now, claim_category=claim_category, title=slot_title)
+        else:
+            newSlot = Claim(forum=forum, author=request.user, created_at=now, updated_at=now, claim_category=claim_category, title=slot_title)
+
+        # refresh slots one by one
+        slots = Claim.objects.filter(forum=forum, stmt_order__isnull=False, claim_category=claim_category)
+        for slot in slots:
+            if slot.stmt_order >= order:
+                slot.stmt_order += 1
+                slot.save()
+        newSlot.stmt_order = order
+        newSlot.save()
+        response["slot_id"] = newSlot.id
+        response["slot_order"] = order
     if action == 'initiate-slot':
         now = timezone.now()
         claim_category = request.REQUEST.get('list_type')
