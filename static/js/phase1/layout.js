@@ -19,6 +19,9 @@ define([
 	var myWorkColor = "rgb(158, 202, 225)";
 	var otherWorkColor = "rgb(254, 227, 145)";
 
+	$(".read-mode[data-id=individual]").css("background-color", myWorkColor);
+	$(".read-mode[data-id=collaborative]").css("background-color", otherWorkColor);
+
 	var module = {};
 	
 	module.put_viewlog_interval = 3 * 1000;
@@ -437,7 +440,7 @@ define([
 	module.initEvents = function() {
 
 		
-
+		$(".read-mode-new").checkbox();
 		$("body").on("click", ".read-mode", function(){
 			$(".read-mode").removeClass("active");
 			$(this).addClass("active");
@@ -445,6 +448,12 @@ define([
 			sessionStorage.setItem("read-mode", mode);
 			var doc_id = $(".workbench-doc-item").attr("data-id");
 			module.get_document_content(doc_id);
+		}).on("click", ".read-mode-new", function(){
+			if (!$(".read-mode-new").checkbox("is checked")) {
+				$(".read-mode[data-id=individual]").click();
+			} else {
+				$(".read-mode[data-id=collaborative]").click();
+			}
 		});
 
 		$("body").on("click", ".all-activity", function(){
