@@ -406,6 +406,11 @@ class ClaimReference(models.Model):
     from_claim = models.ForeignKey(Claim, related_name='newer_versions', on_delete=models.CASCADE)
     to_claim = models.ForeignKey(Claim, related_name='older_versions', on_delete=models.CASCADE)
 
+class StatementVersion(models.Model):
+    claim_version = models.ForeignKey(ClaimVersion, related_name='statement_versions', on_delete=models.CASCADE)
+    text = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    updated_at = models.DateTimeField()
 
 class Event(models.Model):  # the behavior of a user on an entry
     forum = models.ForeignKey(Forum, on_delete=models.CASCADE)

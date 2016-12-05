@@ -172,6 +172,9 @@ def api_draft_stmt(request):
     if action == 'reorder':
         claim_id = request.REQUEST['claim_id']
         is_upvote = request.REQUEST['is_upvote']
+        claim = Claim.objects.get(id = claim_id)
+        if (is_upvote == "true"):
+            claims = Claim.objects.filter(stmt_order__lt = claim)
         print "is_upvote=",is_upvote
         print "claim_id=",claim_id
         # orders = json.loads(request.REQUEST.get('order'))
@@ -297,6 +300,7 @@ def api_claim(request):
         else:
             new_version.author = request.user
         new_version.save()
+        StatementVersion.objects.create(author = request.user, claim_version = new_version, updated_at = now, text = content)
 
         # send messages
         message_type = 'version'
@@ -420,6 +424,8 @@ def _edit_claim(request):
     claim_version.content = content
     claim_version.claim.updated_at = now
     claim_version.save()
+    user = request.user
+    StatementVersion.objects.create(author = user, claim_version = claim_version, updated_at = now, text = content)
 
 def _add_claim(request, highlight):  # by this point user authentication must has been checked
     private = request.REQUEST.get('nopublish')

@@ -321,6 +321,7 @@ define([
 			}).on('click', '.feed-edit-claim-cancel', function(e) {
 				$(this).parents('.event').find(".editing").hide();
 				$(this).parents('.event').find(".edited").show();
+				$container = $(this).parents('.event');
 				var content = $container.find(".improved.text .content").text();
 				$container.find("textarea").val(content);
 			}).on('click', '.feed-edit-claim-save', function(e) {

@@ -634,6 +634,26 @@ define([
 			$("#new-slot-modal .label").text(category);
 		});
 
+		$('body').on('click', '.statement-history-btn', function(){
+			$("#statement-history").modal('show');
+			var claim_version_id = $(this).parents('.event').attr("data-id");
+			$.ajax({
+				url: '/phase1/get_statement_version/',
+				type: 'post',
+				data: {
+					claim_version_id: claim_version_id,
+				},
+				success: function(xhr) {
+					$("#statement-history .content").html(xhr.html);
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});
+		});
+
 		$('body').on('click', '.category-tab', function(){
 			$(".category-tab").removeClass("active");
 			$(this).addClass("active");

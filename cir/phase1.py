@@ -232,6 +232,21 @@ def get_highlights(request):
             response['highlights'].append(highlight_info)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
+def get_statement_version(request):
+    response = {}
+    context = {}
+    claim_version_id = request.REQUEST.get('claim_version_id')
+    statementVersions = StatementVersion.objects.filter(claim_version_id = claim_version_id).order_by('-updated_at')
+    context['versions'] = []
+    for statementVersion in statementVersions:
+        item = {}
+        item['text'] = statementVersion.text
+        item['updated_at'] = utils.pretty_date(statementVersion.updated_at)
+        item['author'] = statementVersion.author.first_name + " " + statementVersion.author.last_name
+        context['versions'].append(item)
+    response['html'] = render_to_string("phase1/statement-versions.html", context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
 def api_load_one_highlight(request):
     response = {}
     response['highlights'] = []
