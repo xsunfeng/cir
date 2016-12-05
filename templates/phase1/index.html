@@ -156,7 +156,7 @@
 		</div>
 	</div>
 	
-    <div id="chat-opened" style="position: fixed; bottom:0; right: 50px; width: 300px; height: 400px; outline: 1px solid #ccc; display:none; border: 1px solid; z-index: 1;">
+<!--     <div id="chat-opened" style="position: fixed; bottom:0; right: 50px; width: 300px; height: 400px; outline: 1px solid #ccc; display:none; border: 1px solid; z-index: 1;">
         <div id="chat-header" style="height: 30px; top: 0;background: #262626;padding-left: 5px;padding-top: 5px;">
 			<i class="large inverted comments outline icon"></i>
 			<i style="float:right;" class="large inverted minus icon"></i>
@@ -193,13 +193,11 @@
         <div style="height: 30px; top: 0;background: #262626;padding-left: 5px;padding-top: 5px;">
 			<i class="large inverted comments outline icon"></i>
         </div>
-    </div>
+    </div> -->
 
 {% include 'qa/qa-wrapper.html' %}
 
-<!-- {% if role != 'visitor' %}
-	{% include 'chatter.html' %}
-{% endif %} -->
+{% include 'chatter.html' %}
 
 {% include 'phase1/nugget_comment.html' %}
 {% include 'phase1/nugget_toolbar.html' %}
