@@ -370,12 +370,17 @@ class Claim(Entry):
         attr['claims'] = []
         attr['stmt_order'] = self.stmt_order
         attr['adopted_versions'] = []
-        for adopted_version in self.adopted_versions().all():
+        count = 1
+        for adopted_version in self.adopted_versions().all().order_by("order"):
+            adopted_version.order = count
+            adopted_version.save()
+            count = count + 1
             attr['adopted_versions'].append({
                 'id': adopted_version.id,
                 'content': adopted_version.content,
                 'author': adopted_version.author.get_full_name()
             })
+
         for claimref in self.older_versions.filter(refer_type='stmt'):
             attr['claims'].append({
                 'id': claimref.from_claim.id,

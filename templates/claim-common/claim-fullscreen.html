@@ -2,8 +2,8 @@
 	<div class="ui red raised segment statement-entry" data-id="{{slot.id}}">
 		<h3>{{ slot.category|title|slice:"1" }}Q{{slot.stmt_order}}: {{ slot.slot_title }}</h3>
 		<div class="ui divider" style="margin: 0.5rem 0;"></div>
-			{% if slot.adopted_versions %}
-				<div class="ui stacked segments" style="margin-top:1rem;">
+<!-- 		{% if slot.adopted_versions %}
+			<div class="ui stacked segments" style="margin-top:1rem;">
 				{% for stmt in slot.adopted_versions %}
 					<div class="ui segment adopted-statement" data-id="{{ stmt.id }}">
 						<h4 style="margin: 0;">[ST{{ forloop.counter }}] {{ stmt.content | safe }}</h4>
@@ -13,8 +13,59 @@
 						</div>
 					</div>
 				{% endfor %}
+			</div>
+		{% endif %} -->
+
+		<div class="ui stacked segments" style="margin-top:1rem;">
+		{% for entry in slot.adopted_versions %}
+			<div class="summary ui segment statement-entry adopted-statement" data-id="{{ entry.id }}">
+				<div class="edited">
+					<div class="extra improved text" style="max-width: 2000px;">
+						<h4 class="content">[ST{{ forloop.counter }}]  {{ entry.content | safe }}</h4>
+						<div class="ui small basic icon buttons reorder-btns" style="position: absolute; right: 0.5rem; top: 0.5rem; display:none;">
+							<button class="ui basic button statement-reorder-up" style="padding:0.5rem;"><i class="icon arrow up"></i></button>
+							<button class="ui basic button statement-reorder-down" style="padding:0.5rem;"><i class="icon arrow down"></i></button>
+						</div>
+					</div>
+
+					<div class="ui red secondary improve small menu" data-id="{{ entry.id }}">
+						<div class="right menu">
+							<a class="item feed-edit-claim-2" data-action="like"><i class="edit icon"></i>Edit<span></span></a>
+							<a class="item statement-history-btn"><i class="history icon"></i>History<span></span></a>
+							<!-- <a class="item feed-like-claim-version" data-action="like"><i class="thumbs outline up icon"></i>Like<span></span></a> -->
+							<a class="item statement-comment-btn" data-id="{{ entry.id }}">Comment</a>
+							<a class="item statement-retract" data-id="{{ entry.id }}" data-action="deadopt">Retract</a>
+						</div>
+					</div>
 				</div>
-			{% endif %}
+				
+				<div class="editing" style="display:none;">
+					<div class="content">
+						<textarea style="width:100%;">{{ entry.content | safe }}</textarea>
+					</div>
+
+					{% if not entry.collective %}
+					<div class="ui red secondary improve small menu" data-id="{{ entry.version_id }}">
+						<div class="right menu">
+							<a class="item feed-edit-claim-save-2"><i class="save icon"></i>Save</a>
+							<a class="item feed-edit-claim-cancel-2"><i class="remove icon"></i>Cancel</a>
+						</div>
+					</div>
+					{% endif %}
+				</div>
+
+				<div class="statement-comments" style="display:none;">
+					<div class="ui action input" style="width:100%; margin: 1rem 0;">
+						<input type="text" placeholder="Make a comment...">
+						<button class="ui teal button statement-comment-post" statement-id="{{ entry.id }}">
+							<i class="send outline icon"></i>Comment
+						</button>
+					</div>
+					<div class="content statement-comment-list" statement-id="{{ entry.id }}"></div>
+				</div>
+			</div>
+		{% endfor %}
+		</div>
 
 		<div class="ui stacked segments" style="margin-top:1rem;">
 			{% for src_claim in slot.claims %}

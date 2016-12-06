@@ -345,6 +345,7 @@ define([
 						}
 					}
 				});
+			// copy and paste, edit for adopted statement
 			}).on('click', '.feed-diff-claim-version', function() {
 				var $current_text = $(this).parents('.event').find('.improved.text');
 				var text = $current_text.text();

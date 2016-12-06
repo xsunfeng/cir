@@ -180,20 +180,24 @@ def api_draft_stmt(request):
         print 'this_claim_version', this_claim_version.order
         print ClaimVersion.objects.filter(claim = slot, order__lt = this_claim_version.order).count()
         if (is_upvote == "true"):
-            prev_claim_version = ClaimVersion.objects.filter(claim = slot, is_adopted = True, order__lt = this_claim_version.order).order_by("-order")[0]
-            tmp = this_claim_version.order
-            this_claim_version.order = prev_claim_version.order
-            prev_claim_version.order = tmp
-            this_claim_version.save()
-            prev_claim_version.save()
+            count = ClaimVersion.objects.filter(claim = slot, is_adopted = True, order__lt = this_claim_version.order).count()
+            if (count > 0):
+                prev_claim_version = ClaimVersion.objects.filter(claim = slot, is_adopted = True, order__lt = this_claim_version.order).order_by("-order")[0]
+                tmp = this_claim_version.order
+                this_claim_version.order = prev_claim_version.order
+                prev_claim_version.order = tmp
+                prev_claim_version.save()
+                this_claim_version.save()
         else: 
-            next_claim_version = ClaimVersion.objects.filter(claim = slot, is_adopted = True, order__gt = this_claim_version.order).order_by("order")[0]
-            print "next_claim_version", next_claim_version.order
-            tmp = this_claim_version.order
-            this_claim_version.order = next_claim_version.order
-            next_claim_version.order = tmp
-            this_claim_version.save()
-            next_claim_version.save()
+            count = ClaimVersion.objects.filter(claim = slot, is_adopted = True, order__gt = this_claim_version.order).count()
+            if (count > 0):
+                next_claim_version = ClaimVersion.objects.filter(claim = slot, is_adopted = True, order__gt = this_claim_version.order).order_by("order")[0]
+                print "next_claim_version", next_claim_version.order
+                tmp = this_claim_version.order
+                this_claim_version.order = next_claim_version.order
+                next_claim_version.order = tmp
+                next_claim_version.save()
+                this_claim_version.save()
     if action == 'destmt':
         now = timezone.now()
         claim = Claim.objects.get(id=request.REQUEST['claim_id'])
@@ -300,7 +304,7 @@ def api_claim(request):
         now = timezone.now()
         order = 1
         if (ClaimVersion.objects.filter(claim = slot).count() > 0):
-            order = ClaimVersion.objects.filter(claim = slot).values_list("order", flat=True).order_by('-order')[0]
+            order = ClaimVersion.objects.filter(claim = slot).values_list("order", flat=True).order_by('-order')[0] + 1
         new_version = ClaimVersion(forum_id=request.session['forum_id'], content=content, created_at=now,
             updated_at=now, is_adopted=False, claim=slot, order = order)
         if collective == 'true':

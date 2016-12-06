@@ -486,8 +486,8 @@ define([
 			var result = confirm("Want to delete?");
 			if (result) {
 				// since a claim can be refered by multiple slots, both claim_id and slot_id are needed
-				var claim_id = $(this).parents('.src_claim').attr('data-id');
-				var slot_id = $(this).parents('.statement-entry').attr('data-id');
+				var claim_id = $(this).closest('.src_claim').attr('data-id');
+				var slot_id = $(this).closest('.statement-entry').attr('data-id');
 				var category = $(".category-tab.active").attr("data-id");
 				_stmtUpdater({
 					'action': 'destmt',
@@ -505,6 +505,43 @@ define([
 				});
 			}
 		});
+
+
+		$('body').on('click', '.feed-edit-claim-2', function(e) {
+			$(this).closest('.statement-entry').find(".edited").hide();
+			$(this).closest('.statement-entry').find(".editing").show();
+		}).on('click', '.feed-edit-claim-cancel-2', function(e) {
+			$(this).closest('.statement-entry').find(".editing").hide();
+			$(this).closest('.statement-entry').find(".edited").show();
+			$container = $(this).closest('.statement-entry');
+			var content = $container.find(".improved.text .content").text();
+			$container.find("textarea").val(content);
+		}).on('click', '.feed-edit-claim-save-2', function(e) {
+			$container = $(this).closest('.statement-entry');
+			var content = $container.find("textarea").val();
+			var claim_version_id = $container.attr("data-id");
+			$container.find(".improved.text .content").text(content);
+			$container.find("textarea").val(content);
+			$(this).closest('.statement-entry').find(".editing").hide();
+			$(this).closest('.statement-entry').find(".edited").show();
+			$.ajax({
+				url: '/api_claim/',
+				type: 'post',
+				data: {
+					action: 'update',
+					content: content,
+					claim_version_id: claim_version_id,
+				},
+				success: function(xhr) {
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});
+		});
+
 
 		$('body').on('mouseenter', '.adopted-statement', function() {
 			$(this).find(".reorder-btns").show();
@@ -541,10 +578,10 @@ define([
 
 		// static event listeners
 		$('body').on('click', '.claim-reword-btn', function() {
-			var slot_id = $(this).parents(".slot").attr("data-id");
+			var slot_id = $(this).closest(".slot").attr("data-id");
 			$('#slot-detail').find(".reword.form'").transition('slide down', '500ms');
 		}).on('click', '.reword.form .submit.button', function() {
-			var slot_id = $(this).parents(".slot").attr("data-id");
+			var slot_id = $(this).closest(".slot").attr("data-id");
 			var content = $('#slot-detail').find(".claim.reword.editor").val();
 			if ($.trim(content).length == 0) {
 				Utils.notify('error', 'Content must not be empty.');
@@ -594,11 +631,11 @@ define([
 		});
 
 		$("body").on("click", ".expand-info", function(){
-			if ($(this).parents(".statement-entry").find(".collapsed-info").css("display") == "none") {
-				$(this).parents(".statement-entry").find(".collapsed-info").show();
+			if ($(this).closest(".statement-entry").find(".collapsed-info").css("display") == "none") {
+				$(this).closest(".statement-entry").find(".collapsed-info").show();
 				$(this).text("Collapse");
 			} else {
-				$(this).parents(".statement-entry").find(".collapsed-info").hide();
+				$(this).closest(".statement-entry").find(".collapsed-info").hide();
 				$(this).text("Expand")
 			}
 		}).on("click", ".back-to-statement-list", function(){
@@ -658,7 +695,8 @@ define([
 
 		$('body').on('click', '.statement-history-btn', function(){
 			$("#statement-history").modal('show');
-			var claim_version_id = $(this).parents('.event').attr("data-id");
+			var claim_version_id = $(this).closest('.event').attr("data-id") || $(this).closest('.statement-entry').attr("data-id");
+			
 			$.ajax({
 				url: '/phase1/get_statement_version/',
 				type: 'post',
@@ -854,7 +892,7 @@ define([
 			html = html + "</div>";	
 			container.append(html);
 			container.on("click", ".reassign-btn", function(e) {
-				var $nugget = $(this).parents(".workbench-nugget")
+				var $nugget = $(this).closest(".workbench-nugget")
 				var highlight_id = $nugget.attr('data-hl-id');
 				var theme_id = $(this).attr("data-id");
 				$.ajax({
@@ -970,7 +1008,10 @@ define([
 		}).on("click", ".statement-comment-reply-save", function(){
 			var text = $(this).closest("form").find("textarea").val();
 		 	var parent_id = $(this).closest(".comment").attr("comment-id");
-		 	var statement_id = $(this).parents(".event").attr("data-id");
+
+			var $container = $(this).closest(".event")
+			if ($(this).closest(".event").length === 0) $container = $(this).closest(".statement-entry");
+		 	var statement_id = $container.attr("data-id");
 		 	var textarea = $(this).closest("form").find("textarea");
 			$.ajax({
 				url: '/phase1/put_statement_comment/',
@@ -998,7 +1039,8 @@ define([
 		}).on("click", ".statement-comment-reply", function(){
 		 	$(this).closest(".content").find(".form").show();
 		}).on("click", ".statement-comment-btn", function(){
-			var $container = $(this).parents(".event");
+			var $container = $(this).closest(".event")
+			if ($(this).closest(".event").length === 0) $container = $(this).closest(".statement-entry");
 			if ($container.find(".statement-comments").css("display") == "none") {
 				var statement_id = $(this).attr("data-id");
 		 		showStatementCommentList(statement_id);	
@@ -1006,7 +1048,27 @@ define([
 			} else {
 				$container.find(".statement-comments").hide();
 			}
+		}).on("click", ".statement-retract", function(){
+			var $container = $(this).closest(".statement-entry")
+			var id = $(this).attr('data-id');
+			$.ajax({
+				url: '/api_claim_vote/',
+				type: 'post',
+				data: {
+					action: "deadopt",
+					version_id: id,
+				},
+				success: function(xhr) {
+					$container.remove();
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});			
 		});
+
 
 		$("#nugget-comment-modal").on("click", ".nugget-comment-post", function(){
 			var text = $(this).closest("form").find("textarea").val();
