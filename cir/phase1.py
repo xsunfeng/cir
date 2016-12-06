@@ -40,12 +40,34 @@ def put_nugget_comment(request):
     newNuggetComment.save()
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
-class NuggetComment(MPTTModel):
-    text = models.CharField(max_length=50, unique=True)
-    parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    highlight = models.ForeignKey(Highlight)
-    created_at = models.DateTimeField()
+def get_statement_comment_list(request):
+    response = {}
+    context = {}
+    statement_id = request.REQUEST.get("statement_id")
+    print "---------"
+    print statement_id
+    this_statement = ClaimVersion.objects.get(id = statement_id)
+    thread_comments = StatementComment.objects.filter(claim_version = this_statement)
+    context['comments'] = thread_comments
+    response['statement_comment_list'] = render_to_string("phase1/statement-comment-list.html", context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def put_statement_comment(request):
+    response = {}
+    context = {}
+    author = request.user
+    parent_id = request.REQUEST.get('parent_id')
+    statement_id = request.REQUEST.get('statement_id')
+    text = request.REQUEST.get('text')
+    created_at = timezone.now()
+    statement = ClaimVersion.objects.get(id = statement_id)
+    if parent_id == "": #root node
+        newStatementComment = StatementComment(author = author, text = text, claim_version = statement, created_at = created_at)
+    else:
+        parent = StatementComment.objects.get(id = parent_id)
+        newStatementComment = StatementComment(author = author, text = text, claim_version = statement, parent = parent, created_at = created_at)
+    newStatementComment.save()
+    return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_load_all_documents(request):
     response = {}

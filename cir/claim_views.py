@@ -3,6 +3,7 @@ import json
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.utils import timezone
+from django.db.models import Max
 
 from cir.models import *
 import random
@@ -172,16 +173,27 @@ def api_draft_stmt(request):
     if action == 'reorder':
         claim_id = request.REQUEST['claim_id']
         is_upvote = request.REQUEST['is_upvote']
-        claim = Claim.objects.get(id = claim_id)
+        this_claim_version = ClaimVersion.objects.get(id = claim_id)
+        slot = this_claim_version.claim
+        print "---------"
+        print "slot-id", slot.id
+        print 'this_claim_version', this_claim_version.order
+        print ClaimVersion.objects.filter(claim = slot, order__lt = this_claim_version.order).count()
         if (is_upvote == "true"):
-            claims = Claim.objects.filter(stmt_order__lt = claim)
-        print "is_upvote=",is_upvote
-        print "claim_id=",claim_id
-        # orders = json.loads(request.REQUEST.get('order'))
-        # for claim_id in orders:
-        #     claim = Claim.objects.get(id=claim_id)
-        #     claim.stmt_order = orders[claim_id]
-        #     claim.save()
+            prev_claim_version = ClaimVersion.objects.filter(claim = slot, is_adopted = True, order__lt = this_claim_version.order).order_by("-order")[0]
+            tmp = this_claim_version.order
+            this_claim_version.order = prev_claim_version.order
+            prev_claim_version.order = tmp
+            this_claim_version.save()
+            prev_claim_version.save()
+        else: 
+            next_claim_version = ClaimVersion.objects.filter(claim = slot, is_adopted = True, order__gt = this_claim_version.order).order_by("order")[0]
+            print "next_claim_version", next_claim_version.order
+            tmp = this_claim_version.order
+            this_claim_version.order = next_claim_version.order
+            next_claim_version.order = tmp
+            this_claim_version.save()
+            next_claim_version.save()
     if action == 'destmt':
         now = timezone.now()
         claim = Claim.objects.get(id=request.REQUEST['claim_id'])
@@ -286,8 +298,11 @@ def api_claim(request):
         collective = request.REQUEST.get('collective')
         request_action = request.REQUEST.get('request_action', 'false')
         now = timezone.now()
+        order = 1
+        if (ClaimVersion.objects.filter(claim = slot).count() > 0):
+            order = ClaimVersion.objects.filter(claim = slot).values_list("order", flat=True).order_by('-order')[0]
         new_version = ClaimVersion(forum_id=request.session['forum_id'], content=content, created_at=now,
-            updated_at=now, is_adopted=False, claim=slot)
+            updated_at=now, is_adopted=False, claim=slot, order = order)
         if collective == 'true':
             new_version.collective = True
             # automatically adopt

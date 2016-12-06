@@ -65,11 +65,8 @@ define([
 
 
 					$(".activity-filter a").removeClass("active");
-					$(".statement-candidate").addClass("active");
-					$(".event").each(function(){
-				        if ($(this).attr("data-type") != "claim version") $(this).hide();
-				    });		
-
+					var activity_filter = sessionStorage.getItem("activity-filter");
+					$("." + activity_filter).click();
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -368,6 +365,7 @@ define([
 				var $form = $(this).parents('form');
 				var content = $form.find('textarea').val();
 				submitComment(content, 'comment');
+				$(".activity-filter .statement-comment").click();
 			}).on('click', '#activity-reply-form div.submit', function(e) {
 				var $form = $(this).parents('form');
 				var content = $form.find('textarea').val();

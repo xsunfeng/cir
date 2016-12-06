@@ -67,6 +67,9 @@
 				<a class="active item statement-candidate">
 					Statements
 				</a>
+				<a class="active item statement-comment">
+					Comments
+				</a>
 				<a class="item all-activity">
 					All
 				</a>
@@ -159,7 +162,7 @@
 							<a class="item feed-edit-claim" data-action="like"><i class="edit icon"></i>Edit<span></span></a>
 							<a class="item statement-history-btn"><i class="history icon"></i>History<span></span></a>
 							<!-- <a class="item feed-like-claim-version" data-action="like"><i class="thumbs outline up icon"></i>Like<span></span></a> -->
-							<a class="item feed-reply-entry" data-id="{{ entry.version_id }}">Reply</a>
+							<a class="item statement-comment-btn" data-id="{{ entry.version_id }}">Comment</a>
 							{% if entry.is_adopted %}
 								<a class="item feed-adopt-claim-version" data-action="deadopt">Retract</a>
 							{% else %}
@@ -183,6 +186,16 @@
 						</div>
 					</div>
 					{% endif %}
+				</div>
+
+				<div class="statement-comments" style="display:none;">
+					<div class="ui action input" style="width:100%; margin: 1rem 0;">
+						<input type="text" placeholder="Make a comment...">
+						<button class="ui teal button statement-comment-post" statement-id="{{ entry.version_id }}">
+							<i class="send outline icon"></i>Comment
+						</button>
+					</div>
+					<div class="content statement-comment-list" statement-id="{{ entry.version_id }}"></div>
 				</div>
 
 			{% elif entry.entry_type == 'slotassignment' %}

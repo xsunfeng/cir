@@ -1,0 +1,37 @@
+<div class="ui threaded comments" style="width:100%;">
+
+	{% load mptt_tags %}
+
+	{% recursetree comments %}
+		<div class="comment" comment-id="{{ node.id }}">
+			<a class="avatar">
+				<img style="width:40px;" src="{{ STATIC_URL }}/static/pictures/{{ node.author.id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
+			</a>
+			<div class="content">
+				<a class="author">{{ node.author }}</a>
+				<div class="metadata">
+					<span class="date">{{ node.created_at }}</span>
+				</div>
+				<div class="text">
+					<p>{{ node.text|safe }}</p>
+				</div>
+				<div class="actions">
+					<a class="reply statement-comment-reply">Reply</a>
+				</div>
+				<form class="ui form" style="display:none;">
+					<div class="field" style="margin-bottom:0;">
+						<textarea rows="2"></textarea>
+					</div>
+					<a href="#" class="reply statement-comment-reply-save">save</a><span> | </span><a href="#" class="reply statement-comment-reply-cancel">cancel</a>
+				</form>
+			</div>	
+
+            {% if not node.is_leaf_node %}
+            	<div class="comments">
+                {{ children }}
+                </div>
+            {% endif %}
+	    
+		</div>
+	{% endrecursetree %}
+</div>

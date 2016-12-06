@@ -273,6 +273,7 @@ class Highlight(models.Model):
 class ClaimVersion(Entry):
     claim = models.ForeignKey('Claim', related_name='versions', on_delete=models.CASCADE)
     is_adopted = models.BooleanField(default=True)
+    order = models.IntegerField(null=True, blank=True)
 
     def getAttr(self, forum):
         attr = super(ClaimVersion, self).getAttr(forum)
@@ -327,7 +328,7 @@ class Claim(Entry):
         return self.versions.get(is_adopted=True)
 
     def adopted_versions(self):
-        return self.versions.filter(is_adopted=True)
+        return self.versions.filter(is_adopted=True).order_by("order")
 
     # get id, author and time only
     def getAttrSimple(self):
@@ -694,6 +695,13 @@ class NuggetComment(MPTTModel):
     parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     highlight = models.ForeignKey(Highlight)
+    created_at = models.DateTimeField()
+
+class StatementComment(MPTTModel):
+    text = models.CharField(max_length=999)
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    claim_version = models.ForeignKey(ClaimVersion)
     created_at = models.DateTimeField()
 
 class ClaimComment(MPTTModel):
