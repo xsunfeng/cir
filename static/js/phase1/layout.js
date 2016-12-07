@@ -441,6 +441,13 @@ define([
 
 	module.initEvents = function() {
 
+		$("body").on("click", "#nugget-bag-close", function(){
+			$("#nugget-bag").hide();
+			$("#nugget-bag-close").hide();
+		}).on("click", "#nugget-bag-open", function(){
+			$("#nugget-bag").show();
+			$("#nugget-bag-close").show();
+		});
 		
 		$(".read-mode-new").checkbox();
 		$("body").on("click", ".read-mode", function(){
@@ -678,6 +685,19 @@ define([
 					// $("#draft-stmt-container").animate({scrollTop: (offset - 100)}, 100);
 					module.drag_drop_events();
 					sessionStorage.setItem('statement-view', 'detail');
+
+					$('#show-statement-btn')
+						.popup({
+							position : 'bottom center',
+							target   : '#statement-detail-header',
+							title    : $(".slot .segment h3").html(),
+							on: 'click',
+							closable:	false,
+							setFluidWidth:	false
+						})
+					;
+
+					$("#nugget-bag").html($(".src_claims").html());
 				},
 				error: function(xhr) {
 					$('#claim-pane-fullscreen').html('');

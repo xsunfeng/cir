@@ -1,7 +1,12 @@
 <div class="slot" data-id="{{slot.id}}">
-	<div class="ui red raised segment statement-entry" data-id="{{slot.id}}">
+
+	<div class="ui segment">
 		<h3>{{ slot.category|title|slice:"1" }}Q{{slot.stmt_order}}: {{ slot.slot_title }}</h3>
-		<div class="ui divider" style="margin: 0.5rem 0;"></div>
+	</div>
+
+
+	<div class="ui red raised segment statement-entry" data-id="{{slot.id}}">
+
 <!-- 		{% if slot.adopted_versions %}
 			<div class="ui stacked segments" style="margin-top:1rem;">
 				{% for stmt in slot.adopted_versions %}
@@ -67,7 +72,7 @@
 		{% endfor %}
 		</div>
 
-		<div class="ui stacked segments" style="margin-top:1rem;">
+		<div class="ui stacked segments src_claims" style="margin-top:1rem;">
 			{% for src_claim in slot.claims %}
 				<div class="src_claim ui secondary segment" data-id="{{ src_claim.id }}" style="padding: 0.5rem 1rem;">
 					[N{{ forloop.counter }}] {{ src_claim.content | safe }}
@@ -80,6 +85,9 @@
 				</div>
 			{% endfor %}
 		</div>
+
+		<div id="nugget-bag-open" style="width:100%;" class="ui button">Pop up Nugget List</div>
+
 		<a style="display:none;" class = "show-workspace" slot-id="{{ slot.id }}">Details</a>
 	</div>
 
