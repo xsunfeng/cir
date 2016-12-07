@@ -341,3 +341,20 @@ a.claim-vote-btn.unready:hover {
 .active-1 {
 	border: 5px #A9D5DE solid;	
 }
+
+
+
+.feed-adopt-claim-version[data-action="deadopt"]{
+    background: #2185D0!important;
+    color: white!important;
+}
+.feed-adopt-claim-version[data-action="deadopt"] span{
+  	position: relative;
+    content: 'Adopted';
+}
+.feed-adopt-claim-version[data-action="deadopt"]:hover span{
+    display: none;
+}
+.feed-adopt-claim-version[data-action="deadopt"]:hover:after{
+    content: 'Retract';
+}

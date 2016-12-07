@@ -13,6 +13,7 @@
 				<div class="field">
 					<textarea rows="1" class="claim reword editor"></textarea>
 					<input type="hidden" name="collective">
+					<div id="result"></div>
 				</div>
 				<div class="ui primary submit button"><i class="send outline icon"></i>Suggest</div>
 				<div class="ui request-action checkbox">
@@ -151,9 +152,6 @@
 				<div class="edited">
 					<div class="extra improved text" style="max-width: 2000px;">
 						<div class="content">{{ entry.content | safe }}</div>
-						{% if entry.is_adopted %}
-							<div class="ui blue label">Adopted</div>
-						{% endif %}
 					</div>
 
 					{% if not entry.collective %}
@@ -164,9 +162,9 @@
 							<!-- <a class="item feed-like-claim-version" data-action="like"><i class="thumbs outline up icon"></i>Like<span></span></a> -->
 							<a class="item statement-comment-btn" data-id="{{ entry.version_id }}">Comment</a>
 							{% if entry.is_adopted %}
-								<a class="item feed-adopt-claim-version" data-action="deadopt">Retract</a>
+								<a class="item feed-adopt-claim-version" data-action="deadopt"><span>Adopted</span></a>
 							{% else %}
-								<a class="item feed-adopt-claim-version" data-action="adopt">Adopt</a>
+								<a class="item feed-adopt-claim-version" data-action="adopt"><span>Adopt</span></a>
 							{% endif %}
 						</div>
 					</div>

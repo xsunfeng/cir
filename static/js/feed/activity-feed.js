@@ -10,6 +10,15 @@ define([
 	jQuery.fn.feed = function(action, data, callback) {
 		var _this = this;
 		this.update = function(callback) {
+
+					$('.feed-adopt-claim-version').hover(
+						function() {
+							$(this).text( "retract" );
+						}, function() {
+							$(this).text( "adopted" );
+						}
+					);
+
 			if (_this.updater) {
 				_this.updater.abort();
 			}
@@ -263,6 +272,7 @@ define([
 			var $menu = $(button).parent().parent();
 			var id = $menu.attr('data-id');
 			var action = button.getAttribute('data-action');
+			var $container = $(button).closest(".event");
 			$.ajax({
 				url: '/api_claim_vote/',
 				type: 'post',
@@ -271,11 +281,15 @@ define([
 					version_id: id,
 				},
 				success: function(xhr) {
-					_this.update();
+					// _this.update();
 					if (action == 'adopt') {
-						DraftStmt.update();
+						$container.find(".feed-adopt-claim-version").attr("data-action", "deadopt");
+						$container.find(".feed-adopt-claim-version span").text("Adopted");
+						// DraftStmt.update();
 					} else {
-						$('#draft-stmt .src_claim[data-id="' + id + '"]').remove();
+						$container.find(".feed-adopt-claim-version").attr("data-action", "adopt");
+						$container.find(".feed-adopt-claim-version span").text("Adopt");
+						// $('#draft-stmt .src_claim[data-id="' + id + '"]').remove();
 					}
 					var slot_id = $(".slot").attr("data-id");
 					$(".show-workspace[slot-id=" + slot_id + "]").click();
@@ -376,6 +390,7 @@ define([
 					$(this).parent().next().trigger('click');
 				}
 			});
+
 		} else if (action == 'update') {
 			if (typeof data == 'object') {
 				this.data(data);

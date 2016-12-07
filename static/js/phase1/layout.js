@@ -669,6 +669,7 @@ define([
 						'id': slot_id,
 					});
 					$('.reword.form .request-action.checkbox').checkbox();
+
 					if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (!sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
 						$('#slot-detail .facilitator-only').show();
 					}
@@ -685,6 +686,33 @@ define([
 					}
 				}
 			});		
+		});
+
+		// var textarea = document.getElementsByClassName("reword editor")[0];
+		// var result   = document.getElementById("result");
+
+		// textarea.addEventListener("input", function(){
+		//   var v = wordCount( this.value );
+		//   result.innerHTML = (
+		//       "<br>Characters (no spaces):  "+ v.charactersNoSpaces +
+		//       "<br>Characters (and spaces): "+ v.characters +
+		//       "<br>Words: "+ v.words +
+		//       "<br>Lines: "+ v.lines
+		//   );
+		// }, false);
+
+
+		$('body').on('keydown', '.reword.editor', function(){
+			console.log("key");
+			var count = $(this).val().split(" ").length;
+			$("#result").html(
+				"<br>Word count: "+ count
+			);
+			if (count >= 50) {
+				$("#result").css("color", "red");
+			} else {
+				$("#result").css("color", "");
+			}
 		});
 
 		$('body').on('click', '.create-new-slot-btn', function(){
@@ -1051,6 +1079,7 @@ define([
 		}).on("click", ".statement-retract", function(){
 			var $container = $(this).closest(".statement-entry")
 			var id = $(this).attr('data-id');
+			$(".event[data-id=" + id + "] .feed-adopt-claim-version[data-action=deadopt]").click();
 			$.ajax({
 				url: '/api_claim_vote/',
 				type: 'post',
