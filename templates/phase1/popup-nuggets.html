@@ -1,0 +1,6 @@
+			{% for src_claim in slot.claims %}
+				<div class="src_claim ui secondary segment" data-id="{{ src_claim.id }}" style="padding: 0.5rem 1rem;">
+					<input type="checkbox">
+					[N{{ forloop.counter }}] {{ src_claim.content | safe }}
+				</div>
+			{% endfor %}

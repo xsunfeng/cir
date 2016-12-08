@@ -151,7 +151,7 @@
 
 				<div class="edited">
 					<div class="extra improved text" style="max-width: 2000px;">
-						<div class="content">{{ entry.content | safe }}</div>
+						<div class="content" style="font-size: 1.3rem!important;">{{ entry.content | safe }}</div>
 					</div>
 
 					{% if not entry.collective %}
@@ -172,7 +172,7 @@
 				</div>
 				
 				<div class="editing" style="display:none;">
-					<div class="content">
+					<div class="content" style="font-size: 1.3rem!important;">
 						<textarea style="width:100%;">{{ entry.content | safe }}</textarea>
 					</div>
 

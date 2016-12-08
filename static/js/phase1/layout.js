@@ -444,9 +444,11 @@ define([
 		$("body").on("click", "#nugget-bag-close", function(){
 			$("#nugget-bag").hide();
 			$("#nugget-bag-close").hide();
+			$(".src_claims").show();
 		}).on("click", "#nugget-bag-open", function(){
 			$("#nugget-bag").show();
 			$("#nugget-bag-close").show();
+			$(".src_claims").hide();
 		});
 		
 		$(".read-mode-new").checkbox();
@@ -696,9 +698,11 @@ define([
 							setFluidWidth:	false
 						})
 					;
-					$( "#nugget-bag" ).sortable();
 
-					$("#nugget-bag").html($(".src_claims").html());
+					
+					$( "#nugget-bag" ).sortable();
+					$("#nugget-bag").html(xhr.popup_nuggets);
+					// $("#nugget-bag").html($(".src_claims").html());
 				},
 				error: function(xhr) {
 					$('#claim-pane-fullscreen').html('');
@@ -726,8 +730,9 @@ define([
 		$('body').on('keydown', '.reword.editor', function(){
 			console.log("key");
 			var count = $(this).val().split(" ").length;
+			if ($(this).val() == "") count = 0;
 			$("#result").html(
-				"<br>Word count: "+ count
+				"<br>Word Count: "+ count
 			);
 			if (count >= 50) {
 				$("#result").css("color", "red");

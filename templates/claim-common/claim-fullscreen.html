@@ -26,7 +26,7 @@
 			<div class="summary ui segment statement-entry adopted-statement" data-id="{{ entry.id }}">
 				<div class="edited">
 					<div class="extra improved text" style="max-width: 2000px;">
-						<h4 class="content">[ST{{ forloop.counter }}]  {{ entry.content | safe }}</h4>
+						<h4 class="content" style="font-size: 1.3rem!important;">[ST{{ forloop.counter }}]  {{ entry.content | safe }}</h4>
 						<div class="ui small basic icon buttons reorder-btns" style="position: absolute; right: 0.5rem; top: 0.5rem; display:none;">
 							<button class="ui basic button statement-reorder-up" style="padding:0.5rem;"><i class="icon arrow up"></i></button>
 							<button class="ui basic button statement-reorder-down" style="padding:0.5rem;"><i class="icon arrow down"></i></button>
@@ -45,7 +45,7 @@
 				</div>
 				
 				<div class="editing" style="display:none;">
-					<div class="content">
+					<div class="content" style="font-size: 1.3rem!important;">
 						<textarea style="width:100%;">{{ entry.content | safe }}</textarea>
 					</div>
 
@@ -72,6 +72,8 @@
 		{% endfor %}
 		</div>
 
+		<div id="nugget-bag-open" style="width:100%; margin-bottom: -1rem;" class="ui button">Pop up Nugget List</div>
+
 		<div class="ui stacked segments src_claims" style="margin-top:1rem;">
 			{% for src_claim in slot.claims %}
 				<div class="src_claim ui secondary segment" data-id="{{ src_claim.id }}" style="padding: 0.5rem 1rem;">
@@ -85,8 +87,6 @@
 				</div>
 			{% endfor %}
 		</div>
-
-		<div id="nugget-bag-open" style="width:100%;" class="ui button">Pop up Nugget List</div>
 
 		<a style="display:none;" class = "show-workspace" slot-id="{{ slot.id }}">Details</a>
 	</div>

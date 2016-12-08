@@ -67,6 +67,7 @@ def api_get_slot(request):
         context['slot'] = slot.getAttrSlot(forum)
         context['slot_order'] = Claim.objects.filter(forum = forum, claim_category = slot.claim_category, stmt_order__lte = slot.stmt_order).count()
     response['html'] = render_to_string("claim-common/claim-fullscreen.html", context)
+    response['popup_nuggets'] = render_to_string("phase1/popup-nuggets.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_draft_stmt(request):
