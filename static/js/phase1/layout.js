@@ -696,6 +696,7 @@ define([
 							setFluidWidth:	false
 						})
 					;
+					$( "#nugget-bag" ).sortable();
 
 					$("#nugget-bag").html($(".src_claims").html());
 				},
@@ -910,7 +911,7 @@ define([
 						$("#workbench-document-panel").animate({scrollTop: 0}, 0);
 						var tmp1 = $($(".tk[data-hl-id*='" + hl_id + "']")[0]).position().top; 
 						var tmp2 = $($(".tk[data-hl-id*='" + hl_id + "']")[0]).offsetParent().position().top;
-						var tmp = tmp1 + tmp2 - 200;
+						var tmp = tmp1 + tmp2 - 100;
 						$("#workbench-document-panel").animate({scrollTop: tmp}, 0);
 						var hl = $(".tk[data-hl-id*='" + hl_id + "']");
 						var prevColor = hl.css("background-color");
