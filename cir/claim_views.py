@@ -304,8 +304,8 @@ def api_claim(request):
         request_action = request.REQUEST.get('request_action', 'false')
         now = timezone.now()
         order = 1
-        if (ClaimVersion.objects.filter(claim = slot).count() > 0):
-            order = ClaimVersion.objects.filter(claim = slot).values_list("order", flat=True).order_by('-order')[0] + 1
+        if (ClaimVersion.objects.filter(claim = slot, order__isnull=False).count() > 0):
+            order = ClaimVersion.objects.filter(claim = slot, order__isnull=False).values_list("order", flat=True).order_by('-order')[0] + 1
         new_version = ClaimVersion(forum_id=request.session['forum_id'], content=content, created_at=now,
             updated_at=now, is_adopted=False, claim=slot, order = order)
         if collective == 'true':
