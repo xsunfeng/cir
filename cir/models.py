@@ -26,6 +26,7 @@ class Forum(models.Model):
         ('paused', 'Paused'),
         ('not_started', 'Not started'),
         ('tagging', 'Tagging'),
+        ('free_discuss', 'Discuss Questions'), # phase 0
         ('nugget', 'Extract nugget'), # phase 1
         ('extract', 'Assemble Claim'), # phase 2
         ('categorize', 'Categorize Claim'), # phase 3
@@ -280,6 +281,8 @@ class ClaimVersion(Entry):
         attr['version_id'] = attr['id']
         attr['entry_type'] = 'claim version'
         attr['is_adopted'] = self.is_adopted
+        attr['claim_ids'] =  StatementClaim.objects.filter(statement = attr['id']).values_list("claim_id", flat = True)
+        attr['num_comments'] = StatementComment.objects.filter(claim_version = self).count()
         return attr
 
     # get id, author and time only
@@ -369,6 +372,7 @@ class Claim(Entry):
         attr['category'] = self.claim_category
         attr['claims'] = []
         attr['stmt_order'] = self.stmt_order
+        attr['num_comments'] = StatementQuestionComment.objects.filter(statement_question = self).count()
         attr['adopted_versions'] = []
         count = 1
         for adopted_version in self.adopted_versions().all().order_by("order"):
@@ -378,7 +382,8 @@ class Claim(Entry):
             attr['adopted_versions'].append({
                 'id': adopted_version.id,
                 'content': adopted_version.content,
-                'author': adopted_version.author.get_full_name()
+                'author': adopted_version.author.get_full_name(),
+                'num_comments': StatementComment.objects.filter(claim_version = adopted_version).count()
             })
 
         for claimref in self.older_versions.filter(refer_type='stmt'):
@@ -386,7 +391,8 @@ class Claim(Entry):
                 'id': claimref.from_claim.id,
                 'content': claimref.from_claim.adopted_version().content,
                 # 'theme': claimref.from_claim.theme.name
-                'theme': "null"
+                'theme': "null",
+                'statement_ids': StatementClaim.objects.filter(claim_id = claimref.from_claim.id).values_list("statement_id", flat = True)
             })
         return attr
 
@@ -709,6 +715,31 @@ class StatementComment(MPTTModel):
     claim_version = models.ForeignKey(ClaimVersion)
     created_at = models.DateTimeField()
 
+    class MPTTMeta:
+        order_insertion_by = ['-created_at']
+
+    def get_author_name(self):
+        return self.author.first_name + " " + self.author.last_name
+
+    def get_datetime(self):
+        return utils.pretty_date(self.created_at)
+
+class StatementQuestionComment(MPTTModel):
+    text = models.CharField(max_length=999)
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    statement_question = models.ForeignKey(Claim)
+    created_at = models.DateTimeField()
+
+    class MPTTMeta:
+        order_insertion_by = ['-created_at']
+
+    def get_author_name(self):
+        return self.author.first_name + " " + self.author.last_name
+
+    def get_datetime(self):
+        return utils.pretty_date(self.created_at)
+
 class ClaimComment(MPTTModel):
     text = models.CharField(max_length=999)
     parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
@@ -750,6 +781,7 @@ class ComplexPhase(models.Model):
         ('paused', 'Paused'),
         ('not_started', 'Not started'),
         ('tagging', 'Tagging'),
+        ('free_discuss', 'Discuss Questions'), # phase 0
         ('nugget', 'Extract nugget'), # phase 1
         ('extract', 'Assemble Claim'), # phase 2
         ('categorize', 'Categorize Claim'), # phase 3
@@ -768,3 +800,23 @@ class PinMessage(models.Model):
     content = models.TextField(null=True, blank=True)
     phase = models.ForeignKey(ComplexPhase, related_name='pin_messages')
     is_show = models.BooleanField(default=False)
+
+class StatementClaim(models.Model):
+    statement = models.ForeignKey(ClaimVersion, on_delete=models.CASCADE)
+    claim = models.ForeignKey(Claim, on_delete=models.CASCADE)
+
+class ForumComment(MPTTModel):
+    text = models.CharField(max_length=999)
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    forum = models.ForeignKey(Forum)
+    created_at = models.DateTimeField()
+
+    class MPTTMeta:
+        order_insertion_by = ['-created_at']
+
+    def get_author_name(self):
+        return self.author.first_name + " " + self.author.last_name
+
+    def get_datetime(self):
+        return utils.pretty_date(self.created_at)

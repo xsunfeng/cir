@@ -3,7 +3,7 @@
 {% block extralib %}
 	<script>
 		require([
-			'phase4/claim',
+			'phase4/layout',
 		]);
 	</script>
 {% endblock %}
@@ -16,14 +16,8 @@
 
 {% block body %}
 
-<div class="ui claim grid">
-	<div id="draft-stmt-container" class="eight wide column">
-		<div id="draft-stmt"></div>
-	</div>
-	<div id="claim-pane-fullscreen" class="eight wide column">
-		<div class="ui message">Please click "Open Discussion" from the left column.</div>
-	</div>
-</div>
+
+
 {% if role != 'visitor' %}
 	{% include 'chatter.html' %}
 {% endif %}

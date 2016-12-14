@@ -71,7 +71,7 @@ def enter_forum(request, forum_url, phase_name):  # access /forum_name
                 forum=forum).exists()):
         context['load_error'] = '403'
         return render(request, 'error_index.html', context)
-    if phase_name is not None and phase_name not in ['nugget', 'extract', 'categorize', 'improve', 'finished']:
+    if phase_name is not None and phase_name not in ['free_discuss', 'nugget', 'extract', 'categorize', 'improve', 'finished']:
         context['load_error'] = '404'
         context['error_msg'] = 'The requested forum phase is not valid: <b>' + phase_name + '</b>'
         return render(request, 'error_index.html', context)
@@ -81,7 +81,7 @@ def enter_forum(request, forum_url, phase_name):  # access /forum_name
         phase = forum.phase
         return redirect('/' + forum_url + '/phase/' + phase)
 
-    for phase_name_tmp in ['nugget', 'extract', 'categorize', 'improve', 'finished']:
+    for phase_name_tmp in ['free_discuss', 'nugget', 'extract', 'categorize', 'improve', 'finished']:
         if (ComplexPhase.objects.filter(forum = forum, name = phase_name_tmp).count() == 0):
             complexPhase = ComplexPhase(name = phase_name_tmp, description = "", start_time = timezone.now(), end_time = timezone.now(), forum = forum)
             complexPhase.save()
@@ -102,7 +102,9 @@ def enter_forum(request, forum_url, phase_name):  # access /forum_name
         context["pinmessages"].append(pinMessage)
 
     index_html = ''
-    if phase_name == 'nugget':
+    if phase_name == 'free_discuss':
+        index_html = 'phase0/index.html'
+    elif phase_name == 'nugget':
         index_html = 'phase1/index.html'
     elif phase_name == 'extract':
         index_html = 'phase2/index.html'
@@ -174,14 +176,16 @@ def _get_phases(forum, selected_phase):
     results['selected_phase'] = selected_phase
     results['selected_phase_name'] = _get_full_phase_name(selected_phase)
     results['phases'] = []
-    for name in ['nugget', 'extract', 'categorize', 'improve', 'finished']:
+    # for name in ['free_discuss','nugget', 'extract', 'categorize', 'improve', 'finished']:
+    for name in ['free_discuss','nugget', 'finished']:
         phase_info = {
             'name': name,
             'fullname': _get_full_phase_name(name)
         }
         if name == selected_phase:
             phase_info['status'] = 'active'
-        elif (name == 'nugget') or \
+        elif (name == 'free_discuss') or \
+                (name == 'nugget' and forum.phase != 'free_discuss') or \
                 (name == 'extract' and forum.phase != 'nugget') or \
                 (name == 'categorize' and forum.phase != 'nugget' and forum.phase != 'extract') or \
                 (name == 'improve' and (forum.phase == 'improve' or forum.phase == 'finished')) or \
@@ -190,6 +194,7 @@ def _get_phases(forum, selected_phase):
         else:
             phase_info['status'] = 'disabled'
         results['phases'].append(phase_info)
+    print results
     return results
 
 

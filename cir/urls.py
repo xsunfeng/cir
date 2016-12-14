@@ -13,8 +13,10 @@ import chatter_views
 import vis_views
 import sankey_views
 
+import phase0
 import phase1
 import phase2
+import phase5
 
 
 admin.autodiscover()
@@ -61,6 +63,13 @@ urlpatterns = patterns('',
     url(r'^workbench/api_get_doc_by_hl_id/$', workbench_views.api_get_doc_by_hl_id),
     url(r'^workbench/api_get_doc_by_doc_id/$', workbench_views.api_get_doc_by_doc_id),
     url(r'^workbench/api_get_init_doc/$', workbench_views.api_get_init_doc),
+
+    url(r'^phase0/update_statement_questions/$', phase0.update_statement_questions),
+    url(r'^phase0/get_statement_comment_list/$', phase0.get_statement_comment_list),
+    url(r'^phase0/put_statement_comment/$', phase0.put_statement_comment),
+
+    url(r'^phase5/get_statement_comment_list/$', phase5.get_statement_comment_list),
+    url(r'^phase5/put_statement_comment/$', phase5.put_statement_comment),
 
     url(r'^phase1/get_nugget_list/$', phase1.get_nugget_list),
     url(r'^phase1/get_highlights/$', phase1.get_highlights),

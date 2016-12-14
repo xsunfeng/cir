@@ -1,0 +1,58 @@
+<div class="ui compact menu">
+	<a href="./free_discuss" class="item">
+		<i class="left chevron icon" style="margin-right:0;"></i>Full Question List
+	</a>
+</div>
+
+<div class="ui segment statement-entry" data-id="{{slot_info.id}}">
+	<h3>{{ slot_info.category|title|slice:"1" }}Q{{ slot_info.stmt_order }}: {{ slot_info.slot_title }}</h3>
+</div>
+
+<div class="ui threaded comments comment-container" style="width:100%; margin:auto; max-width: 960px;" slot-id="{{ slot.id }}">
+  	<h3 class="ui dividing header">Comments</h3>
+
+	<form class="ui form">
+		<div class="field" style="margin-bottom:0;">
+			<textarea rows="1"></textarea>
+		</div>
+		<span class="actions">
+			<a href="#" class="reply comment-post">Comment</a>
+		</span>
+	</form>
+
+
+	{% load mptt_tags %}
+
+	{% recursetree comments %}
+		<div class="comment" comment-id="{{ node.id }}">
+			<a class="avatar">
+				<img style="width:40px;" src="{{ STATIC_URL }}/static/pictures/{{ node.author.id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
+			</a>
+			<div class="content">
+				<a class="author">{{ node.get_author_name }}</a>
+				<div class="metadata">
+					<span class="date">{{ node.get_datetime }}</span>
+				</div>
+				<div class="text">
+					<p>{{ node.text|safe }}</p>
+				</div>
+				<div class="actions">
+					<a class="reply comment-reply">Reply</a>
+				</div>
+				<form class="ui form" style="display:none;">
+					<div class="field" style="margin:0;">
+						<textarea rows="1" style="height:auto!important;"></textarea>
+					</div>
+					<a href="#" class="reply comment-reply-save">save</a><span> | </span><a href="#" class="reply comment-reply-cancel">cancel</a>
+				</form>
+			</div>	
+
+            {% if not node.is_leaf_node %}
+            	<div class="comments">
+                {{ children }}
+                </div>
+            {% endif %}
+	    
+		</div>
+	{% endrecursetree %}
+</div>

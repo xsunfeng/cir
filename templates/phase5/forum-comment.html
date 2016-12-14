@@ -1,0 +1,46 @@
+<div class="ui threaded comments comment-container" style="width:100%; margin:auto; max-width: 960px;" slot-id="{{ slot.id }}">
+	<form class="ui form">
+		<div class="field" style="margin-bottom:0;">
+			<textarea rows="1"></textarea>
+		</div>
+		<span class="actions">
+			<a href="#" class="reply ui teal button comment-post" style="width: 100%; margin: 0.4rem 0;">Comment</a>
+		</span>
+	</form>
+
+
+	{% load mptt_tags %}
+
+	{% recursetree comments %}
+		<div class="comment" comment-id="{{ node.id }}">
+			<a class="avatar">
+				<img style="width:40px;" src="{{ STATIC_URL }}/static/pictures/{{ node.author_id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
+			</a>
+			<div class="content">
+				<a class="author">{{ node.get_author_name }}</a>
+				<div class="metadata">
+					<span class="date">{{ node.get_datetime }}</span>
+				</div>
+				<div class="text">
+					<p>{{ node.text|safe }}</p>
+				</div>
+				<div class="actions">
+					<a class="reply comment-reply">Reply</a>
+				</div>
+				<form class="ui form" style="display:none;">
+					<div class="field" style="margin:0;">
+						<textarea rows="1" style="height:auto!important;"></textarea>
+					</div>
+					<a href="#" class="reply comment-reply-save">save</a><span> | </span><a href="#" class="reply comment-reply-cancel">cancel</a>
+				</form>
+			</div>	
+
+            {% if not node.is_leaf_node %}
+            	<div class="comments">
+                {{ children }}
+                </div>
+            {% endif %}
+	    
+		</div>
+	{% endrecursetree %}
+</div>

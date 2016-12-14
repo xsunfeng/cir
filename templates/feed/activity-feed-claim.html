@@ -1,94 +1,26 @@
-<div>
-	<div class="ui top attached tabular menu">
-		<a class="statement-post-tab item active" style="border-top: 2px solid #DB2828;" data-id="statement">
-			Suggest a Statement
-		</a>
-		<a class="statement-post-tab item" data-id="comment">
-			Post a Comment
-		</a>
-	</div>
-	<div id="statement-container" class="ui bottom attached segment">
-		<div class="statement-post" data-id="statement">
-			<form class="ui form reword">
-				<div class="field">
-					<textarea style="font-size: 1rem;" rows="2" class="claim reword editor"></textarea>
-					<input type="hidden" name="collective">
-					<div id="result"></div>
-				</div>
-				<div class="ui primary submit button"><i class="send outline icon"></i>Suggest</div>
-				<div class="ui request-action checkbox">
-					<label>Request panel attention</label>
-					<input type="checkbox" name="request">
-				</div>
-			</form>
-		</div>
-		<div class="statement-post" data-id="comment" style="display:none;">
-			<form id="activity-comment-form" class="ui form">
-				<div class="field">
-					<textarea rows="2"></textarea>
-				</div>
-				<div class="field">
-					<div class="ui primary submit button"><i class="send outline icon"></i>Post</div>
-					<div class="ui collective checkbox facilitator-only" style="display:none">
-						<label>Collective</label>
-						<input type="checkbox" name="collective">
-					</div>
-			<!-- 		<div class="ui request-action checkbox">
-						<label>Request panel attention</label>
-						<input type="checkbox" name="request">
-					</div> -->
-				</div>
 
-			</form>
-			<form id="activity-reply-form" class="ui form" style="display:none">
-				<div class="field">
-					<label><span></span> (Ctrl + Enter to post)</label>
-					<textarea rows="2"></textarea>
-				</div>
-				<div class="ui primary submit button"><i class="send outline icon"></i>Post</div>
-			<!-- 	<div class="ui request-action checkbox">
-					<label>Request panel attention</label>
-					<input type="checkbox" name="request">
-				</div> -->
-			</form>
-		</div>
-	</div>
-</div>
 
 <div class="ui raised pink segment">
 	<div class="ui top attached tabular menu">
-		<div class="ui text menu" style="margin:0;">
-			<a id="document-toc-button" class="header item"> Activities
+		<div class="ui text menu activity-filter" style="margin:0;">
+			<div class="header item">Activities</div>
+			<a class="active item statement-candidate">
+				Statements
 			</a>
-		</div>
-		<div id="document-toc-container" class="ui special popup" style="min-width:400px; max-height:500px; overflow:auto;"></div>
-		<div class="right menu">
-			<div class="ui text menu activity-filter" style="margin:0;">
-				<div class="header item">Filter</div>
-				<a class="active item statement-candidate">
-					Statements
-				</a>
-				<a class="active item statement-comment">
-					Comments
-				</a>
-				<a class="item all-activity">
-					All
-				</a>
-			</div>
+			<a class="active item statement-comment">
+				Comments
+			</a>
+			<a class="item all-activity">
+				All
+			</a>
 		</div>
 	</div>
 	{% if entries %}
 	<div class="ui feed" style="margin-top: 1em">
 	{% for entry in entries %}
 		<div class="event" data-type="{{ entry.entry_type }}" data-id="{{ entry.id }}">
-			<div class="user-initial">
-				<div class="{{ entry.author_role }}{% if entry.collective %} collective{% endif %}">
-				{% if entry.author_role == 'facilitator' %}F
-				{% elif entry.collective %}C
-				{% elif entry.author_role == 'admin' %}A
-				{% else %}{{ entry.author_initial }}
-				{% endif %}
-				</div>
+			<div class="user-initial" style="min-width: 4em;">
+				<img src="{{ STATIC_URL }}/static/pictures/{{ entry.author_id }}.png" alt="Image not found" onerror="this.onerror=null;this.src='{{ STATIC_URL }}/static/pictures/default-avatar.png';" style="width:40px;"/>
 			</div>
 			<div class="activity-content content">
 			{% if entry.is_deleted %}
@@ -142,16 +74,21 @@
 			{% elif entry.entry_type == 'claim version' %}
 				<div class="summary">
 					{% if entry.collective %}
-						The panel generated a statement <div class="ui label">S{{ entry.version_id }}</div> for this slot (written by <a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a>):
+						The panel generated a statement <div class="ui label">S{{ entry.version_id }}</div> (written by <a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a>):
 					{% else %}
-						<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> suggested a statement <div class="ui label">S{{ entry.version_id }}</div> for this slot:
+						<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> suggested a statement <div class="ui label">S{{ entry.version_id }}</div>:
 					{% endif %}
 					<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+					<div class="src-claim-labels">
+						{% for claim_id in entry.claim_ids %}
+							<span class="ui mini label src-claim-label" claim-id="{{ claim_id }}">N{{ claim_id }}<i class="delete icon"></i></a></span>
+						{% endfor %}
+					</div>
 				</div>
 
 				<div class="edited">
 					<div class="extra improved text" style="max-width: 2000px;">
-						<div class="content" style="font-size: 1.3rem!important;">{{ entry.content | safe }}</div>
+						<div class="content" style="font-size: 1rem!important;">{{ entry.content | safe }}</div>
 					</div>
 
 					{% if not entry.collective %}
@@ -160,7 +97,7 @@
 							<a class="item feed-edit-claim" data-action="like"><i class="edit icon"></i>Edit<span></span></a>
 							<a class="item statement-history-btn"><i class="history icon"></i>History<span></span></a>
 							<!-- <a class="item feed-like-claim-version" data-action="like"><i class="thumbs outline up icon"></i>Like<span></span></a> -->
-							<a class="item statement-comment-btn" data-id="{{ entry.version_id }}">Comment</a>
+							<a class="item statement-comment-btn" data-id="{{ entry.version_id }}"><i class="wechat icon"></i>Comments({{ entry.num_comments }})</a>
 							{% if entry.is_adopted %}
 								<a class="item feed-adopt-claim-version" data-action="deadopt"><span>Adopted</span></a>
 							{% else %}
@@ -172,7 +109,7 @@
 				</div>
 				
 				<div class="editing" style="display:none;">
-					<div class="content" style="font-size: 1.3rem!important;">
+					<div class="content" style="font-size: 1rem!important;">
 						<textarea style="width:100%;">{{ entry.content | safe }}</textarea>
 					</div>
 

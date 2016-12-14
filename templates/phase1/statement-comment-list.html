@@ -8,9 +8,9 @@
 				<img style="width:40px;" src="{{ STATIC_URL }}/static/pictures/{{ node.author.id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
 			</a>
 			<div class="content">
-				<a class="author">{{ node.author }}</a>
+				<a class="author">{{ node.get_author_name }}</a>
 				<div class="metadata">
-					<span class="date">{{ node.created_at }}</span>
+					<span class="date">{{ node.get_datetime }}</span>
 				</div>
 				<div class="text">
 					<p>{{ node.text|safe }}</p>

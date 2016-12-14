@@ -297,6 +297,7 @@ def api_claim(request):
             version.save()
         claim.save()
     elif action == 'reword':
+        claim_ids = request.REQUEST.getlist('claim_ids[]')
         forum = Forum.objects.get(id=request.session['forum_id'])
         slot = Claim.objects.get(id=request.REQUEST.get('slot_id'))
         content = request.REQUEST.get('content')
@@ -321,6 +322,10 @@ def api_claim(request):
             new_version.author = request.user
         new_version.save()
         StatementVersion.objects.create(author = request.user, claim_version = new_version, updated_at = now, text = content)
+        print "---------------------------"
+        for claim_id in claim_ids:
+            print claim_id
+            StatementClaim.objects.create(statement = new_version, claim_id = claim_id)
 
         # send messages
         message_type = 'version'

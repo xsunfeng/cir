@@ -441,14 +441,38 @@ define([
 
 	module.initEvents = function() {
 
+		$("body").on("click", ".temp-used.label", function(){
+			var statements = $(this).attr("data-tooltip").trim().split(/\s+/);
+			for (var i = 0; i < statements.length; i++) {
+				var statement_id = statements[i].slice(1);
+				if (i === statements.length - 1) {
+					$(".container").animate({scrollTop: 0}, 0);
+					var v1 = $(".event[data-id=" + statement_id + "]").position().top;
+					var v2 = $(".event[data-id=" + statement_id + "]").offsetParent().position().top;
+					$(".container").animate({scrollTop: v1 + v2}, 0);
+				}
+				$(".event[data-id=" + statement_id + "]").css("background-color", "yellow");
+				setTimeout(function() {
+					$(".event").css("background-color", "");	
+				}, 2500);	
+			}
+		});
+
 		$("body").on("click", "#nugget-bag-close", function(){
 			$("#nugget-bag").hide();
 			$("#nugget-bag-close").hide();
-			$(".src_claims").show();
+			$("#nugget-bag-origin").show();
+			
+			$("#nugget-bag-origin").html($("#nugget-bag").html());
+			$( ".src_claims" ).sortable();
+		
 		}).on("click", "#nugget-bag-open", function(){
 			$("#nugget-bag").show();
 			$("#nugget-bag-close").show();
-			$(".src_claims").hide();
+			$("#nugget-bag-origin").hide();
+
+			$("#nugget-bag").html($("#nugget-bag-origin").html());
+			$( ".src_claims" ).sortable();
 		});
 		
 		$(".read-mode-new").checkbox();
@@ -496,8 +520,9 @@ define([
 			if (result) {
 				// since a claim can be refered by multiple slots, both claim_id and slot_id are needed
 				var claim_id = $(this).closest('.src_claim').attr('data-id');
-				var slot_id = $(this).closest('.statement-entry').attr('data-id');
+				var slot_id = $(this).closest('.src_claims').attr('slot-id');
 				var category = $(".category-tab.active").attr("data-id");
+				$(this).closest(".src_claim").remove();
 				_stmtUpdater({
 					'action': 'destmt',
 					'claim_id': claim_id,
@@ -510,15 +535,55 @@ define([
 						module.update_statement();
 					}
 					var doc_id = $(".workbench-doc-item").attr("data-id");
-					module.get_document_content(doc_id);
+					if (doc_id !== undefined) module.get_document_content(doc_id);
 				});
 			}
+		}).on('click', '.use-nugget-2', function(e) {
+			$(this).closest(".src_claim").css("border", "1px solid");
+			var claim_id = $(this).closest(".src_claim").attr("data-id");
+			var new_label = '<a class="ui used label" style="display: inline-block !important; margin-bottom: 0.5rem;" claim-id='
+				 + claim_id
+				 + '>N' + claim_id + '<i class="delete icon"></i></a>';
+			$("#use-nugget-labels").append(new_label);
+			var text = $(this).closest(".src_claim").find("span").text();
+			text = $("textarea.reword.editor").val() + text;
+			$("textarea.reword.editor").val(text);
+			textarea_autoresize();
+		}).on('click', '#use-nugget-labels i.delete.icon', function(e) {
+			var claim_id = $(this).closest(".label").attr("claim-id");
+			$(this).closest(".label").remove();
+			$(".src_claim[data-id=" + claim_id + "]").css("border", "");
+			textarea_autoresize();
 		});
 
+		$("body").on("click", ".statement-question-comment", function(){
+			var slot_id = $(this).attr("slot-id");
+			showStatementCommentList(slot_id);
+		})
+		var showStatementCommentList = function(slot_id) {
+			$.ajax({
+				url: '/phase0/get_statement_comment_list/',
+				type: 'post',
+				data: {
+					'slot_id': slot_id,
+				},
+				success: function(xhr) {	
+					$('#phase0-container').html(xhr.statement_comment_list);
+
+					textarea_autoresize();
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});	
+		}
 
 		$('body').on('click', '.feed-edit-claim-2', function(e) {
 			$(this).closest('.statement-entry').find(".edited").hide();
 			$(this).closest('.statement-entry').find(".editing").show();
+			textarea_autoresize();
 		}).on('click', '.feed-edit-claim-cancel-2', function(e) {
 			$(this).closest('.statement-entry').find(".editing").hide();
 			$(this).closest('.statement-entry').find(".edited").show();
@@ -583,7 +648,7 @@ define([
 			$(this).find(".src_claim_actions").show();
 		}).on('mouseleave', '.src_claim', function() {
 			$(this).find(".src_claim_actions").hide();
-		});;
+		});
 
 		// static event listeners
 		$('body').on('click', '.claim-reword-btn', function() {
@@ -597,16 +662,21 @@ define([
 				return;
 			}
 			var collective = false;
-			var request_action = $('.reword.form .request-action.checkbox').checkbox('is checked');
+			// var request_action = $('.reword.form .request-action.checkbox').checkbox('is checked');
+			
+			var claim_ids = [];
+			$("#use-nugget-labels .label.used").each(function(v){ 
+				claim_ids.push($(this).attr("claim-id"));
+			});
 			$.ajax({
 				url: '/api_claim/',
 				type: 'post',
 				data: {
+					'claim_ids[]': claim_ids,
 					action: 'reword',
 					content: content,
 					slot_id: slot_id,
 					collective: collective,
-					request_action: request_action
 				},
 				success: function(xhr) {
 					if (collective == 'true') {
@@ -699,10 +769,8 @@ define([
 						})
 					;
 
-					
-					$( "#nugget-bag" ).sortable();
-					$("#nugget-bag").html(xhr.popup_nuggets);
-					// $("#nugget-bag").html($(".src_claims").html());
+					$( ".src_claims" ).sortable();
+					// $("#nugget-bag").html(xhr.popup_nuggets);
 				},
 				error: function(xhr) {
 					$('#claim-pane-fullscreen').html('');
@@ -746,6 +814,94 @@ define([
 			var category = $(".category-tab.active").attr("data-id").toUpperCase();
 			$("#new-slot-modal .label").text(category);
 		});
+
+		var showSlotCommentList = function(slot_id) {
+			$.ajax({
+				url: '/phase0/get_statement_comment_list/',
+				type: 'post',
+				data: {
+					'slot_id': slot_id,
+				},
+				success: function(xhr) {	
+					$("#statement-question-comment-container").html(xhr.statement_comment_list);
+					$(".ui.compact.menu").hide();
+					$("#statement-question-comment-modal").modal('show');
+
+					textarea_autoresize();
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});	
+		}
+
+		$('body').on('click', '.statement-question-comment-btn', function(){
+			var slot_id = $(this).attr("slot-id");
+			showSlotCommentList(slot_id);
+		});
+
+	$("body").on("click", ".comment-post", function(){
+		var textarea = $(this).closest(".comment-container").find("textarea");
+		var text = textarea.val();
+	 	var parent_id = "";
+	 	var slot_id = $(this).closest(".comment-container").attr("slot-id");
+	 	if (text == "") {
+	 		Utils.notify('warning', "Empty content not accepted");
+	 	} else {
+			$.ajax({
+				url: '/phase0/put_statement_comment/',
+				type: 'post',
+				data: {
+					'text': text,
+					'parent_id': parent_id,
+					'slot_id': slot_id,
+				},
+				success: function(xhr) {
+					textarea.val("");
+					showSlotCommentList(slot_id);
+					// updateStatementCommentList();
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});	 		
+	 	}
+	}).on("click", ".comment-reply-save", function(){
+		var text = $(this).closest("form").find("textarea").val();
+	 	var parent_id = $(this).closest(".comment").attr("comment-id");
+	 	var slot_id = $(this).closest(".comment-container").attr("slot-id");
+	 	var textarea = $(this).closest("form").find("textarea");
+		$.ajax({
+			url: '/phase0/put_statement_comment/',
+			type: 'post',
+			data: {
+				'text': text,
+				'parent_id': parent_id,
+				'slot_id': slot_id,
+			},
+			success: function(xhr) {
+				textarea.val("");
+				textarea.closest(".form").hide();
+				showSlotCommentList(slot_id);
+			},
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			}
+		});
+	}).on("click", ".comment-reply-cancel", function(){
+	 	var textarea = $(this).closest("form").find("textarea");
+		textarea.val("");
+		textarea.closest(".form").hide();
+	}).on("click", ".comment-reply", function(){
+	 	$(this).closest(".content").find(".form").show();
+		textarea_autoresize();
+	});
 
 		$('body').on('click', '.statement-history-btn', function(){
 			$("#statement-history").modal('show');
@@ -1409,6 +1565,16 @@ define([
 		module.update_statement();
 
 	}
+
+	var textarea_autoresize = function(){
+		$('textarea').each(function () {
+			this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px; overflow-y:hidden; width:100%;');
+		}).on('input', function () {
+			this.style.height = 'auto';
+			this.style.height = (this.scrollHeight) + 'px';
+		});
+	}
+
 	module.initLayout();
 });
 

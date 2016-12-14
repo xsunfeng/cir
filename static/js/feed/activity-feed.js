@@ -11,13 +11,13 @@ define([
 		var _this = this;
 		this.update = function(callback) {
 
-					$('.feed-adopt-claim-version').hover(
-						function() {
-							$(this).text( "retract" );
-						}, function() {
-							$(this).text( "adopted" );
-						}
-					);
+			$('.feed-adopt-claim-version').hover(
+				function() {
+					$(this).text( "retract" );
+				}, function() {
+					$(this).text( "adopted" );
+				}
+			);
 
 			if (_this.updater) {
 				_this.updater.abort();
@@ -76,6 +76,14 @@ define([
 					$(".activity-filter a").removeClass("active");
 					var activity_filter = sessionStorage.getItem("activity-filter");
 					$("." + activity_filter).click();
+
+					$('textarea').each(function () {
+						this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px; overflow-y:hidden; width:100%!important;');
+					}).on('input', function () {
+						this.style.height = 'auto';
+						this.style.height = (this.scrollHeight) + 'px';
+					});
+
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -329,6 +337,12 @@ define([
 			}).on('click', '.feed-edit-claim', function(e) {
 				$(this).parents('.event').find(".edited").hide();
 				$(this).parents('.event').find(".editing").show();
+				$('textarea').each(function () {
+					this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden; width:100%!important;');
+				}).on('input', function () {
+					this.style.height = 'auto';
+					this.style.height = (this.scrollHeight) + 'px';
+				});
 			}).on('click', '.feed-edit-claim-cancel', function(e) {
 				$(this).parents('.event').find(".editing").hide();
 				$(this).parents('.event').find(".edited").show();

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load compressed %}
+{% block extralib %}
+    <script>
+        require([
+            'phase0/layout',
+        ]);
+    </script>
+{% endblock %}
+{% block extracss %}
+	{% compressed_css 'cir_forum' %}
+{% endblock %}
+{% block header %}
+	{% include 'header/forum_header.html' %}
+{% endblock %}
+
+{% block body %}
+
+<div id="phase0-container" style="max-width:960px; margin:auto; padding-bottom: 2rem;">
+	<div class="ui segment" style="min-height:480px;">
+	<div class="ui active inverted dimmer">
+	<div class="ui text loader">Loading</div>
+	</div>
+	<p></p>
+	</div>
+</div>
+
+{% endblock %}
+

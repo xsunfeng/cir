@@ -79,7 +79,7 @@ def enter_dashboard(request, forum_url, dashboard_tab):
         context["phase"]["end_time"] = complexPhase.end_time
         context["phase"]["description"] = complexPhase.description
         flag = False
-        for phase_name_tmp in ['nugget', 'extract', 'categorize', 'improve', 'finished']:
+        for phase_name_tmp in ['free_discuss', 'nugget', 'extract', 'categorize', 'improve', 'finished']:
             if (not flag):
                 if (forum.phase == phase_name_tmp):
                     context["phase_status"][phase_name_tmp] = 1
@@ -421,7 +421,7 @@ def phase(request):
     context["phase"]["end_time"] = complexPhase.end_time
     context["phase"]["description"] = complexPhase.description
     flag = False
-    for phase_name_tmp in ['nugget', 'extract', 'categorize', 'improve', 'finished']:
+    for phase_name_tmp in ['free_discuss', 'nugget', 'extract', 'categorize', 'improve', 'finished']:
         if (not flag):
             if (forum.phase == phase_name_tmp):
                 context["phase_status"][phase_name_tmp] = 1
