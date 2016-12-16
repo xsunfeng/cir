@@ -3,13 +3,9 @@
 	<div class="ui raised pink segment">
 		<h3>{{ slot.category|title|slice:"1" }}Q{{slot.stmt_order}}: {{ slot.slot_title }}</h3>
 		
-		{% if slot.num_comments %}
-			<a class="ui label statement-question-comment-btn" slot-id="{{ slot.id }}">Comments
-				<div class="detail">{{ slot.num_comments }}</div>
-			</a>
-		{% else %}
-			<a class="ui label statement-question-comment-btn" slot-id="{{ slot.id }}">Comment</a>
-		{% endif %}
+		<a class="ui label statement-question-comment-btn" slot-id="{{ slot.id }}">Discuss the question
+			<div class="detail">{{ slot.num_comments }}</div>
+		</a>
 
 		<div class="ui divider"></div>
 
@@ -28,10 +24,14 @@
 
 					<div class="ui red secondary improve small menu" data-id="{{ entry.id }}" style="margin-top: 0;">
 						<div class="right menu">
+							
+							<a class="item statement-comment-btn" data-id="{{ entry.id }}"><i class="wechat icon"></i>Comments({{ entry.num_comments }})</a>
+
 							<a class="item feed-edit-claim-2" data-action="like"><i class="edit icon"></i>Edit<span></span></a>
+
 							<a class="item statement-history-btn"><i class="history icon"></i>History<span></span></a>
 							<!-- <a class="item feed-like-claim-version" data-action="like"><i class="thumbs outline up icon"></i>Like<span></span></a> -->
-							<a class="item statement-comment-btn" data-id="{{ entry.id }}"><i class="wechat icon"></i>Comments({{ entry.num_comments }})</a>
+
 							<a class="item statement-retract" data-id="{{ entry.id }}" data-action="deadopt"><i class="undo icon"></i>Retract</a>
 						</div>
 					</div>
@@ -119,7 +119,7 @@
 							data-inverted="" 
 							data-tooltip="{% for statement_id in src_claim.statement_ids %} S{{statement_id}} {% endfor %}" 
 							data-position="top center">
-							N{{ src_claim.id }}
+							N{{ src_claim.id }} 
 						</a>
 						<span>{{ src_claim.content | safe }}</span>
 						<div class="src_claim_actions" style="position: absolute; right: 0rem; top: 0.2rem; display:none;">

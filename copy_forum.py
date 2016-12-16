@@ -1,8 +1,8 @@
 # open manage.py shell
 # then: from cir.models import *
 
-src_forum = Forum.objects.get(id=24)
-new_url = 'tax2'
+src_forum = Forum.objects.get(id=36)
+new_url = 'tax4'
 
 new_forum = Forum(
     full_name=src_forum.full_name,

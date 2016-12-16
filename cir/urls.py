@@ -70,6 +70,9 @@ urlpatterns = patterns('',
 
     url(r'^phase5/get_statement_comment_list/$', phase5.get_statement_comment_list),
     url(r'^phase5/put_statement_comment/$', phase5.put_statement_comment),
+    url(r'^phase5/vote_issue/$', phase5.vote_issue),
+    url(r'^phase5/render_support_bar/$', phase5.render_support_bar),
+    url(r'^phase5/view_vote_result/$', phase5.view_vote_result),
 
     url(r'^phase1/get_nugget_list/$', phase1.get_nugget_list),
     url(r'^phase1/get_highlights/$', phase1.get_highlights),

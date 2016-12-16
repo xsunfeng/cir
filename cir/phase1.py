@@ -44,8 +44,6 @@ def get_statement_comment_list(request):
     response = {}
     context = {}
     statement_id = request.REQUEST.get("statement_id")
-    print "---------"
-    print statement_id
     this_statement = ClaimVersion.objects.get(id = statement_id)
     thread_comments = StatementComment.objects.filter(claim_version = this_statement)
     context['comments'] = thread_comments

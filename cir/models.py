@@ -392,8 +392,10 @@ class Claim(Entry):
                 'content': claimref.from_claim.adopted_version().content,
                 # 'theme': claimref.from_claim.theme.name
                 'theme': "null",
-                'statement_ids': StatementClaim.objects.filter(claim_id = claimref.from_claim.id).values_list("statement_id", flat = True)
+                'statement_ids': StatementClaim.objects.filter(claim_id = claimref.from_claim.id).values_list("statement_id", flat = True),
+                'num_statements': StatementClaim.objects.filter(claim_id = claimref.from_claim.id).count() 
             })
+            attr['claims'] = sorted(attr['claims'], key=lambda k: k['num_statements'], reverse=True)
         return attr
 
     def getAttrStmt(self):
@@ -820,3 +822,14 @@ class ForumComment(MPTTModel):
 
     def get_datetime(self):
         return utils.pretty_date(self.created_at)
+
+    def get_vote(self):
+        if (ForumVote.objects.filter(forum = self.forum, author = self.author).count() > 0):
+            return ForumVote.objects.filter(forum = self.forum, author = self.author)[0].support
+        return None
+
+class ForumVote(models.Model):
+    support = models.BooleanField(default = True)
+    reason = models.CharField(max_length=2010, null=True, blank=True)
+    forum = models.ForeignKey(Forum)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)

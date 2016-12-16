@@ -20,6 +20,11 @@
 				<a class="author">{{ node.get_author_name }}</a>
 				<div class="metadata">
 					<span class="date">{{ node.get_datetime }}</span>
+					{% if node.get_vote != None %}
+						<span class="ui mini label">
+							{% if node.get_vote %} support {% else %} oppose {% endif %}
+						</span>
+					{% endif %}
 				</div>
 				<div class="text">
 					<p>{{ node.text|safe }}</p>

@@ -36,3 +36,36 @@ def put_statement_comment(request):
         newForumComment = ForumComment(author = author, text = text, forum = forum, parent = parent, created_at = created_at)
     newForumComment.save()
     return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def vote_issue(request):
+    reason = request.REQUEST.get('reason')
+    author = request.user
+    forum = Forum.objects.get(id = request.session['forum_id'])
+    support = True 
+    if (request.REQUEST.get('support') == "false"): support = False
+    vote, created = ForumVote.objects.get_or_create(forum = forum, author = author)
+    vote.reason = reason
+    vote.support = support
+    vote.save()
+    response = {}
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def render_support_bar(request):
+    author = request.user
+    forum = Forum.objects.get(id = request.session['forum_id'])
+    response = {}
+    response["num_support"] = ForumVote.objects.filter(forum = forum, support = True).count()
+    response["num_oppose"] = ForumVote.objects.filter(forum = forum, support = False).count()
+    if request.user.is_authenticated():
+        response["my_num_support"] = ForumVote.objects.filter(forum = forum, support = True, author = author).count()
+        response["my_num_oppose"] = ForumVote.objects.filter(forum = forum, support = False, author = author).count()
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def view_vote_result(request):
+    author = request.user
+    forum = Forum.objects.get(id = request.session['forum_id'])
+    response = {}
+    context = {}
+    context["entries"] = ForumVote.objects.filter(forum = forum)
+    response["vote_result_table"] = render_to_string('phase5/vote-result-table.html', context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')

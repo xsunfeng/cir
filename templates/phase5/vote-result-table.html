@@ -1,0 +1,22 @@
+<table class="ui celled table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Vote</th>
+      <th>Reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for entry in entries %}
+      {% if entry.support %} 
+        <tr class="positive"> 
+      {% else %} 
+        <tr class="negative"> 
+      {% endif %}
+          <td>{{ entry.author }}</td>
+          <td>{{ entry.support }}</td>
+          <td>{{ entry.reason }}</td>
+        </tr>
+    {% endfor %}
+  </tbody>
+</table>
