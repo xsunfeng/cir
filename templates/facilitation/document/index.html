@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load compressed %}
+{% block extralib %}
+    <script>
+        require([
+            'facilitation/document/layout'
+        ]);
+    </script>
+    <script src="//cdn.ckeditor.com/4.5.3/standard/ckeditor.js"></script>
+{% endblock %}
+{% block delaylib %}
+{% endblock %}
+{% block extracss %}
+	{% compressed_css 'cir_dashboard' %}
+{% endblock %}
+{% block header %}
+
+{% endblock %}
+{% block body %}
+
+<div style="max-width:1200px; margin:auto;">
+    <div id="feng-button-group" class="ui four item menu">
+        <a href="/{{ forum_url }}/dashboard/overview" class="item feng-button" data-content="overview">Overview</a>
+        <a href="/{{ forum_url }}/dashboard/phase" class="item feng-button" data-content="phase">Phase Control</a>
+        <!-- <a href="/{{ forum_url }}/dashboard/message" class="item feng-button">Message Center</a> -->
+        <a href="/{{ forum_url }}/dashboard/theme" class="item feng-button" data-content="theme">Theme Management</a>
+        <a href="/{{ forum_url }}/dashboard/document" class="item feng-button active" data-content="document">Document Management</a>
+    </div>
+
+    <div id="feng-document-container">
+    </div>
+</div>
+
+{% endblock %}

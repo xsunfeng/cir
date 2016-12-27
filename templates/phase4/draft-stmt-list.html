@@ -3,10 +3,10 @@
 		<div class="ui top attached secondary segment">
 			<i class="reorder-handle vertical resize icon"></i>
 			<div class="slot-title{% if not slot_info.slot_title %} empty{% endif %}">
-				{% if slot_info.slot_title %}{{ slot_info.slot_title }}{% else %}(Click to name this slot){% endif %}
+				{% if slot_info.slot_title %}{{ slot_info.slot_title }}{% else %} (Click to name this slot){% endif %}
 			</div>
 		</div>
-		<div class="ui attached segment slot-hidden" style="display:none;background-color:#f3f4f5">
+		<div class="ui attached segment slot-hidden" style="background-color:#f3f4f5">
 			{% if slot_info.claims %}
 				<h4 class="description">This slot contains the following claim(s).</h4>{% for src_claim in slot_info.claims %}
 				<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}">
@@ -22,7 +22,7 @@
 				</div>
 			{% endif %}
 		</div>
-		<div class="ui attached segment slot-hidden" style="display:none">
+		<div class="ui attached segment slot-hidden" style="">
 			{% if slot_info.adopted_versions %}
 				<h4 class="description">The following statement(s) have been produced by the CIR panel from this slot.</h4>{% for stmt in slot_info.adopted_versions %}
 				<div class="src_claim ui vertical segment" data-id="{{ stmt.id }}"><div class="ui label">S{{ stmt.id }}</div>

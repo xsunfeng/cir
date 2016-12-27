@@ -22,31 +22,35 @@ define([
 		module.activeClaimModule.jumpTo(claim_id); // without changing display_type
 	}).on('click', '.destmt.button', function(e) {
 		e.stopPropagation();
-
-		// since a claim can be refered by multiple slots, both claim_id and slot_id are needed
-		var claim_id = $(this).parents('.src_claim').attr('data-id');
-		var slot_id = $(this).parents('.slot').attr('data-id');
-		var category = $(this).parents('ol.list').attr('data-list-type');
-		_stmtUpdater({
-			'action': 'destmt',
-			'claim_id': claim_id,
-			'slot_id': slot_id
-		}).done(function() {
-			$('#claim-pane-overview .claim.segment[data-id="' + claim_id + '"]').removeClass('stmt');
-			Socket.slotChange({
-				'forum_id': $('body').attr('forum-id'),
-				'category': category,
+		var result = confirm("Want to delete?");
+		if (result) {
+			// since a claim can be refered by multiple slots, both claim_id and slot_id are needed
+			var claim_id = $(this).parents('.src_claim').attr('data-id');
+			var slot_id = $(this).parents('.slot').attr('data-id');
+			var category = $(this).parents('ol.list').attr('data-list-type');
+			_stmtUpdater({
+				'action': 'destmt',
+				'claim_id': claim_id,
+				'slot_id': slot_id
+			}).done(function() {
+				$('#claim-pane-overview .claim.segment[data-id="' + claim_id + '"]').removeClass('stmt');
+				Socket.slotChange({
+					'forum_id': $('body').attr('forum-id'),
+					'category': category,
+				});
+				module.update_claim_usage();
 			});
-		});
+		}
 	}).on('click', '.fullscreen.item', function() {
 		module.activeClaimModule.slot_id = this.getAttribute('data-id');
 		module.activeSlotId = this.getAttribute('data-id');
 		module.activeClaimModule.updateClaimPane();
 		$('#draft-stmt li.item').removeClass('active');
 		$('#draft-stmt li.item[data-id="' + module.activeClaimModule.slot_id + '"]').addClass('active');
+		$('#draft-stmt li.item').removeClass('active-1');
+		$('#draft-stmt li.item[data-id="' + module.activeClaimModule.slot_id + '"]').addClass('active-1');
 		$('#draft-stmt li.item').find('.fullscreen.item').removeClass('active');
 		$('#draft-stmt li.item[data-id="' + module.activeClaimModule.slot_id + '"]').find('.fullscreen.item').addClass('active');
-
 	}).on('click', '.slot-title', function() {
 		module.$slotTitleInput = $('<div class="slot-title-wrapper">')
 			.append('<input type="text" class="slot-title-input">')
@@ -265,26 +269,35 @@ define([
 				'claim_id': module.draggingClaimId,
 				'order': module.order,
 				'list_type': list_type
-			}).done(function() {
-				$('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId + '"]').addClass('stmt');
+			}).done(function(xhr) {
+				$claim = $('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId + '"]');
+				$claim.addClass('stmt');
+				$('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId + '"]')
 				delete module.draggingClaimId;
 				Socket.slotChange({
 					'forum_id': $('body').attr('forum-id'),
 					'category': list_type,
 				});
+				module.update_claim_usage();
+				// phase 3, open workspace after drop
+				$(".show-workspace[data-id=" + xhr.slot_id + "]").click();
 			});
 		} else if (module.action == 'merge') {
 			_stmtUpdater({
 				'action': 'add-to-slot',
 				'slot_id': module.target_id,
 				'claim_id': module.draggingClaimId,
-			}).done(function() {
-				$('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId + '"]').addClass('stmt');
+			}).done(function(xhr) {
+				$claim = $('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId + '"]');
+				$claim.addClass('stmt');
 				delete module.draggingClaimId;
 				Socket.slotChange({
 					'forum_id': $('body').attr('forum-id'),
 					'category': list_type,
 				});
+				module.update_claim_usage();
+				// phase 3, open workspace after drop
+				$(".show-workspace[data-id=" + xhr.slot_id + "]").click();
 			});
 		}
 		clearDropStatus();
@@ -354,6 +367,7 @@ define([
 			type: 'post',
 			data: data,
 			success: function(xhr) {
+				$('#my-statement').html(xhr.my_statement);
 				$('#draft-stmt').css('opacity', '1.0');
 				if (data.category) {
 					$('#draft-stmt ol.list[data-list-type="' + data.category + '"]')
@@ -369,6 +383,7 @@ define([
 				}
 				initSortable();
 				updateProgressBars();
+				module.update_claim_usage();
 			},
 			error: function(xhr) {
 				$('#draft-stmt').css('opacity', '1.0');
@@ -377,6 +392,39 @@ define([
 				}
 			}
 		});
+	}
+
+	module.update_claim_usage = function() {
+		var claim_to_slot_hash = {};
+		var slot_types = ["finding", "pro", "con"];
+		for (var i in slot_types) {
+			var slot_type = slot_types[i];
+			for (var i = 0; i < $('.list[data-list-type="'+ slot_type +'"] .item.slot').length; i++) {
+				var slot = $('.list[data-list-type="'+ slot_type +'"] .item.slot')[i];
+				var slot_order = i + 1;
+				var slot_id = $(slot).attr("data-id");
+				for (var j = 0; j < $(slot).find(".src_claim").length; j++) {
+					var claim = $(slot).find(".src_claim")[j];
+					var claim_id = $(claim).attr("data-id");
+					if (claim_to_slot_hash[claim_id] === undefined) claim_to_slot_hash[claim_id] = [];
+					var html = '<a href="#" class="toslot" slot-id=' + slot_id +'>' + slot_type + slot_order + '</a>';
+					claim_to_slot_hash[claim_id].push(html);
+				}
+			}
+		}
+		for (var i = 0; i < $(".claim.stmt").length; i++) {
+			var claim = $(".claim.stmt")[i];
+			$(claim).find(".slot-assignment").empty();
+			var claim_id = $(claim).attr("data-id");
+			if (claim_id in claim_to_slot_hash) {
+				var html = '<i class="warning sign icon"></i>This claim has been categorized into: ';
+				for (var j = 0; j < claim_to_slot_hash[claim_id].length; j++){
+					html += claim_to_slot_hash[claim_id][j];
+					if (j != claim_to_slot_hash[claim_id].length - 1) html += ", ";
+				}	
+				$(claim).find(".slot-assignment").append(html);				
+			}
+		}
 	}
 
 	return module;

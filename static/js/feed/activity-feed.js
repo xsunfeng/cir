@@ -7,9 +7,18 @@ define([
 	Utils,
 	DraftStmt
 ) {
-	jQuery.fn.feed = function(action, data) {
+	jQuery.fn.feed = function(action, data, callback) {
 		var _this = this;
-		this.update = function() {
+		this.update = function(callback) {
+
+			$('.feed-adopt-claim-version').hover(
+				function() {
+					$(this).text( "retract" );
+				}, function() {
+					$(this).text( "adopted" );
+				}
+			);
+
 			if (_this.updater) {
 				_this.updater.abort();
 			}
@@ -22,11 +31,23 @@ define([
 			} else if (this.data('type') == 'question') {
 				this.data('question_id', this.data('id'));
 				var url = '/api_qa/';
+			} else if (this.data('type') == 'post') { // only show subset of activities
+				this.data('root_id', this.data('id'));
+				var url = '/api_claim_activities/';
 			}
-			if (!require.defined('phase2/claim') && !require.defined('phase3/claim') && !require.defined('phase4/claim')) {
+			if (!require.defined('phase1/layout') && !require.defined('phase2/layout') && !require.defined('phase3/claim') && !require.defined('phase4/claim')) {
 				return;
 			}
-			var claimModule = require.defined('phase3/claim') ? require('phase3/claim') : require('phase4/claim');
+			var claimModule;
+			if (require.defined('phase1/layout')) {
+				claimModule = require.defined('phase1/layout');
+			} else if (require.defined('phase2/layout')) {
+				claimModule = require.defined('phase2/layout');
+			} else if (require.defined('phase3/claim')) {
+				claimModule = require.defined('phase3/claim');
+			} else if (require.defined('phase4/claim')) {
+				claimModule = require.defined('phase4/claim');
+			}
 			_this.updater = $.ajax({
 				url: url,
 				type: 'post',
@@ -35,29 +56,34 @@ define([
 				}, _this.data()),
 				success: function(xhr) {
 					_this.html(xhr.html);
-					//_this.find('abbr').popup();
 
 					showDeleteButtons();
 
-					if (_this.data('type') == 'claim' && claimModule.display_type == 'fullscreen') {
+					if (_this.data('type') == 'claim' && claimModule && claimModule.display_type == 'fullscreen') {
 						_this.find('.filter.buttons .button').removeClass('loading').removeClass('active');
 						_this.find('.filter.buttons .button[data-filter="' + _this.data('filter') + '"]').addClass('active');
 
 						loadAlternativeVersions();
 					}
 					// init UI elements
-					_this.find('.nopublish-wrapper').checkbox({
-						onChecked: function() {
-							$(this).parent().next().text('Save');
-						},
-						onUnchecked: function() {
-							$(this).parent().next().text('Publish');
-						}
-					});
 					_this.find('.ui.checkbox').checkbox();
 					if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (!sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
 						_this.find('.facilitator-only').show();
 					}
+					if (typeof callback == 'function') callback();
+
+
+					$(".activity-filter a").removeClass("active");
+					var activity_filter = sessionStorage.getItem("activity-filter");
+					$("." + activity_filter).click();
+
+					$('textarea').each(function () {
+						this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px; overflow-y:hidden; width:100%!important;');
+					}).on('input', function () {
+						this.style.height = 'auto';
+						this.style.height = (this.scrollHeight) + 'px';
+					});
+
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -181,12 +207,18 @@ define([
 				if (typeof data.reply_id == 'undefined') {
 					data.reply_id = _this.data('question_id');
 				}
+				if ($form.find('.request-action.checkbox').length) {
+					data.request_action = $form.find('.request-action.checkbox').checkbox('is checked');
+				}
 			} else if (type == 'comment') {
 				// in document/claim thread, you always need to specify a target
 				data.reply_id = $form.find('span').attr('data-reply-id');
 				data.reply_type = $form.find('span').attr('data-reply-type');
-				if ($form.find('.ui.checkbox').length) {
-					data.collective = $form.find('.ui.checkbox').checkbox('is checked');
+				if ($form.find('.collective.checkbox').length) {
+					data.collective = $form.find('.collective.checkbox').checkbox('is checked');
+				}
+				if ($form.find('.request-action.checkbox').length) {
+					data.request_action = $form.find('.request-action.checkbox').checkbox('is checked');
 				}
 			}
 			$.ajax({
@@ -206,6 +238,9 @@ define([
 						require('realtime/socket').dispatchNewPost({
 							'target': _this.data('question_id')
 						});
+					}
+					if (data.request_action) {
+						// TODO realtime notify others
 					}
 				},
 				error: function(xhr) {
@@ -245,6 +280,7 @@ define([
 			var $menu = $(button).parent().parent();
 			var id = $menu.attr('data-id');
 			var action = button.getAttribute('data-action');
+			var $container = $(button).closest(".event");
 			$.ajax({
 				url: '/api_claim_vote/',
 				type: 'post',
@@ -253,12 +289,18 @@ define([
 					version_id: id,
 				},
 				success: function(xhr) {
-					_this.update();
+					// _this.update();
 					if (action == 'adopt') {
-						DraftStmt.update();
+						$container.find(".feed-adopt-claim-version").attr("data-action", "deadopt");
+						$container.find(".feed-adopt-claim-version span").text("Adopted");
+						// DraftStmt.update();
 					} else {
-						$('#draft-stmt .src_claim[data-id="' + id + '"]').remove();
+						$container.find(".feed-adopt-claim-version").attr("data-action", "adopt");
+						$container.find(".feed-adopt-claim-version span").text("Adopt");
+						// $('#draft-stmt .src_claim[data-id="' + id + '"]').remove();
 					}
+					var slot_id = $(".slot").attr("data-id");
+					$(".show-workspace[slot-id=" + slot_id + "]").click();
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -291,6 +333,47 @@ define([
 				deleteEntry(entry_id);
 			}).on('click', '.feed-like-claim-version', function(e) {
 				likeClaimVersion(this);
+
+			}).on('click', '.feed-edit-claim', function(e) {
+				$(this).parents('.event').find(".edited").hide();
+				$(this).parents('.event').find(".editing").show();
+				$('textarea').each(function () {
+					this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden; width:100%!important;');
+				}).on('input', function () {
+					this.style.height = 'auto';
+					this.style.height = (this.scrollHeight) + 'px';
+				});
+			}).on('click', '.feed-edit-claim-cancel', function(e) {
+				$(this).parents('.event').find(".editing").hide();
+				$(this).parents('.event').find(".edited").show();
+				$container = $(this).parents('.event');
+				var content = $container.find(".improved.text .content").text();
+				$container.find("textarea").val(content);
+			}).on('click', '.feed-edit-claim-save', function(e) {
+				$container = $(this).parents('.event');
+				var content = $container.find("textarea").val();
+				var claim_version_id = $container.attr("data-id");
+				$container.find(".improved.text .content").text(content);
+				$container.find("textarea").val(content);
+				$(this).parents('.event').find(".editing").hide();
+				$(this).parents('.event').find(".edited").show();
+				$.ajax({
+					url: '/api_claim/',
+					type: 'post',
+					data: {
+						action: 'update',
+						content: content,
+						claim_version_id: claim_version_id,
+					},
+					success: function(xhr) {
+					},
+					error: function(xhr) {
+						if (xhr.status == 403) {
+							Utils.notify('error', xhr.responseText);
+						}
+					}
+				});
+			// copy and paste, edit for adopted statement
 			}).on('click', '.feed-diff-claim-version', function() {
 				var $current_text = $(this).parents('.event').find('.improved.text');
 				var text = $current_text.text();
@@ -308,21 +391,25 @@ define([
 			}).on('click', '.feed-adopt-claim-version', function() {
 				adoptClaimVersion(this);
 			}).on('click', '#activity-comment-form div.submit', function(e) {
-				var content = $('#activity-comment-form textarea').val();
+				var $form = $(this).parents('form');
+				var content = $form.find('textarea').val();
 				submitComment(content, 'comment');
+				$(".activity-filter .statement-comment").click();
 			}).on('click', '#activity-reply-form div.submit', function(e) {
-				var content = $('#activity-reply-form textarea').val();
+				var $form = $(this).parents('form');
+				var content = $form.find('textarea').val();
 				submitComment(content, 'reply');
 			}).on('keydown', 'textarea', function(e) {
 				if ((e.ctrlKey || e.metaKey) && e.keyCode == 13) {
 					$(this).parent().next().trigger('click');
 				}
 			});
+
 		} else if (action == 'update') {
 			if (typeof data == 'object') {
 				this.data(data);
 			}
-			return this.update();
+			return this.update(callback);
 		} else if (action == 'get_id') {
 			return _this.data('id');
 		}

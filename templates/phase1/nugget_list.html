@@ -1,7 +1,7 @@
 {% if highlights %}
 	{% for highlight in highlights %}
-		<div class="ui segment workbench-nugget nugget-related" data-hl-id = {{ highlight.id }} doc-id = {{ highlight.doc_id }} theme-id = {{ highlight.theme_id }}>
-			{% if highlight.is_nugget %}
+		{% if highlight.is_nugget %}
+			<div class="ui segment workbench-nugget nugget-related" style="margin: 5px;" data-hl-id = {{ highlight.id }} author-id = "{{ highlight.author_id }}" doc-id = {{ highlight.doc_id }} theme-id = {{ highlight.theme_id }}>
 				<a class="ui small red right corner label nugget-select-mark" style="display:none;">
 					<i class="checkmark icon"></i>
 				</a>
@@ -10,27 +10,31 @@
 						{{ highlight.text }}
 					</div>
 				</div>
-				<div class="discription" style="color:rgba(0,0,0,.4);">
-					<span class="ui label theme-label" theme-id={{ highlight.theme_id }}>{{ highlight.theme }}</span>
-					<span> | </span>
-					<span class="ui heart rating" data-rating="0" data-max-rating="1"></span>
-					<span> | </span>
-					<span>{{ highlight.author_name }}</span>
-					<span> | </span>
-					<span>{{ highlight.created_at_pretty }}</span>
-					<span style="float:right;" class="actions">
-						<a href="#" class="item source-nugget">context</a>
+				<div class="ui divider" style="margin: 5px 0;"></div>
+				<div class="discription action-bar" style="color:rgba(0,0,0,.4);">
+					<a class="ui basic label theme-label" theme-id="{{ highlight.theme_id }}" data-content="{{ highlight.theme_desc }}">{{ highlight.theme }}</a>
+					<a class="ui basic image label avatar1" data-id="{{ highlight.author_id }}" data-content="{{ highlight.author_intro }}" data-inverted="">
+						<img src="{{ STATIC_URL }}/static/pictures/{{ highlight.author_id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
+						{{ highlight.author_name }}
+					</a>
+					<span class="ui basic label">{{ highlight.created_at_pretty }}</span>
+					<div class="actions" style="margin-top:5px;">
+						<a href="#" class="item source-nugget">Context</a>
 						<span> | </span>
-						<a href="#" class="item comment-nugget">comment</a>
-						{% if highlight.comment_number != 0 %}
-							<a href="#" class="item comment-nugget-number">({{ highlight.comment_number }})</a>
+							<a href="#" class="item comment-nugget">Comment</a>
+							{% if highlight.comment_number != 0 %}
+								<a href="#" class="item comment-nugget-number">({{ highlight.comment_number }})</a>
+							{% endif %}
+						<span> | </span>
+						<a href="#" class="item reassign-nugget">Change theme</a>
+						{% if highlight.is_author %}
+							<span> | </span>
+							<a href="#" class="item delete-nugget">Delete</a>
 						{% endif %}
-						<span> | </span>
-						<a href="#" class="item reassign-nugget">change theme</a>
-					</span>
+					</div>
 				</div>
-			{% endif %}
-		</div>
+			</div>
+		{% endif %}
 	{% endfor %}
 {% else %}
 		<div class="ui card" style="background: PapayaWhip;">

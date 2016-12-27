@@ -1,4 +1,5 @@
 define([
+	'doc/qa',
 	'jquery',
 	'utils',
 	'claim-common/draft-stmt',
@@ -6,6 +7,7 @@ define([
 	'feed/activity-feed',
 	'semantic-ui'
 ], function(
+	QA,
 	$,
 	Utils,
 	DraftStmt,
@@ -13,6 +15,26 @@ define([
 ) {
 	var module = {};
 	module.initClaimView = function() {
+
+		$("body").on("click", ".all-activity", function(){
+			$(".activity-filter a").removeClass("active");
+			$(this).addClass("active");
+			$(".event").show();
+		}).on("click", ".statement-candidate", function(){
+			$(".activity-filter a").removeClass("active");
+			$(this).addClass("active");
+			$(".event").each(function(){
+		        if ($(this).attr("data-type") != "claim version") $(this).hide()
+		    });		
+		});
+
+        $("body").on("keypress", ".claim.reword.editor", function(){
+        	var textarea = $(this)[0];
+            if(textarea.scrollTop != 0){
+                textarea.style.height = textarea.scrollHeight + "px";
+            }
+        });
+
 		// static event listeners
 		$('#claim-pane-fullscreen').on('click', '.claim-reword-btn', function() {
 			$('#claim-pane-fullscreen .reword.form').transition('slide down', '500ms');
@@ -22,7 +44,8 @@ define([
 				Utils.notify('error', 'Content must not be empty.');
 				return;
 			}
-			var collective = $('#claim-pane-fullscreen .reword.form input[name="collective"]').val();
+			var collective = false;
+			var request_action = $('.reword.form .request-action.checkbox').checkbox('is checked');
 			$.ajax({
 				url: '/api_claim/',
 				type: 'post',
@@ -30,7 +53,8 @@ define([
 					action: 'reword',
 					content: content,
 					slot_id: module.slot_id,
-					collective: collective
+					collective: collective,
+					request_action: request_action
 				},
 				success: function(xhr) {
 					if (collective == 'true') {
@@ -44,6 +68,7 @@ define([
 						$('#claim-pane-fullscreen .claim.reword.editor').val('');
 						$('#claim-pane-fullscreen .reword.form').transition('slide down', '500ms');
 					}
+					// TODO realtime notify everyone
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -60,6 +85,8 @@ define([
 				.val($.trim($('#claim-pane .claim-content').text()));
 			$('#claim-pane .reword.form').transition('slide down', '500ms');
 		});
+
+		$('.ui.accordion').accordion();
 	};
 
 
@@ -87,9 +114,11 @@ define([
 					'type': 'claim',
 					'id': module.slot_id,
 				});
+				$('.reword.form .request-action.checkbox').checkbox();
 				if (sessionStorage['simulated_user_role'] && sessionStorage['simulated_user_role'] == 'facilitator' || (!sessionStorage['simulated_user_role']) && sessionStorage['role'] == 'facilitator') {
 					$('#claim-pane-fullscreen .facilitator-only').show();
 				}
+				$(".claim-reword-btn").click();
 			},
 			error: function(xhr) {
 				$('#claim-pane-fullscreen').html('');
@@ -105,6 +134,7 @@ define([
 	DraftStmt.activeClaimModule = module;
 	Socket.activeClaimModule = module;
 	DraftStmt.update();
+	QA.updateQuestionList();
 	module.initClaimView();
 	return module;
 });

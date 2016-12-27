@@ -7,7 +7,8 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
         <title>Geodeliberator</title>
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.min.css" rel="stylesheet" class="ui" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" rel="stylesheet" class="ui" />
+        <link href="http://code.jquery.com/ui/jquery-ui-git.css" rel="stylesheet" class="ui" />
         {% compressed_css 'cir_global' %}
         {% block extracss %}{% endblock %}
         <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.20/require.min.js"></script>
@@ -15,12 +16,12 @@
             require.config({
                 baseUrl: "{% static 'js' %}",
                 paths: {
-                    'jquery.ui': 'vendor/jquery-ui.min',
+                    'jquery.ui': '//code.jquery.com/ui/1.12.1/jquery-ui.min',
                     'jquery': '//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min',
-                    'semantic-ui': '//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.min',
+                    'semantic-ui': '//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min',
                     'socket.io': '//130.203.136.141:443/socket.io/socket.io',
 					'd3': '//cdnjs.cloudflare.com/ajax/libs/d3/3.5.8/d3.min',
-                    'd3-tooltip': '//labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3',
+                    'eventDrops': 'ext/eventDrops/eventDrops',
                     'sankey': 'vis/sankey',
                     'dimple': '//dimplejs.org/dist/dimple.v2.1.6.min',
                     'tagcloud': 'vis/tagcloud',
@@ -30,7 +31,6 @@
                     'semantic-ui': ['jquery'],
                     'dimple': ['d3'],
                     'sankey': ['d3'],
-                    'd3-tooltip': ['d3']
                 },
                 waitSeconds: 200,
             });
@@ -41,16 +41,43 @@
             });
         </script>
     </head>
-    <body id="cir" {% if forum_id %}forum-id="{{ forum_id }}" {% endif %}{% if phase_info %}data-phase="{{ phase_info.selected_phase }}"{% endif %}>
-	{% block header %}
-	{% endblock %}
-	<div id="popup-notification" class="ui message hidden"></div>
-	<div id="sticked-notification" class="ui warning message" style="display:none"></div>
-	{% block body %}
-	{% endblock %}
-
-	{% include 'signin-signup.html' %}
-	{% block extralib %}{% endblock %}
-	{% block delaylib %}{% endblock %}
+    <body id="cir" 
+        {% if forum_id %}
+            forum-id="{{ forum_id }}" 
+        {% endif %}
+        {% if phase_info %}
+            data-phase="{{ phase_info.selected_phase }}"
+        {% endif %}
+    >
+    	{% block header %}
+    	{% endblock %}
+    	<div id="popup-notification" class="ui message hidden"></div>
+    	<div id="sticked-notification" class="ui warning message" style="display:none"></div>
+        <div id="pin-messages" style="margin-top:50px;">
+            {% for message in pinmessages %}
+                <div class="ui floating green message pin-message" style="z-index:9999;">
+                    <i class="close icon"></i>
+                    <div class="content"><p>{{ message.content }}</p></div>
+                </div>
+            {% endfor %}
+        </div>
+    	{% block body %}
+    	{% endblock %}
+    	<div id="messages-modal" class="ui modal">
+    		<div class="ui secondary menu">
+    			<div id="important-filter" class="ui slider checkbox item">
+    				<input type="checkbox">
+    				<label>Only show important messages</label>
+    			</div>
+    			<div id="completed-filter" class="ui slider checkbox item">
+    				<input type="checkbox">
+    				<label>Show completed</label>
+    			</div>
+    		</div>
+    		<div id="message-list"></div>
+    	</div>
+    	{% include 'signin-signup.html' %}
+    	{% block extralib %}{% endblock %}
+    	{% block delaylib %}{% endblock %}
     </body>
 </html>

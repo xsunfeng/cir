@@ -1,0 +1,26 @@
+		<div class="ui stacked segments" style="margin-top:1rem;">
+			{% for version in versions %}
+
+			{% if forloop.first %}
+				<div class="ui segment warning message" style="padding: 0.5rem 1rem;">
+			{% else %}
+				<div class="ui segment" style="padding: 0.5rem 1rem;">
+			{% endif %}
+					<div class="ui items">
+						<div class="item">
+							<div class="content">
+								<a class="header">{{ version.text | safe }}</a>
+								<div class="description">
+									<p></p>
+									<p></p>
+								</div>
+								<div class="extra">
+									{{ version.updated_at | safe }} | {{ version.author | safe }}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			{% endfor %}
+		</div>
+

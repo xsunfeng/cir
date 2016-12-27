@@ -49,8 +49,8 @@ define([
 					'role': sessionStorage['role'],
 					'forum_id': $('body').attr('forum-id')
 				});
+				
 				initSocketEvents();
-
 				Chatter.loadRecentHistory();
 			}
 		}, 3000);
@@ -67,15 +67,27 @@ define([
 				delete module['online_users'][user_id];
 				Chatter.removeOnlineUser(user_id);
 			}).on('client:users:current_online', function(users) {
-				for (var i = 0; i < users.length; i++) {
-					if (!module['online_users'].hasOwnProperty(users[i].user_id)
-						&& users[i].forum_id == $('body').attr('forum-id')) {
-						module['online_users'][users[i].user_id] = users[i];
-						if ($('body').attr('forum-id') == users[i].forum_id) {
-							Chatter.addOnlineUser(users[i]);
+				$.ajax({
+					url: '/api_chatter/',
+					type: 'post',
+					data: {
+						'action': 'get-all-user'
+					},
+					success: function(xhr) {
+						for (var i = 0; i < xhr.users.length; i++) {
+							$('#chatter-wrapper .online.users.list').append(getUserLabel(xhr.users[i]));
+						}
+						for (var i = 0; i < users.length; i++) {
+							if (!module['online_users'].hasOwnProperty(users[i].user_id)
+								&& users[i].forum_id == $('body').attr('forum-id')) {
+								module['online_users'][users[i].user_id] = users[i];
+								if ($('body').attr('forum-id') == users[i].forum_id) {
+									Chatter.addOnlineUser(users[i]);
+								}
+							}
 						}
 					}
-				}
+				});
 			}).on('client:chat:emit_msg', function(msg) {
 				if ($('body').attr('forum-id') == msg.forum_id) {
 					Chatter.showMsg(msg);
@@ -111,6 +123,7 @@ define([
 			});
 		}
 	}, function(err) {
+		console.log("socket.io.js cannot be loaded");
 		// socket.io.js cannot be loaded
 		// fail silently and skip all socket initialization.
 		if (err.requireModules && err.requireModules[0] == 'socket.io') {
@@ -118,6 +131,22 @@ define([
 			$('#chatter-wrapper').addClass('disconnected');
 		}
 	});
+
+	function getUserLabel(userinfo) {
+		var color = '';
+		// if (userinfo.role == 'facilitator') {
+		// 	color = 'blue';
+		// } else if (userinfo.role == 'expert') {
+		// 	color = 'yellow';
+		// }
+		var html = '<div class="ui image label ' + color
+			+ '" data-user-id="' + userinfo.user_id + '">'
+			+ userinfo.user_name
+			+ '<div class="detail">' + userinfo.role.toUpperCase().charAt(0) + '</div>'
+			+ '</div>';
+		return html;
+	}
+
 	return module;
 });
 

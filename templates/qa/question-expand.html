@@ -1,0 +1,38 @@
+{% load staticfiles %}
+<div class="ui threaded comments" style="width:100%;" highlight-id="{{ highlight.id }}">
+	{% load mptt_tags %}
+	<div class="ui threaded comments">
+	{% recursetree comments %}
+		<div class="comment" comment-id="{{ node.id }}">
+			<a class="avatar">
+				<img style="width:40px;" src="{{ STATIC_URL }}/static/pictures/{{ node.author.id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
+			</a>
+			<div class="content">
+				<a class="author avatar1" data-content="{{ node.getAttr.author_intro }}">{{ node.getAttr.author_name }}</a>
+				<div class="metadata">
+					<span class="date">{{ node.getAttr.created_at_pretty }}</span>
+				</div>
+				<div class="text">
+					<p>{{ node.text|safe }}</p>
+				</div>
+				<div class="actions">
+					<a class="reply reply-comment">Reply</a>
+				</div>
+				<form class="ui form" style="display:none;">
+					<div class="field" style="margin-bottom:0;">
+						<textarea rows="2"></textarea>
+					</div>
+					<a href="#" class="reply reply-comment-save" parent-id="{{ node.id }}">save</a><span> | </span><a href="#" class="reply reply-comment-cancel">cancel</a>
+				</form>
+			</div>	
+
+            {% if not node.is_leaf_node %}
+            	<div class="comments">
+                {{ children }}
+                </div>
+            {% endif %}
+	    
+		</div>
+	{% endrecursetree %}
+</div>
+

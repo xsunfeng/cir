@@ -88,5 +88,6 @@ define([
 			$(e.target).addClass('active');
 		});
 	}
+
 	return module;
 });

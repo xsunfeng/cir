@@ -19,7 +19,7 @@
 <div class="ui claim grid">
 	<div id="claim-container" class="eight wide claim column" style="margin-bottom: 3em">
 		<div style="position:relative">
-			<div class="ui top attached info message">
+			<div class="ui info message">
 				<div class="ui instructions accordion">
 					<div class="ui active title"><i class="dropdown icon"></i>Current phase: Claim categorization</div>
 					<div class="active content">
@@ -27,35 +27,31 @@
 					</div>
 				</div>
 			</div>
-			<div id="claim-filter-pane" class="ui bottom attached one item menu"></div>
+			<!-- <div id="claim-filter-pane" class="ui bottom attached one item menu"></div> -->
 			<div id="claim-pane-overview">
 				<div class="ui active centered inline loader"></div>
 			</div>
 		</div>
 	</div>
-	<div id="qa-wrapper" class="eight wide column" style="display: none;">
-		<h3 class="ui header">Questions</h3>
-		<div class="ui fluid top attached two item blue pointing menu">
-			<a class="item refresh-list">Refresh List</a>
-			<a class="item new-question">Raise a question</a>
-		</div>
-		<div class="ui buttom attached secondary segment new question hidden">
-			<form class="ui form">
-				<div class="ui message">
-					If your question has a context in the document, please ...
-				</div>
-				<div class="field">
-					<textarea rows="3"></textarea>
-				</div>
-				<button class="ui submit primary button">Submit</button>
-			</form>
-		</div>
-		<div id="qa-list"></div>
-	</div>
+
 	<div id="draft-stmt-container" class="eight wide column">
+<!-- 		<div class="ui compact pointing menu statement-filter" style="margin-bottom:20px;">
+			<a class="categorize-tab item active">
+				Categorized
+			</a>
+			<a class="my-statement-tab item">
+				My statements
+			</a>
+			<a class="active-statement-tab item">
+				Active statements
+			</a>
+		</div> -->
 		<div id="draft-stmt"></div>
+		<div style="display:none;" id="my-statement">page2</div>
+		<div style="display:none;" id="active-statement">page3</div>
 	</div>
 </div>
+{% include 'qa/qa-wrapper.html' %}
 {% if role != 'visitor' %}
 	{% include 'chatter.html' %}
 {% endif %}

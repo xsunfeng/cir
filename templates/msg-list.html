@@ -1,0 +1,40 @@
+<div class="ui celled list">
+	{% if msgs %}{% for msg in msgs %}
+		<div class="message item {{ msg.content_type }} {{ msg.important }} {{ msg.is_read }} {{ msg.is_done }}" data-id="{{ msg.id }}">
+			<div class="content">
+				<div class="header">
+					{% if 'facilitation' in msg.content_type %}<div class="ui yellow label">Message from facilitator</div>{% endif %}
+					{% if 'action' in msg.content_type %}<div class="ui blue label">Attention requested</div>{% endif %}
+					{% if msg.source_id %}
+						<span class="msg-content" data-source-id="{{ msg.source_id }}">
+						{% if 'post' in msg.content_type %}<div class="ui label">New comment added</div>{% endif %}
+						{% if 'reply' in msg.content_type %}<div class="ui label">Reply to your activity</div>{% endif %}
+						{% if 'version' in msg.content_type %}<div class="ui label">New statement version written</div>{% endif %}
+							{{ msg.content }}
+						</span>
+					{% else %}
+					<span class="msg-content">{{ msg.content }}</span>
+					{% endif %}
+				</div>
+
+				<div class="ui horizontal bulleted link list">
+					<div class="item">
+						{{ msg.sender }}
+					</div>
+					<div class="item">
+						<abbr title="{{ msg.created_at_full }}">{{ msg.created_at }}</abbr>
+					</div>
+					<a class="expand-msg item" data-source-id="{{ msg.source_id }}">Expand</a>
+					{% if msg.source_id %}
+						<a class="mark-done item" data-msg-id="{{ msg.id }}">Mark as completed</a>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	{% endfor %}{% else %}
+		<div class="item">
+			No messages yet.
+		</div>
+	{% endif %}
+</div>
+

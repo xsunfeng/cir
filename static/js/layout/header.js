@@ -17,7 +17,7 @@ define([
 			} else {
 				sessionStorage.setItem('user_id', $('#header-user-name').attr('data-id'));
 				sessionStorage.setItem('user_name', $('#header-user-name').text());
-
+				require(['message']);
 				initUserBtns();
 				// check if within a specific forum
 				if ($('#header-user-name').attr('data-role')) {
@@ -30,13 +30,32 @@ define([
 					}
 				}
 			}
+
+			$("body").on("click", "#instruction-btn", function(){
+				// $("#instruction-modal").modal("show");
+				$(".pin-message").toggleClass("hidden");
+			})
+
+			$('#issue-desc-btn').popup({
+				position : 'bottom right',
+				target   : '#issue-desc-btn'
+			});
+
+			$('.pin-message .close')
+			  .on('click', function() {
+			    $(this)
+			      .closest('.message')
+			      .transition('fade')
+			    ;
+			  })
+			;
 		}
 	};
 
 	function initFacilitatorBtns() {
 		// populate users list
 		$.ajax({
-			url: '/dashboard/user_mgmt/',
+			url: '/api_dashboard/user_mgmt/',
 			type: 'post',
 			data: {
 				'action': 'get_user_list'
@@ -203,6 +222,10 @@ define([
 					});
 				}
 			});
+		});
+		$('#show-messages').click(function() {
+			$('#messages-modal').modal('show');
+			require('message').updateMessageList();
 		});
 	}
 	function initVisitorBtns() {

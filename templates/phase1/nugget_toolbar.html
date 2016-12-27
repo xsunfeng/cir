@@ -1,21 +1,18 @@
-<div id="doc-highlight-toolbar">
-		<div class="ui attached top segment blue labeled icon menu">
-			<a data-action="claim" class="item doc-anno-btn">
-				<i class="code icon"></i>Extract nugget
-			</a>
-		</div>
-		<div class="ui attached bottom segment">
-			<form id="doc-claim-form" class="ui form claim">
-				<div class="ui error message"></div>
-				<div class="required field">
-					<label>Please assign a theme</label>
-					<select id="nugget-tool-bar-themes" class="ui fluid dropdown" name="theme">
-						{% for theme in themes %}
-							<option value="{{ theme.id }}">{{ theme.name }}</option>
-						{% endfor %}
-					</select>
-				</div>
-				<div id="create-nugget" class="ui submit primary button">Publish</div>
-			</form>
-		</div>
+<div id="doc-highlight-toolbar" draggable="true" nugget-id="">
+        <div style="height: 55px; top: 0;background: #262626;padding-left: 5px;padding-top: 5px;">
+			<i style="cursor: move;" class="huge inverted hand lizard icon"></i>
+			<i style="float:right;" class="large inverted remove icon"></i>
+        </div>
+        <div id="highlight-content" style="padding:1rem;">
+        	2. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+        </div>
+        <div style="padding:1rem;">
+        	Used in Slots: <span class="used_in"></span>
+        </div>
+        <div id="highlight-discussion" style="padding:0.5rem;">
+        	<button class="ui blue basic button view-nugget-question" style="margin:0; width:100%;">Discussion</button>
+    	</div> 
+<!--         <div id="highlight-delete" style="padding:0.5rem; padding-top:0;">
+        	<button class="ui red basic button" style="margin:0; width:100%;">Delete</button>
+    	</div> -->
 </div>

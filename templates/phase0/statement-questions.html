@@ -1,0 +1,23 @@
+<div class="ui one item menu">
+      <a class="item" style="width: 100%;">Finding Questions</a>
+</div>
+
+<div class="category-list" data-list-type="finding">
+	{% include 'phase0/statement-questions-categorized.html' with categories=categories.finding %}
+</div>
+
+<div class="ui one item menu">
+      <a class="item" style="width: 100%;">Pro Questions</a>
+</div>
+
+<div class="category-list" data-list-type="pro">
+	{% include 'phase0/statement-questions-categorized.html' with categories=categories.pro %}
+</div>
+
+<div class="ui one item menu">
+      <a class="item" style="width: 100%;">Con Questions</a>
+</div>
+
+<div class="category-list" data-list-type="con">
+	{% include 'phase0/statement-questions-categorized.html' with categories=categories.con %}
+</div>

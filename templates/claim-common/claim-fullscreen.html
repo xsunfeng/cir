@@ -1,30 +1,145 @@
-<h4 class="ui top attached center aligned header">
-	Slot details
-</h4>
-<div class="ui attached menu">
-	<a class="item claim-reword-btn">Compose a new statement candidate</a>
+<div class="slot" data-id="{{slot.id}}">
 
-</div>
-<form class="ui form reword attached segment" style="display:none">
-	<div class="ui info message">
-		<div class="header">
-			Hints for rewording a claim:
+	<div class="ui raised pink segment">
+		<h3>{{ slot.category|title|slice:"1" }}Q{{slot.stmt_order}}: {{ slot.slot_title }}</h3>
+		
+		<a class="ui label statement-question-comment-btn" slot-id="{{ slot.id }}">Discuss the question
+			<div class="detail">{{ slot.num_comments }}</div>
+		</a>
+
+		<div class="ui divider"></div>
+
+		{% for entry in slot.adopted_versions %}
+			<div class="summary ui vertical segment statement-entry adopted-statement" style="padding-bottom:0;" data-id="{{ entry.id }}">
+				<div class="edited">
+					<div class="extra improved text" style="max-width: 2000px;">
+						[ST{{ forloop.counter }}]
+						<div class="ui mini label">S{{ entry.id }}</div>
+						<span class="content" style="font-size: 1rem!important;">{{ entry.content | safe }}</span>
+						<div class="ui small basic icon buttons reorder-btns" style="position: absolute; right: 0.5rem; top: 0.5rem; display:none;">
+							<button class="ui basic button statement-reorder-up" style="padding:0.5rem;"><i class="icon arrow up"></i></button>
+							<button class="ui basic button statement-reorder-down" style="padding:0.5rem;"><i class="icon arrow down"></i></button>
+						</div>
+					</div>
+
+					<div class="ui red secondary improve small menu" data-id="{{ entry.id }}" style="margin-top: 0;">
+						<div class="right menu">
+							
+							<a class="item statement-comment-btn" data-id="{{ entry.id }}"><i class="wechat icon"></i>Comments({{ entry.num_comments }})</a>
+
+							<a class="item feed-edit-claim-2" data-action="like"><i class="edit icon"></i>Edit<span></span></a>
+
+							<a class="item statement-history-btn"><i class="history icon"></i>History<span></span></a>
+							<!-- <a class="item feed-like-claim-version" data-action="like"><i class="thumbs outline up icon"></i>Like<span></span></a> -->
+
+							<a class="item statement-retract" data-id="{{ entry.id }}" data-action="deadopt"><i class="undo icon"></i>Retract</a>
+						</div>
+					</div>
+				</div>
+				
+				<div class="editing" style="display:none;">
+					<div class="content" style="font-size: 1rem!important;">
+						<textarea row="3" style="width:100%!important;">{{ entry.content | safe }}</textarea>
+					</div>
+
+					{% if not entry.collective %}
+					<div class="ui red secondary improve small menu" data-id="{{ entry.version_id }}" style="margin:0;">
+						<div class="right menu">
+							<a class="item feed-edit-claim-save-2"><i class="save icon"></i>Save</a>
+							<a class="item feed-edit-claim-cancel-2"><i class="remove icon"></i>Cancel</a>
+						</div>
+					</div>
+					{% endif %}
+				</div>
+
+				<div class="statement-comments" style="display:none;">
+					<div class="ui action input" style="width:100%; margin: 1rem 0;">
+						<input type="text" placeholder="Make a comment...">
+						<button class="ui teal button statement-comment-post" statement-id="{{ entry.id }}">
+							<i class="send outline icon"></i>Comment
+						</button>
+					</div>
+					<div class="content statement-comment-list" statement-id="{{ entry.id }}"></div>
+				</div>
+			</div>
+		{% endfor %}
+	</div>
+
+
+	<div class="ui red raised segment statement-entry" data-id="{{slot.id}}">
+
+<!-- 		{% if slot.adopted_versions %}
+			<div class="ui stacked segments" style="margin-top:1rem;">
+				{% for stmt in slot.adopted_versions %}
+					<div class="ui segment adopted-statement" data-id="{{ stmt.id }}">
+						<h4 style="margin: 0;">[ST{{ forloop.counter }}] {{ stmt.content | safe }}</h4>
+						<div class="ui small basic icon buttons reorder-btns" style="position: absolute; right: 0.5rem; top: 0.5rem; display:none;">
+							<button class="ui basic button statement-reorder-up" style="padding:0.5rem;"><i class="icon arrow up"></i></button>
+							<button class="ui basic button statement-reorder-down" style="padding:0.5rem;"><i class="icon arrow down"></i></button>
+						</div>
+					</div>
+				{% endfor %}
+			</div>
+		{% endif %} -->
+
+<div>
+	<div id="statement-container" class="ui bottom attached segment">
+		<div class="ui top attached tabular menu">
+			<div class="ui text menu" style="margin:0;">
+				<div class="header item">Suggest a Statement</div>
+			</div>
 		</div>
-		<ul class="list">
-			<li>Please keep in mind that it is a candidate statement in the final product, so the language should be precise, clear, and informative.</li>
-			<li>Please read the panel's discussion and think about their suggestions before writing your version.</li>
-			<li>After submission, your version will appear in Activities as a candidate version; the facilitator will ultimately perform the adoption.</li>
-		</ul>
+		<div class="statement-post" data-id="statement">
+			<form class="ui form reword">
+				<div class="field">
+					<div id="use-nugget-labels">
+					</div>
+					<textarea style="font-size: 1rem !important;" rows="1" class="claim reword editor"></textarea>
+					<input type="hidden" name="collective">
+					<div id="result" style="float:right;"></div>
+				</div>
+				<div class="ui primary submit button"><i class="send outline icon"></i>Suggest</div>
+				<div id="nugget-bag-open" class="ui basic button"><i class="zoom icon"></i>Pop up Nugget List</div>
+<!-- 				<div class="ui request-action checkbox">
+					<label>Request panel attention</label>
+					<input type="checkbox" name="request">
+				</div> -->
+			</form>
+		</div>
 	</div>
-	<div class="field">
-		<label><span>Reword this claim</span> (Ctrl + Enter to publish)</label>
-		<textarea class="claim reword editor" rows="6"></textarea>
-		<input type="hidden" name="collective">
-	</div>
-	<div class="ui primary submit button"><i class="send outline icon"></i>Submit</div>
-	<div class="ui reset button">Cancel</div>
-</form>
-<h4 class="ui attached center aligned header">Activities on this slot (latest first)</h4>
-<div id="claim-activity-feed" class="ui bottom attached segment">
-	<div class="ui small active inline loader"></div>Loading activities ...
 </div>
+
+		
+
+		<div id="nugget-bag-origin">
+			<div class="ui stacked segments src_claims" slot-id="{{slot.id}}" style="margin-top:1rem;">
+				{% for src_claim in slot.claims %}
+					<div class="src_claim ui secondary segment" data-id="{{ src_claim.id }}" style="padding: 0.5rem 1rem; ">
+						<a class="ui mini {% if src_claim.statement_ids %} orange {% endif %} label temp-used"
+							data-inverted="" 
+							data-tooltip="{% for statement_id in src_claim.statement_ids %} S{{statement_id}} {% endfor %}" 
+							data-position="top center">
+							N{{ src_claim.id }} 
+						</a>
+						<span>{{ src_claim.content | safe }}</span>
+						<div class="src_claim_actions" style="position: absolute; right: 0rem; top: 0.2rem; display:none;">
+	<!-- 						<button class="ui circular teal icon button context-claim"><i class="file text icon"></i></button>
+							<button class="ui circular red icon button remove-claim"><i class="remove icon"></i></button> -->
+							<button class="ui blue button use-nugget-2" style="padding:0.5rem;"><i class="icon hand lizard"></i>Use</button>
+							<button class="ui teal button source-nugget" style="padding:0.5rem;"><i class="icon file text"></i>Context</button>
+							<button class="ui red button remove-claim" style="padding:0.5rem;"><i class="icon remove"></i>Remove</button>
+						</div>
+					</div>
+				{% endfor %}
+			</div>
+		</div>
+
+		<a style="display:none;" class = "show-workspace" slot-id="{{ slot.id }}">Details</a>
+	</div>
+
+	<div id="claim-activity-feed">
+		<div class="ui small active inline loader"></div>Loading activities ...
+	</div>
+</div>
+
+
