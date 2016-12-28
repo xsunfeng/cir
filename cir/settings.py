@@ -252,7 +252,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'cir',
-    'annotator',
+    'postcir',
     'password_reset',
     'pipeline',
     'mptt',
