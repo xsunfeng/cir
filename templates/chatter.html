@@ -1,9 +1,43 @@
 <div id="chatter-wrapper" class="minimized">
+	<div id="chatter-notebook" class="ui segment" style="display:none; position:fixed; right:37.5%; bottom:0; width:400px; min-height:60%; margin: 0;border-radius: 0; display:none;">
+
+		<div class="ui list">
+			<div class="item">
+				<a class="header">to do</a>
+			</div>
+			<div class="item">
+				1
+			</div>
+			<div class="item">
+				2
+			</div>
+			<div class="item">
+				3
+			</div>
+		</div>
+
+		<div class="ui list">
+			<div class="item">
+				<a class="header">complete</a>
+			</div>
+			<div class="item">
+				1
+			</div>
+			<div class="item">
+				2
+			</div>
+			<div class="item">
+				3
+			</div>
+		</div>
+
+	</div>
 	<div class="ui warning disconnected message">Cannot connect to the real-time module; collaboration features not available.</div>
 	<div class="online users segment">
 		<div class="online users list"></div>
 		<a class="ui top attached blue label titlebar">
 			Chat with online users
+			<i class="large minus circle icon close-icon" style="float:right; display:none;"></i> 
 		</a>
 	</div>
 	<div class="ui label chat title">Chat</div>

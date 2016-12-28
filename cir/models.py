@@ -1,16 +1,15 @@
 from django.contrib.gis.db import models
 from django.contrib.auth.models import User
 
+from mptt.models import MPTTModel, TreeForeignKey
 
-import nltk
 import utils
-
 import datetime, time
 
 VISITOR_ROLE = 'visitor'
 
 class UserLogin(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     timestamp = models.DateTimeField()
 
 class Forum(models.Model):
@@ -27,12 +26,13 @@ class Forum(models.Model):
         ('paused', 'Paused'),
         ('not_started', 'Not started'),
         ('tagging', 'Tagging'),
-        ('nugget', 'Nugget extraction'),
-        ('extract', 'Claim construction'),
-        ('categorize', 'Claim categorization'),
-        ('theming', 'Claim theme identification'),
-        ('improve', 'Claim prioritization and improvement'),
-        ('finished', 'Finished')
+        ('free_discuss', 'Discuss Questions'), # phase 0
+        ('nugget', 'Extract nugget'), # phase 1
+        ('extract', 'Assemble Claim'), # phase 2
+        ('categorize', 'Categorize Claim'), # phase 3
+        ('theming', 'Claim theme identification'), 
+        ('improve', 'Refine Statements'), # phase 4
+        ('finished', 'Finalize Statements') # phase 5 statements
     )
     access_level = models.CharField(max_length=100, choices=ACCESS_CHOICES, default='private')
     phase = models.CharField(max_length=100, choices=PHASE_CHOICES, default='not_started')
@@ -51,6 +51,7 @@ class Forum(models.Model):
         attr['url'] = self.url
         attr['full_description'] = self.description
         attr['short_description'] = self.description[:400] + '...'
+        attr['phase'] = self.phase
         if self.access_level == 'open':
             attr['access_level'] = 'Open access'
         elif self.access_level == 'panelist':
@@ -71,15 +72,15 @@ class Role(models.Model):
         ('analyst', 'Analyst'),
         ('visitor', 'Visitor'),
     )
-    user = models.ForeignKey(User, related_name="role")
-    forum = models.ForeignKey(Forum, related_name="members")
+    user = models.ForeignKey(User, related_name="role", on_delete=models.CASCADE)
+    forum = models.ForeignKey(Forum, related_name="members", on_delete=models.CASCADE)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
 
 
 class UserInfo(models.Model):
-    user = models.OneToOneField(User, related_name='info')
+    user = models.OneToOneField(User, related_name='info', on_delete=models.CASCADE)
     description = models.TextField(null=True, blank=True)
-    last_visited_forum = models.ForeignKey(Forum, null=True, blank=True)
+    last_visited_forum = models.ForeignKey(Forum, null=True, blank=True, on_delete=models.CASCADE)
 
 
 class EntryCategory(models.Model):
@@ -89,7 +90,7 @@ class EntryCategory(models.Model):
     )
     name = models.CharField(max_length=200, null=True, blank=True)
     category_type = models.CharField(max_length=10, choices=CONTENT_CHOICES)
-    forum = models.ForeignKey(Forum)
+    forum = models.ForeignKey(Forum, on_delete=models.CASCADE)
     visible = models.BooleanField(default=False)
     can_create = models.BooleanField(default=False)
     can_edit = models.BooleanField(default=False)
@@ -120,13 +121,13 @@ class EntryCategory(models.Model):
 
 
 class Entry(models.Model):
-    forum = models.ForeignKey(Forum)
-    author = models.ForeignKey(User)
-    delegator = models.ForeignKey(User, null=True, blank=True, related_name='delegated_entries')
+    forum = models.ForeignKey(Forum, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    delegator = models.ForeignKey(User, null=True, blank=True, related_name='delegated_entries', on_delete=models.CASCADE)
     content = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
-    category = models.ForeignKey(EntryCategory, related_name='entries', null=True, blank=True)
+    category = models.ForeignKey(EntryCategory, related_name='entries', null=True, blank=True, on_delete=models.CASCADE)
     is_deleted = models.BooleanField(default=False)
     collective = models.BooleanField(default=False)
 
@@ -154,12 +155,18 @@ class Entry(models.Model):
         attr['collective'] = self.collective
         return attr
 
+    def getAuthor(self):
+        attr = {}
+        attr['author_id'] = self.author.id
+        attr['author_name'] = self.author.get_full_name()
+        attr['author_intro'] = UserInfo.objects.get(user = self.author).description
+        return attr
 
 class Doc(models.Model):
-    forum = models.ForeignKey(Forum)
+    forum = models.ForeignKey(Forum, on_delete=models.CASCADE)
     title = models.TextField()
     description = models.TextField(null=True, blank=True)
-    folder = models.ForeignKey(EntryCategory, related_name='doc_entries', null=True, blank=True)
+    folder = models.ForeignKey(EntryCategory, related_name='doc_entries', null=True, blank=True, on_delete=models.CASCADE)
     order = models.TextField(null=True, blank=True)
 
     def __str__(self):  # used for admin site
@@ -183,7 +190,7 @@ class Doc(models.Model):
 class DocSection(Entry):
     title = models.TextField(null=True, blank=True)
     order = models.IntegerField(null=True, blank=True)
-    doc = models.ForeignKey(Doc, related_name='sections')
+    doc = models.ForeignKey(Doc, related_name='sections', on_delete=models.CASCADE)
 
     def __str__(self):  # used for admin site
         return str(self.id) + ' ' + self.title
@@ -208,7 +215,7 @@ class DocSection(Entry):
         return attr
 
 class ClaimTheme(models.Model):
-    forum = models.ForeignKey(Forum)
+    forum = models.ForeignKey(Forum, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     description = models.TextField()
 
@@ -227,9 +234,9 @@ class Highlight(models.Model):
     lower_bound = models.FloatField(null=True, blank=True)
     start_pos = models.IntegerField()
     end_pos = models.IntegerField()
-    context = models.ForeignKey(Entry, related_name='highlights')
-    author = models.ForeignKey(User)
-    theme = models.ForeignKey(ClaimTheme, null=True, blank=True)
+    context = models.ForeignKey(Entry, related_name='highlights', on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    theme = models.ForeignKey(ClaimTheme, null=True, blank=True, on_delete=models.CASCADE)
     is_nugget = models.BooleanField(default=True)
     text = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField()
@@ -237,6 +244,7 @@ class Highlight(models.Model):
     def getAttr(self):
         attr = {}
         attr['created_at'] = time.mktime(self.created_at.timetuple())
+        attr['created_at_pretty'] = utils.pretty_date(self.created_at)
         attr['id'] = self.id
         attr['start'] = self.start_pos
         attr['end'] = self.end_pos
@@ -246,6 +254,8 @@ class Highlight(models.Model):
         attr['is_nugget'] = self.is_nugget
         attr['is_used'] = HighlightClaim.objects.filter(highlight_id = self.id).count() > 0
         attr['author_name'] = self.author.first_name + " " + self.author.last_name
+        attr['theme'] = ""
+        attr['theme_id'] = ""
         try:
             tag = Tag.objects.get(highlight_ptr=self)
             attr['content'] = tag.content
@@ -262,14 +272,17 @@ class Highlight(models.Model):
 
 
 class ClaimVersion(Entry):
-    claim = models.ForeignKey('Claim', related_name='versions')
+    claim = models.ForeignKey('Claim', related_name='versions', on_delete=models.CASCADE)
     is_adopted = models.BooleanField(default=True)
+    order = models.IntegerField(null=True, blank=True)
 
     def getAttr(self, forum):
         attr = super(ClaimVersion, self).getAttr(forum)
         attr['version_id'] = attr['id']
         attr['entry_type'] = 'claim version'
         attr['is_adopted'] = self.is_adopted
+        attr['claim_ids'] =  StatementClaim.objects.filter(statement = attr['id']).values_list("claim_id", flat = True)
+        attr['num_comments'] = StatementComment.objects.filter(claim_version = self).count()
         return attr
 
     # get id, author and time only
@@ -290,7 +303,7 @@ class ClaimVersion(Entry):
         return attr
 
 class Claim(Entry):
-    # for a Claim, its EntryCategory is not used for now -- for further extension of phases
+    title = models.TextField(null=True, blank=True)
     published = models.BooleanField(default=True)
     stmt_order = models.IntegerField(null=True, blank=True)
     CATEGORY_CHOICES = (
@@ -299,18 +312,26 @@ class Claim(Entry):
         ('finding', 'finding'),
         ('opinion', 'Opinion'),
         ('discarded', 'Discarded'),
+        ("pending", "Pending")
     )
     claim_category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, null=True, blank=True)
-    theme = models.ForeignKey(ClaimTheme, null=True, blank=True)
+    theme = models.ForeignKey(ClaimTheme, null=True, blank=True, on_delete=models.CASCADE)
     # the highlight from which this claim is extracted
     # source_highlight = models.ForeignKey(Highlight, null=True, blank=True, related_name='claims_of_highlight')
     source_highlights = models.ManyToManyField(Highlight, through='HighlightClaim')
 
     def __unicode__(self):
-        return self.adopted_version().content
+        if self.adopted_versions().count() == 0:
+            return '(No adopted version)'
+        if self.adopted_versions().count() == 1:
+            return self.adopted_version().content
+        return '(Multiple adopted versions)'
 
     def adopted_version(self):
         return self.versions.get(is_adopted=True)
+
+    def adopted_versions(self):
+        return self.versions.filter(is_adopted=True).order_by("order")
 
     # get id, author and time only
     def getAttrSimple(self):
@@ -322,18 +343,59 @@ class Claim(Entry):
     def getAttr(self, forum):
         attr = self.adopted_version().getAttr(forum)
         attr['id'] = self.id
-        attr['published'] = self.published
         attr['entry_type'] = 'claim'
         attr['category'] = self.claim_category
-        attr['stmt_order'] = self.stmt_order
         if self.theme:
             attr['theme'] = self.theme.name
-        if self.newer_versions:
+        if self.newer_versions.filter(refer_type='merge').exists():
             # is outdated!
-            attr['is_merged'] = '.'.join([str(claimref.to_claim.id) for claimref in self.newer_versions.all()])
-        if self.older_versions:
+            attr['is_merged'] = '.'.join([str(claimref.to_claim.id) for claimref in self.newer_versions.filter(refer_type='merge')])
+        if self.older_versions.filter(refer_type='merge').exists():
             # is generated by merging other claims!
-            attr['merge_of'] = '.'.join([str(claimref.from_claim.id) for claimref in self.older_versions.all()])
+            attr['merge_of'] = '.'.join([str(claimref.from_claim.id) for claimref in self.older_versions.filter(refer_type='merge')])
+        if self.newer_versions.filter(refer_type='stmt').exists():
+            # is used in statement
+            attr['is_stmt'] = True
+        attr['slots'] = []
+        for claimref in ClaimReference.objects.filter(refer_type = "stmt", from_claim = self):       
+            slot = claimref.to_claim
+            attr['slots'].append({
+                'slot_id': slot.id,
+                'slot_category': slot.claim_category,
+                'slot_order': slot.stmt_order
+            })
+        return attr
+
+    def getAttrSlot(self, forum):
+        attr = super(Claim, self).getAttr(forum)
+        attr['slot_title'] = self.title
+        attr['category'] = self.claim_category
+        attr['claims'] = []
+        attr['stmt_order'] = self.stmt_order
+        attr['num_comments'] = StatementQuestionComment.objects.filter(statement_question = self).count()
+        attr['adopted_versions'] = []
+        count = 1
+        for adopted_version in self.adopted_versions().all().order_by("order"):
+            adopted_version.order = count
+            adopted_version.save()
+            count = count + 1
+            attr['adopted_versions'].append({
+                'id': adopted_version.id,
+                'content': adopted_version.content,
+                'author': adopted_version.author.get_full_name(),
+                'num_comments': StatementComment.objects.filter(claim_version = adopted_version).count()
+            })
+
+        for claimref in self.older_versions.filter(refer_type='stmt'):
+            attr['claims'].append({
+                'id': claimref.from_claim.id,
+                'content': claimref.from_claim.adopted_version().content,
+                # 'theme': claimref.from_claim.theme.name
+                'theme': "null",
+                'statement_ids': StatementClaim.objects.filter(claim_id = claimref.from_claim.id).values_list("statement_id", flat = True),
+                'num_statements': StatementClaim.objects.filter(claim_id = claimref.from_claim.id).count() 
+            })
+            attr['claims'] = sorted(attr['claims'], key=lambda k: k['num_statements'], reverse=True)
         return attr
 
     def getAttrStmt(self):
@@ -347,23 +409,28 @@ class Claim(Entry):
     def getExcerpt(self, forum):  # used for claim navigator
         attr = self.adopted_version().getExcerpt(forum)
         attr['id'] = self.id
-        attr['published'] = self.published
         return attr
 
-class ClaimReference(models.Model):  # only for merging relationship!
+class ClaimReference(models.Model):
     TYPE_CHOICES = (
         ('merge', 'Merge'),
+        ('stmt', 'Referenced by statement slot')
     )
     refer_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
-    from_claim = models.ForeignKey(Claim, related_name='newer_versions')
-    to_claim = models.ForeignKey(Claim, related_name='older_versions')
+    from_claim = models.ForeignKey(Claim, related_name='newer_versions', on_delete=models.CASCADE)
+    to_claim = models.ForeignKey(Claim, related_name='older_versions', on_delete=models.CASCADE)
 
+class StatementVersion(models.Model):
+    claim_version = models.ForeignKey(ClaimVersion, related_name='statement_versions', on_delete=models.CASCADE)
+    text = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    updated_at = models.DateTimeField()
 
 class Event(models.Model):  # the behavior of a user on an entry
-    forum = models.ForeignKey(Forum)
-    user = models.ForeignKey(User)
-    delegator = models.ForeignKey(User, null=True, blank=True, related_name='delegated_events')
-    entry = models.ForeignKey(Entry, related_name='events')
+    forum = models.ForeignKey(Forum, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    delegator = models.ForeignKey(User, null=True, blank=True, related_name='delegated_events', on_delete=models.CASCADE)
+    entry = models.ForeignKey(Entry, related_name='events', on_delete=models.CASCADE)
     created_at = models.DateTimeField()
     collective = models.BooleanField(default=False)
 
@@ -372,6 +439,7 @@ class Event(models.Model):  # the behavior of a user on an entry
         attr['id'] = self.id
         attr['user_id'] = self.user.id
         attr['user_name'] = self.user.get_full_name()
+        attr['author_intro'] = UserInfo.objects.get(user = self.user).description
         try:
             attr['author_role'] = Role.objects.get(user=self.user, forum=forum).role
         except:
@@ -385,6 +453,52 @@ class Event(models.Model):  # the behavior of a user on an entry
         attr['collective'] = self.collective
         return attr
 
+class ClaimThemeAssignment(Event):
+    EVENT_CHOICES = (
+        ('add_theme', 'Add a theme'),
+        ('remove_theme', 'Remove a theme'),
+    )
+    claim = models.ForeignKey(Claim)
+    theme = models.ForeignKey(ClaimTheme)
+    event_type = models.CharField(max_length=20, choices=EVENT_CHOICES)
+    def getAttr(self, forum):
+        attr = super(ClaimThemeAssignment, self).getAttr(forum)
+        attr['entry_type'] = 'claim_theme_assignment'
+        attr['action'] = self.event_type
+        attr['claim_id'] = self.entry.id
+        return attr
+
+class ClaimNuggetAssignment(Event):
+    EVENT_CHOICES = (
+        ('add', 'Add a nugget'),
+        ('remove', 'Remove a nugget'),
+    )
+    claim = models.ForeignKey(Claim)
+    nugget = models.ForeignKey(Highlight)
+    event_type = models.CharField(max_length=20, choices=EVENT_CHOICES)
+    def getAttr(self, forum):
+        attr = super(ClaimNuggetAssignment, self).getAttr(forum)
+        attr['entry_type'] = 'claim_nugget_assignment'
+        attr['action'] = self.event_type
+        attr['claim_id'] = self.claim.id
+        attr['nugget_id'] = self.nugget.id
+        return attr
+
+class SlotAssignment(Event):
+    EVENT_CHOICES = (
+        ('add', 'Add to slot'),
+        ('remove', 'Remove from slot'),
+    )
+    slot = models.ForeignKey(Claim)
+    event_type = models.CharField(max_length=20, choices=EVENT_CHOICES)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    def getAttr(self, forum):
+        attr = super(SlotAssignment, self).getAttr(forum)
+        attr['entry_type'] = 'slotassignment'
+        attr['action'] = self.event_type
+        attr['claim_id'] = self.entry.id
+        attr['claim_text'] = Claim.objects.get(id=self.entry.id).adopted_version().content
+        return attr
 
 class Vote(Event):
     VOTE_CHOICES = (
@@ -427,7 +541,7 @@ class Vote(Event):
 
 class Tag(Highlight):
     content = models.TextField()
-    claimTheme = models.ForeignKey(ClaimTheme, related_name="tags", null=True, blank=True)
+    claimTheme = models.ForeignKey(ClaimTheme, related_name="tags", null=True, blank=True, on_delete=models.CASCADE)
     def getAttr(self):
         attr = super(Tag, self).getAttr()
         attr['content'] = self.content
@@ -436,7 +550,7 @@ class Tag(Highlight):
         return attr
 
 class ThemeAssignment(Event):
-    theme = models.ForeignKey(ClaimTheme)
+    theme = models.ForeignKey(ClaimTheme, on_delete=models.CASCADE)
 
     def getAttr(self, forum):
         attr = super(ThemeAssignment, self).getAttr(forum)
@@ -447,12 +561,10 @@ class ThemeAssignment(Event):
 
 class Post(Entry):  # in discussion
     title = models.TextField(null=True, blank=True)
-    target_entry = models.ForeignKey(Entry, related_name='comments_of_entry', null=True,
-                                     blank=True)  # for comments of a claim
-    target_event = models.ForeignKey(Event, related_name='comments_of_event', null=True,
-                                     blank=True)  # for comments of an event
+    target_entry = models.ForeignKey(Entry, related_name='comments_of_entry', null=True, blank=True, on_delete=models.CASCADE)  # for comments of a claim
+    target_event = models.ForeignKey(Event, related_name='comments_of_event', null=True, blank=True, on_delete=models.CASCADE)  # for comments of an event
     # the highlight to which this post is attached
-    highlight = models.ForeignKey(Highlight, related_name='posts_of_highlight', null=True, blank=True)
+    highlight = models.ForeignKey(Highlight, related_name='posts_of_highlight', null=True, blank=True, on_delete=models.CASCADE)
     CONTENT_CHOICES = (
         ('question', 'Question'),
         ('comment', 'Comment'),
@@ -478,21 +590,68 @@ class Post(Entry):  # in discussion
     def getAttr(self, forum):
         attr = super(Post, self).getAttr(forum)
         attr['entry_type'] = self.content_type
+        attr['author_id'] = self.author.id
+        attr['author_name'] = self.author.get_full_name()
+        attr['author_intro'] = UserInfo.objects.get(user = self.author).description
         if self.target_entry:
-            attr['parent_name'] = self.target_entry.author.get_full_name()
-            attr['parent_id'] = self.target_entry.id
+            try:
+                order = self.target_entry.stmt_order # see if it's a slot
+            except:
+                attr['parent_name'] = self.target_entry.author.get_full_name()
+                attr['parent_id'] = self.target_entry.id
         if self.target_event:
             attr['parent_name'] = self.target_event.user.get_full_name()
             attr['parent_id'] = self.target_event.id
         return attr
 
-class ChatMessage(models.Model):
-    source = models.ForeignKey(User, related_name='get_source')
-    target = models.ForeignKey(User, null=True, blank=True)
-    reply_target = models.ForeignKey('self', related_name='replies', null=True, blank=True)
+class Message(models.Model):
+    forum = models.ForeignKey(Forum)
+    sender = models.ForeignKey(User, related_name='msg_of_sender')
+    receiver = models.ForeignKey(User, related_name='msg_of_receiver')
+    target_entry = models.ForeignKey(Entry, null=True, blank=True)
     content = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField()
-    forum = models.ForeignKey(Forum, null=True, blank=True)
+    unread = models.BooleanField(default=True)
+    CONTENT_CHOICES = (
+        ('facilitation', 'Facilitation message'),
+        ('facilitation-action', 'Facilitation message - Action required'),
+        ('post', 'Post'),
+        ('post-action', 'Post - Attention requested'),
+        ('reply', 'Reply'),
+        ('reply-action', 'Reply - Attention requested'),
+        ('version', 'Version'),
+        ('version-action', 'Version - Attention requested'),
+    )
+    is_done = models.BooleanField(default=False)
+
+    content_type = models.CharField(max_length=20, choices=CONTENT_CHOICES)
+    def getAttr(self):
+        attr = {
+            'id': self.id,
+            'sender': self.sender.get_full_name(),
+            'receiver': self.receiver.get_full_name(),
+            'content': self.content,
+            'created_at_full': self.created_at,  # for sorting
+            'created_at': utils.pretty_date(self.created_at),
+            'content_type': self.content_type,
+        }
+        if 'facilitation' in self.content_type or 'action' in self.content_type:
+            attr['important'] = 'important'
+        if not self.unread:
+            attr['is_read'] = 'read'
+        if self.is_done:
+            attr['is_done'] = 'done'
+        if self.target_entry:
+            attr['source_id'] = self.target_entry.id
+        return attr
+
+class ChatMessage(models.Model):
+    source = models.ForeignKey(User, related_name='get_source', on_delete=models.CASCADE)
+    target = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
+    reply_target = models.ForeignKey('self', related_name='replies', null=True, blank=True, on_delete=models.CASCADE)
+    content = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField()
+    forum = models.ForeignKey(Forum, null=True, blank=True, on_delete=models.CASCADE)
 
     def __unicode__(self):
         return self.content
@@ -511,19 +670,16 @@ class ChatMessage(models.Model):
         return attr
 
 class HighlightClaim(models.Model):
-    claim = models.ForeignKey(Claim)
-    highlight = models.ForeignKey(Highlight)
+    claim = models.ForeignKey(Claim, on_delete=models.CASCADE)
+    highlight = models.ForeignKey(Highlight, on_delete=models.CASCADE)
 
-class NuggetComment(models.Model):
-    forum = models.ForeignKey(Forum)
-    author = models.ForeignKey(User)
-    theme = models.ForeignKey(ClaimTheme, null=True, blank=True)
-    content = models.TextField(null=True, blank=True)
-    created_at = models.DateTimeField()
+class ClaimAndTheme(models.Model):
+    claim = models.ForeignKey(Claim, on_delete=models.CASCADE)
+    theme = models.ForeignKey(ClaimTheme, on_delete=models.CASCADE)
 
 class SankeyWorkbench(models.Model):
-    forum = models.ForeignKey(Forum)
-    author = models.ForeignKey(User)
+    forum = models.ForeignKey(Forum, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField(null=True, blank=True)
 
 class SankeyScreenshot(models.Model):
@@ -531,19 +687,150 @@ class SankeyScreenshot(models.Model):
 
 class ViewLog(models.Model):
     heatmap = models.TextField(null=True, blank=True)
-    doc = models.ForeignKey(Doc, related_name='viewlogs') 
-    author = models.ForeignKey(User, related_name='viewlogs')
+    doc = models.ForeignKey(Doc, related_name='viewlogs', on_delete=models.CASCADE) 
+    author = models.ForeignKey(User, related_name='viewlogs', on_delete=models.CASCADE)
     created_at = models.DateTimeField(null=True, blank=True)
 
 class NuggetMap(models.Model):
     distribution = models.TextField(null=True, blank=True)
-    doc = models.ForeignKey(Doc, related_name='nuggetmaps') 
-    author = models.ForeignKey(User, related_name='nuggetmaps')
-    theme = models.ForeignKey(ClaimTheme, related_name='nuggetmaps')
+    doc = models.ForeignKey(Doc, related_name='nuggetmaps', on_delete=models.CASCADE) 
+    author = models.ForeignKey(User, related_name='nuggetmaps', on_delete=models.CASCADE)
+    theme = models.ForeignKey(ClaimTheme, related_name='nuggetmaps', on_delete=models.CASCADE)
     created_at = models.DateTimeField(null=True, blank=True)
 
 class NuggetLensInteraction(models.Model):
-    author = models.ForeignKey(User)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(null=True, blank=True)
     is_open = models.BooleanField(default=False)
-    forum = models.ForeignKey(Forum, null=True, blank=True)
+    forum = models.ForeignKey(Forum, null=True, blank=True, on_delete=models.CASCADE)
+
+class NuggetComment(MPTTModel):
+    text = models.CharField(max_length=999)
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    highlight = models.ForeignKey(Highlight)
+    created_at = models.DateTimeField()
+
+class StatementComment(MPTTModel):
+    text = models.CharField(max_length=999)
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    claim_version = models.ForeignKey(ClaimVersion)
+    created_at = models.DateTimeField()
+
+    class MPTTMeta:
+        order_insertion_by = ['-created_at']
+
+    def get_author_name(self):
+        return self.author.first_name + " " + self.author.last_name
+
+    def get_datetime(self):
+        return utils.pretty_date(self.created_at)
+
+class StatementQuestionComment(MPTTModel):
+    text = models.CharField(max_length=999)
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    statement_question = models.ForeignKey(Claim)
+    created_at = models.DateTimeField()
+
+    class MPTTMeta:
+        order_insertion_by = ['-created_at']
+
+    def get_author_name(self):
+        return self.author.first_name + " " + self.author.last_name
+
+    def get_datetime(self):
+        return utils.pretty_date(self.created_at)
+
+class ClaimComment(MPTTModel):
+    text = models.CharField(max_length=999)
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    claim = models.ForeignKey(Claim, null=True, blank=True)
+    nugget = models.ForeignKey(Highlight, null=True, blank=True)
+    created_at = models.DateTimeField()
+    CONTENT_CHOICES = (
+        ('question', 'Question'),
+        ('comment', 'Comment'),
+    )
+    comment_type = models.CharField(max_length=10, choices=CONTENT_CHOICES)
+    is_answered = models.BooleanField(default=False)
+    is_expert = models.BooleanField(default=False)
+    forum = models.ForeignKey(Forum, null=True, blank=True, on_delete=models.CASCADE)
+    def getAttr(self):
+        attr = {}
+        attr['id'] = self.id
+        attr['author_id'] = self.author.id
+        attr['author_name'] = self.author.get_full_name()
+        attr['author_intro'] = UserInfo.objects.get(user = self.author).description
+        attr['text'] = self.text
+        attr['created_at_full'] = self.created_at  # for sorting
+        attr['created_at_pretty'] = utils.pretty_date(self.created_at)
+        return attr
+
+class ClaimQuestionVote(models.Model):
+    question = models.ForeignKey(ClaimComment)
+    voter = models.ForeignKey(User)
+    created_at = models.DateTimeField()
+
+class QuestionNeedExpertVote(models.Model):
+    question = models.ForeignKey(ClaimComment)
+    voter = models.ForeignKey(User)
+    created_at = models.DateTimeField()
+
+class ComplexPhase(models.Model):
+    PHASE_CHOICES = (
+        ('paused', 'Paused'),
+        ('not_started', 'Not started'),
+        ('tagging', 'Tagging'),
+        ('free_discuss', 'Discuss Questions'), # phase 0
+        ('nugget', 'Extract nugget'), # phase 1
+        ('extract', 'Assemble Claim'), # phase 2
+        ('categorize', 'Categorize Claim'), # phase 3
+        ('theming', 'Claim theme identification'), 
+        ('improve', 'Refine Statements'), # phase 4
+        ('finished', 'Finalize Statements') # phase 5 statements
+    )
+    name = models.CharField(max_length=20, choices=PHASE_CHOICES)
+    description = models.TextField(null=True, blank=True)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    forum = models.ForeignKey(Forum)
+    status = models.SmallIntegerField(default=2) # 0 complete, 1 current focus, 2 to complete
+
+class PinMessage(models.Model):
+    content = models.TextField(null=True, blank=True)
+    phase = models.ForeignKey(ComplexPhase, related_name='pin_messages')
+    is_show = models.BooleanField(default=False)
+
+class StatementClaim(models.Model):
+    statement = models.ForeignKey(ClaimVersion, on_delete=models.CASCADE)
+    claim = models.ForeignKey(Claim, on_delete=models.CASCADE)
+
+class ForumComment(MPTTModel):
+    text = models.CharField(max_length=999)
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    forum = models.ForeignKey(Forum)
+    created_at = models.DateTimeField()
+
+    class MPTTMeta:
+        order_insertion_by = ['-created_at']
+
+    def get_author_name(self):
+        return self.author.first_name + " " + self.author.last_name
+
+    def get_datetime(self):
+        return utils.pretty_date(self.created_at)
+
+    def get_vote(self):
+        if (ForumVote.objects.filter(forum = self.forum, author = self.author).count() > 0):
+            return ForumVote.objects.filter(forum = self.forum, author = self.author)[0].support
+        return None
+
+class ForumVote(models.Model):
+    support = models.BooleanField(default = True)
+    reason = models.CharField(max_length=2010, null=True, blank=True)
+    forum = models.ForeignKey(Forum)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)

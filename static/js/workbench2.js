@@ -61,45 +61,45 @@ define([
 	};
 
 	// get heatmap
-	idleTime2 = 0
-	idleInterval2 = setInterval(function() {
-		idleTime2 = idleTime2 + 1;
-		if (idleTime2 < 2 && $(".workbench-doc-item").is(":visible") && !$("#sankey-container").is(":visible")) { // 30s
-			update_viewlog();
-		}
-	}, 5000); // every 5s
+	// idleTime2 = 0
+	// idleInterval2 = setInterval(function() {
+	// 	idleTime2 = idleTime2 + 1;
+	// 	if (idleTime2 < 2 && $(".workbench-doc-item").is(":visible") && !$("#sankey-container").is(":visible")) { // 30s
+	// 		update_viewlog();
+	// 	}
+	// }, 5000); // every 5s
 
 	// put heatmap
-	idleTime = 0
-	idleInterval = setInterval(function() {
-		idleTime = idleTime + 1;
-		if (idleTime < 2 && $(".workbench-doc-item").is(":visible") && !$("#sankey-container").is(":visible")) { // 30s
-		  if ($("#header-user-name").attr("data-role") !== "panelist") return;
-		  var upper = $("#workbench-document").scrollTop();
-		  var lower = $("#workbench-document").scrollTop() + $("#workbench-document").height();
-		  var height = $("#workbench-document .workbench-doc-item").height();
-		  var doc_id = $(".workbench-doc-item").attr("data-id");
-		  var author_id = $("#header-user-name").attr("data-id");
-		  $.ajax({
-				url: '/sankey/put_viewlog/',
-				type: 'post',
-				data: {
-				  "doc_id": 	doc_id,
-				  "lower": 		lower,
-				  "upper": 		upper,
-				  "height": 	height,
-				  "author_id": 	author_id
-				},
-				success: function(xhr) {
-				},
-				error: function(xhr) {
-				  if (xhr.status == 403) {
-				    Utils.notify('error', xhr.responseText);
-				  }
-				}
-			});
-		}
-	}, 2000); // every 5s
+	// idleTime = 0
+	// idleInterval = setInterval(function() {
+	// 	idleTime = idleTime + 1;
+	// 	if (idleTime < 2 && $(".workbench-doc-item").is(":visible") && !$("#sankey-container").is(":visible")) { // 30s
+	// 	  if ($("#header-user-name").attr("data-role") !== "panelist") return;
+	// 	  var upper = $("#workbench-document").scrollTop();
+	// 	  var lower = $("#workbench-document").scrollTop() + $("#workbench-document").height();
+	// 	  var height = $("#workbench-document .workbench-doc-item").height();
+	// 	  var doc_id = $(".workbench-doc-item").attr("data-id");
+	// 	  var author_id = $("#header-user-name").attr("data-id");
+	// 	  $.ajax({
+	// 			url: '/sankey/put_viewlog/',
+	// 			type: 'post',
+	// 			data: {
+	// 			  "doc_id": 	doc_id,
+	// 			  "lower": 		lower,
+	// 			  "upper": 		upper,
+	// 			  "height": 	height,
+	// 			  "author_id": 	author_id
+	// 			},
+	// 			success: function(xhr) {
+	// 			},
+	// 			error: function(xhr) {
+	// 			  if (xhr.status == 403) {
+	// 			    Utils.notify('error', xhr.responseText);
+	// 			  }
+	// 			}
+	// 		});
+	// 	}
+	// }, 2000); // every 5s
 
 	//Zero the idle timer on mouse movement.
 	$("body").on("mousemove", "#workbench2-document-container", function(e){
@@ -429,15 +429,15 @@ define([
 		}, '.nugget-related');
 
   		// document context menu
-  		$('body').on({
-		    mouseenter: function(){
-		  		$(".document-related").show();
-				$("#workbench-document-toc-container").css("left", $("#workbench2-document-container").offset().left - $("#workbench-document-toc-container").width() - 10);
-				$("#workbench-document-toc-container").css("top", $("#workbench2-document-container").offset().top + 10);	
-		    },mouseleave: function(){
-			    $("#workbench-document-toc-container").hide();
-		    }
-		}, '.document-related');
+  // 		$('body').on({
+		//     mouseenter: function(){
+		//   		$(".document-related").show();
+		// 		$("#workbench-document-toc-container").css("left", $("#workbench2-document-container").offset().left - $("#workbench-document-toc-container").width() - 10);
+		// 		$("#workbench-document-toc-container").css("top", $("#workbench2-document-container").offset().top + 10);	
+		//     },mouseleave: function(){
+		// 	    $("#workbench-document-toc-container").hide();
+		//     }
+		// }, '.document-related');
 
 
 		$("body").on("click", "#workbench-document-back-to-top", function(e) {

@@ -1,0 +1,33 @@
+{% if claims %} 
+	{% for item in claims %}
+		<div class="ui segment workbench-claim-item" style="margin: 5px;" claim-id="{{ item.id }}" nugget-ids="{{ item.highlight_ids }}" theme-ids="{{ item.theme_ids }}">
+			<div class="content">
+				<a href="#" class="description workbench-claim-content">
+					<b>{{ item.content }}</b>
+				</a>
+			</div>
+			<div class="ui divider" style="margin: 5px 0;"></div>
+<!-- 			{% for theme in item.themes %}
+				<span class="ui label theme-label" theme-id={{ theme.id }}>{{ theme.name }}</span>
+			{% endfor %} -->
+			<div class="discription" style="color:rgba(0,0,0,.4);">
+				<span class="discription">
+					<a class="ui basic image label avatar1" data-id="{{ item.author_id }}" data-content="{{ item.author_intro }}" data-inverted="">
+						<img src="{{ STATIC_URL }}/static/pictures/{{ item.author_id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
+						{{ item.author_name }}
+					</a>
+					<span class="ui basic label">{{ item.date }}</span>
+				</span>
+			</div>
+		</div>
+	{% endfor %}
+{% else %}
+	<div class="ui segment workbench-claim-item">
+		<div class="content">
+			<div class="description">
+				No claims yet.
+			</div>
+		</div>
+	</div>
+{% endif %}
+

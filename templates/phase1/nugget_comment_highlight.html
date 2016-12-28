@@ -1,0 +1,21 @@
+<div class="ui segment workbench-nugget nugget-related" data-hl-id = {{ highlight.id }}>
+	{% if highlight.is_nugget %}
+		<a class="ui small red right corner label nugget-select-mark" style="display:none;">
+			<i class="checkmark icon"></i>
+		</a>
+		<div class="content">
+			<div class="description more" data="{{ highlight.text}}">
+				{{ highlight.text }}
+			</div>
+		</div>
+		<div class="discription" style="color:rgba(0,0,0,.4);">
+			<span class="ui label theme-label" theme-id={{ highlight.theme_id }}>{{ highlight.theme }}</span>
+			<span> | </span>
+			<span class="ui heart rating" data-rating="0" data-max-rating="1"></span>
+			<span> | </span>
+			<span>{{ highlight.author_name }}</span>
+			<span> | </span>
+			<span>{{ highlight.created_at_pretty }}</span>
+		</div>
+	{% endif %}
+</div>

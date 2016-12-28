@@ -8,6 +8,10 @@
   position: fixed;
   z-index: 9999;
 }
+#sticked-notification {
+	margin-top: 2em;
+	margin-bottom: -2em;
+}
 .main.tab {
   padding-top: 3rem;
 }
@@ -63,11 +67,11 @@ a.user {
 .user.facilitator:after {
   content: ' (facilitator)';
 }
-#header-facilitator-wrapper .switch.user.menu {
+#user-switch-menu .switch.user.menu {
   max-height: 500px;
   overflow: auto;
 }
-#header-facilitator-wrapper .switch.user.menu .item {
+#user-switch-menu .switch.user.menu .item {
   padding: 5px 10px!important;
 }
 .doc-content img {
@@ -86,3 +90,61 @@ iframe[src^="//www.youtube.com"] {
 #fixed-steps > .step {
 	height: 1.2em;
 }
+
+@media only screen and (min-width: 1120px) {
+	#citizens-statement {
+		width: 62.5%;
+		margin-left: auto;
+		margin-right: auto;
+	}
+}
+
+#citizens-statement {
+	padding-top: 36px;
+}
+#citizens-statement .segment,
+#citizens-statement .segment .description{
+	font-size: 16px;
+	line-height: 1.4em;
+}
+
+#messages-modal {
+	height:80%;
+	overflow: auto;
+}
+#message-list {
+	padding:0 1em;
+
+}
+#message-list .message.item .header {
+	white-space: nowrap;
+	overflow: hidden;
+	margin: 0.5em 0;
+}
+
+#message-list .message.item.important {
+	background-color: #FFF4D3;
+}
+#message-list .message.item.done .mark-done {
+	display: none;
+}
+#message-list .message.item.read .header {
+	font-weight:inherit!important;
+}
+#message-list .message.item.done .header {
+	font-weight:inherit!important;
+	color: #999999!important;
+}
+#message-list:not(.show-done) .message.item.done {
+	display: none;
+}
+#message-list.important-only .message.item:not(.important) {
+	display: none;
+}
+#message-details {
+	background-color: aliceblue;
+}
+#message-details .highlight-found {
+	background-color: yellow;
+}
+

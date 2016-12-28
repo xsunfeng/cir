@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load compressed %}
+{% block extralib %}
+    <script>
+        require([
+        	"vis/layout",
+        ]);
+    </script>
+{% endblock %}
+{% block extracss %}
+	{% compressed_css 'cir_forum' %}
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.css">
+		<style>
+		.node rect {
+			cursor: move;
+			fill-opacity: .9;
+			shape-rendering: crispEdges;
+		}
+
+		.node text {
+			pointer-events: none;
+			text-shadow: 0 1px 0 #fff;
+		}
+
+		.link {
+			fill: none;
+			stroke: #000;
+			stroke-opacity: .2;
+		}
+
+		.link:hover {
+			stroke-opacity: .5;
+		}
+	</style>
+{% endblock %}
+{% block header %}
+{% endblock %}
+{% block body %}
+
+<div class="ui grid" style="margin: 0 auto 0 auto; max-width: 1280px;">
+	<div class="four wide column">
+
+		<h5 class="ui top attached header">
+  			Panelists
+		</h5>
+		<div class="ui raised attached segment">
+			<span class="select-author-elements">
+				{% for author in authors %}
+					<a class="ui tiny label active green select-element" style="margin:2px 0;" data-id="{{ author.id }}">{{author.name}}</a>
+				{% endfor %}
+			</span>
+		</div>
+
+		<h5 class="ui top attached header">
+  			Documents
+		</h5>
+		<div class="ui raised attached segment">
+			<span class="select-document-elements">
+				{% for document in docs %}
+					<a class="ui tiny label active green select-element" style="margin:2px 0;" data-id="{{ document.id }}">{{document.name}}</a>
+				{% endfor %}
+			</span>
+		</div>
+
+		<h5 class="ui top attached header">
+  			Themes
+		</h5>
+		<div class="ui raised attached segment">
+			<span class="select-theme-elements">
+				{% for theme in themes %}
+					<a class="ui tiny label active green select-element" style="margin:2px 0;" data-id="{{ theme.id }}">{{theme.name}}</a>
+				{% endfor %}
+			</span>
+		</div>
+
+	</div>
+	
+	<div class="twelve wide column">
+
+		<h5 class="ui top attached header">
+  			Activity barchart
+		</h5>
+		<div class="ui raised attached segment">
+			<!-- filter end -->
+			<div id="sankey-timerange" style="text-align: center;">
+				<div id="sankey-timerange-slider"> </div>
+				<span id="sankey-timerange-lower-value" data-value="0"></span> ~
+				<span id="sankey-timerange-upper-value" data-value="0"></span>
+			</div>
+			<div id="brush"></div>
+		</div>	
+
+		<h5 class="ui top attached header">
+  			Sankey
+		</h5>
+		<div class="ui raised attached segment">
+			<div id="sankey-container"></div>
+		</div>	
+
+		<h5 class="ui top attached header">
+  			DocuMap
+		</h5>
+		<div class="ui raised attached segment">
+		  	<div id="documap-container">
+	  		
+		  	</div>
+		</div>		
+
+
+	</div>
+</div>
+
+
+<!-- {% include 'qa/qa-wrapper.html' %}
+
+{% if role != 'visitor' %}
+	{% include 'chatter.html' %}
+{% endif %} -->
+
+{% endblock %}
+

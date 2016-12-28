@@ -5,10 +5,14 @@ define([
 ) {
 	var module = {
 		'addOnlineUser': function(userinfo) {
-			$('#chatter-wrapper .online.users.list').append(getUserLabel(userinfo));
+			if (!isNaN(userinfo.user_id)) {
+				$('#chatter-wrapper .online.users.list').find(".label[data-user-id=" + userinfo.user_id + "]").addClass("blue");
+			}
+			// $('#chatter-wrapper .online.users.list').append(getUserLabel(userinfo));
 		},
 		'removeOnlineUser': function(user_id) {
-			$('#chatter-wrapper .online.users .label[data-user-id="' + user_id + '"]').remove();
+			$('#chatter-wrapper .online.users.list').find(".label[data-user-id=" + user_id + "]").removeClass("blue");
+			// $('#chatter-wrapper .online.users .label[data-user-id="' + user_id + '"]').remove();
 		},
 		'showMsg': function(msg) {
 			$('#chatter-wrapper').transition('bounce');
@@ -32,11 +36,28 @@ define([
 					scrollToBottom();
 				}
 			});
+		},
+		'getAllUser': function() {
+			$.ajax({
+				url: '/api_chatter/',
+				type: 'post',
+				data: {
+					'action': 'get-all-user'
+				},
+				success: function(xhr) {
+					for (var i = 0; i < xhr.users.length; i++) {
+						$('#chatter-wrapper .online.users.list').append(getUserLabel(xhr.users[i]));
+					}
+				}
+			});
 		}
 	};
 	$('#chatter-wrapper .titlebar').click(function() {
+		// $("#chatter-notebook").toggle();
 		$('#chatter-wrapper').toggleClass('minimized');
+		$('#chatter-wrapper .close-icon').hide();
 		if (!$('#chatter-wrapper').hasClass('minimized')) {
+			$('#chatter-wrapper .close-icon').show();
 			scrollToBottom();
 			setTimeout(function() {
 				$('#chatter-wrapper textarea').focus();
@@ -77,15 +98,15 @@ define([
 
 	function getUserLabel(userinfo) {
 		var color = '';
-		if (userinfo.role == 'facilitator') {
-			color = 'blue';
-		} else if (userinfo.role == 'expert') {
-			color = 'yellow';
-		}
+		// if (userinfo.role == 'facilitator') {
+		// 	color = 'blue';
+		// } else if (userinfo.role == 'expert') {
+		// 	color = 'yellow';
+		// }
 		var html = '<div class="ui image label ' + color
 			+ '" data-user-id="' + userinfo.user_id + '">'
 			+ userinfo.user_name
-			+ '<div class="detail">' + userinfo.role + '</div>'
+			+ '<div class="detail">' + userinfo.role.toUpperCase().charAt(0) + '</div>'
 			+ '</div>';
 		return html;
 	}

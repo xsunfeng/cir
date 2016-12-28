@@ -1,0 +1,148 @@
+<div id="doc-categories" class="ui segment">
+    <div class="ui top attached label">
+        Document list
+    </div>
+    <div class="ui list">
+        {% if not folders and not root_docs %}
+            <div class="item">No document for now.</div>
+        {% endif %}
+        {% for folder in folders %}
+            <div class="item">
+                <span class="ui top aligned avatar image"><i class="ui folder open outline big icon"></i></span>
+                <div class="folder content">
+                    <div class="header"><span class="folder-name">{{ folder.name }}</span> (<a class="edit-folder" data-folder-id="{{ folder.id }}">edit</a>)(<a class="delete-item" data-type="folder" data-id="{{ folder.id }}">delete whole folder</a>)</div>
+                    <span class="folder-description">{{ folder.instructions }}</span>
+                    <div class="list">
+                        {% for doc in folder.docs %}
+                            <div class="item">
+                                <i class="file text outline big icon"></i>
+                                <div class="doc content">
+                                    <a class="header open-doc" data-id="{{ doc.id }}">{{ doc.title }}</a>
+                                    ({{ doc.num_sections }} sections)
+                                    (<a class="edit-doc" data-doc-id="{{ doc.id }}">edit</a>)
+                                    (<a class="delete-item" data-type="doc" data-id="{{ doc.id }}">delete whole document</a>)
+                                    <div class="description">{{ doc.description }}</div>
+                                    {% if doc.num_sections %}<div class="ui label"><i class="calendar icon"></i>updated <abbr title="{{ doc.updated_at_full }}">{{ doc.updated_at }}</abbr></div>{% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="add-document ui primary button" data-folder-name="{{ folder.name }}" data-folder-id="{{ folder.id }}" style="margin-left: 3.5em;">Add a document to this folder</div>
+            </div>
+        {% endfor %}
+        <div id="add-folder" class="ui primary button">Add a folder</div>
+        {% for root_doc in root_docs %}
+            <div class="item">
+                <span class="ui top aligned avatar image"><i class="ui file text outline big icon"></i></span>
+                <div class="doc content">
+                    <a class="header open-doc" data-id="{{ root_doc.id }}">{{ root_doc.title }}</a>
+                    ({{ root_doc.num_sections }} sections)
+                    (<a class="edit-doc" data-doc-id="{{ root_doc.id }}">edit</a>)
+                    (<a class="delete-item" data-type="doc" data-id="{{ root_doc.id }}">delete whole document</a>)
+                    <div class="description">{{ root_doc.description }}</div>
+                    {% if root_doc.num_sections %}<div class="ui label"><i class="calendar icon"></i>updated <abbr title="{{ root_doc.updated_at_full }}">{{ root_doc.updated_at }}</abbr></div>{% endif %}
+                </div>
+            </div>
+        {% endfor %}
+        <hr />
+        <div class="add-document ui primary button" data-folder-name="Root folder" data-folder-id="-1">Add a document to the root folder</div>
+    </div>
+</div>
+<div id="doc-content" class="doc-content">
+    <div class="ui message">Please select a document from the list.</div>
+</div>
+<div class="ui new-docsection segment" style="display:none">
+    <div class="ui top attached label">
+        Add a section to "<span id="doc-dest-name"></span>"
+    </div>
+    <form class="ui form">
+        <div class="field">
+            <div class="ui input">
+                <input type="text" name="title" placeholder="Section title">
+            </div>
+        </div>
+        <div class="field">
+            <textarea name="newdocsection" id="newdocsection" cols="80" rows="10"></textarea>
+        </div>
+        <div class="ui message">
+            Please select a place to add your document
+        </div>
+        <div class="ui submit primary button">Add</div>
+    </form>
+</div>
+<div id="new-folder-form" class="ui small modal">
+    <div class="header">New folder</div>
+    <div class="content">
+        <form class="ui form">
+            <div class="ui error message"></div>
+            <div class="field required">
+                <div class="ui icon input">
+                    <input type="text" name="name" placeholder="Folder name">
+                </div>
+            </div>
+            <div class="field">
+                <label>Description/instructions</label>
+                <textarea name="description"></textarea>
+            </div>
+            <div class="ui submit primary button">Add</div>
+        </form>
+    </div>
+</div>
+<div id="edit-folder-form" class="ui small modal">
+    <div class="header">Edit folder</div>
+    <div class="content">
+        <form class="ui form">
+            <div class="ui error message"></div>
+            <div class="field required">
+                <div class="ui icon input">
+                    <input type="text" name="name" placeholder="Folder name">
+                </div>
+            </div>
+            <div class="field">
+                <label>Description/instructions</label>
+                <textarea name="description"></textarea>
+            </div>
+            <div class="ui submit primary button">Submit</div>
+        </form>
+    </div>
+</div>
+<div id="new-doc-form" class="ui small modal">
+    <div class="header">New document</div>
+    <div class="content">
+        <form class="ui form">
+            <div class="ui message">
+                Create a document here. You'll be able to fill in sections later.
+            </div>
+            <div class="ui error message"></div>
+            <div class="field required">
+                <div class="ui icon input">
+                    <input type="text" name="title" placeholder="Document title">
+                </div>
+            </div>
+            <div class="field">
+                <label>Description/instructions</label>
+                <textarea name="description"></textarea>
+            </div>
+            <div class="ui submit primary button">Add</div>
+        </form>
+    </div>
+</div>
+<div id="edit-doc-form" class="ui small modal">
+    <div class="header">Edit document</div>
+    <div class="content">
+        <form class="ui form">
+            <div class="ui error message"></div>
+            <div class="field required">
+                <div class="ui icon input">
+                    <input type="text" name="title" placeholder="Document title">
+                </div>
+            </div>
+            <div class="field">
+                <label>Description/instructions</label>
+                <textarea name="description"></textarea>
+            </div>
+            <div class="ui submit primary button">Submit</div>
+        </form>
+    </div>
+</div>

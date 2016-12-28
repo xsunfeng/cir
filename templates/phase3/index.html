@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load compressed %}
+{% block extralib %}
+	<script>
+		require([
+			'phase3/claim'
+		]);
+	</script>
+{% endblock %}
+{% block extracss %}
+	{% compressed_css 'cir_forum' %}
+{% endblock %}
+{% block header %}
+	{% include 'header/forum_header.html' %}
+{% endblock %}
+
+{% block body %}
+
+<div class="ui claim grid">
+	<div id="claim-container" class="eight wide claim column" style="margin-bottom: 3em">
+		<div style="position:relative">
+			<div class="ui info message">
+				<div class="ui instructions accordion">
+					<div class="ui active title"><i class="dropdown icon"></i>Current phase: Claim categorization</div>
+					<div class="active content">
+						Before we proceed with claim improvement, let's category the claims we just composed. Available categories are Pro, Con and Key Finding. If you don't think a claim should proceed to the next round, you can also vote a Discard to it. Facilitators will perform the final categorization for each claim.
+					</div>
+				</div>
+			</div>
+			<!-- <div id="claim-filter-pane" class="ui bottom attached one item menu"></div> -->
+			<div id="claim-pane-overview">
+				<div class="ui active centered inline loader"></div>
+			</div>
+		</div>
+	</div>
+
+	<div id="draft-stmt-container" class="eight wide column">
+<!-- 		<div class="ui compact pointing menu statement-filter" style="margin-bottom:20px;">
+			<a class="categorize-tab item active">
+				Categorized
+			</a>
+			<a class="my-statement-tab item">
+				My statements
+			</a>
+			<a class="active-statement-tab item">
+				Active statements
+			</a>
+		</div> -->
+		<div id="draft-stmt"></div>
+		<div style="display:none;" id="my-statement">page2</div>
+		<div style="display:none;" id="active-statement">page3</div>
+	</div>
+</div>
+{% include 'qa/qa-wrapper.html' %}
+{% if role != 'visitor' %}
+	{% include 'chatter.html' %}
+{% endif %}
+{% endblock %}

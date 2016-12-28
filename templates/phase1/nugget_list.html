@@ -1,0 +1,48 @@
+{% if highlights %}
+	{% for highlight in highlights %}
+		{% if highlight.is_nugget %}
+			<div class="ui segment workbench-nugget nugget-related" style="margin: 5px;" data-hl-id = {{ highlight.id }} author-id = "{{ highlight.author_id }}" doc-id = {{ highlight.doc_id }} theme-id = {{ highlight.theme_id }}>
+				<a class="ui small red right corner label nugget-select-mark" style="display:none;">
+					<i class="checkmark icon"></i>
+				</a>
+				<div class="content">
+					<div class="description more" data="{{ highlight.text}}">
+						{{ highlight.text }}
+					</div>
+				</div>
+				<div class="ui divider" style="margin: 5px 0;"></div>
+				<div class="discription action-bar" style="color:rgba(0,0,0,.4);">
+					<a class="ui basic label theme-label" theme-id="{{ highlight.theme_id }}" data-content="{{ highlight.theme_desc }}">{{ highlight.theme }}</a>
+					<a class="ui basic image label avatar1" data-id="{{ highlight.author_id }}" data-content="{{ highlight.author_intro }}" data-inverted="">
+						<img src="{{ STATIC_URL }}/static/pictures/{{ highlight.author_id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
+						{{ highlight.author_name }}
+					</a>
+					<span class="ui basic label">{{ highlight.created_at_pretty }}</span>
+					<div class="actions" style="margin-top:5px;">
+						<a href="#" class="item source-nugget">Context</a>
+						<span> | </span>
+							<a href="#" class="item comment-nugget">Comment</a>
+							{% if highlight.comment_number != 0 %}
+								<a href="#" class="item comment-nugget-number">({{ highlight.comment_number }})</a>
+							{% endif %}
+						<span> | </span>
+						<a href="#" class="item reassign-nugget">Change theme</a>
+						{% if highlight.is_author %}
+							<span> | </span>
+							<a href="#" class="item delete-nugget">Delete</a>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+		{% endif %}
+	{% endfor %}
+{% else %}
+		<div class="ui card" style="background: PapayaWhip;">
+				<div class="content">
+					<div class="description">
+						No nuggets yet.
+					</div>
+				</div>
+		</div>
+{% endif %}
+

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block delaylib %}
+{% endblock %}
+{% block header %}
+	{% include 'header/forum_list_header.html' %}
+{% endblock %}
+
+{% block body %}
+
+{% if load_error == '404' %}
+<article class="ui two column centered grid">
+	<div class="column" style="top:50px">
+		<div class="ui error message">
+			<div class="header">{{ error_msg | safe }}</div>
+			<p>Click <a href="/">here</a> to return to homepage.</p>
+		</div>
+	</div>
+</article>
+{% elif load_error == '403' %}
+<article class="ui two column centered grid">
+	<div class="column" style="top:50px">
+		<div class="ui error message">
+			<div class="header">Sorry, this is a private forum.</div>
+			<ul class="list">
+				<li>This forum is only accessible to specific users.</li>
+				{% if user_id == '-1' %}
+				<li>If you have not logged in, please log in and retry.</li>
+				{% endif %}
+				<li>Click <a href="/">here</a> to return to homepage.</li>
+			</ul>
+		</div>
+	</div>
+</article>
+{% endif %}
+
+{% endblock %}
+

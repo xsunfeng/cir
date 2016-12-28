@@ -8,6 +8,51 @@
         ]);
     </script>
     <script src="//cdn.ckeditor.com/4.5.3/standard/ckeditor.js"></script>
+	<style>
+
+	svg {
+		width: 100%;
+		height: 100%;
+	}
+
+	path.slice{
+		stroke-width:2px;
+	}
+
+	polyline{
+		opacity: .3;
+		stroke: black;
+		stroke-width: 2px;
+		fill: none;
+	}
+
+/* dot chart */
+.axis path,.axis line {
+	fill: none;
+	stroke:#b6b6b6;
+	shape-rendering: crispEdges;
+}
+/*.tick line{fill:none;stroke:none;}*/
+.tick text{
+	fill:#999;
+}
+
+g.journal.active{
+	cursor:pointer;
+}
+
+text.label{
+	font-size:12px;
+	font-weight:bold;
+	cursor:pointer;
+}
+
+text.value{
+	font-size:12px;
+	font-weight:bold;
+}
+
+	</style>
 {% endblock %}
 {% block delaylib %}
 {% endblock %}
@@ -21,17 +66,17 @@
     <div class="item">GeoDeliberator</div>
     {% else %}
     <a href="#" class="red item active" data-tab="overview-tab">Overview</a>
+    <a href="#" class="red item" data-tab="vis-tab">Visualization</a>
     <a href="#" class="red item" data-tab="forum-tab">Forum</a>
     <a href="#" class="red item" data-tab="users-tab">Users</a>
     <a href="#" class="red item" data-tab="document-tab">Documents</a>
-    <a href="#" class="red item" data-tab="messages-tab">Messages</a>
+    <a href="#" class="red item" data-tab="message-tab">Messages</a>
     <a href="#" class="red item" data-tab="log-tab">Access log</a>
     {% endif %}
 </div>
 {% endblock %}
 
 {% block body %}
-<div id="popup-notification" class="ui message hidden"></div>
 	{% if load_error %}
 		{% if load_error == '404' %}
 <div class="ui two column centered grid">
@@ -59,9 +104,6 @@
 <div class="container">
 	<div class="ui main tab active" data-tab="overview-tab">
 		<div class="ui centered grid">
-			<div class="sixteen wide column">
-				<h3>Forum activities -- mockup</h3>
-			</div>
 			<div class="ten wide column">
 				<h3>Current phase of deliberation</h3>
 				<div class="ui segment">
@@ -83,8 +125,8 @@
 								<option value="not_started" {% if phase == 'not_started' %} selected{% endif %}>Not started</option>
                                 <option value="nugget" {% if phase == 'nugget' %} selected{% endif %}>Nugget extraction</option>
 								<option value="extract" {% if phase == 'extract' %} selected{% endif %}>Claim construction</option>
-								<option value="categorize" {% if phase == 'categorize' %} selected{% endif %}>Categorize</option>
-								<option value="improve" {% if phase == 'improve' %} selected{% endif %}>Prioritize and Improve</option>
+								<option value="categorize" {% if phase == 'categorize' %} selected{% endif %}>Claim categorization</option>
+								<option value="improve" {% if phase == 'improve' %} selected{% endif %}>Claim refinement</option>
 								<option value="finished" {% if phase == 'finished' %} selected{% endif %}>Finished</option>
 							</select>
 						</div>
@@ -96,6 +138,76 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="ui main tab" data-tab="vis-tab" style="position: fixed; top: 50px; bottom: 0; left: 0; right: 0;">
+		<div class="ui compact pointing menu" style="margin-bottom: 30px; margin-left:calc(50% - 150px);">
+			<a id="pie-btn" class="vis-btn active item"><i class="gamepad icon"></i>Games</a>
+			<a id="dot-btn" class="vis-btn item"><i class="video camera icon"></i>Channels</a>
+			<a id="another-btn" class="vis-btn item"><i class="video play icon"></i>Videos</a>
+		</div>
+		<div id="pie-container" class="vis-container">
+			<div style="position:absolute; left:0; width:200px; top:0; bottom:0;">
+				<div class="ui segments">
+					<div class="ui segment">
+						<div class="ui form">
+							<div class="grouped fields">
+								<label>How often do you use checkboxes?</label>
+									<div class="field">
+									<div class="ui radio checkbox pie-object">
+										<input type="radio" name="pie-object" checked="checked" value="author_name">
+										<label>Panelist</label>
+									</div>
+								</div>
+								<div class="field">
+									<div class="ui radio checkbox pie-object">
+										<input type="radio" name="pie-object" value="theme_name">
+										<label>Theme</label>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div div id="pie" style="position:absolute; left:200px; top:0; bottom:0;">
+			</div>
+		</div>
+		<div id="dot-container" class="vis-container" style="display:none;">
+			<div style="position:absolute; left:0; width:200px;">
+				<div class="ui segments">
+					<div class="ui segment">
+						<div class="ui form">
+							<div class="grouped fields">
+								<label>How often do you use checkboxes?</label>
+									<div class="field">
+									<div class="ui radio checkbox pie-object">
+										<input type="radio" name="pie-object" checked="checked" value="author_name">
+										<label>checkbox1</label>
+									</div>
+								</div>
+								<div class="field">
+									<div class="ui radio checkbox pie-object">
+										<input type="radio" name="pie-object" value="theme_name">
+										<label>checkbox2</label>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div style="position:absolute; left:200px;">
+				<div id="dot">
+				</div>
+			</div>
+		</div>
+	</div>
+
+<script type="text/javascript">
+
+
+</script>
+
 	<div class="ui main tab" data-tab="forum-tab">
 		<div class="ui centered grid">
 			<div class="ten wide column">
@@ -152,10 +264,27 @@
     <div class="ui main tab" data-tab="document-tab">
         <div class="ui loading segment" style="min-height:10em"></div>
     </div>
-	<div class="ui main tab" data-tab="messages-tab">
-		<div class="ui grid">
-			<div class="ten wide column">Under construction.</div>
-			<div class="six wide column"></div>
+	<div class="ui main tab" data-tab="message-tab">
+		<div class="ui centered grid">
+			<div class="ten wide column">
+				<h3>Send a message / task to the panel</h3>
+				<div class="ui segment">
+					<form id="send-msg-form" class="ui form">
+						<div class="field">
+							<textarea></textarea>
+						</div>
+						<div class="ui primary button">Send</div>
+					</form>
+				</div>
+				<h3>Previous messages</h3>
+				<div id="previous-messages" class="ui segment">
+
+				</div>
+
+			</div>
+			<div class="six wide column">
+				<div id="panelist-list"></div>
+			</div>
 		</div>
 	</div>
 	<div class="ui main tab" data-tab="log-tab">

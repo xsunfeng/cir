@@ -1,0 +1,13 @@
+
+{% for slot_info in categories %}
+	<div href="" class="ui segment statement-entry" data-id="{{slot_info.id}}">
+		<h3>{{ slot_info.category|title|slice:"1" }}Q{{ slot_info.stmt_order }}: {{ slot_info.slot_title }}</h3>
+		{% if slot_info.num_comments %}
+			<a class="ui label">Comments<div class="detail">{{ slot_info.num_comments }}</div></a>
+		{% else %}
+			<a class="ui label">Comment</a>
+		{% endif %}
+	</div>
+{% endfor %}
+
+<div style="height:1rem;"></div>

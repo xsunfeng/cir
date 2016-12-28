@@ -1,0 +1,67 @@
+{% if questions %}
+<div class="ui relaxed list">
+{% for question in questions %}
+    {% if question.is_answered %}
+    {% else %}
+	<div class="question item" data-id="{{ question.id }}">
+		<div class="ui info refresh prompt message">New activities in this thread.</div>
+		<div class="content">
+			<div class="header">{{ question.text }}</div>
+			<div class="description">
+				<span>
+					<b>Raised by</b>
+					<a class="ui basic image label avatar1" data-id="{{ question.author_id }}" data-content="{{ question.author_intro }}" data-inverted="">
+						<img src="{{ STATIC_URL }}/static/pictures/{{ question.author_id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
+						{{ question.author_name }}
+					</a>
+					<abbr title="{{ question.created_at_pretty }}">{{ question.created_at_pretty }}</abbr>
+					{% if question.last_reply_pretty %}
+						<span> | </span>
+						<b>Last reply:</b>
+						<abbr title="{{ question.last_reply_pretty }}">{{ question.last_reply_pretty }}</abbr>
+					{% endif %}
+				</span>
+			</div>
+			<div class="ui text menu" style="margin:0;">
+				<a class="item expand-thread" data-id="{{ question.id }}">Show thread ({{ question.reply_count }})</a>
+				<a class="item collapse-thread" style="display:none;" data-id="{{ question.id }}">Hide thread</a>
+				<a class="item direct-reply" data-id="{{ question.id }}">Reply</a>
+				{% if question.nugget_id %}
+					<a class="item find-in-doc" data-id="{{ question.doc_id }}" data-highlight-id="{{ question.nugget_id }}">Context</a>
+				{% elif question.claim_id %}
+					<a class="item find-in-claim" claim-id="{{ question.claim_id }}" data-variation="very wide" 
+						data-html='
+								<div class="ui one column divided left aligned grid">
+									<div class="column">
+										<h4 class="ui header">Claim</h4>
+										<p>{{ question.claim_content }}</p>
+										<span>{{ question.claim_author }} | {{ question.claim_created_at }}</span>
+									</div>
+								</div>'
+					>Preview related claim</a>
+				{% endif %}
+<!-- 				<a class="item">
+					<span class="claim-question-vote {% if question.voted %}voted{% endif %}" data-tooltip="Vote if you think this is important.">Vote </span> 
+					(<span class="vote-cnt" data-tooltip="{{ question.voted_authors }}">{{ question.vote_count }}</span>)
+				</a> -->
+				{% if question.is_author or question.is_facilitator %}
+					<a href="#" class="item delete-question" nugget-id="{{ question.nugget_id }}" question-id="{{ question.id }}">Delete</a>
+				{% endif %}
+				<a class="item"  style="{% if question.has_facilitator_vote %} color:red; {% endif %}">
+					<span class="claim-expert-vote {% if question.expert_voted %}voted{% endif %}
+						{% if question.expert_vote_count > 0 %} experted {% endif %}
+					" data-tooltip="Vote if you think this needs experts to answer.">Expert </span> 
+					(<span class="expert-vote-cnt" data-tooltip="{{ question.expert_voted_authors }}">{{ question.expert_vote_count }}</span>)
+				</a>
+			</div>
+		</div>
+	</div>
+	{% endif %}
+{% endfor %}
+</div>
+{% else %}
+<div class="ui message">
+	No questions at all.
+</div>
+{% endif %}
+<div id="qa-thread" class="ui basic secondary segment" style="display:none"></div>

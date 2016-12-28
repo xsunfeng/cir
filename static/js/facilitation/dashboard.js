@@ -3,13 +3,19 @@ define([
 	'facilitation/phase-manager',
 	'facilitation/forum-manager',
 	'facilitation/doc-manager',
+	'facilitation/message-manager',
+	'facilitation/vis/pie',
+	'facilitation/vis/dot',
 	'semantic-ui',
 	'realtime/socket'
 ], function(
 	$,
 	PhaseManager,
 	ForumManager,
-	DocManager
+	DocManager,
+	MessageManager,
+	Pie,
+	Dot
 ) {
 	var module = {};
 	module.initLayout = function() {
@@ -25,7 +31,25 @@ define([
 				DocManager.init();
 			}
 		});
-
+		$('#nav-menu > .item[data-tab="message-tab"]').tab({
+			'onFirstLoad': function() {
+				MessageManager.init();
+			}
+		});
+		$('#nav-menu > .item[data-tab="vis-tab"]').tab({
+			'onFirstLoad': function() {
+				Pie.init();
+				Dot.init();
+				$("body").on("click", ".vis-btn", function() {
+					$(".vis-btn").removeClass("active");
+					$(this).addClass("active");
+					$(".vis-container").hide();
+					var type = $(this).attr("id").split("-")[0];
+					var container_id = ("#" + type + "-container");
+					$(container_id).show();
+				})
+			}
+		});
 	};
 
 	sessionStorage.setItem('role', 'facilitator');

@@ -1,0 +1,20 @@
+<div id="nugget-thread-popup" style="position: absolute; left: -999999px; top: -999999px; z-index: 900;">
+	<div class="ui attached top blue message">
+		<div class="header">Activities on Highlight</div>
+	</div>
+	<div id="doc-thread-content" class="ui attached segment"></div>
+	{% if phase.show_highlight_toolbar %}
+	<div class="ui attached bottom segment labeled icon menu">
+		<a data-action="comment" class="item doc-thread-btn">
+		    <i class="comment icon"></i>Comment
+		</a>
+<!-- 		<a data-action="claim" class="item doc-thread-btn">
+		    <i class="code icon"></i>Extract Nugget
+		</a> -->
+	</div>
+	{% else %}
+	<div class="ui attached bottom warning message">
+		We are not in a claim extraction round. Please discuss in the claim view.
+	</div>
+	{% endif %}
+</div>

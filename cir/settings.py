@@ -4,7 +4,7 @@ import socket
 
 # automatically determine debug status
 if 'cai' in socket.getfqdn():
-    DEBUG = True
+    DEBUG = False
 else:
     DEBUG = True
 
@@ -16,51 +16,57 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-SERVER_HOST =  '130.203.136.141'
-NOMINATIM_SERVER_HOST = '130.203.139.102'
+server_ip = socket.gethostbyname(socket.gethostname())
+
+# determine if the IST DB can be connected. if not, use local db.
+if '130.203' in server_ip:
+    SERVER_HOST = '130.203.136.141'
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
+            'NAME': 'cir_backup_20161125',  # Or path to database file if using sqlite3.
+            'USER': 'postgres',
+            'PASSWORD': 'asdf1234',
+            'HOST': SERVER_HOST,
+            'PORT': '',  # Set to empty string for default.
+        },
+        'dev': {
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
+            'NAME': 'cir_backup_20161125',  # Or path to database file if using sqlite3.
+            'USER': 'postgres',
+            'PASSWORD': 'asdf1234',
+            'HOST': SERVER_HOST,
+            'PORT': '',  # Set to empty string for default.
+        }
+    }
+else:
+    # on local dev -- use different DB setups
+    SERVER_HOST = '127.0.0.1'
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
+            'NAME': 'cir_backup_20161125',  # Or path to database file if using sqlite3.
+            'USER': 'homestead',
+            'PASSWORD': 'secret',
+            'HOST': SERVER_HOST,
+            'PORT': '',  # Set to empty string for default.
+        },
+        'dev': {
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
+            'NAME': 'cir_backup_20161125',  # Or path to database file if using sqlite3.
+            'USER': 'homestead',
+            'PASSWORD': 'secret',
+            'HOST': SERVER_HOST,
+            'PORT': '',  # Set to empty string for default.
+        }
+    }
 
 # dispatcher url
-# if DEBUG:
-#     DISPATCHER_URL = '127.0.0.1:443'
-# else:
-DISPATCHER_URL = '130.203.136.141:443'
+if DEBUG:
+    DISPATCHER_URL = '127.0.0.1:443'
+else:
+    DISPATCHER_URL = '130.203.136.141:443'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'cir_backup_20160318',  # Or path to database file if using sqlite3.
-        'USER': 'postgres',
-        'PASSWORD': 'asdf1234',
-        'HOST': SERVER_HOST,
-        'PORT': '',  # Set to empty string for default.
-    },
-    'dev': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'cir_backup_20160318',  # Or path to database file if using sqlite3.
-        'USER': 'postgres',
-        'PASSWORD': 'asdf1234',
-        'HOST': SERVER_HOST,
-        'PORT': '',  # Set to empty string for default.
-    },
-    'geoparser': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'geoparser',                      # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': 'postgres',
-        'PASSWORD': 'asdf1234',
-        'HOST': SERVER_HOST,                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '5432',                      # Set to empty string for default.
-    },
-    'nominatim': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'nominatim',                      # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': 'postgres',
-        'PASSWORD': '',
-        'HOST': NOMINATIM_SERVER_HOST,                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '5432',                      # Set to empty string for default.
-    }
-}
 
 CACHES = {
     'default': {
@@ -245,11 +251,12 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
-    'south',
     'cir',
     'annotator',
     'password_reset',
     'pipeline',
+    'mptt',
+    'south',
 )
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'

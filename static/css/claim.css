@@ -1,21 +1,49 @@
-#claim-pane .hidden {
+.ui.claim.grid {
+	margin-top: 2em;
+	height: 100%;
+	overflow: hidden;
+}
+
+#claim-container {
+	height: 100%;
+	overflow: auto;
+}
+
+#draft-stmt-container {
+	height: 100%;
+	overflow: auto;
+	padding-bottom:3em;
+}
+
+#claim-pane-fullscreen {
+	height: 100%;
+	overflow: auto;
+}
+#claim-pane-fullscreen .ui.header {
+	background-color: #DBDCDD;
+}
+#claim-container .hidden {
     display: none;
 }
 #claim-pane > .ui.segments {
 	border: none;
 }
-#claim-pane > .ui.segments > .merging.segment {
+#claim-pane-overview > .merging.menu {
 	padding: 0.5em 0;
 	display: none;
 	border-radius: 0;
 }
-#claim-pane > .ui.empty.segment {
+#claim-pane-overview > .ui.empty.segment {
 	height: 10em;
 	border: none;
 	border-radius: 0;
 }
-#claim-pane > .full-screen.segment {
-	border-top: none;
+#claim-pane-overview .ui.menu .item.label {
+	margin: 0;
+	padding-right: 0;
+}
+#claim-pane-overview .ui.menu .item>.label {
+	margin: 0;
 }
 .claim.column > .ui.menu {
 	-webkit-box-shadow: none;
@@ -28,19 +56,20 @@
 	border: none;
 
 }
-.claim.column > .ui.menu > .item.active {
-	background-color: #fff;
-}
+
 .ui.secondary.menu .dropdown.item > .menu {
     margin-top: 0!important;
 }
 .ui.secondary.menu .claim-addstmt-handle {
 	cursor: move;
+	color: #999999;
 }
-.claim-content {
-	font-size: 1.5em;
-    line-height: 1.5em;
-	padding-top: 0;
+.ui.secondary.menu .claim-addstmt-handle:hover {
+	color: #000;
+}
+#claim-pane-overview .claim-content {
+	font-size: 1.2em;
+    line-height: 1.2em;
 }
 .claim.segment {
 	-moz-transition: background-color 0.5s;
@@ -63,16 +92,12 @@
 }
 .claim-metainfo {
 	margin: 10px 0;
+	font-size: 12px;
 }
 .claim-metainfo > * {
 	display: inline-block;
 }
-textarea.claim.editor {
-	font-size:1.5em;
-}
-.improved.text {
-	font-size: 1.3em!important;
-}
+
 del {
 	color: red;
 }
@@ -89,24 +114,15 @@ a.claim-vote-btn.unready:hover {
 	color: rgba(40,40,40,.3)!important;
 	background-color: transparent!important;
 }
-#claim-pane .claim.segment {
+#claim-pane-overview .claim.segment {
     padding-bottom: 0;
 
 }
-#claim-pane .stmt.segment {
+#claim-pane-overview .stmt.segment {
 	background-color: #FFFAF3;
 }
-#claim-pane .stmt.segment .claim-addstmt-handle {
-	display: none;
-}
-#claim-pane .segments .claim.menu {
-    margin: 0 -1em;
-	-webkit-box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
-	-moz-box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
-	box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
-	background-color: #F3F4F5;
-}
-#claim-pane .private.claim.segment {
+
+#claim-container .private.claim.segment {
     opacity: 0.6;
 }
 #claim-navigator {
@@ -124,6 +140,33 @@ a.claim-vote-btn.unready:hover {
 	white-space: nowrap;
 
 }
+
+#draft-stmt .stmt.progress {
+	margin:0;
+}
+
+#draft-stmt .slot-title {
+	display: inline-block;
+}
+#draft-stmt .slot-title:not(.empty) {
+	color: #000;
+}
+#draft-stmt .slot-title-wrapper {
+	display: inline-block;
+	width: calc(100% - 40px);
+}
+#draft-stmt .slot-title:hover {
+	cursor: text;
+	background-color: #fff;
+}
+#draft-stmt .slot-title-input {
+	cursor: text;
+	margin: 2px 1em 0;
+	border:	 1px solid #A7A7A7;
+	background-color: #fff;
+	width: 40%;
+}
+
 #draft-stmt .ui.progress .title {
 	position: absolute;
 	text-align: center;
@@ -131,75 +174,54 @@ a.claim-vote-btn.unready:hover {
 	z-index: 2;
 	font-size: 1.1em;
 	font-weight: bold;
+	margin-top:0.2em;
 }
 
-#draft-stmt .list.invalid .description {
-	cursor: not-allowed;
+#draft-stmt .ui.progress .label {
+	top: 0;
+	font-weight: inherit;
+	left: -40%;
 }
-#draft-stmt .item:not(.empty) .description {
-	min-height: 3em;
-	max-height: 6em;
-	cursor: pointer;
+
+#draft-stmt .phase3.slot .src_claim {
+	max-height: 5em;
 	overflow: hidden;
-	background: #fff;
+	color: #999999;
+}
+#draft-stmt .phase3.slot .src_claim:last-child {
+	padding-bottom: 0;
 }
 #draft-stmt .item.empty {
 	position: relative;
 	height: 3em;
 }
-#draft-stmt .description:hover .destmt.button {
+#draft-stmt .src_claim:hover .destmt.button {
 	display: block;
 }
-#draft-stmt .item.to-merge:after {
-	background-color: #D9D9D9;
-	width: 100%;
-	height: calc(100% - 4px);
-	content: 'Merge';
-	position: absolute;
-	visibility: visible;
-	z-index: 2;
-	text-align: center;
-	border-radius: 10px;
-	border: 5px dashed #2185D0;
-	font-size: 2em;
-	line-height: 1em;
-	top: 4px;
+#draft-stmt .slot.phase3:hover .src_claim {
+	max-height: inherit;
+	color: #000;
 }
-#draft-stmt .description .destmt.button {
+
+#draft-stmt .slot .reorder-handle {
+	cursor: ns-resize;
+}
+#draft-stmt .slot .move-claim-handle {
+	cursor: move;
+}
+#draft-stmt .slot .destmt.button {
 	display: none;
 	position: absolute;
 	top: 0;
 	right: 0;
 	z-index: 2;
 }
-#draft-stmt .description.ui-sortable-helper {
+#draft-stmt .slot.ui-sortable-helper {
 	background-color: #fff;
 	overflow: hidden;
+	max-height:3.5em;
 }
-#draft-stmt .description:after {
-	content: "";
-	height: 3em;
-	position: absolute;
-	left: 0;
-	bottom: 0;
-	width: 100%;
-	background: linear-gradient(to bottom, rgba(0, 0, 0, 0), #fff);
-}
-#draft-stmt .item.empty.to-drop:after {
-	background-color: #D9D9D9;
-	width: 100%;
-	height: 100%;
-	content: 'Drop to add';
-	position: absolute;
-	visibility: visible;
-	z-index: 2;
-	text-align: center;
-	border-radius: 10px;
-	border: 5px dashed #2185D0;
-	font-size: 2em;
-	line-height: 1em;
-	top: 0;
-}
+
 #draft-stmt .sortable-placeholder {
 	background-color: #D9D9D9;
 	height: 7em;
@@ -209,32 +231,80 @@ a.claim-vote-btn.unready:hover {
 #draft-stmt .sortable-placeholder:after {
 	width: 100%;
 	height: 100%;
-	content: 'Drop to reorder';
+	content: 'Drop to move the slot here';
 	position: absolute;
 	z-index: 2;
 	text-align: center;
 	font-size: 2em;
 	line-height: 2em;
 }
-#draft-stmt .list.invalid {
-	cursor: not-allowed;
-	opacity: 0.7;
-	max-height: 15em;
-	overflow: hidden;
-}
-#draft-stmt .droppable-edge {
+#draft-stmt .phase3.slot.to-drop:after {
+	background-color: #D9D9D9;
+	width: 100%;
+	height: 100%;
+	content: 'Drop to merge into slot';
 	position: absolute;
-	width: calc(100% - 28px);
-	height: 3px;
-	background-color: #2185D0;
-	display: none;
-	border-radius: 4px;
+	visibility: visible;
+	z-index: 2;
+	text-align: center;
+	border-radius: 10px;
+	border: 5px dashed #2185D0;
+	font-size: 2em;
+	line-height: 1em;
+	top: 0;
 }
+#draft-stmt li.item.active .slot-hidden {
+	display: block!important;
+}
+#draft-stmt .phase4.slot .description {
+	margin-bottom:0;
+}
+#draft-stmt .phase4.slot .src_claim {
+	font-size:1.3em;
+	line-height:1.3em;
+}
+#draft-stmt .stmt-refresh-category {
+	cursor: pointer;
+}
+.droppable-edge:after {
+	display: block;
+	background-color: #F3F4F5;
+	height: 42px;
+	content: 'Move a claim here to create a new slot';
+	text-align: center;
+	border-radius: 0.3em;
+	border: 2px solid #2185D0;
+	font-size: 1em;
+	line-height: 2em;
+	margin-top: 14px;
+}
+.droppable-edge.to-drop:after {
+	background-color: #D9D9D9;
+	content: 'Drop to create a new slot';
+	border: 5px dashed #2185D0;
+}
+#draft-stmt .phase4.slot.to-drop:after {
+	background-color: #fff;
+	width: 100%;
+	height: 100%;
+	content: 'Drop to move to slot';
+	position: absolute;
+	visibility: visible;
+	z-index: 2;
+	text-align: center;
+	border-radius: 0.1em;
+	border: 5px dashed #2185D0;
+	font-size: 2em;
+	line-height: 1em;
+	top: 0;
+}
+
 #claim-stmt-helper {
 	width: 25em;
 	max-height: 7em;
 	overflow: hidden;
 	position: fixed;
+	z-index: 3;
 }
 #claim-stmt-helper:after {
 	content: "";
@@ -245,69 +315,43 @@ a.claim-vote-btn.unready:hover {
 	width: 100%;
 	background: linear-gradient(to bottom, rgba(0, 0, 0, 0), white);
 }
-
-/*4:3:3*/
-
-/*#workbench-document-container {
-	position: absolute;
-	left: 0%;
-	top: 0%; 
-	bottom: 0%;
-	right: 60%;
-	margin: 0.5em;
+#claim-activity-feed .improve.menu,
+#claim-activity-feed .post.menu {
+	margin: 0;
+}
+#claim-activity-feed .ui.message {
+	margin: 0.5em 0 0 0;
+}
+#claim-activity-feed .improved.text {
+	font-size: 1.3em!important;
+}
+#claim-activity-feed .event[data-type="claim version"] {
+	background-color: #F8FFFF;
+	border-top: 1px #A9D5DE solid;
+	margin-top: 0.5em;
+	margin-left: -1em;
+	width: calc(100% + 2em);
+	padding: 0.5em 1em;
+	border-bottom: 1px #A9D5DE solid;
 }
 
-#workbench-document-panel {
-	left: 0%;
-	top: 0%;
-	bottom: 0%;
-	right: 0%;
-	height: 94%;
-	overflow: auto;
+.active-1 {
+	border: 5px #A9D5DE solid;	
 }
 
-#workbench-nugget-container {
-	position: absolute;
-	left: 40%;
-	top: 0%;
-	bottom: 0%;
-	right: 30%;
-    margin: 0.5em;
-}
 
-#workbench-nugget-panel {
-	left: 0%;
-	top: 0%; 
-	bottom: 0%;
-	right: 0%;
-	height: 94%;
-	overflow: auto;
-}
 
-#workbench-claim-container {
-	position: absolute;
-	left: 70%;
-	top: 0%; 
-	bottom: 0%;
-	right: 0%;
-	margin: 0.5em;
+.feed-adopt-claim-version[data-action="deadopt"]{
+    background: #2185D0!important;
+    color: white!important;
 }
-
-#workbench-claim-panel {
-	left: 0%;
-	top: 0%; 
-	bottom: 0%;
-	right: 0%;
-	height: 94%;
-	overflow: auto;
+.feed-adopt-claim-version[data-action="deadopt"] span{
+  	position: relative;
+    content: 'Adopted';
 }
-
-#workbench-theme-container {
-	padding: 0.5em;
-	margin: 0.5em;
+.feed-adopt-claim-version[data-action="deadopt"]:hover span{
+    display: none;
 }
-*/
-
-/*.workbench-documents-column:nth-of-type(even) {
-	background: #FFCCCC;
-}*/
+.feed-adopt-claim-version[data-action="deadopt"]:hover:after{
+    content: 'Retract';
+}

@@ -1,15 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block header %}
-<header class="ui fixed inverted main menu">
-	<div class="item">GeoDeliberator</div>
-	{% if not load_error %}
-    <div class="item">Community Deliberation</div>
-	<div id="header-member-wrapper" class="right menu" style="display:flex">
-		<a href="/{{ forum_url }}" class="item" target="_blank">Open full review in new tab</a>
-	</div>
-	{% endif %}
-</header>
+{% include 'header/forum_postcir_header.html' %}
 {% endblock %}
 {% block extracss %}
     <link rel="stylesheet" href="{% static 'css/postcir.css' %}">

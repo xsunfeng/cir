@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load compressed %}
+{% block extralib %}
+    <script>
+        require([
+            'phase2/layout',
+            'realtime/chatter'
+        ]);
+    </script>
+{% endblock %}
+{% block delaylib %}
+{% endblock %}
+{% block extracss %}
+	{% compressed_css 'cir_forum' %}
+{% endblock %}
+
+{% block header %}
+	{% include 'header/forum_header.html' %}
+{% endblock %}
+
+{% block body %}
+
+<div id="popup-notification" class="ui message hidden"></div>
+	{% if load_error %}
+		{% if load_error == '404' %}
+<article class="ui two column centered grid">
+	<div class="column" style="top:50px">
+		<div class="ui error message">
+			<div class="header">Forum does not exist; did you enter the correct address?</div>
+			<p>Click <a href="/">here</a> to return to homepage.</p>
+		</div>
+	</div>
+</article>
+		{% elif load_error == '403' %}
+<article class="ui two column centered grid">
+	<div class="column" style="top:50px">
+		<div class="ui error message">
+			<div class="header">Sorry, this is a private forum</div>
+			<ul class="list">
+				<li>This forum is only accessible to specific users.</li>
+				<li>Click <a href="/">here</a> to return to homepage.</li>
+			</ul>
+		</div>
+	</div>
+</article>
+		{% endif %}
+	{% else %}
+
+<!-- left panel -->
+<div style="font-size:1.2em; position:fixed; top:50px; bottom:0; left:0; right:50%;">
+	<div style="padding-left: 2em; position:absolute; width:100%; max-width:640px; right:0;">
+		<div class="ui text menu">
+			<div class="header item">nugget list</div>
+			<div class="header item" style="border-left: 1px solid #000000;margin-left: 1em;">theme</div>
+			<select name="gender" class="ui dropdown item" id="nugget-list-theme">
+			</select>
+		</div>
+	</div>
+	<div style="overflow:auto; top:60px; bottom:0; position:absolute; padding:1em; padding-top:0; width:100%; max-width:640px; right:0;">
+		<div id="workbench-nugget-list" class="ui segments" style="border-radius: 0;">
+			<div class="ui segment">
+				<div class="ui active small inline loader"></div>loading
+			</div>
+		</div>
+		<a href="#" id="nugget-list-back" style="display:none;">back to full list</a>
+	</div>
+</div>
+
+<!-- right panel -->
+<div style="font-size:1.2em; position:fixed; top:50px; bottom:0; left:50%; right:0;">
+	<div style="padding-left: 2em;">
+		<div class="ui text menu">
+			<div class="header item">claim</div>	
+			<div class="item" id="add-new-claim">
+				<button class="ui circular icon button"><i class="plus icon"></i></button>
+			</div>
+		</div>
+	</div>
+	<div id="feng-claim-panel" style="overflow:auto; top:60px; bottom:0; position:absolute; padding:1em; left:0; width:100%; max-width:640px;  padding-top: 0;">
+		<a href="#" id="claim-list-back" style="display:none;"><i class="icon angle left"></i>back to full list</a>
+		<div id="claim-detail" class="ui segment" style="display:none; margin-top:0;"></div>
+		<div id="claim-list" class="ui segments" style="border-radius:0; margin-top:0;"></div>		
+	</div>
+</div>
+
+
+
+{% if role != 'visitor' %}
+	{% include 'chatter.html' %}
+{% endif %}
+	{% endif %}
+
+{% include 'phase1/nugget_comment.html' %}
+
+{% include 'qa/qa-wrapper.html' %}
+
+{% endblock %}
+

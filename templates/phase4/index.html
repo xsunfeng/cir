@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load compressed %}
+{% block extralib %}
+	<script>
+		require([
+			'phase4/layout',
+		]);
+	</script>
+{% endblock %}
+{% block extracss %}
+	{% compressed_css 'cir_forum' %}
+{% endblock %}
+{% block header %}
+	{% include 'header/forum_header.html' %}
+{% endblock %}
+
+{% block body %}
+
+
+
+{% if role != 'visitor' %}
+	{% include 'chatter.html' %}
+{% endif %}
+
+{% include 'qa/qa-wrapper.html' %}
+
+{% endblock %}

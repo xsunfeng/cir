@@ -1,0 +1,35 @@
+{% if claims %}{% for claim in claims %}
+<div class="ui top attached secondary claim menu" data-id="{{ claim.id }}">
+	<div class="label item">
+		<div class="ui label">C{{ claim.id }}</div>
+	</div>
+	{% if claim.theme %}
+		<div class="label item"><div class="ui label">Theme: {{ claim.theme }}</div></div>
+	{% endif %}
+	<div class="right menu">
+		<div class="item claim-addstmt-handle"><i class="move icon"></i>Drag to statement</div>
+	</div>
+</div>
+<section class="ui bottom attached segment claim{% if claim.is_stmt %} stmt{% endif %}" data-id="{{ claim.id }}">
+	<div class="content">
+	{% if claim.collective %}
+		<a class="ui teal right ribbon label">Collective</a>
+	{% endif %}
+		<div class="claim-content">
+			{{ claim.content|safe }}
+		</div>
+		<div class="claim-metainfo">
+			Composed by <a class="user {{ claim.author_role }}" data-id="{{ claim.author_id }}">{{ claim.author_name }}</a> <abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr> 
+		</div>
+		
+		<div class="claim-metainfo slot-assignment">
+		</div>
+	</div>
+</section>
+{% endfor %}{% else %}
+<div class="ui orange inverted segment">
+	No claims available for now.
+</div>
+{% endif %}
+
+

@@ -1,0 +1,38 @@
+{% if option.filter %}
+<div id="claim-filter-pane">
+	<div class="ui dropdown item disabled">Filter by theme
+		<i class="dropdown icon"></i>
+		<div class="menu">
+			<a data-value="0" class="theme item">(All)</a>
+			{% for theme in themes %}<a data-value="{{ theme.id }}" class="theme item">{{ theme.name }}</a>{% endfor %}
+			<a data-value="-1" class="theme item">(Unassigned)</a>
+		</div>
+	</div>
+</div>
+{% endif %}
+{% if option.claim %}
+<div id="claim-nav-pane" class="ui secondary vertical blue menu">
+    <h4 class="ui header">
+        {% if not category and not theme %}<strong>All claims</strong>
+        {% else %}
+            Current filters:
+            {% if category %}Category ({{ category }}){% endif %}
+            {% if theme %}Theme ({{ theme }}){% endif %}
+        {% endif %}
+        ({{ claims_cnt }})
+    </h4>
+	<a class="refresh item">Refresh claim list<i class="refresh icon"></i></a>
+	{% if claims %}{% for claim in claims %}
+	<a class="claim item" data-id="{{ claim.id }}">
+		{% if not claim.published %}
+			<div class="ui label">Unpublished</div>
+		{% endif %}
+			<abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr>: {{ claim.excerpt }}
+	</a>
+	{% endfor %}{% else %}
+    <div class="item">
+        No claims available for now.
+    </div>
+	{% endif %}
+</div>
+{% endif %}

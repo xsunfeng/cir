@@ -1,6 +1,5 @@
 define([
   'd3',
-  'd3-tooltip',
   'sankey',
   'jquery',
   'semantic-ui',
@@ -8,7 +7,6 @@ define([
   'workbench2'
 ], function(
   d3,
-  tip,
   sankey_module,
   $,
   semantic,
@@ -932,24 +930,24 @@ define([
         }
 
         // add author lastest activity
-        var your_id = $("#header-user-name").attr("data-id");
-        $(".latest-activity").each(function(){
-            var author_id = $(this).attr("author-id");
-            var author_name = $(this).attr("author-name");
-            if (your_id === author_id) {
-              var tooltip = "You recently worked at this place";
-              var arrow = '<div class="latest-activity-arrow" data-tooltip="' + tooltip + '" author-id="' + author_id + '" style="position:fixed;">' +
-                  '<i class="icon big red user"></i>' +
-                '</div>';       
-            } else {
-              var tooltip = author_name + " recently worked at this place";
-              var arrow = '<div class="latest-activity-arrow" data-tooltip="' + tooltip + '" author-id="' + author_id + '" style="position:fixed;">' +
-                      '<i class="icon big olive user"><b>' + author_name + '</b></i>' +
-                '</div>';  
-            }
-            $("#latest-activity-container").append(arrow);
-            $(".latest-activity-arrow[author-id=" + author_id +  "]").css("left", $(this).offset().left).css("top", $(this).offset().top - 10);
-        })
+        // var your_id = $("#header-user-name").attr("data-id");
+        // $(".latest-activity").each(function(){
+        //     var author_id = $(this).attr("author-id");
+        //     var author_name = $(this).attr("author-name");
+        //     if (your_id === author_id) {
+        //       var tooltip = "You recently worked at this place";
+        //       var arrow = '<div class="latest-activity-arrow" data-tooltip="' + tooltip + '" author-id="' + author_id + '" style="position:fixed;">' +
+        //           '<i class="icon big red user"></i>' +
+        //         '</div>';       
+        //     } else {
+        //       var tooltip = author_name + " recently worked at this place";
+        //       var arrow = '<div class="latest-activity-arrow" data-tooltip="' + tooltip + '" author-id="' + author_id + '" style="position:fixed;">' +
+        //               '<i class="icon big olive user"><b>' + author_name + '</b></i>' +
+        //         '</div>';  
+        //     }
+        //     $("#latest-activity-container").append(arrow);
+        //     $(".latest-activity-arrow[author-id=" + author_id +  "]").css("left", $(this).offset().left).css("top", $(this).offset().top - 10);
+        // })
       },
       error: function(xhr) {
         if (xhr.status == 403) {
