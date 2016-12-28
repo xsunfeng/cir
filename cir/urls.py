@@ -131,7 +131,7 @@ urlpatterns = patterns('',
     url(r'^api_dashboard/theme/$', facilitator_views.theme),
     url(r'^api_dashboard/document/$', facilitator_views.document),
 
-    url(r'geocoder/', include('annotator.urls')),
+    # url(r'geocoder/', include('annotator.urls')),
 
     # these must be put last!
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)(/phase/(?P<phase_name>[a-zA-Z0-9_]+))?/?$', forum_views.enter_forum),
