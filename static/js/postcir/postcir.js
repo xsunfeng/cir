@@ -103,7 +103,7 @@ define([
                 + '</span>';
             tinymce.activeEditor.insertContent(citeHtml);
             $('#stmt-highlight-toolbar').removeAttr('style');
-            $('#citizens-statement .tk').removeClass('highlighted');
+            $('#stmt .tk.highlighted').removeClass('highlighted');
             highlight({
                 context_id: module.newHighlight.contextId,
                 start: module.newHighlight.start,
@@ -111,6 +111,7 @@ define([
                 type: 'my_citation',
                 highlight_id: null
             });
+            module.newHighlight = {};
         });
 
         $('#post-btn').click(function() {
@@ -205,8 +206,6 @@ define([
 			},
 			success: function(xhr) {
 				$('#posts-area').html(xhr.html);
-
-				//showDeleteButtons();
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -217,7 +216,7 @@ define([
 	}
 
     function highlight(data) {
-        var $context = $('#citizens-statement .description[data-id="' + data.claim_id + '"]');
+        var $context = $('#stmt .stmt-item[data-id="' + data.context_id + '"]');
         var className;
         if (data.type == 'my_citation') {
             className = 'my';
