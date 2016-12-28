@@ -5,13 +5,13 @@ from django.shortcuts import render, render_to_response, redirect
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.utils import timezone
-from cir.models import *
-
-index_building = False
+from postcir.models import *
+from cir.utils import segment_text
 
 VISITOR_ROLE = 'visitor'
 
 def home(request, forum_url):
+    # no delegation on this forum
     if 'actual_user_id' in request.session:
         del request.session['actual_user_id']
     try:
@@ -23,24 +23,31 @@ def home(request, forum_url):
         return render(request, 'index_statement.html', context)
     request.session['forum_id'] = forum.id
     request.session['role'] = VISITOR_ROLE
-    context = {}
-    context['forum_name'] = forum.full_name
-    context['forum_url'] = forum.url
-    context['stmt_preamble'] = forum.stmt_preamble
-    context['claims'] = {
-        'findings': [],
-        'pros': [],
-        'cons': []
+    context = {
+        'forum_name': forum.full_name,
+        'forum_url': forum.url,
+        'stmt_preamble': forum.stmt_preamble,
+        'statement_categories': []
     }
-    findings = Claim.objects.filter(forum=forum, stmt_order__isnull=False, claim_category='finding').order_by('stmt_order')
-    for claim in findings:
-        context['claims']['findings'].append(claim.getAttrStmt())
-    pros = Claim.objects.filter(forum=forum, stmt_order__isnull=False, claim_category='pro').order_by('stmt_order')
-    for claim in pros:
-        context['claims']['pros'].append(claim.getAttrStmt())
-    cons = Claim.objects.filter(forum=forum, stmt_order__isnull=False, claim_category='con').order_by('stmt_order')
-    for claim in cons:
-        context['claims']['cons'].append(claim.getAttrStmt())
+    for stmt_category in StatementCategory.objects.filter(forum=forum):
+        stmt_category_entry = {
+            'name': stmt_category.name,
+            'description': stmt_category.description,
+            'groups': []
+        }
+        context['statement_categories'].append(stmt_category_entry)
+        for stmt_group in StatementGroup.objects.filter(category=stmt_category):
+            stmt_group_entry = {
+                'description': stmt_group.description,
+                'items': []
+            }
+            stmt_category_entry['groups'].append(stmt_group_entry)
+            for stmt_item in StatementItem.objects.filter(group=stmt_group):
+                stmt_group_entry['items'].append({
+                    'id': stmt_item.id,
+                    'content': stmt_item.content,
+                    'content_segmented': segment_text(stmt_item.content)
+                })
     return render(request, 'index_statement.html', context)
 
 def api_postcir(request):

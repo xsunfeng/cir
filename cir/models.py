@@ -401,7 +401,12 @@ class Claim(Entry):
     def getAttrStmt(self):
         attr = {}
         attr['id'] = self.id
-        attr['content'] = utils.segment_text(self.adopted_version().content)
+        if self.adopted_versions().count() > 1:
+            attr['content'] = '(Multiple adopted versions)'
+        elif self.adopted_versions().count() == 0:
+            attr['content'] = '(No adopted version)'
+        else:
+            attr['content'] = utils.segment_text(self.adopted_version().content)
         if self.theme:
             attr['theme'] = self.theme.name
         return attr

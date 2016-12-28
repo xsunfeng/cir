@@ -9,7 +9,6 @@
         <title>Geodeliberator: Community Deliberation</title>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" rel="stylesheet" class="ui" />
         {% compressed_css 'postcir' %}
-        {% block extracss %}{% endblock %}
         <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.20/require.min.js"></script>
         <script>
             require.config({
@@ -33,66 +32,33 @@
             });
         </script>
     </head>
-    <body id="cir-stmt"{% if forum_id %} forum-id="{{ forum_id }}"{% endif %}>
+    <body{% if forum_id %} forum-id="{{ forum_id }}"{% endif %}>
     	{% include 'header/forum_postcir_header.html' %}
 
-        <div id="citizens-statement">
+        <div id="stmt">
             <h2>Citizen's statement on {{ forum_name }}</h2>
             <div class="ui styled accordion" style="width:auto">
                 <div class="title">
                     <i class="dropdown icon"></i>
-                    Click to show an overview of the issue description.
+                    Click to show issue description.
                 </div>
                 <div class="content">
                     {{ stmt_preamble|safe }}
                 </div>
             </div>
-            <div class="ui segment" style="display:none">
-                <div id="show-cited-checkbox" class="ui toggle checkbox">
-                    <input type="checkbox" name="show_cited">
-                    <label>Show frequently cited texts</label>
-                </div>
-            </div>
-
-            <h3>Key Findings</h3>
-            <section class="ui stmt segment">
-                <ol class="ui list">
-                {% for claim in claims.findings %}
-                    <li class="item" cite-name="FINDING-{{ forloop.counter }}">
-                        <div class="description" data-id="{{ claim.id }}">
-                            {{ claim.content|safe }}
-                            {% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
-                        </div>
-                    </li>
-                {% endfor %}
-                </ol>
-            </section>
-            <h3>Proponent Claims</h3>
-            <section class="ui stmt segment">
-                <ol class="ui list">
-                {% for claim in claims.pros %}
-                    <li class="item" cite-name="PRO-{{ forloop.counter }}">
-                        <div class="description" data-id="{{ claim.id }}">
-                            {{ claim.content|safe }}
-                            {% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
-                        </div>
-                    </li>
-                {% endfor %}
-                </ol>
-            </section>
-            <h3>Opponent Claims</h3>
-            <section class="ui stmt segment">
-                <ol class="ui list">
-                {% for claim in claims.cons %}
-                    <li class="item" cite-name="CON-{{ forloop.counter }}">
-                        <div class="description" data-id="{{ claim.id }}">
-                            {{ claim.content|safe }}
-                            {% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
-                        </div>
-                    </li>
-                {% endfor %}
-                </ol>
-            </section>
+            {% for category in statement_categories %}
+                <h3>{{ category.description }}</h3>
+                <section class="stmt-category">
+                    {% for group in category.groups %}
+                    <p>{{ group.description|safe }}</p>
+                    <ol class="ui list stmt-group">
+                    {% for item in group.items %}
+                        <li class="item stmt-item" data-cite-name="{{ category.name }}-{{ item.id }}">{{ item.content_segmented|safe }}</li>
+                    {% endfor %}
+                    </ol>
+                    {% endfor %}
+                </section>
+            {% endfor %}
             <div id="stmt-highlight-toolbar">
                 <div class="ui blue segment labeled icon menu">
                     <a class="item stmt-cite-btn">

@@ -1,27 +1,16 @@
 define([
-
 	'jquery',
 	'utils',
-	'geocoding/geocoder',
+    'tinymce',
 	'semantic-ui',
-    'tinymce'
+
 ], function(
 	$,
-	Utils,
-	GeoCoder
+	Utils
 ) {
-	var urlPrefix = '/cir';
-	var module = {
-		resolvePlace: function(geotext, place_type) {
-			var content = tinymce.activeEditor.selection.getContent();
-			var wholeText = tinymce.activeEditor.getContent();
-			var wrapped = '<span class="cite-label geoname" data-geotext="' + geotext
-				+ '" data-place-type="'
-				+ place_type + '">' + content + '</span>';
-			wholeText = wholeText.replace(content,wrapped);
-			tinymce.activeEditor.setContent(wholeText);
-		}
-	};
+    var module = {};
+	var urlPrefix = '/postcir';
+
 	function initLayout() {
 
 		$('.ui.accordion').accordion();
@@ -41,38 +30,14 @@ define([
             content_css: '/static/css/postcir_editor.css',
 			forced_root_block : '',
             setup: function(editor) {
-                editor.on('click', onClickCitationLabel)
-					.on('mouseup', function() {
-						// look up geo name, if Selection is not empty
-						if (!editor.selection.isCollapsed()
-							&& editor.selection.getContent().indexOf('cite-label') < 0
-							&& editor.selection.getContent().indexOf('</li>') < 0) {
-							var searchText = editor.selection.getContent({format: 'text'}).trim();
-							$('#geocoding').show();
-							GeoCoder.getRecommendation(searchText);
-						} else {
-							GeoCoder.hideGeocoder();
-						}
-					});
-            }
-        });
-		GeoCoder.init();
-        $('#show-cited-checkbox').checkbox({
-            onChecked: function() {
-                // TODO disable opinion panel
-                // TODO show other users' cited highlights
-            },
-            onUnchecked: function() {
-            }
-        });
 
+            }
+        });
 
         module.newHighlight = {};
         module.isDragging = false;
         module.draggingTarget = null;
-		$('#opinion-board').click(function() {
-			$('#hover-map').removeAttr('style');
-		});
+
         $('#citizens-statement').on('click', '.tk', function (e) {
             e.stopPropagation();
             if ($(this).hasClass('r')) {
@@ -81,7 +46,7 @@ define([
                     // this highlighted text is referenced -- don't do anything TODO
                 }
             }
-        }).on('mousedown', '.stmt.segment', function (e) {
+        }).on('mousedown', '.stmt-item', function (e) {
             $('#stmt-highlight-toolbar').removeAttr('style');
             if ($(e.target).is('u.tk')) {
                 module.draggingTarget = $(e.target.parentElement);
@@ -126,15 +91,6 @@ define([
                 module.newHighlight = {};
             }
         });
-
-		$('#posts-area')
-			.on('click', '.cite-label', onClickCitationLabel)
-			.on('click', '.cite-label.geoname', function(e) {
-				e.stopPropagation();
-				var $target = $(e.target);
-				var geotext = $target.attr('data-geotext');
-				GeoCoder.showPlace(geotext, e);
-			});
 
         $('#stmt-highlight-toolbar .stmt-cite-btn').click(function() {
             var citeHtml = '<span class="cite-label" data-claim-id="'
@@ -284,25 +240,6 @@ define([
             }
         }
     }
-
-	function onClickCitationLabel(e) {
-		e.stopPropagation();
-		var $target = $(e.target);
-		if ($target.hasClass('geoname')) {
-
-		} else {
-			if ($target.hasClass('cite-label')) {
-				$('#citizens-statement .tk.highlighted').removeClass('highlighted');
-				$('#citizens-statement .tk.my').removeClass('my');
-				highlight({
-					claim_id: $target.attr('data-claim-id'),
-					start: $target.attr('data-start'),
-					end: $target.attr('data-end'),
-					type: 'my_citation'
-				});
-			}
-		}
-	}
-	return module;
+    return module;
 });
 
