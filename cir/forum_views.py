@@ -271,38 +271,6 @@ def enter_sankey(request, forum_url):  # access /forum_name
     context['forum_id'] = forum.id
     return render(request, 'sankey.html', context)
 
-def enter_statement(request, forum_url):
-    if 'actual_user_id' in request.session:
-        del request.session['actual_user_id']
-    try:
-        forum = Forum.objects.get(url=forum_url)
-    except:  # 404
-        context = {
-            'load_error': '404'
-        }
-        return render(request, 'index_statement.html', context)
-    request.session['forum_id'] = forum.id
-    request.session['role'] = VISITOR_ROLE
-    context = {}
-    context['forum_name'] = forum.full_name
-    context['forum_url'] = forum.url
-    context['stmt_preamble'] = forum.stmt_preamble
-    context['claims'] = {
-        'findings': [],
-        'pros': [],
-        'cons': []
-    }
-    findings = Claim.objects.filter(forum=forum, stmt_order__isnull=False, claim_category='finding').order_by('stmt_order')
-    for claim in findings:
-        context['claims']['findings'].append(claim.getAttrStmt())
-    pros = Claim.objects.filter(forum=forum, stmt_order__isnull=False, claim_category='pro').order_by('stmt_order')
-    for claim in pros:
-        context['claims']['pros'].append(claim.getAttrStmt())
-    cons = Claim.objects.filter(forum=forum, stmt_order__isnull=False, claim_category='con').order_by('stmt_order')
-    for claim in cons:
-        context['claims']['cons'].append(claim.getAttrStmt())
-    return render(request, 'index_statement.html', context)
-
 def handler500(request):
     response = render_to_response('500.html', {}, context_instance=RequestContext(request))
     response.status_code = 500

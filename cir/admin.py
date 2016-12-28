@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from models import *
+from postcir.models import *
 
 def user_unicode(self):
     return  u'%s %s (%s)' % (self.first_name, self.last_name, self.email)
@@ -130,6 +131,7 @@ class PostAdmin(admin.ModelAdmin):
     list_filter = ('forum', 'content_type')
     ordering = ('-created_at', )
 
+
 admin.site.register(Forum, ForumAdmin)
 admin.site.register(Role, RoleAdmin)
 admin.site.unregister(User)
@@ -142,3 +144,21 @@ admin.site.register(Post, PostAdmin)
 admin.site.register(ClaimVersion, ClaimVersionAdmin)
 admin.site.register(Highlight, HighlightAdmin)
 admin.site.register(Tag, TagAdmin)
+
+class StatementCategoryAdmin(admin.ModelAdmin):
+    list_display = ('forum', 'description', 'created_at')
+
+class StatementGroupAdmin(admin.ModelAdmin):
+    list_display = ('forum', 'category', 'description', 'created_at')
+    list_filter = ('forum', )
+
+class StatementItemAdmin(admin.ModelAdmin):
+    def group_forum(self):
+        return self.group.forum
+
+    list_display = (group_forum, 'group', 'content')
+    list_filter = ('group__forum', )
+
+admin.site.register(StatementCategory, StatementCategoryAdmin)
+admin.site.register(StatementGroup, StatementGroupAdmin)
+admin.site.register(StatementItem, StatementItemAdmin)

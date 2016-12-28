@@ -10,9 +10,8 @@ import facilitator_views
 import tag_views
 import workbench_views
 import chatter_views
-import vis_views
 import sankey_views
-import postcir_views
+import postcir.views as postcir_views
 
 import phase0
 import phase1
@@ -43,8 +42,6 @@ urlpatterns = patterns('',
     url(r'^api_get_flags/$', claim_views.api_get_flags),
     url(r'^api_tag/$', tag_views.api_tag),
     url(r'^api_tag_theme/$', facilitator_views.tag_theme),
-    url(r'api_postcir/$', postcir_views.api_postcir),
-    url(r'api_geoparse/$', postcir_views.api_geoparse),
 
     url(r'^workbench/api_load_all_documents/$', workbench_views.api_load_all_documents),
     url(r'^workbench/api_load_all_themes/$', workbench_views.api_load_all_themes),
@@ -132,6 +129,7 @@ urlpatterns = patterns('',
     url(r'^api_dashboard/document/$', facilitator_views.document),
 
     # url(r'geocoder/', include('annotator.urls')),
+    url(r'^postcir/', include('postcir.urls')),
 
     # these must be put last!
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)(/phase/(?P<phase_name>[a-zA-Z0-9_]+))?/?$', forum_views.enter_forum),
@@ -139,7 +137,7 @@ urlpatterns = patterns('',
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/workbench/?$', forum_views.enter_workbench),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/sankey/?$', forum_views.enter_sankey),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)(/dashboard/(?P<dashboard_tab>[a-zA-Z0-9_]+))?/?$', facilitator_views.enter_dashboard),
-    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/statement/?$', forum_views.enter_statement)
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/deliberation/?$', postcir_views.home)
     
 )
     

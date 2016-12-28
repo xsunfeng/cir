@@ -1,121 +1,125 @@
-{% extends 'base.html' %}
 {% load static %}
-{% block header %}
-{% include 'header/forum_postcir_header.html' %}
-{% endblock %}
-{% block extracss %}
-    <link rel="stylesheet" href="{% static 'css/postcir.css' %}">
-	<link href="{% static 'css' %}/ol.min.css" rel="stylesheet" />
-{% endblock %}
-{% block extralib %}
-	<script>
-		require([
-			'postcir/postcir',
-			'tinymce',
-		]);
-	</script>
+{% load compressed %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <title>Geodeliberator: Community Deliberation</title>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" rel="stylesheet" class="ui" />
+        {% compressed_css 'postcir' %}
+        {% block extracss %}{% endblock %}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.20/require.min.js"></script>
+        <script>
+            require.config({
+                baseUrl: "{% static 'js' %}",
+                paths: {
+                    'jquery': '//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min',
+                    'semantic-ui': '//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min',
+                    'socket.io': '//130.203.136.141:443/socket.io/socket.io',
+                	'tinymce': '//cdn.tinymce.com/4/tinymce.min',
+				},
+                shim: {
+                    'semantic-ui': ['jquery'],
+                },
+                waitSeconds: 200,
+            });
+            require([
+                'layout/header',
+                'postcir/postcir',
+            ], function(Header) {
+                Header.initHeader();
+            });
+        </script>
+    </head>
+    <body id="cir-stmt"{% if forum_id %} forum-id="{{ forum_id }}"{% endif %}>
+    	{% include 'header/forum_postcir_header.html' %}
 
-{% endblock %}
-
-{% block body %}
-
-{% if load_error and load_error == '404' %}
-<article class="ui two column centered grid">
-	<div class="column" style="top:50px">
-		<div class="ui error message">
-			<div class="header">Forum does not exist; did you enter the correct address?</div>
-		</div>
-	</div>
-</article>
-{% else %}
-<div id="citizens-statement">
-    <h2>Citizen's statement on {{ forum_name }}</h2>
-    <div class="ui styled accordion" style="width:auto">
-        <div class="title">
-            <i class="dropdown icon"></i>
-            Click to show an overview of the issue description.
-        </div>
-        <div class="content">
-            {{ stmt_preamble|safe }}
-        </div>
-    </div>
-    <div class="ui segment" style="display:none">
-        <div id="show-cited-checkbox" class="ui toggle checkbox">
-            <input type="checkbox" name="show_cited">
-            <label>Show frequently cited texts</label>
-        </div>
-    </div>
-
-    <h3>Key Findings</h3>
-    <section class="ui stmt segment">
-        <ol class="ui list">
-        {% for claim in claims.findings %}
-            <li class="item" cite-name="FINDING-{{ forloop.counter }}">
-                <div class="description" data-id="{{ claim.id }}">
-                    {{ claim.content|safe }}
-                    {% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
+        <div id="citizens-statement">
+            <h2>Citizen's statement on {{ forum_name }}</h2>
+            <div class="ui styled accordion" style="width:auto">
+                <div class="title">
+                    <i class="dropdown icon"></i>
+                    Click to show an overview of the issue description.
                 </div>
-            </li>
-        {% endfor %}
-        </ol>
-    </section>
-    <h3>Proponent Claims</h3>
-    <section class="ui stmt segment">
-        <ol class="ui list">
-        {% for claim in claims.pros %}
-            <li class="item" cite-name="PRO-{{ forloop.counter }}">
-                <div class="description" data-id="{{ claim.id }}">
-                    {{ claim.content|safe }}
-                    {% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
+                <div class="content">
+                    {{ stmt_preamble|safe }}
                 </div>
-            </li>
-        {% endfor %}
-        </ol>
-    </section>
-    <h3>Opponent Claims</h3>
-    <section class="ui stmt segment">
-        <ol class="ui list">
-        {% for claim in claims.cons %}
-            <li class="item" cite-name="CON-{{ forloop.counter }}">
-                <div class="description" data-id="{{ claim.id }}">
-                    {{ claim.content|safe }}
-                    {% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
-                </div>
-            </li>
-        {% endfor %}
-        </ol>
-    </section>
-    <div id="stmt-highlight-toolbar">
-        <div class="ui blue segment labeled icon menu">
-            <a class="item stmt-cite-btn">
-                <i class="quote left icon"></i>Cite
-            </a>
-        </div>
-    </div>
-</div>
-<div id="opinion-board">
-    <form class="ui form">
-        <div class="ui info message" style="display: none;">
-            <div class="header">
-                Please share your opinion...
             </div>
-            <ul class="list">
-                <li>You can now have cover images on blog pages</li>
-                <li>Drafts will now auto-save while writing</li>
-            </ul>
-        </div>
-        <div class="field">
-            <textarea id="opinion-textarea"></textarea>
-        </div>
-		<div id="geocoding" style="display:none">
-			{% include 'geocoding_workbench.html' %}
+            <div class="ui segment" style="display:none">
+                <div id="show-cited-checkbox" class="ui toggle checkbox">
+                    <input type="checkbox" name="show_cited">
+                    <label>Show frequently cited texts</label>
+                </div>
+            </div>
 
-		</div>
-        <div id="post-btn" class="ui submit primary button">Post</div>
-    </form>
-	<div id="posts-area"></div>
+            <h3>Key Findings</h3>
+            <section class="ui stmt segment">
+                <ol class="ui list">
+                {% for claim in claims.findings %}
+                    <li class="item" cite-name="FINDING-{{ forloop.counter }}">
+                        <div class="description" data-id="{{ claim.id }}">
+                            {{ claim.content|safe }}
+                            {% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
+                        </div>
+                    </li>
+                {% endfor %}
+                </ol>
+            </section>
+            <h3>Proponent Claims</h3>
+            <section class="ui stmt segment">
+                <ol class="ui list">
+                {% for claim in claims.pros %}
+                    <li class="item" cite-name="PRO-{{ forloop.counter }}">
+                        <div class="description" data-id="{{ claim.id }}">
+                            {{ claim.content|safe }}
+                            {% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
+                        </div>
+                    </li>
+                {% endfor %}
+                </ol>
+            </section>
+            <h3>Opponent Claims</h3>
+            <section class="ui stmt segment">
+                <ol class="ui list">
+                {% for claim in claims.cons %}
+                    <li class="item" cite-name="CON-{{ forloop.counter }}">
+                        <div class="description" data-id="{{ claim.id }}">
+                            {{ claim.content|safe }}
+                            {% if claim.theme %}<span class="ui label">Theme: {{ claim.theme }}</span>{% endif %}
+                        </div>
+                    </li>
+                {% endfor %}
+                </ol>
+            </section>
+            <div id="stmt-highlight-toolbar">
+                <div class="ui blue segment labeled icon menu">
+                    <a class="item stmt-cite-btn">
+                        <i class="quote left icon"></i>Cite
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div id="opinion-board">
+            <form class="ui form">
+                <div class="ui info message" style="display: none;">
+                    <div class="header">
+                        Please share your opinion...
+                    </div>
+                    <ul class="list">
+                        <li>You can now have cover images on blog pages</li>
+                        <li>Drafts will now auto-save while writing</li>
+                    </ul>
+                </div>
+                <div class="field">
+                    <textarea id="opinion-textarea"></textarea>
+                </div>
+                <div id="post-btn" class="ui submit primary button">Post</div>
+            </form>
+            <div id="posts-area"></div>
+        </div>
+    	{% include 'signin-signup.html' %}
+    </body>
+</html>
 
-</div>
-<div id="hover-map" class="ui segment"></div>
-{% endif %}
-{% endblock %}
