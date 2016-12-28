@@ -53,7 +53,7 @@
                     <p>{{ group.description|safe }}</p>
                     <ol class="ui list stmt-group">
                     {% for item in group.items %}
-                        <li class="item stmt-item" data-cite-name="{{ category.name }}-{{ item.id }}">{{ item.content_segmented|safe }}</li>
+                        <li class="item stmt-item" data-id="{{ item.id }}" data-cite-name="{{ category.name }}-{{ item.id }}">{{ item.content_segmented|safe }}</li>
                     {% endfor %}
                     </ol>
                     {% endfor %}

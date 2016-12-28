@@ -38,7 +38,7 @@ define([
         module.isDragging = false;
         module.draggingTarget = null;
 
-        $('#citizens-statement').on('click', '.tk', function (e) {
+        $('#stmt').on('click', '.tk', function (e) {
             e.stopPropagation();
             if ($(this).hasClass('r')) {
                 var highlight_ids = this.getAttribute('data-hl-id').split(' ');
@@ -55,16 +55,15 @@ define([
                     module.newHighlight.end = e2.target.getAttribute('data-id');
                     var min = Math.min(module.newHighlight.start, module.newHighlight.end);
                     var max = Math.max(module.newHighlight.start, module.newHighlight.end);
-                    $('#citizens-statement .tk.highlighted').removeClass('highlighted').removeClass('my');
+                    $('.tk.highlighted').removeClass('highlighted').removeClass('my');
                     for (var i = min; i <= max; i++) {
                         module.draggingTarget.find('.tk[data-id="' + i + '"]').addClass('highlighted');
                     }
                     module.newHighlight.contextId = module.draggingTarget.attr('data-id');
                 });
                 module.newHighlight.start = e.target.getAttribute('data-id');
-                module.newHighlight.end = e.target.getAttribute('data-id');
             }
-        }).on('mouseup', '.stmt.segment', function (e) {
+        }).on('mouseup', '.stmt-item', function (e) {
             module.draggingTarget.off('mousemove');
             var wasDragging = module.isDragging;
             module.isDragging = false;
@@ -82,8 +81,8 @@ define([
                         text += highlights[i].textContent;
                     }
                     module.newHighlight.text = text;
-                    module.newHighlight.cite_name = $(highlights[0]).parents('li').attr('cite-name');
-                    $('#stmt-highlight-toolbar').css('left', e.pageX - 14).css('top', e.pageY + $('#citizens-statement').scrollTop() - 50);
+                    module.newHighlight.cite_name = $(highlights[0]).parents('li').attr('data-cite-name');
+                    $('#stmt-highlight-toolbar').css('left', e.pageX - 14).css('top', e.pageY + $('#stmt').scrollTop() - 50);
                 }
             } else { // just clicking
                 $('#stmt-highlight-toolbar').removeAttr('style');
@@ -93,7 +92,7 @@ define([
         });
 
         $('#stmt-highlight-toolbar .stmt-cite-btn').click(function() {
-            var citeHtml = '<span class="cite-label" data-claim-id="'
+            var citeHtml = '<span class="cite-label" data-stmt-item-id="'
                 + module.newHighlight.contextId
                 + '" data-start="'
                 + module.newHighlight.start
