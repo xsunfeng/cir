@@ -30,7 +30,7 @@ define([
             content_css: '/static/css/postcir_editor.css',
 			forced_root_block : '',
             setup: function(editor) {
-
+                editor.on('click', onClickCitationLabel);
             }
         });
 
@@ -90,6 +90,8 @@ define([
                 module.newHighlight = {};
             }
         });
+
+        $('#posts-area').on('click', '.cite-label', onClickCitationLabel);
 
         $('#stmt-highlight-toolbar .stmt-cite-btn').click(function() {
             var citeHtml = '<span class="cite-label" data-stmt-item-id="'
@@ -196,6 +198,21 @@ define([
             }
         }
     }
+
+    function onClickCitationLabel(e) {
+		e.stopPropagation();
+		var $target = $(e.target);
+        if ($target.hasClass('cite-label')) {
+            $('#stmt .tk.highlighted').removeClass('highlighted');
+            $('#stmt .tk.my').removeClass('my');
+            highlight({
+                context_id: $target.attr('data-stmt-item-id'),
+                start: $target.attr('data-start'),
+                end: $target.attr('data-end'),
+                type: 'my_citation'
+            });
+        }
+	}
     return module;
 });
 
