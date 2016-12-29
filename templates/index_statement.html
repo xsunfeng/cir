@@ -34,7 +34,16 @@
     </head>
     <body{% if forum_id %} forum-id="{{ forum_id }}"{% endif %}>
     	{% include 'header/forum_postcir_header.html' %}
-
+        {% if load_error %}
+        <div class="ui two column centered grid">
+            <div class="column" style="top:50px">
+                <div class="ui error message">
+                    <div class="header">Forum does not exist; did you enter the correct address?</div>
+                    <p>Click <a href="/">here</a> to return to homepage.</p>
+                </div>
+            </div>
+        </div>
+        {% else %}
         <div id="stmt">
             <h2>Citizen's statement on {{ forum_name }}</h2>
             <div class="ui styled accordion" style="width:auto">
@@ -86,6 +95,7 @@
             <div id="posts-area"></div>
         </div>
     	{% include 'signin-signup.html' %}
+        {% endif %}
     </body>
 </html>
 

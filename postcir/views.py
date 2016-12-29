@@ -21,14 +21,23 @@ def home(request, forum_url):
             'load_error': '404'
         }
         return render(request, 'index_statement.html', context)
+
+    # get specified forum data
     request.session['forum_id'] = forum.id
-    request.session['role'] = VISITOR_ROLE
     context = {
         'forum_name': forum.full_name,
         'forum_url': forum.url,
         'stmt_preamble': forum.stmt_preamble,
         'statement_categories': []
     }
+
+    # get user data
+    if request.user.is_authenticated():
+        context['user_id'] = request.user.id
+        context['user_name'] = request.user.get_full_name()
+    else:
+        context['user_id'] = '-1'
+
     for stmt_category in StatementCategory.objects.filter(forum=forum):
         stmt_category_entry = {
             'name': stmt_category.name,
