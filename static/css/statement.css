@@ -27,7 +27,7 @@
 }
 
 #opinion-board {
-    top: calc(1em + 36px);
+    top: 50px;
     right: 0;
     bottom: 0;
     width: calc(50% - 1em);
