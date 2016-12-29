@@ -115,78 +115,36 @@ define([
         });
 
         $('#post-btn').click(function() {
-
 			var body = tinymce.activeEditor.getBody();
-			var $citations = $(body).find('.cite-label:not(.geoname)');
-			var $geonames = $(body).find('.cite-label.geoname');
-			var geoname_candidates = $(body).find('.geoname-candidate').length;
-
-			// strip geoname-candidate tags
-			var element = $(body);//convert string to JQuery element
-			element.find("span.geoname-candidate").each(function(index) {
-				var text = $(this).html();//get span content
-				$(this).replaceWith(text);//replace all span with just content
-			});
-			//var newString = element.html();//get back new string
+			var $citations = $(body).find('.cite-label');
 			var rawcontent = tinymce.activeEditor.getContent();
-
-			if ($geonames.length != 0 || geoname_candidates > 0) {
-				makePost(rawcontent, $citations, $geonames);
-			} else {
-				// use nltk
-				$.ajax({
-					url: urlPrefix + '/api_geoparse/',
-					type: 'post',
-					data: {text: tinymce.activeEditor.getContent({format: 'text'})},
-					success: function(xhr) {
-						var geonames = xhr.entity_names;
-						if (geonames.length == 0) {
-							makePost(rawcontent, $citations, $geonames);
-						} else {
-							for (var i = 0; i < geonames.length; i ++) {
-								// highlight geonames in tinymce
-								var geoname = geonames[i];
-								var wholeText = tinymce.activeEditor.getContent();
-								var wrapped = '<span class="geoname-candidate">' + geoname + '</span>';
-								wholeText = wholeText.replace(geoname, wrapped);
-								tinymce.activeEditor.setContent(wholeText);
-							}
-						}
-					}
-				});
-			}
+            makePost(rawcontent, $citations);
         });
 	}
 
 	initLayout();
 	loadPosts();
 
-	function makePost(rawcontent, $citations, $geonames) {
-		var data = {
-			'citations': [],
-			'geonames': [],
-			'content': rawcontent,
-			'action': 'new-post'
-		};
+	function makePost(rawcontent, $citations) {
+	    var citations = [];
 		for (var i = 0; i < $citations.length; i ++) {
-			data['citations'].push({
-				'claim_id': $citations.get(i).getAttribute('data-claim-id'),
-				'start': $citations.get(i).getAttribute('start'),
-				'end': $citations.get(i).getAttribute('end'),
+			citations.push({
+				'stmt_item_id': $citations.get(i).getAttribute('data-stmt-item-id'),
+				'start': $citations.get(i).getAttribute('data-start'),
+				'end': $citations.get(i).getAttribute('data-end'),
 			});
 		}
-		for (var i = 0; i < $geonames.length; i ++) {
-			data['geonames'].push({
-				'text': $geonames.get(i).innerHTML,
-				'geotext': $geonames.get(i).getAttribute('data-geotext')
-			});
-		}
+        var data = {
+			'content': rawcontent,
+			'action': 'new-post',
+            'citations': JSON.stringify(citations)
+		};
 		$.ajax({
 			url: urlPrefix + '/api_postcir/',
 			type: 'post',
 			data: data,
 			success: function(xhr) {
-				loadPosts();
+				$('#posts-area').html(xhr.html);
 				tinymce.activeEditor.setContent('');
 			},
 			error: function(xhr) {

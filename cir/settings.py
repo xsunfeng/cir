@@ -171,6 +171,7 @@ PIPELINE_CSS = {
     'postcir': {
         'source_filenames': (
             'css/statement.css',
+            'css/page_body.css'
         ),
         'output_filename': 'css/postcir.css'
     }

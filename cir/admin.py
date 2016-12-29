@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from models import *
-from postcir.models import *
+from postcir.models import StatementCategory, StatementGroup, StatementItem
 
 def user_unicode(self):
     return  u'%s %s (%s)' % (self.first_name, self.last_name, self.email)

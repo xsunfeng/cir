@@ -54,11 +54,31 @@ def api_postcir(request):
     response = {}
     action = request.REQUEST.get('action')
     now = timezone.now()
-    if action == 'load-posts':
+    if action == 'new-post':
+        if not request.user.is_authenticated():
+            return HttpResponse("Please log in first.", status=403)
+        content = request.REQUEST.get('content')
+        citations = json.loads(request.REQUEST.get('citations'))
+        highlight_object = None
+        for citation in citations:
+            stmt_item = StatementItem.objects.get(id=citation['stmt_item_id'])
+            start = citation['start']
+            end = citation['end']
+            # TODO check if exist
+            highlight_object = Highlight(start_pos=start, end_pos=end, context=stmt_item)
+            highlight_object.save()
+        Post.objects.create(
+            forum_id=request.session['forum_id'],
+            author=request.user,
+            content=content,
+            highlight=highlight_object,
+            content_type='comment', # TODO pass from front end
+        )
+    if action == 'load-posts' or action == 'new-post':
         forum = Forum.objects.get(id=request.session['forum_id'])
         context = {}
         context['entries'] = []
-        posts = Post.objects.filter(forum=forum, content_type='postcir')
+        posts = Post.objects.filter(forum=forum)
         for post in posts:
             context['entries'].append(post.getAttr(forum))
         context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'])

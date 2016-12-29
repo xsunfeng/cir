@@ -40,7 +40,9 @@ a.user {
   text-align: center;
   border-radius: 500rem;
   font-size: 1.5em;
-  color: #fff; 
+  color: #fff;
+  background-color: #c2c2c2;
+  border-color: #c2c2c2;
 }
 .user-initial > .facilitator {
   background-color: #5bbd72;
@@ -58,6 +60,7 @@ a.user {
   background-color: #d95c5c!important;
   border-color: #d95c5c!important;
 }
+
 .user.facilitator {
   background-color: #5bbd72!important;
   color: #fff!important;
