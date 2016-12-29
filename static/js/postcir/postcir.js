@@ -86,12 +86,17 @@ define([
                 }
             } else { // just clicking
                 $('#stmt-highlight-toolbar').removeAttr('style');
-                $(this).find('.tk').removeClass('highlighted').removeClass('my');
+                $('#stmt .tk').removeClass('highlighted').removeClass('my');
                 module.newHighlight = {};
             }
         });
 
-        $('#posts-area').on('click', '.cite-label', onClickCitationLabel);
+        $('#posts-area').click(function(e) {
+            $('#stmt .tk').removeClass('highlighted').removeClass('my');
+            if ($(e.target).hasClass('cite-label')) {
+                onClickCitationLabel(e);
+            }
+        });
 
         $('#stmt-highlight-toolbar .stmt-cite-btn').click(function() {
             var citeHtml = '<span class="cite-label" data-stmt-item-id="'
@@ -197,6 +202,10 @@ define([
                 }
             }
         }
+        // jump to the last token
+        var elOffset = $token.offset().top;
+        var windowHeight = $(window).height();
+        $('#stmt').scrollTop(elOffset - (windowHeight / 2));
     }
 
     function onClickCitationLabel(e) {

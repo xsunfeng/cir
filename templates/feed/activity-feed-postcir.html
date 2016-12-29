@@ -24,8 +24,7 @@
 							{{ entry.content | safe }}
 						</div>
 						<div class="ui red secondary post fitted menu">
-							<a class="item feed-reply-entry" data-id="{{ entry.id }}" style="display:none">Reply</a>
-							<a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
+							<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
 						</div>
 					{% else %}
 						<div class="summary">
@@ -36,7 +35,7 @@
 							{{ entry.content | safe }}
 						</div>
 						<div class="ui red secondary post fitted menu">
-							<a class="item feed-reply-entry" data-id="{{ entry.id }}" style="display:none">Reply</a>
+							<a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
 						</div>
 					{% endif %}
 				</div>

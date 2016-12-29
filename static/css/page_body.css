@@ -31,7 +31,8 @@ a.user {
   display: table-cell;
   vertical-align: top;
   word-wrap: break-word;
-  width: 4em;
+    max-width: 4em;
+    margin-right: 10px;
 }
 .user-initial > * {
   width: 2em;
