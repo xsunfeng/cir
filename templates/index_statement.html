@@ -56,7 +56,7 @@
                 </div>
             </div>
             {% for category in statement_categories %}
-                <h3>{{ category.description }}</h3>
+                <h3 class="stmt-category-title">{{ category.description }}</h3>
                 <section class="stmt-category">
                     {% for group in category.groups %}
                     <p>{{ group.description|safe }}</p>
