@@ -47,7 +47,7 @@ define([
             $('#activity-reply-form').insertAfter($(this).parent()).show();
             $('#activity-reply-form textarea').focus();
         });
-        $('#reply-btn').click(function(e) {
+        $('#posts-area').on('click', '#reply-btn', function(e) {
             e.preventDefault();
             var data = {
                 'content': $('#activity-reply-form textarea').val(),

@@ -68,6 +68,9 @@ class Post(MPTTModel):
     )
     content_type = models.CharField(max_length=10, choices=CONTENT_CHOICES)
 
+    class MPTTMeta:
+        order_insertion_by = ['created_at']
+
     @property
     def author_initial(self):
         try:
