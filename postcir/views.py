@@ -57,6 +57,10 @@ def home(request, forum_url):
                     'content': stmt_item.content,
                     'content_segmented': segment_text(stmt_item.content)
                 })
+
+    # TODO for logged in user, check for "already voted" overlay
+    # TODO for unlogged in user, show "log in to vote" overlay
+
     return render(request, 'index_statement.html', context)
 
 def api_postcir(request):
