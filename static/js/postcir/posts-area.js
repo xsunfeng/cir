@@ -41,7 +41,7 @@ define([
         });
         $('#posts-area').on('click', '.feed-reply-post', function (e) {
             e.preventDefault();
-            var reply_name = $(this).parents('.comment').find('.author:eq(0)').text();
+            var reply_name = $(this).parent().siblings('.author').text();
             module.reply_id = this.getAttribute('data-id');
             $('#activity-reply-form label').text('Reply to ' + reply_name);
             $('#activity-reply-form').insertAfter($(this).parent()).show();

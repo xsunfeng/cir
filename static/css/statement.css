@@ -77,6 +77,7 @@
 }
 #posts-area {
     margin-top: 10px;
+    max-width: inherit;
 }
 #posts-area span.cite-label {
     background-color: #0E566C;
@@ -96,8 +97,14 @@
 #activity-reply-form {
     max-width: inherit;
     padding: 10px 1em 10px 58px;
-    margin-left: -58px;
-    margin-right: -1em;
+    margin: 1em -1em 0 -58px;
     background-color: #f5f5f5;
 }
 
+#posts-area .comment {
+    margin-top: 1em;
+}
+#posts-area .comment .comments {
+    margin-left: -2em;
+    padding: 2em 0 1em 1em;
+}

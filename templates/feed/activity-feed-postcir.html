@@ -1,43 +1,33 @@
 <h4 class="ui dividing header">
 	Opinions and comments (oldest first)
 </h4>
-{% if entries %}
-{% for entry in entries %}
-    <div class="comment">
-        <div class="user-initial avatar">
-            <div class="{{ entry.author_role }}">
-                {% if entry.author_role == 'facilitator' %}F
-                {% elif entry.author_role == 'admin' %}A
-                    {% else %}{{ entry.author_initial }}
+{% if posts %}
+{% load mptt_tags %}
+    {% recursetree posts %}
+        <div class="comment">
+            <div class="user-initial avatar">
+                <div class="visitor">{{ node.author_initial }}</div>
+            </div>
+            <div class="activity-content content">
+                <a class="author {{ node.author_role }}" data-id="{{ node.author.id }}">{{ node.author.get_full_name }}</a>
+                <div class="metadata">
+                    <span class="date"><abbr title="{{ node.updated_at }}">{{ node.updated_at_pretty }}</abbr></span>
+                </div>
+                {% if node.vote %}<span>voted {{ node.get_vote_display }}</span>{% endif %}
+                <div class="text">
+                    {{ node.content | safe }}
+                </div>
+                <div class="actions">
+                    <a class="reply feed-reply-post" data-id="{{ node.id }}">Reply</a>
+                </div>
+                {% if not node.is_leaf_node %}
+                <div class="comments">
+                    {{ children }}
+                </div>
                 {% endif %}
             </div>
         </div>
-        <div class="activity-content content">
-        {% if entry.parent_name %}
-            <a class="author {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> replied to <a class="author">{{ entry.parent_name }}</a>
-            <div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
-            <div class="extra text">
-                {{ entry.content | safe }}
-            </div>
-            <div class="meta">
-                <a class="item feed-reply-post" data-id="{{ entry.id }}">Reply</a>
-            </div>
-        {% else %}
-            <a class="author {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a>
-            <div class="metadata">
-                <span class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></span>
-            </div>
-            {% if entry.vote %}<span>voted {{ entry.vote }}</span>{% endif %}
-            <div class="text">
-                {{ entry.content | safe }}
-            </div>
-            <div class="actions">
-                <a class="reply feed-reply-post" data-id="{{ entry.id }}">Reply</a>
-            </div>
-        {% endif %}
-        </div>
-    </div>
-{% endfor %}
+    {% endrecursetree %}
 {% else %}
 	<div class="ui info message">No opinions or comments to show</div>
 {% endif %}

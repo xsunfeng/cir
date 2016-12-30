@@ -68,27 +68,13 @@ class Post(MPTTModel):
     )
     content_type = models.CharField(max_length=10, choices=CONTENT_CHOICES)
 
-    def getAttr(self, forum):
-        attr = {}
+    @property
+    def author_initial(self):
         try:
-            attr['author_role'] = Role.objects.get(user=self.author, forum=forum).role
+            return str.upper(str(self.author.first_name[0]) + str(self.author.last_name[0]))
         except:
-            attr['author_role'] = 'visitor'
-        attr['id'] = self.id
-        attr['author_id'] = self.author.id
-        attr['author_name'] = self.author.get_full_name()
-        try:
-            attr['author_initial'] = str.upper(str(self.author.first_name[0]) + str(self.author.last_name[0]))
-        except:
-            attr['author_initial'] = ''
-        attr['content'] = self.content
-        attr['created_at_full'] = self.created_at  # for sorting
-        attr['updated_at'] = pretty_date(self.updated_at)
-        attr['updated_at_full'] = self.updated_at
-        attr['entry_type'] = self.content_type
-        attr['author_intro'] = UserInfo.objects.get(user=self.author).description
-        attr['vote'] = self.get_vote_display()
-        if self.parent:
-            attr['parent_name'] = self.parent.author.get_full_name()
-            attr['parent_id'] = self.parent.id
-        return attr
+            return ''
+
+    @property
+    def updated_at_pretty(self):
+        return pretty_date(self.updated_at)
