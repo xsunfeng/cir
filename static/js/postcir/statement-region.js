@@ -40,7 +40,7 @@ define([
             if ($target.hasClass('cite-label')) {
                 $('#stmt .tk.highlighted').removeClass('highlighted');
                 $('#stmt .tk.my').removeClass('my');
-                highlight({
+                module.highlight({
                     context_id: $target.attr('data-stmt-item-id'),
                     start: $target.attr('data-start'),
                     end: $target.attr('data-end'),
@@ -128,7 +128,7 @@ define([
             tinymce.activeEditor.insertContent(citeHtml);
             $('#stmt-highlight-toolbar').removeAttr('style');
             $('#stmt .tk.highlighted').removeClass('highlighted');
-            highlight({
+            module.highlight({
                 context_id: module.newHighlight.contextId,
                 start: module.newHighlight.start,
                 end: module.newHighlight.end,
@@ -138,4 +138,5 @@ define([
             module.newHighlight = {};
         });
     }
+    return module;
 });

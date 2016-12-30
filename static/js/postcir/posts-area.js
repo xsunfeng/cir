@@ -2,7 +2,6 @@ define([
 	'jquery',
 	'utils',
     'postcir/statement-region',
-
 ], function(
 	$,
 	Utils,
