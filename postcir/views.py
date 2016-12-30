@@ -1,10 +1,9 @@
 # Create your views here.
 import json
 
-from django.shortcuts import render, render_to_response, redirect
+from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.http import HttpResponse
-from django.utils import timezone
 from postcir.models import *
 from cir.utils import segment_text
 
@@ -66,31 +65,41 @@ def home(request, forum_url):
 def api_postcir(request):
     response = {}
     action = request.REQUEST.get('action')
-    now = timezone.now()
     if action == 'new-post':
         if not request.user.is_authenticated():
             return HttpResponse("Please log in first.", status=403)
         content = request.REQUEST.get('content')
-        citations = json.loads(request.REQUEST.get('citations'))
-        highlight_object = None
-        for citation in citations:
-            stmt_item = StatementItem.objects.get(id=citation['stmt_item_id'])
-            start = citation['start']
-            end = citation['end']
-            # TODO check if exist
-            highlight_object = Highlight(start_pos=start, end_pos=end, context=stmt_item)
-            highlight_object.save()
+        parent_id = request.REQUEST.get('parent_id')
+        if parent_id:
+            Post.objects.create(
+                forum_id=request.session['forum_id'],
+                author=request.user,
+                content=content,
+                content_type='comment',  # TODO pass from front end
+                parent_id=parent_id
+            )
+        else:
+            # only non-reply posts can have citations and vote
+            citations = json.loads(request.REQUEST.get('citations'))
+            highlight_object = None
+            for citation in citations:
+                stmt_item = StatementItem.objects.get(id=citation['stmt_item_id'])
+                start = citation['start']
+                end = citation['end']
+                # TODO check if exist
+                highlight_object = Highlight(start_pos=start, end_pos=end, context=stmt_item)
+                highlight_object.save()
 
-        # vote is nullable
-        vote = request.REQUEST.get('vote')
-        Post.objects.create(
-            forum_id=request.session['forum_id'],
-            author=request.user,
-            content=content,
-            highlight=highlight_object,
-            content_type='comment', # TODO pass from front end
-            vote=vote
-        )
+            # vote is nullable
+            vote = request.REQUEST.get('vote')
+            Post.objects.create(
+                forum_id=request.session['forum_id'],
+                author=request.user,
+                content=content,
+                highlight=highlight_object, # TODO very problematic -- only the last highlight counts.
+                content_type='comment', # TODO pass from front end
+                vote=vote
+            )
     if action == 'load-posts' or action == 'new-post':
         forum = Forum.objects.get(id=request.session['forum_id'])
         context = {}

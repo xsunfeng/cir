@@ -724,7 +724,7 @@ class StatementComment(MPTTModel):
     created_at = models.DateTimeField()
 
     class MPTTMeta:
-        order_insertion_by = ['-created_at']
+        order_insertion_by = ['created_at']
 
     def get_author_name(self):
         return self.author.first_name + " " + self.author.last_name
@@ -740,7 +740,7 @@ class StatementQuestionComment(MPTTModel):
     created_at = models.DateTimeField()
 
     class MPTTMeta:
-        order_insertion_by = ['-created_at']
+        order_insertion_by = ['created_at']
 
     def get_author_name(self):
         return self.author.first_name + " " + self.author.last_name
@@ -821,7 +821,7 @@ class ForumComment(MPTTModel):
     created_at = models.DateTimeField()
 
     class MPTTMeta:
-        order_insertion_by = ['-created_at']
+        order_insertion_by = ['created_at']
 
     def get_author_name(self):
         return self.author.first_name + " " + self.author.last_name

@@ -1,48 +1,43 @@
-
-<h4 class="ui horizontal header divider">
+<h4 class="ui dividing header">
 	Opinions and comments (oldest first)
 </h4>
 {% if entries %}
-	<div class="ui feed" style="margin-top: 1em">
-		{% for entry in entries %}
-			<div class="event" data-type="{{ entry.entry_type }}">
-				<div class="user-initial">
-					<div class="{{ entry.author_role }}">
-						{% if entry.author_role == 'facilitator' %}F
-						{% elif entry.author_role == 'admin' %}A
-							{% else %}{{ entry.author_initial }}
-						{% endif %}
-					</div>
-				</div>
-				<div class="activity-content content">
-					{% if entry.parent_name %}
-						<div class="summary">
-							<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> replied to <a class="user">{{ entry.parent_name }}</a>
-							<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
-						</div>
-						<div class="extra text">
-							{{ entry.content | safe }}
-						</div>
-						<div class="meta">
-							<a class="item feed-reply-post" data-id="{{ entry.id }}">Reply</a>
-						</div>
-					{% else %}
-						<div class="summary">
-							<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a>
-                            {% if entry.vote %}<span>voted {{ entry.vote }}</span>{% endif %}
-                            <div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
-						</div>
-						<div class="extra text">
-							{{ entry.content | safe }}
-						</div>
-						<div class="meta">
-							<a class="item feed-reply-post" data-id="{{ entry.id }}">Reply</a>
-						</div>
-					{% endif %}
-				</div>
-			</div>
-		{% endfor %}
-	</div>
+{% for entry in entries %}
+    <div class="comment">
+        <div class="user-initial avatar">
+            <div class="{{ entry.author_role }}">
+                {% if entry.author_role == 'facilitator' %}F
+                {% elif entry.author_role == 'admin' %}A
+                    {% else %}{{ entry.author_initial }}
+                {% endif %}
+            </div>
+        </div>
+        <div class="activity-content content">
+        {% if entry.parent_name %}
+            <a class="author {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> replied to <a class="author">{{ entry.parent_name }}</a>
+            <div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+            <div class="extra text">
+                {{ entry.content | safe }}
+            </div>
+            <div class="meta">
+                <a class="item feed-reply-post" data-id="{{ entry.id }}">Reply</a>
+            </div>
+        {% else %}
+            <a class="author {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a>
+            <div class="metadata">
+                <span class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></span>
+            </div>
+            {% if entry.vote %}<span>voted {{ entry.vote }}</span>{% endif %}
+            <div class="text">
+                {{ entry.content | safe }}
+            </div>
+            <div class="actions">
+                <a class="reply feed-reply-post" data-id="{{ entry.id }}">Reply</a>
+            </div>
+        {% endif %}
+        </div>
+    </div>
+{% endfor %}
 {% else %}
 	<div class="ui info message">No opinions or comments to show</div>
 {% endif %}
