@@ -114,7 +114,6 @@ define([
             }
         });
 
-
         $('#stmt-highlight-toolbar .stmt-cite-btn').click(function () {
             var citeHtml = '<span class="cite-label" data-stmt-item-id="'
                 + module.newHighlight.contextId

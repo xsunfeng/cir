@@ -97,7 +97,7 @@
                     </div>
                 </div>
                 <div id="voter-prompt" class="ui info top attached message">
-                    If you have any question or comment and would like to discuss with other community members, please post here.
+                    If you have any question or comment and would like to discuss with your community, please post here.
                 </div>
                 <div class="field">
                     <textarea id="opinion-textarea"></textarea>
@@ -105,6 +105,13 @@
                 <div id="post-btn" class="ui submit primary fluid button">Post</div>
             </form>
             <div id="posts-area"></div>
+            <div id="activity-reply-form" class="ui form" style="display:none">
+                <div class="field">
+                    <label></label>
+                    <textarea rows="2"></textarea>
+                </div>
+                <div id="reply-btn" class="ui submit primary button">Reply</div>
+            </div>
         </div>
     	{% include 'signin-signup.html' %}
         {% endif %}
