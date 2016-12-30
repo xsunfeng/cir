@@ -60,7 +60,6 @@ define([
                 data: data,
                 success: function (xhr) {
                     $('#posts-area').html(xhr.html);
-                    tinymce.activeEditor.setContent('');
                 },
                 error: function (xhr) {
                     if (xhr.status == 403) {

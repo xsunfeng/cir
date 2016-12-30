@@ -6,8 +6,8 @@ define([
 
 ], function (
     $,
-    StatementRegion,
-    Utils
+    Utils,
+    StatementRegion
 ) {
     var urlPrefix = '/postcir';
     var module = {};
