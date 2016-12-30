@@ -26,7 +26,7 @@
             });
             require([
                 'layout/header',
-                'postcir/postcir',
+                'postcir/postcir-layout',
             ], function(Header) {
                 Header.initHeader();
             });
@@ -78,17 +78,14 @@
         </div>
         <div id="opinion-board">
             <form class="ui form">
-                <div class="ui info message" style="display: none;">
-                    <div class="header">
-                        Please share your opinion...
-                    </div>
-                    <ul class="list">
-                        <li>You can now have cover images on blog pages</li>
-                        <li>Drafts will now auto-save while writing</li>
-                    </ul>
+                <div class="ui info message">
+                    If you have formed an opinion after digesting the Citizens Statement, please cast your vote.
                 </div>
                 <div class="field">
                     <textarea id="opinion-textarea"></textarea>
+                </div>
+                <div class="ui info message">
+                    If you have formed an opinion after digesting the Citizens Statement, please cast your vote.
                 </div>
                 <div id="post-btn" class="ui submit primary button">Post</div>
             </form>
