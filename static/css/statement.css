@@ -75,7 +75,9 @@
 .tk.highlighted { /* must be put after .tk.r */
     background-color: #f2c61f;
 }
-
+#posts-area {
+    margin-top: 10px;
+}
 #posts-area span.cite-label {
     background-color: #0E566C;
     color: #fff;

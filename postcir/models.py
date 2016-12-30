@@ -53,6 +53,11 @@ class Post(MPTTModel):
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now_add=True)
     title = models.TextField(null=True, blank=True)
+    VOTE_CHOICES = (
+        ('yes', 'Yes'),
+        ('no', 'No')
+    )
+    vote = models.CharField(null=True, blank=True, max_length=10, choices=VOTE_CHOICES)
 
     # the highlight to which this post is attached
     highlight = models.ForeignKey(Highlight, related_name='posts_of_highlight', null=True, blank=True)
@@ -82,6 +87,7 @@ class Post(MPTTModel):
         attr['updated_at_full'] = self.updated_at
         attr['entry_type'] = self.content_type
         attr['author_intro'] = UserInfo.objects.get(user=self.author).description
+        attr['vote'] = self.get_vote_display()
         if self.parent:
             attr['parent_name'] = self.parent.author.get_full_name()
             attr['parent_id'] = self.parent.id

@@ -28,8 +28,9 @@
 						</div>
 					{% else %}
 						<div class="summary">
-							<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a>:
-							<div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
+							<a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a>
+                            {% if entry.vote %}<span>voted {{ entry.vote }}</span>{% endif %}:
+                            <div class="date"><abbr title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
 						</div>
 						<div class="extra text">
 							{{ entry.content | safe }}

@@ -79,15 +79,30 @@
         <div id="opinion-board">
             <form class="ui form">
                 <div class="ui info message">
-                    If you have formed an opinion after digesting the Citizens Statement, please cast your vote.
+                    (Optional) If you have formed an opinion after digesting the Citizens Statement, please cast your vote.
+                </div>
+                <div id="voter" class="grouped fields">
+                    <div class="field">
+                        <div class="ui radio checkbox">
+                            <input type="radio" name="vote" data-vote="yes">
+                            <label><b>Yes</b>: I think that the State College Borough should implement an annual
+                                automatic inflation-based property tax increase.</label>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="ui radio checkbox">
+                            <input type="radio" name="vote" data-vote="no">
+                            <label><b>No</b>: I think the proposal should <b>not</b> be implemented.</label>
+                        </div>
+                    </div>
+                </div>
+                <div id="voter-prompt" class="ui info message">
+                    If you have any question or comment and would like to discuss with other community members, please post here.
                 </div>
                 <div class="field">
                     <textarea id="opinion-textarea"></textarea>
                 </div>
-                <div class="ui info message">
-                    If you have formed an opinion after digesting the Citizens Statement, please cast your vote.
-                </div>
-                <div id="post-btn" class="ui submit primary button">Post</div>
+                <div id="post-btn" class="ui submit primary fluid button">Post</div>
             </form>
             <div id="posts-area"></div>
         </div>

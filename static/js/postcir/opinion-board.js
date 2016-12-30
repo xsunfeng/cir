@@ -9,6 +9,7 @@ define([
     StatementRegion,
     Utils
 ) {
+    var urlPrefix = '/postcir';
     var module = {};
     initLayout();
 
@@ -38,6 +39,16 @@ define([
             var rawcontent = tinymce.activeEditor.getContent();
             makePost(rawcontent, $citations);
         });
+        $('#voter .ui.checkbox').checkbox({
+            onChange: function() {
+                var vote = this.getAttribute('data-vote');
+                if (vote === 'yes' || vote === 'no') {
+                    module.vote = vote;
+                    $('#voter-prompt').text('Please share the reason of your vote.');
+                    $('#post-btn').text('Vote');
+                }
+            }
+        });
     }
 
     function makePost(rawcontent, $citations) {
@@ -52,7 +63,8 @@ define([
         var data = {
             'content': rawcontent,
             'action': 'new-post',
-            'citations': JSON.stringify(citations)
+            'citations': JSON.stringify(citations),
+            'vote': module.vote
         };
         $.ajax({
             url: urlPrefix + '/api_postcir/',

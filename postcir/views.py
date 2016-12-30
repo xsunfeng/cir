@@ -76,12 +76,16 @@ def api_postcir(request):
             # TODO check if exist
             highlight_object = Highlight(start_pos=start, end_pos=end, context=stmt_item)
             highlight_object.save()
+
+        # vote is nullable
+        vote = request.REQUEST.get('vote')
         Post.objects.create(
             forum_id=request.session['forum_id'],
             author=request.user,
             content=content,
             highlight=highlight_object,
             content_type='comment', # TODO pass from front end
+            vote=vote
         )
     if action == 'load-posts' or action == 'new-post':
         forum = Forum.objects.get(id=request.session['forum_id'])
