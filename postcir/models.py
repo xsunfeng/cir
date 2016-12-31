@@ -6,6 +6,16 @@ from cir.utils import pretty_date
 
 # Create your models here.
 
+class UserEvent(models.Model):
+    user = models.ForeignKey(User)
+    EVENT_CHOICES = (
+        ('phase.enter', 'User entered a phase'),
+        ('phase.complete', 'User completed a phase'),
+    )
+    event = models.CharField(max_length=20, choices=EVENT_CHOICES)
+    extra_data = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now=True)
+
 class StatementCategory(models.Model):
     CATEGORY_CHOICES = (
         ('pro', 'Proponent'),
@@ -58,6 +68,12 @@ class Post(MPTTModel):
         ('no', 'No')
     )
     vote = models.CharField(null=True, blank=True, max_length=10, choices=VOTE_CHOICES)
+    CONTEXT_CHOICES = (
+        ('issue', 'Issue Briefing'),
+        ('statement', 'Citizens Statement'),
+        ('deliberation', 'Deliberative Poll')
+    )
+    context = models.CharField(null=True, blank=True, max_length=15, choices=CONTEXT_CHOICES)
 
     # the highlight to which this post is attached
     highlight = models.ForeignKey(Highlight, related_name='posts_of_highlight', null=True, blank=True)
@@ -67,9 +83,6 @@ class Post(MPTTModel):
         ('opinion', 'Opinion'),
     )
     content_type = models.CharField(max_length=10, choices=CONTENT_CHOICES)
-
-    class MPTTMeta:
-        order_insertion_by = ['created_at']
 
     @property
     def author_initial(self):

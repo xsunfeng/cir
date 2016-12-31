@@ -1,16 +1,8 @@
 @import url(https://fonts.googleapis.com/css?family=Sahitya:400,700);
 
-#issue-briefing,
-#stmt-quiz,
-#deliberation {
-    transition: opacity 0.3s;
-}
-
-#issue-briefing.hidden-phase,
-#stmt-quiz.hidden-phase,
-#deliberation.hidden-phase {
-    opacity: 0;
-    display: none;
+#issue-briefing {
+    margin-top: 60px;
+    padding-bottom: 2em;
 }
 
 #stmt {
@@ -23,6 +15,12 @@
     padding: 1em 1em 2em 1em;
 }
 
+.serif {
+    font-family: 'Sahitya', serif;
+}
+.large-text {
+    font-size: 1.3em;
+}
 #stmt .stmt-category-title {
     font-size: 1.5em;
     text-align: center;

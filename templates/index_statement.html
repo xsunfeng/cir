@@ -26,7 +26,10 @@
             });
             require([
                 'layout/header',
-                'postcir/postcir-layout',
+                {% if active_phase == 'issue' %}'postcir/issue-layout',{% endif %}
+                {% if active_phase == 'statement' %}'postcir/statement-layout',{% endif %}
+                {% if active_phase == 'deliberation' %}'postcir/postcir-layout',{% endif %}
+
             ], function(Header) {
                 Header.initHeader();
             });
@@ -45,10 +48,9 @@
         </div>
         {% else %}
         <div id="popup-notification" class="ui message hidden"></div>
-            {% include 'postcir/issue-briefing.html' %}
-            {% include 'postcir/stmt-quiz.html' %}
-            {% include 'postcir/deliberation.html' %}
-
+            {% if active_phase == 'issue' %}{% include 'postcir/issue-briefing.html' %}{% endif %}
+            {% if active_phase == 'statement' %}{% include 'postcir/stmt-quiz.html' %}{% endif %}
+            {% if active_phase == 'deliberation' %}{% include 'postcir/deliberation.html' %}{% endif %}
             {% include 'signin-signup.html' %}
         {% endif %}
     </body>
