@@ -45,69 +45,11 @@
         </div>
         {% else %}
         <div id="popup-notification" class="ui message hidden"></div>
-        <div id="stmt">
-            <h2>Citizen's statement on {{ forum_name }}</h2>
-            <div class="ui styled accordion" style="width:auto">
-                <div class="title">
-                    <i class="dropdown icon"></i>
-                    Click to show issue description.
-                </div>
-                <div class="content">
-                    {{ stmt_preamble|safe }}
-                </div>
-            </div>
-            {% for category in statement_categories %}
-                <h3 class="stmt-category-title">{{ category.description }}</h3>
-                <section class="stmt-category">
-                    {% for group in category.groups %}
-                    <p>{{ group.description|safe }}</p>
-                    <ol class="ui list stmt-group">
-                    {% for item in group.items %}
-                        <li class="item stmt-item" data-id="{{ item.id }}" data-cite-name="{{ category.name }}-{{ item.id }}">{{ item.content_segmented|safe }}</li>
-                    {% endfor %}
-                    </ol>
-                    {% endfor %}
-                </section>
-            {% endfor %}
-            <div id="stmt-highlight-toolbar">
-                <div class="ui blue segment labeled icon menu">
-                    <a class="item stmt-cite-btn">
-                        <i class="quote left icon"></i>Cite
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div id="opinion-board">
-            <form class="ui form">
-                <div class="ui info message">
-                    (Optional) If you have formed an opinion after digesting the Citizens Statement, please cast your vote.
-                </div>
-                <div id="voter" class="grouped fields">
-                    <div class="field">
-                        <div class="ui radio checkbox">
-                            <input type="radio" name="vote" data-vote="yes">
-                            <label><b>Yes</b>: I think that the State College Borough should implement an annual
-                                automatic inflation-based property tax increase.</label>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <div class="ui radio checkbox">
-                            <input type="radio" name="vote" data-vote="no">
-                            <label><b>No</b>: I think the proposal should <b>not</b> be implemented.</label>
-                        </div>
-                    </div>
-                </div>
-                <div id="voter-prompt" class="ui info top attached message">
-                    If you have any question or comment and would like to discuss with your community, please post here.
-                </div>
-                <div class="field">
-                    <textarea id="opinion-textarea"></textarea>
-                </div>
-                <div id="post-btn" class="ui submit primary fluid small button">Post</div>
-            </form>
-            <div id="posts-area" class="ui threaded comments"></div>
-        </div>
-    	{% include 'signin-signup.html' %}
+            {% include 'postcir/issue-briefing.html' %}
+            {% include 'postcir/stmt-quiz.html' %}
+            {% include 'postcir/deliberation.html' %}
+
+            {% include 'signin-signup.html' %}
         {% endif %}
     </body>
 </html>

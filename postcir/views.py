@@ -30,6 +30,9 @@ def home(request, forum_url):
         'statement_categories': []
     }
 
+    # TODO get user active phase
+    context['active_phase'] = 'issue'
+
     # get user data
     if request.user.is_authenticated():
         context['user_id'] = request.user.id

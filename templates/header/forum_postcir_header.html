@@ -4,11 +4,11 @@
     {% else %}
         <div class="item">{{ forum_name }}</div>
         <div class="ui item small breadcrumb">
-            <div class="section" data-phase="issue-briefing">Issue Briefing</div>
+            <div class="section {% if active_phase == 'issue' %}active{% endif %}" data-phase="issue-briefing">Issue Briefing</div>
             <i class="right arrow icon divider"></i>
-            <div class="section" data-phase="citizens-statement">Citizens Statement</div>
+            <div class="section {% if active_phase == 'statement' %}active{% endif %}" data-phase="citizens-statement">Citizens Statement</div>
             <i class="right arrow icon divider"></i>
-            <div class="section" data-phase="deliberation">Community Deliberative Poll</div>
+            <div class="section {% if active_phase == 'deliberation' %}active{% endif %}" data-phase="deliberation">Community Deliberative Poll</div>
         </div>
         {% if user_id == '-1' %}
         <div id="header-visitor-wrapper" class="right menu" style="display:flex">
