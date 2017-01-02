@@ -54,6 +54,7 @@ def home(request, forum_url):
             context['statement_categories'].append(stmt_category_entry)
             for stmt_group in StatementGroup.objects.filter(category=stmt_category):
                 stmt_group_entry = {
+                    'id': stmt_group.id,
                     'description': stmt_group.description,
                     'items': []
                 }

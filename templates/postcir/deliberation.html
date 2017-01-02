@@ -15,7 +15,7 @@
             <section class="stmt-category">
                 {% for group in category.groups %}
                     <p>{{ group.description|safe }}</p>
-                    <ol class="ui list stmt-group">
+                    <ol class="ui list">
                         {% for item in group.items %}
                             <li class="item stmt-item" data-id="{{ item.id }}"
                                 data-cite-name="{{ category.name }}-{{ item.id }}">{{ item.content_segmented|safe }}</li>

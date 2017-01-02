@@ -10,6 +10,23 @@ define([
 
     $('.ui.accordion').accordion();
 
+    injectQuizBoxes();
+
+    // TODO on window resize, rearrange
+    function injectQuizBoxes() {
+        $stmt_questions = $('.stmt-group-question[data-id]');
+        for (var i = 0; i < $stmt_questions.length; i++) {
+            var question = $stmt_questions.get(i);
+            var $textarea = '<textarea class="stmt-quiz-answer" rows="2" data-id="' + question.getAttribute('data-id') + '"></textarea>';
+            $('#quiz-area .form').append($textarea);
+        }
+        rearrangeQuizBoxes();
+    }
+
+    function rearrangeQuizBoxes() {
+
+    }
+
     function makePost(rawcontent, $citations) {
         var citations = [];
         for (var i = 0; i < $citations.length; i++) {
