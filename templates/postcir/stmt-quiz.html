@@ -1,3 +1,38 @@
 <div id="stmt-quiz">
-
+    Here is the Citizens Statement compiled by a random-selected citizens panel.
+    <div id="stmt">
+        <h2>Citizen's statement on {{ forum_name }}</h2>
+        <div class="ui styled accordion" style="width:auto">
+            <div class="title">
+                <i class="dropdown icon"></i>
+                Click to show issue description.
+            </div>
+            <div class="content">
+                {{ stmt_preamble|safe }}
+            </div>
+        </div>
+        {% for category in statement_categories %}
+            <h3 class="stmt-category-title">{{ category.description }}</h3>
+            <section class="stmt-category">
+                {% for group in category.groups %}
+                    <p>{{ group.description|safe }}</p>
+                    <ol class="ui list stmt-group">
+                        {% for item in group.items %}
+                            <li class="item stmt-item" data-id="{{ item.id }}"
+                                data-cite-name="{{ category.name }}-{{ item.id }}">{{ item.content|safe }}</li>
+                        {% endfor %}
+                    </ol>
+                {% endfor %}
+            </section>
+        {% endfor %}
+        <div id="stmt-highlight-toolbar">
+            <div class="ui blue segment labeled icon menu">
+                <a class="item stmt-cite-btn">
+                    <i class="quote left icon"></i>Cite
+                </a>
+            </div>
+        </div>
+    </div>
+    <div id="quiz-area">
+    </div>
 </div>

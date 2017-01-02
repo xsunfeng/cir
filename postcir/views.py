@@ -44,7 +44,7 @@ def home(request, forum_url):
         event='phase.enter',
         extra_data=json.dumps({'phase': context['active_phase']})
     )
-    if context['active_phase'] == 'deliberation':
+    if context['active_phase'] == 'deliberation' or context['active_phase'] == 'statement':
         for stmt_category in StatementCategory.objects.filter(forum=forum):
             stmt_category_entry = {
                 'name': stmt_category.name,
