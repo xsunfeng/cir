@@ -140,6 +140,7 @@ def api_postcir(request):
     if action == 'load-posts' or action == 'new-post':
         forum = Forum.objects.get(id=request.session['forum_id'])
         context = {
+            # TODO filter out posts from first 2 phases
             'posts': Post.objects.filter(forum=forum)
         }
         response['html'] = render_to_string("feed/activity-feed-postcir.html", context)
