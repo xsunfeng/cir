@@ -22,7 +22,7 @@ define([
             var val = $(this).find('textarea').val();
             if (val.trim().length === 0) {
                 $('html, body').scrollTop($(this).offset().top - 50);
-                Utils.notify('warning', 'Please fill in all questions');
+                Utils.notify('warning', 'Please fill in all answers');
                 all_filled_in = false;
                 return false;
             }
@@ -46,23 +46,34 @@ define([
         }
     });
 
-    $('.stmt-voter .ui.checkbox').checkbox({
-        onChange: function () {
-            var vote = this.getAttribute('data-vote');
-            if (vote === 'yes' || vote === 'no') {
-                module.vote = vote;
-            }
-        }
-    });
+    initializeCheckbox();
 
     $('#quiz-area').on('click', '#my-vote.collapsed', function() {
         $(this).removeClass('collapsed').addClass('expanded');
     });
+    $('#quiz-area').on('click', '#stmt-cancel-btn', function() {
+        $('#my-vote').addClass('collapsed').removeClass('expanded');
+    });
+    $('#quiz-area').on('click', '#stmt-vote-btn', function() {
+        var content = $('#stmt-vote-textarea').val();
+        if (content.trim().length == 0) {
+            Utils.notify('warning', 'Please fill in the reason.');
+            return;
+        }
+        $(this).addClass('loading');
+        makePost(content);
+    });
 
-    // $('#quiz-area').on('click', '#my-vote.expanded', function () {
-    //     $(this).removeClass('expanded').addClass('collapse');
-    // });
-
+    function initializeCheckbox() {
+        $('.stmt-voter .ui.checkbox').checkbox({
+            onChange: function () {
+                var vote = this.getAttribute('data-vote');
+                if (vote === 'yes' || vote === 'no') {
+                    module.vote = vote;
+                }
+            }
+        });
+    }
     function injectQuizBoxes() {
         var $stmt_questions = $('.stmt-group-question[data-id]');
         for (var i = 0; i < $stmt_questions.length; i++) {
@@ -86,28 +97,19 @@ define([
         }
     }
 
-    function makePost(rawcontent, $citations) {
-        var citations = [];
-        for (var i = 0; i < $citations.length; i++) {
-            citations.push({
-                'stmt_item_id': $citations.get(i).getAttribute('data-stmt-item-id'),
-                'start': $citations.get(i).getAttribute('data-start'),
-                'end': $citations.get(i).getAttribute('data-end'),
-            });
-        }
-        var data = {
-            'content': rawcontent,
-            'action': 'new-post',
-            'citations': JSON.stringify(citations),
-            'vote': module.vote
-        };
+    function makePost(rawcontent) {
+        $('#my-vote').addClass('loading');
         $.ajax({
-            url: urlPrefix + '/api_postcir/',
+            url: urlPrefix + '/api_stmt_vote/',
             type: 'post',
-            data: data,
+            data: {
+                'content': rawcontent,
+                'vote': module.vote
+            },
             success: function (xhr) {
-                $('#posts-area').html(xhr.html);
-                tinymce.activeEditor.setContent('');
+                var $vote_wrapper = $(xhr.html).find('#my-vote');
+                $('#my-vote').replaceWith($vote_wrapper);
+                initializeCheckbox();
             },
             error: function (xhr) {
                 if (xhr.status == 403) {

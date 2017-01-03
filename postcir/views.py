@@ -154,6 +154,33 @@ def api_stmt_quiz(request):
         event='phase.complete',
         extra_data=json.dumps({'phase': 'statement'})
     )
+    # TODO create data structure for request.REQUEST.get('answers')
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def api_stmt_vote(request):
+    if not request.user.is_authenticated():
+        return HttpResponse("Please log in first.", status=403)
+    content = request.REQUEST.get('content')
+    vote = request.REQUEST.get('vote')
+    post = Post(
+        forum_id=request.session['forum_id'],
+        author=request.user,
+        content=content,
+        content_type='comment',
+        vote=vote,
+        context='statement'
+    )
+    post.save()
+
+    context = {
+        'most_recent_vote': {
+            'vote': post.vote,
+            'voted_at': pretty_date(post.created_at)
+        }
+    }
+    response = {
+        'html': render_to_string("postcir/stmt-quiz.html", context)
+    }
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def _get_active_phase(user):

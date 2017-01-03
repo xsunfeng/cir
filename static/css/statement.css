@@ -39,6 +39,9 @@
     padding-right: 2em;
 }
 
+#quiz-area #my-vote.loading {
+    opacity: 0.7;
+}
 #quiz-area #my-vote.collapsed {
     cursor: pointer;
 }

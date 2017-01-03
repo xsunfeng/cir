@@ -23,23 +23,16 @@
                 {% endfor %}
             </section>
         {% endfor %}
-        <div id="stmt-highlight-toolbar">
-            <div class="ui blue segment labeled icon menu">
-                <a class="item stmt-cite-btn">
-                    <i class="quote left icon"></i>Cite
-                </a>
-            </div>
-        </div>
     </div>
     <div id="quiz-area">
         <div id="quiz-answers-wrapper" class="ui form"></div>
         {% if most_recent_vote %}
             <div id="my-vote" class="collapsed">
                 <div class="ui top attached message">
-                    Your most recent vote: <strong>{{ most_recent_vote.vote }}</strong> ({{ most_recent_vote.voted_at }})
+                    Your current vote: <strong>{{ most_recent_vote.vote }}</strong> (voted {{ most_recent_vote.voted_at }})
                 </div>
                 <div class="ui bottom attached info message vote-change-instruction">
-                    To change your vote, click here
+                    Click here to change your vote
                 </div>
                 <div class="ui bottom attached segment stmt-voter">
                     <div class="ui form">
@@ -70,7 +63,10 @@
                         <div class="field">
                             <textarea rows="3" id="stmt-vote-textarea"></textarea>
                         </div>
-                        <div id="stmt-vote-btn" class="ui submit primary fluid small button">Submit</div>
+                        <div class="two ui buttons">
+                            <div id="stmt-vote-btn" class="ui submit primary small button">Submit</div>
+                            <div id="stmt-cancel-btn" class="ui small button">Cancel</div>
+                        </div>
 
                     </div>
                 </div>
