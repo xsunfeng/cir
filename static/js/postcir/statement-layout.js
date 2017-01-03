@@ -12,19 +12,31 @@ define([
 
     injectQuizBoxes();
 
-    // TODO on window resize, rearrange
+    $(window).resize(rearrangeQuizBoxes);
+
     function injectQuizBoxes() {
-        $stmt_questions = $('.stmt-group-question[data-id]');
+        var $stmt_questions = $('.stmt-group-question[data-id]');
         for (var i = 0; i < $stmt_questions.length; i++) {
             var question = $stmt_questions.get(i);
-            var $textarea = '<textarea class="stmt-quiz-answer" rows="2" data-id="' + question.getAttribute('data-id') + '"></textarea>';
+            var $textarea = '<div class="stmt-quiz-answer" data-id="' + question.getAttribute('data-id') + '">' +
+                'Your answer:' +
+                '<textarea rows="2"></textarea></div>';
             $('#quiz-area .form').append($textarea);
         }
         rearrangeQuizBoxes();
     }
 
     function rearrangeQuizBoxes() {
-
+        var $stmt_questions = $('.stmt-group-question[data-id]');
+        for (var i = 0; i < $stmt_questions.length; i++) {
+            var question = $stmt_questions.get(i);
+            var $textarea = $('.stmt-quiz-answer[data-id="' + question.getAttribute('data-id') + '"]');
+            // setTimeout(function() {
+                $textarea.offset({
+                    top: $('.stmt-group-question[data-id="' + question.getAttribute('data-id') + '"]').offset().top
+                });
+            // }, 0);
+        }
     }
 
     function makePost(rawcontent, $citations) {
