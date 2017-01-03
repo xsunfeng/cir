@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from postcir.models import *
-from cir.utils import segment_text
+from cir.utils import segment_text, pretty_date
 
 VISITOR_ROLE = 'visitor'
 
@@ -45,6 +45,19 @@ def home(request, forum_url):
         extra_data=json.dumps({'phase': context['active_phase']})
     )
     if context['active_phase'] == 'deliberation' or context['active_phase'] == 'statement':
+        # load most recent vote
+        if request.user.is_authenticated():
+            user_votes = Post.objects.filter(
+                forum=forum,
+                author=request.user,
+                vote__isnull=False,
+            ).order_by('-created_at')
+            if user_votes.count() > 0:
+                context['most_recent_vote'] = {
+                    'vote': user_votes[0].vote,
+                    'voted_at': pretty_date(user_votes[0].created_at)
+                }
+        # load citizens statement
         for stmt_category in StatementCategory.objects.filter(forum=forum):
             stmt_category_entry = {
                 'name': stmt_category.name,
@@ -65,9 +78,6 @@ def home(request, forum_url):
                         'content': stmt_item.content,
                         'content_segmented': segment_text(stmt_item.content)
                     })
-
-    # TODO for logged in user, check for "already voted" overlay
-    # TODO for unlogged in user, show "log in to vote" overlay
 
     return render(request, 'index_statement.html', context)
 
@@ -133,6 +143,17 @@ def api_postcir(request):
             'posts': Post.objects.filter(forum=forum)
         }
         response['html'] = render_to_string("feed/activity-feed-postcir.html", context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def api_stmt_quiz(request):
+    response = {}
+    if not request.user.is_authenticated():
+        return HttpResponse("Please log in first.", status=403)
+    UserEvent.objects.create(
+        user=request.user,
+        event='phase.complete',
+        extra_data=json.dumps({'phase': 'statement'})
+    )
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def _get_active_phase(user):

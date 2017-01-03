@@ -30,6 +30,32 @@
     background-color: #f5f5f5;
 }
 
+#quiz-area #my-vote {
+    position: fixed;
+    bottom: 73px;
+    right: -1em;
+    width: 40%;
+    z-index: 1;
+    padding-right: 2em;
+}
+
+#quiz-area #my-vote.collapsed {
+    cursor: pointer;
+}
+
+#quiz-area #my-vote.collapsed .stmt-voter {
+    display: none;
+}
+
+#quiz-area #my-vote.expanded {
+    bottom: 1em;
+}
+
+#quiz-area #my-vote.expanded .vote-change-instruction {
+    display: none;
+}
+
+
 #stmt-quiz-submit-btn {
     position: absolute;
     width: calc(100% - 2em);
