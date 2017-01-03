@@ -36,14 +36,14 @@ def home(request, forum_url):
     if request.user.is_authenticated():
         context['user_id'] = request.user.id
         context['user_name'] = request.user.get_full_name()
+        UserEvent.objects.create(
+            user=request.user,
+            event='phase.enter',
+            extra_data=json.dumps({'phase': context['active_phase']})
+        )
     else:
         context['user_id'] = '-1'
 
-    UserEvent.objects.create(
-        user=request.user,
-        event='phase.enter',
-        extra_data=json.dumps({'phase': context['active_phase']})
-    )
     if context['active_phase'] == 'deliberation' or context['active_phase'] == 'statement':
         # load most recent vote
         if request.user.is_authenticated():
@@ -186,6 +186,8 @@ def api_stmt_vote(request):
 
 def _get_active_phase(user):
     """Load the user's current phase upon refresh"""
+    if not user.is_authenticated():
+        return 'issue'
     events = UserEvent.objects.filter(user=user, event='phase.complete')
     if events.count() == 0:
         return 'issue'
