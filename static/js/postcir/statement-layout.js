@@ -8,8 +8,6 @@ define([
     var urlPrefix = '/postcir';
     var module = {};
 
-    $('.ui.accordion').accordion();
-
     injectQuizBoxes();
 
     $(window).resize(rearrangeQuizBoxes);

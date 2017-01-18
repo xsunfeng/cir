@@ -32,6 +32,7 @@ class StatementCategory(models.Model):
 
 class StatementGroup(models.Model):
     description = models.TextField(null=True, blank=True)
+    extra_description = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now=True)
     category = models.ForeignKey(StatementCategory, on_delete=models.CASCADE)
     forum = models.ForeignKey(Forum, on_delete=models.CASCADE)

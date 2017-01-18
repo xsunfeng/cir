@@ -1,14 +1,16 @@
 <div id="stmt-quiz">
     <div id="stmt">
         <h2>Citizen's statement on {{ forum_name }}</h2>
-        <div class="ui styled accordion" style="width:auto">
-            <div class="title">
-                <i class="dropdown icon"></i>
-                Click to show issue description.
-            </div>
-            <div class="content">
-                {{ stmt_preamble|safe }}
-            </div>
+        <p class="stmt-group-question">Issue description</p>
+        {{ stmt_preamble|safe }}
+        <div class="ui message">
+            <p>A randomly assembled citizen panel has conducted an extensive analysis on the proposed
+                policy on inflationary tax increasing, and the findings are as follows.</p>
+            <p>This <i>Citizens Statement</i> presents the policy proposal and its pros and cons
+            as 6 questions and answers.</p>
+            <p>In this section, please carefully read each question and answers, and write a brief summary on
+            what you know about each question and what you learned from the answers of each question.</p>
+            <p>Please scroll down to start reading.</p>
         </div>
         {% for category in statement_categories %}
             <h3 class="stmt-category-title">{{ category.description }}</h3>
