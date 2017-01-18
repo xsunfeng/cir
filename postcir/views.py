@@ -55,7 +55,8 @@ def home(request, forum_url):
             if user_votes.count() > 0:
                 context['most_recent_vote'] = {
                     'vote': user_votes[0].vote,
-                    'voted_at': pretty_date(user_votes[0].created_at)
+                    'voted_at': pretty_date(user_votes[0].created_at),
+                    'vote_percentage': (user_votes[0].vote + 100.0) / 2.0
                 }
         # load citizens statement
         for stmt_category in StatementCategory.objects.filter(forum=forum):
@@ -162,7 +163,7 @@ def api_stmt_vote(request):
     if not request.user.is_authenticated():
         return HttpResponse("Please log in first.", status=403)
     content = request.REQUEST.get('content')
-    vote = request.REQUEST.get('vote')
+    vote = int(request.REQUEST.get('vote', '0'))
     post = Post(
         forum_id=request.session['forum_id'],
         author=request.user,
@@ -176,7 +177,8 @@ def api_stmt_vote(request):
     context = {
         'most_recent_vote': {
             'vote': post.vote,
-            'voted_at': pretty_date(post.created_at)
+            'voted_at': pretty_date(post.created_at),
+            'vote_percentage': (post.vote + 100.0) / 2.0
         }
     }
     response = {

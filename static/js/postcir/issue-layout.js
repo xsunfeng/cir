@@ -56,7 +56,6 @@ define([
             type: 'post',
             data: data,
             success: function (xhr) {
-                $('#issue-vote-form').removeClass('loading');
                 window.location.reload();
             },
             error: function (xhr) {

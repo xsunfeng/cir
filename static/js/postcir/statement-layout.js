@@ -46,7 +46,7 @@ define([
         }
     });
 
-    initializeCheckbox();
+    initVoter();
 
     $('#quiz-area').on('click', '#my-vote.collapsed', function() {
         $(this).removeClass('collapsed').addClass('expanded');
@@ -64,14 +64,9 @@ define([
         makePost(content);
     });
 
-    function initializeCheckbox() {
-        $('.stmt-voter .ui.checkbox').checkbox({
-            onChange: function () {
-                var vote = this.getAttribute('data-vote');
-                if (vote === 'yes' || vote === 'no') {
-                    module.vote = vote;
-                }
-            }
+    function initVoter() {
+        $('.stmt-voter input[type="range"]').on('change', function () {
+            module.vote = this.value;
         });
     }
     function injectQuizBoxes() {
@@ -109,7 +104,7 @@ define([
             success: function (xhr) {
                 var $vote_wrapper = $(xhr.html).find('#my-vote');
                 $('#my-vote').replaceWith($vote_wrapper);
-                initializeCheckbox();
+                initVoter();
             },
             error: function (xhr) {
                 if (xhr.status == 403) {

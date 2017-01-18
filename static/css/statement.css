@@ -58,6 +58,13 @@
     display: none;
 }
 
+#my-vote .last-time-indicator {
+    width: 0;
+    height: 10px;
+    position: absolute;
+    border-left: 2px solid black;
+    top: calc(1rem - 1px);
+}
 
 #stmt-quiz-submit-btn {
     position: absolute;
@@ -189,7 +196,7 @@
 }
 
 input[type="range"] {
-    width: 100%;
+    width: calc(100% + 1.5rem);
     -webkit-appearance: none;
     border: none;
     border-radius: 10px;
@@ -197,8 +204,7 @@ input[type="range"] {
     background-image: linear-gradient(to right, rgba(219, 40, 40, 1) 0%, rgba(219, 40, 40, 1) 14%, rgba(140, 140, 140, 1) 50%, rgba(33, 186, 69, 1) 88%, rgba(33, 186, 69, 1) 100%);
     padding: 0;
     height: 7px;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
+    margin: 1rem -0.75rem;
 }
 
 input[type="range"]:focus {
