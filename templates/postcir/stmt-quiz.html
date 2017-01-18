@@ -10,6 +10,9 @@
             as 6 questions and answers.</p>
             <p>In this section, please carefully read each question and answers, and write a brief summary on
             what you know about each question and what you learned from the answers of each question.</p>
+            <p>As you read this Citizens Statement and learn more about the issue, you can revise your initial
+            position on whether the proposal should be implemented. To revise your position, please click the blue banner
+            on the bottom-right corner of your browser.</p>
             <p>Please scroll down to start reading.</p>
         </div>
         {% for category in statement_categories %}
@@ -27,7 +30,16 @@
         {% endfor %}
     </div>
     <div id="quiz-area">
-        <div id="quiz-answers-wrapper" class="ui form"></div>
+        <div id="quiz-answers-wrapper" class="ui form">
+            {% for category in statement_categories %}
+                {% for group in category.groups %}
+                    <div class="stmt-quiz-answer" data-id="{{ group.id }}">
+                        {{ group.extra_description }}
+                        <textarea rows="2"></textarea>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
         {% if most_recent_vote %}
             <div id="my-vote" class="collapsed">
                 <div class="ui top attached message">

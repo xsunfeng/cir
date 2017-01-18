@@ -8,7 +8,7 @@ define([
     var urlPrefix = '/postcir';
     var module = {};
 
-    injectQuizBoxes();
+    rearrangeQuizBoxes();
 
     $(window).resize(rearrangeQuizBoxes);
 
@@ -66,17 +66,6 @@ define([
         $('.stmt-voter input[type="range"]').on('change', function () {
             module.vote = this.value;
         });
-    }
-    function injectQuizBoxes() {
-        var $stmt_questions = $('.stmt-group-question[data-id]');
-        for (var i = 0; i < $stmt_questions.length; i++) {
-            var question = $stmt_questions.get(i);
-            var $textarea = '<div class="stmt-quiz-answer" data-id="' + question.getAttribute('data-id') + '">' +
-                'Your answer:' +
-                '<textarea rows="2"></textarea></div>';
-            $('#quiz-answers-wrapper').append($textarea);
-        }
-        rearrangeQuizBoxes();
     }
 
     function rearrangeQuizBoxes() {

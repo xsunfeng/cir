@@ -70,6 +70,7 @@ def home(request, forum_url):
                 stmt_group_entry = {
                     'id': stmt_group.id,
                     'description': stmt_group.description,
+                    'extra_description': stmt_group.extra_description,
                     'items': []
                 }
                 stmt_category_entry['groups'].append(stmt_group_entry)
