@@ -63,11 +63,7 @@ class Post(MPTTModel):
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now_add=True)
     title = models.TextField(null=True, blank=True)
-    VOTE_CHOICES = (
-        ('yes', 'Yes'),
-        ('no', 'No')
-    )
-    vote = models.CharField(null=True, blank=True, max_length=10, choices=VOTE_CHOICES)
+    vote = models.IntegerField(null=True, blank=True)
     CONTEXT_CHOICES = (
         ('issue', 'Issue Briefing'),
         ('statement', 'Citizens Statement'),

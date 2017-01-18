@@ -88,7 +88,7 @@ def api_postcir(request):
         if not request.user.is_authenticated():
             return HttpResponse("Please log in first.", status=403)
         content = request.REQUEST.get('content')
-        vote = request.REQUEST.get('vote')
+        vote = int(request.REQUEST.get('vote', '0'))
         Post.objects.create(
             forum_id=request.session['forum_id'],
             author=request.user,

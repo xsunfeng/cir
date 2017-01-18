@@ -32,13 +32,11 @@ define([
             var rawcontent = tinymce.activeEditor.getContent();
             makePost(rawcontent);
         });
-        $('#issue-voter .ui.checkbox').checkbox({
-            onChange: function () {
-                var vote = this.getAttribute('data-vote');
-                if (vote === 'yes' || vote === 'no') {
-                    module.vote = vote;
-                }
-            }
+
+        // initialize voter
+        module.vote = 0;
+        $('#issue-voter input[type="range"]').on('change', function() {
+            module.vote = this.value;
         });
     }
 
