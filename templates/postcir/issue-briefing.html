@@ -13,7 +13,7 @@
     </p>
     <h2 class="ui large header serif dividing">Issue description</h2>
     <p class="serif large-text">
-        One goal of the borough is to maintain quality of life issues. A proposal to address quality of life is to
+        One goal of the borough is to maintain quality of life. A proposal to address quality of life is to
         increase property taxes each year in line with inflation. Property tax affects everyone in the borough and is
         one of the only two ways that the borough can generate revenue (one being property taxes, another being wage
         taxes).
@@ -33,21 +33,18 @@
     <div class="ui container segment">
         <form id="issue-vote-form" class="ui form">
             <div class="ui info message">
-                Given the above reason, please form an initial opinion on this policy proposal and cast your vote.
-                (Note: this vote will only be used for research purposes)
+                Based on the above information and your own knowledge on this issue, please form an initial opinion on this policy proposal using the following slider bar.
+                (Note: this action will only be used for research purposes)
             </div>
+
             <div id="issue-voter" class="grouped fields">
                 <div class="field">
-                    <div class="ui radio checkbox">
-                        <input type="radio" name="vote" data-vote="yes">
-                        <label><b>Yes</b>: I think that the State College Borough should implement an annual
-                            automatic inflation-based property tax increase.</label>
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="ui radio checkbox">
-                        <input type="radio" name="vote" data-vote="no">
-                        <label><b>No</b>: I think the proposal should <b>not</b> be implemented.</label>
+                    Statement: the policy proposal on an annual automatic property tax increase should be implemented in the State College Borough.
+                    <input type="range">
+                    <div class="indicators" style="width:100%;position:relative;top:-10px">
+                        <span style="position:absolute;left:0">Strongly oppose</span>
+                        <span style="position:absolute;left:50%;transform:translate(-50%)">Neutral</span>
+                        <span style="position:absolute;right:0">Strongly support</span>
                     </div>
                 </div>
             </div>
