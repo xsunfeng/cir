@@ -246,6 +246,12 @@ input[type="range"] {
     margin: 1rem -0.75rem;
 }
 
+input[type="range"].inline {
+    width: 100px;
+    opacity: 0.7;
+    margin: 0 0.5em;
+}
+
 input[type="range"]:focus {
     border-color: #ccc;
     outline: none !important;
@@ -285,4 +291,15 @@ input[type="range"]::-moz-range-thumb {
     background: #fff -moz-linear-gradient(transparent, rgba(0, 0, 0, 0.05));
     border-radius: 100%;
     border: 1px solid rgba(0,0,0,.6);
+}
+
+input[type="range"].inline::-webkit-slider-thumb {
+    cursor: default;
+    width: 2px;
+    height: 10px;
+    border: 2px solid black;
+    margin-left: -1px;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
 }

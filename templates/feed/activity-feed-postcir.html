@@ -13,7 +13,9 @@
                 <div class="metadata">
                     <span class="date"><abbr title="{{ node.updated_at }}">{{ node.updated_at_pretty }}</abbr></span>
                 </div>
-                {% if node.vote %}<span>voted {{ node.vote }}</span>{% endif %}
+                {% if node.vote %}<span>voted {{ node.vote }}</span>
+                    <input class="inline" type="range" min="-100" max="100" value="{{ node.vote }}" disabled>
+                {% endif %}
                 <div class="text">
                     {{ node.content | safe }}
                 </div>
