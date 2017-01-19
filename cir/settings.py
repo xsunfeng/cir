@@ -168,13 +168,6 @@ PIPELINE_CSS = {
         ),
         'output_filename': 'css/cir_dashboard.css',
     },
-    'postcir': {
-        'source_filenames': (
-            'css/statement.css',
-            'css/page_body.css'
-        ),
-        'output_filename': 'css/postcir.css'
-    }
 }
 
 PIPELINE_JS = {
