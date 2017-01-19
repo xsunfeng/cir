@@ -136,6 +136,10 @@ define([
             });
             module.newHighlight = {};
         });
+
+        $('.open-comments').click(function() {
+            var id = this.getAttribute('data-id');
+        });
     }
     return module;
 });

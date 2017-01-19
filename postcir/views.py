@@ -116,7 +116,8 @@ def api_postcir(request):
                 author=request.user,
                 content=content,
                 content_type='comment',  # TODO pass from front end
-                parent_id=parent_id
+                parent_id=parent_id,
+                context='deliberation'
             )
         else:
             # only non-reply posts can have citations and vote
@@ -131,22 +132,30 @@ def api_postcir(request):
                 highlight_object.save()
 
             # vote is nullable
-            vote = request.REQUEST.get('vote')
-            Post.objects.create(
+            vote = int(request.REQUEST.get('vote', '0'))
+            post = Post(
                 forum_id=request.session['forum_id'],
                 author=request.user,
                 content=content,
                 highlight=highlight_object, # TODO very problematic -- only the last highlight counts.
                 content_type='comment', # TODO pass from front end
-                vote=vote
+                vote=vote,
+                context='deliberation'
             )
+            post.save()
+            response['voter_html'] = render_to_string("postcir/deliberation.html", {
+                'most_recent_vote': {
+                    'vote': post.vote,
+                    'voted_at': pretty_date(post.created_at),
+                    'vote_percentage': (post.vote + 100.0) / 2.0
+                }
+            })
     if action == 'load-posts' or action == 'new-post':
         forum = Forum.objects.get(id=request.session['forum_id'])
-        context = {
-            # TODO filter out posts from first 2 phases
-            'posts': Post.objects.filter(forum=forum)
-        }
-        response['html'] = render_to_string("feed/activity-feed-postcir.html", context)
+        response['html'] = render_to_string("feed/activity-feed-postcir.html", {
+            'posts': Post.objects.filter(forum=forum, context='deliberation')
+        })
+
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_stmt_quiz(request):

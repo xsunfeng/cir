@@ -39,14 +39,20 @@ define([
             var rawcontent = tinymce.activeEditor.getContent();
             makePost(rawcontent, $citations);
         });
-        $('#voter .ui.checkbox').checkbox({
-            onChange: function() {
-                var vote = this.getAttribute('data-vote');
-                if (vote === 'yes' || vote === 'no') {
-                    module.vote = vote;
-                    $('#voter-prompt').text('Please share the reason of your vote.');
-                    $('#post-btn').text('Vote');
-                }
+
+        initVoter();
+    }
+
+    function initVoter() {
+        module.initial_vote_value = $('#voter input[type="range"]').val();
+        $('#voter input[type="range"]').on('change', function () {
+            module.vote = this.value;
+            if (this.value != module.initial_vote_value) {
+                $('#voter-prompt').text('Please share the reason of this revision.');
+                $('#post-btn').text('Update Vote');
+            } else {
+                $('#voter-prompt').text('If you have any question or comment and would like to discuss with your community, please post here.');
+                $('#post-btn').text('Post');
             }
         });
     }
@@ -72,6 +78,9 @@ define([
             data: data,
             success: function (xhr) {
                 $('#posts-area').html(xhr.html);
+                var $vote_wrapper = $(xhr.voter_html).find('#opinion-board form');
+                $('#opinion-board form').replaceWith($vote_wrapper);
+                initVoter();
                 tinymce.activeEditor.setContent('');
             },
             error: function (xhr) {
