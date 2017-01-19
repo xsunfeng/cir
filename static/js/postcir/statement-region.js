@@ -51,6 +51,7 @@ define([
         }
     };
     initLayout();
+    initStmtGroupForum();
 
     function initLayout() {
         $('.ui.accordion').accordion();
@@ -139,20 +140,20 @@ define([
         });
 
         $('.open-comments').click(function() {
-            var id = this.getAttribute('data-id');
+            module.active_stmt_group_id = this.getAttribute('data-id');
             $('#opinion-board').dimmer('show');
             $('#stmt-question-board').addClass('loading').show();
             $.ajax({
                 url: urlPrefix + '/api_stmt_question/',
                 type: 'post',
                 data: {
-                    'stmt_group_id': id
+                    'action': 'load-posts',
+                    'stmt_group_id': module.active_stmt_group_id
                 },
                 success: function (xhr) {
                     $('#stmt-question-board')
                         .html(xhr.html)
                         .removeClass('loading');
-                    initStmtGroupForum();
                 },
                 error: function (xhr) {
                     if (xhr.status == 403) {
@@ -167,6 +168,61 @@ define([
         $('#stmt-question-board').on('click', '.close.icon', function() {
             $('#stmt-question-board').hide();
             $('#opinion-board').dimmer('hide');
+        });
+        $('#stmt-question-board').on('click', '#stmt-group-post', function(e) {
+            e.preventDefault();
+            var data = {
+                'content': $('#stmt-group-post-form textarea').val(),
+                'action': 'new-post',
+                'stmt_group_id': module.active_stmt_group_id
+            };
+            $.ajax({
+                url: urlPrefix + '/api_stmt_question/',
+                type: 'post',
+                data: data,
+                success: function (xhr) {
+                    $('#stmt-question-board')
+                        .html(xhr.html)
+                        .removeClass('loading');
+                },
+                error: function (xhr) {
+                    if (xhr.status == 403) {
+                        Utils.notify('error', xhr.responseText);
+                    }
+                }
+            });
+        });
+        $('#stmt-question-board').on('click', '.stmt-group-reply-post', function (e) {
+            e.preventDefault();
+            var reply_name = $(this).parent().siblings('.author').text();
+            module.reply_id = this.getAttribute('data-id');
+            $('#stmt-group-reply-form label').text('Reply to ' + reply_name);
+            $('#stmt-group-reply-form').insertAfter($(this).parent()).show();
+            $('#stmt-group-reply-form textarea').focus();
+        });
+        $('#stmt-question-board').on('click', '#stmt-group-reply', function (e) {
+            e.preventDefault();
+            var data = {
+                'content': $('#stmt-group-reply-form textarea').val(),
+                'action': 'new-post',
+                'stmt_group_id': module.active_stmt_group_id,
+                'parent_id': module.reply_id
+            };
+            $.ajax({
+                url: urlPrefix + '/api_stmt_question/',
+                type: 'post',
+                data: data,
+                success: function (xhr) {
+                    $('#stmt-question-board')
+                        .html(xhr.html)
+                        .removeClass('loading');
+                },
+                error: function (xhr) {
+                    if (xhr.status == 403) {
+                        Utils.notify('error', xhr.responseText);
+                    }
+                }
+            });
         });
     }
     return module;

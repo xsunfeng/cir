@@ -211,18 +211,31 @@ def api_stmt_vote(request):
 def api_stmt_question(request):
     forum = Forum.objects.get(id=request.session['forum_id'])
     stmt_group = StatementGroup.objects.get(id=request.REQUEST.get('stmt_group_id'))
-    posts = Post.objects.filter(
-        forum=forum,
-        context='stmt_group',
-        stmt_group=stmt_group
-    )
-    response = {
-        'html': render_to_string("feed/activity-feed-stmt-group.html", {
-            'posts': posts,
+    action = request.REQUEST.get('action')
+    response = {}
+
+    if action == 'new-post':
+        content = request.REQUEST.get('content')
+        parent_id = request.REQUEST.get('parent_id')
+        Post.objects.create(
+            forum_id=request.session['forum_id'],
+            author=request.user,
+            content=content,
+            content_type='comment',
+            context='stmt_group',
+            stmt_group=stmt_group,
+            parent_id=parent_id
+        )
+    if action == 'load-posts' or action == 'new-post':
+        response['html'] = render_to_string("feed/activity-feed-stmt-group.html", {
+            'posts': Post.objects.filter(
+                forum=forum,
+                context='stmt_group',
+                stmt_group=stmt_group
+            ),
             'question': stmt_group.description,
             'prompt': stmt_group.extra_description
         })
-    }
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 

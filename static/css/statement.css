@@ -216,17 +216,20 @@
     margin: 0 0 -1px 0;
 }
 
-#activity-reply-form {
+#activity-reply-form,
+#stmt-group-reply-form {
     max-width: inherit;
     padding: 10px 1em 10px 58px;
     margin: 1em -1em 0 -58px;
     background-color: #f5f5f5;
 }
 
-#posts-area .comment {
+#posts-area .comment,
+#stmt-question-board .comment {
     margin-top: 1em;
 }
-#posts-area .comment .comments {
+#posts-area .comment .comments,
+#stmt-question-board .comment .comments{
     margin-left: -2em;
     padding: 2em 0 1em 1em;
 }
