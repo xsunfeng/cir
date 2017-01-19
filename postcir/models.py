@@ -65,10 +65,13 @@ class Post(MPTTModel):
     updated_at = models.DateTimeField(auto_now_add=True)
     title = models.TextField(null=True, blank=True)
     vote = models.IntegerField(null=True, blank=True)
+    stmt_group = models.ForeignKey(StatementGroup, null=True, blank=True)
+
     CONTEXT_CHOICES = (
         ('issue', 'Issue Briefing'),
         ('statement', 'Citizens Statement'),
-        ('deliberation', 'Deliberative Poll')
+        ('deliberation', 'Deliberative Poll'),
+        ('stmt_group', 'Statement Question')
     )
     context = models.CharField(null=True, blank=True, max_length=15, choices=CONTEXT_CHOICES)
 

@@ -152,12 +152,23 @@ def api_stmt_quiz(request):
     response = {}
     if not request.user.is_authenticated():
         return HttpResponse("Please log in first.", status=403)
+
+    for stmt_group in StatementGroup.objects.filter(forum_id=request.session['forum_id']):
+        answer = request.REQUEST.get('answers[' + str(stmt_group.id) + ']')
+        if answer:
+            Post.objects.create(
+                forum_id=request.session['forum_id'],
+                author=request.user,
+                content=answer,
+                content_type='comment',
+                context='stmt_group',
+                stmt_group=stmt_group
+            )
     UserEvent.objects.create(
         user=request.user,
         event='phase.complete',
         extra_data=json.dumps({'phase': 'statement'})
     )
-    # TODO create data structure for request.REQUEST.get('answers')
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_stmt_vote(request):
