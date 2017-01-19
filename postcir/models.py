@@ -68,10 +68,10 @@ class Post(MPTTModel):
     stmt_group = models.ForeignKey(StatementGroup, related_name='comments', null=True, blank=True)
 
     CONTEXT_CHOICES = (
-        ('issue', 'Issue Briefing'),
-        ('statement', 'Citizens Statement'),
-        ('deliberation', 'Deliberative Poll'),
-        ('stmt_group', 'Statement Question')
+        ('issue', 'Initial voting in Phase 1'),
+        ('statement', 'Vote revision in Phase 2'),
+        ('deliberation', 'Issue forum (may contain vote revision)'),
+        ('stmt_group', 'Statement Question forum')
     )
     context = models.CharField(null=True, blank=True, max_length=15, choices=CONTEXT_CHOICES)
 

@@ -118,7 +118,7 @@
     user-select: none;
 }
 
-#deliberation #opinion-board {
+#opinion-board {
     top: 40px;
     right: 0;
     bottom: 0;
@@ -128,8 +128,40 @@
     position: absolute;
 }
 
-#deliberation #opinion-textarea {
+#opinion-board.dimmed {
+    overflow: hidden;
+}
+
+#opinion-textarea {
     height: 1px !important;
+}
+
+#stmt-question-board {
+    top: 40px;
+    right: 0;
+    bottom: 0;
+    width: calc(50% - 2em);
+    overflow-y: auto;
+    position: absolute;
+    display: none;
+    z-index: 1001;
+    margin: 1em;
+}
+
+#stmt-question-board .header {
+    width: calc(50% - 2em);
+    position: fixed;
+    height: 3em;
+    border-bottom: 1px solid rgb(222, 222, 223);
+    margin: -1em;
+    padding: 1em;
+    line-height: 1em;
+    background-color: #ebebeb;
+    z-index: 1002;
+}
+
+#stmt-question-board .threaded.comments {
+    margin-top: 3em;
 }
 
 #stmt-highlight-toolbar {

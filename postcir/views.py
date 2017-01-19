@@ -208,6 +208,23 @@ def api_stmt_vote(request):
     }
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
+def api_stmt_question(request):
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    stmt_group = StatementGroup.objects.get(id=request.REQUEST.get('stmt_group_id'))
+    posts = Post.objects.filter(
+        forum=forum,
+        context='stmt_group',
+        stmt_group=stmt_group
+    )
+    response = {
+        'html': render_to_string("feed/activity-feed-stmt-group.html", {
+            'posts': posts,
+            'question': stmt_group.description
+        })
+    }
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+
 def _get_active_phase(user):
     """Load the user's current phase upon refresh"""
     if not user.is_authenticated():

@@ -6,6 +6,7 @@ define([
     $,
     Utils
 ) {
+    var urlPrefix = '/postcir';
     var module = {
         highlight: function(data) {
             var $context = $('#stmt .stmt-item[data-id="' + data.context_id + '"]');
@@ -139,6 +140,25 @@ define([
 
         $('.open-comments').click(function() {
             var id = this.getAttribute('data-id');
+            $('#opinion-board').dimmer('show');
+            $('#stmt-question-board').addClass('loading').show();
+            $.ajax({
+                url: urlPrefix + '/api_stmt_question/',
+                type: 'post',
+                data: {
+                    'stmt_group_id': id
+                },
+                success: function (xhr) {
+                    $('#stmt-question-board')
+                        .html(xhr.html)
+                        .removeClass('loading');
+                },
+                error: function (xhr) {
+                    if (xhr.status == 403) {
+                        Utils.notify('error', xhr.responseText);
+                    }
+                }
+            });
         });
     }
     return module;

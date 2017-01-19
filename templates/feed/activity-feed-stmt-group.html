@@ -1,0 +1,44 @@
+<div class="header">
+    <i class="close icon"></i>
+    Citizens Statement discussion forum
+</div>
+<div class="ui threaded comments">
+<div class="ui info message">Question: {{ question }}</div>
+{% if posts %}
+{% load mptt_tags %}
+    {% recursetree posts %}
+    <div class="comment">
+        <div class="user-initial avatar">
+            <div class="visitor">{{ node.author_initial }}</div>
+        </div>
+        <div class="activity-content content">
+            <a class="author {{ node.author_role }}" data-id="{{ node.author.id }}">{{ node.author.get_full_name }}</a>
+            <div class="metadata">
+                <span class="date"><abbr title="{{ node.updated_at }}">{{ node.updated_at_pretty }}</abbr></span>
+            </div>
+            {% if node.vote %}<span>voted {{ node.get_vote_display }}</span>{% endif %}
+            <div class="text">
+                {{ node.content | safe }}
+            </div>
+            <div class="actions">
+                <a class="reply feed-reply-post" data-id="{{ node.id }}">Reply</a>
+            </div>
+            {% if not node.is_leaf_node %}
+            <div class="comments">
+                {{ children }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endrecursetree %}
+    <div id="stmt-group-reply-form" class="ui form" style="display:none">
+        <div class="field">
+            <label></label>
+            <textarea rows="2"></textarea>
+        </div>
+        <div id="reply-btn" class="ui submit primary small button">Reply</div>
+    </div>
+{% else %}
+	<div class="ui info message">No opinions or comments to show</div>
+{% endif %}
+</div>
