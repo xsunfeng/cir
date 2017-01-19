@@ -219,7 +219,8 @@ def api_stmt_question(request):
     response = {
         'html': render_to_string("feed/activity-feed-stmt-group.html", {
             'posts': posts,
-            'question': stmt_group.description
+            'question': stmt_group.description,
+            'prompt': stmt_group.extra_description
         })
     }
     return HttpResponse(json.dumps(response), mimetype='application/json')

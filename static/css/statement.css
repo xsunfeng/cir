@@ -160,6 +160,9 @@
     z-index: 1002;
 }
 
+#stmt-question-board .icon {
+    cursor: pointer;
+}
 #stmt-question-board .threaded.comments {
     margin-top: 3em;
 }

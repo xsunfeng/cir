@@ -3,9 +3,15 @@
     Citizens Statement discussion forum
 </div>
 <div class="ui threaded comments">
-<div class="ui info message">Question: {{ question }}</div>
-{% if posts %}
-{% load mptt_tags %}
+    <div class="ui info message">Question: {{ question }}</div>
+    <form class="ui form">
+        <div class="field">
+            <textarea rows="3"></textarea>
+        </div>
+        <div id="stmt-group-post" class="ui submit primary fluid small button">Post</div>
+    </form>
+    {% if posts %}
+    {% load mptt_tags %}
     {% recursetree posts %}
     <div class="comment">
         <div class="user-initial avatar">
@@ -16,12 +22,11 @@
             <div class="metadata">
                 <span class="date"><abbr title="{{ node.updated_at }}">{{ node.updated_at_pretty }}</abbr></span>
             </div>
-            {% if node.vote %}<span>voted {{ node.get_vote_display }}</span>{% endif %}
             <div class="text">
                 {{ node.content | safe }}
             </div>
             <div class="actions">
-                <a class="reply feed-reply-post" data-id="{{ node.id }}">Reply</a>
+                <a class="reply stmt-group-reply-post" data-id="{{ node.id }}">Reply</a>
             </div>
             {% if not node.is_leaf_node %}
             <div class="comments">
@@ -36,7 +41,7 @@
             <label></label>
             <textarea rows="2"></textarea>
         </div>
-        <div id="reply-btn" class="ui submit primary small button">Reply</div>
+        <div id="stmt-group-reply" class="ui submit primary small button">Reply</div>
     </div>
 {% else %}
 	<div class="ui info message">No opinions or comments to show</div>

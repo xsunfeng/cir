@@ -13,7 +13,7 @@
                 <div class="metadata">
                     <span class="date"><abbr title="{{ node.updated_at }}">{{ node.updated_at_pretty }}</abbr></span>
                 </div>
-                {% if node.vote %}<span>voted {{ node.get_vote_display }}</span>{% endif %}
+                {% if node.vote %}<span>voted {{ node.vote }}</span>{% endif %}
                 <div class="text">
                     {{ node.content | safe }}
                 </div>

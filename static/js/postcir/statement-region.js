@@ -152,6 +152,7 @@ define([
                     $('#stmt-question-board')
                         .html(xhr.html)
                         .removeClass('loading');
+                    initStmtGroupForum();
                 },
                 error: function (xhr) {
                     if (xhr.status == 403) {
@@ -159,6 +160,13 @@ define([
                     }
                 }
             });
+        });
+    }
+
+    function initStmtGroupForum() {
+        $('#stmt-question-board').on('click', '.close.icon', function() {
+            $('#stmt-question-board').hide();
+            $('#opinion-board').dimmer('hide');
         });
     }
     return module;
