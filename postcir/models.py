@@ -65,7 +65,7 @@ class Post(MPTTModel):
     updated_at = models.DateTimeField(auto_now_add=True)
     title = models.TextField(null=True, blank=True)
     vote = models.IntegerField(null=True, blank=True)
-    stmt_group = models.ForeignKey(StatementGroup, null=True, blank=True)
+    stmt_group = models.ForeignKey(StatementGroup, related_name='comments', null=True, blank=True)
 
     CONTEXT_CHOICES = (
         ('issue', 'Issue Briefing'),

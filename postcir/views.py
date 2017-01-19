@@ -71,7 +71,8 @@ def home(request, forum_url):
                     'id': stmt_group.id,
                     'description': stmt_group.description,
                     'extra_description': stmt_group.extra_description,
-                    'items': []
+                    'items': [],
+                    'num_of_comments': stmt_group.comments.count()
                 }
                 stmt_category_entry['groups'].append(stmt_group_entry)
                 for stmt_item in StatementItem.objects.filter(group=stmt_group):

@@ -14,7 +14,15 @@
             <h3 class="stmt-category-title">{{ category.description }}</h3>
             <section class="stmt-category">
                 {% for group in category.groups %}
-                    <p>{{ group.description|safe }}</p>
+                    <strong>{{ group.description|safe }}</strong>
+                    <div class="ui right labeled small button" tabindex="0">
+                        <div class="ui icon button">
+                            Comments
+                        </div>
+                        <a class="ui basic label">
+                           {{ group.num_of_comments }}
+                        </a>
+                    </div>
                     <ol class="ui list">
                         {% for item in group.items %}
                             <li class="item stmt-item" data-id="{{ item.id }}"
