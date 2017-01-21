@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from models import *
-from postcir.models import StatementCategory, StatementGroup, StatementItem, UserEvent
+from postcir.models import StatementCategory, StatementGroup, StatementItem, UserEvent, Post as PostPost
 
 def user_unicode(self):
     return  u'%s %s (%s)' % (self.first_name, self.last_name, self.email)
@@ -162,7 +162,12 @@ class StatementItemAdmin(admin.ModelAdmin):
 class UserEventAdmin(admin.ModelAdmin):
     list_display = ('user', 'event', 'extra_data', 'created_at')
 
+class PostCirPostAdmin(admin.ModelAdmin):
+    list_filter = ('forum', )
+    list_display = ('author', 'content', 'created_at', 'vote', 'context')
+
 admin.site.register(StatementCategory, StatementCategoryAdmin)
 admin.site.register(StatementGroup, StatementGroupAdmin)
 admin.site.register(StatementItem, StatementItemAdmin)
 admin.site.register(UserEvent, UserEventAdmin)
+admin.site.register(PostPost, PostCirPostAdmin)

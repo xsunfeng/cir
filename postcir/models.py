@@ -70,8 +70,8 @@ class Post(MPTTModel):
     CONTEXT_CHOICES = (
         ('issue', 'Initial voting in Phase 1'),
         ('statement', 'Vote revision in Phase 2'),
-        ('deliberation', 'Issue forum (may contain vote revision)'),
-        ('stmt_group', 'Statement Question forum')
+        ('deliberation', 'Issue forum in Phase 3'),
+        ('stmt_group', 'Statement Question forum in Phase 3')
     )
     context = models.CharField(null=True, blank=True, max_length=15, choices=CONTEXT_CHOICES)
 
