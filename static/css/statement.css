@@ -17,15 +17,24 @@
     padding: 1em 1em 2em 3em;
 }
 
+#stmt .stmt-question-wrapper {
+    opacity: 0.35;
+    transition: opacity 0.3s;
+}
+#stmt .stmt-question-wrapper.focused {
+    opacity: 1;
+}
+
 #stmt-quiz .stmt-group-question {
     font-weight: 700;
+    margin-top: 20px;
 }
 #stmt-quiz #quiz-area {
     top: 40px;
     right: 0;
     bottom: 0;
     width: 40%;
-    padding: 1em;
+    padding: 1em 0;
     position: absolute;
     background-color: #f5f5f5;
 }
@@ -71,6 +80,15 @@
     position: absolute;
     width: calc(100% - 2em);
     bottom: 3em;
+}
+
+.stmt-quiz-answer {
+    position: absolute;
+    margin: 0 1em;
+}
+.stmt-quiz-answer.fixed {
+    top: 50px!important;
+    position: fixed!important;
 }
 
 .stmt-quiz-answer textarea {

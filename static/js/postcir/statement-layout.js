@@ -12,6 +12,9 @@ define([
 
     $(window).resize(rearrangeQuizBoxes);
 
+    $(window).scroll(highlightFocusedQuestion);
+    highlightFocusedQuestion();
+
     $('#stmt-quiz-submit-btn').click(function() {
         var answers = {};
         var all_filled_in = true;
@@ -77,6 +80,32 @@ define([
                 top: $('.stmt-group-question[data-id="' + question.getAttribute('data-id') + '"]').offset().top
             });
         }
+    }
+
+    function highlightFocusedQuestion() {
+        $('.stmt-group-question[data-id]').each(function(idx, question) {
+            var question_top = question.getBoundingClientRect().top;
+            var question_bottom = question.nextElementSibling.getBoundingClientRect().bottom;
+            var viewport_height = window.innerHeight || document.documentElement.clientHeight;
+
+            if (
+                question_top > 0 && question_top < viewport_height / 2
+                || question_top < 0 && question_bottom > viewport_height / 2
+            ) {
+                // reset focused / fixed status
+                $('#stmt').find('.stmt-question-wrapper').removeClass('focused');
+                $('#quiz-answers-wrapper .stmt-quiz-answer').removeClass('fixed');
+
+                // focus and fix
+                if (question_top < 50) {
+                    var active_id = this.getAttribute('data-id');
+                    $('#quiz-answers-wrapper .stmt-quiz-answer[data-id="' + active_id + '"]')
+                        .addClass('fixed');
+                }
+                $(question).parent().addClass('focused');
+                return false;
+            }
+        });
     }
 
     function makePost(rawcontent) {

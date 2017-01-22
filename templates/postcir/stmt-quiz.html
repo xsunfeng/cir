@@ -19,12 +19,14 @@
             <h3 class="stmt-category-title">{{ category.description }}</h3>
             <section class="stmt-category">
                 {% for group in category.groups %}
+                <div class="stmt-question-wrapper">
                     <p class="stmt-group-question" data-id="{{ group.id }}">{{ group.description|safe }}</p>
                     <ol class="ui list">
                         {% for item in group.items %}
-                        <li class="item stmt-item">{{ item.content|safe }}</li>
+                            <li class="item stmt-item">{{ item.content|safe }}</li>
                         {% endfor %}
                     </ol>
+                </div>
                 {% endfor %}
             </section>
         {% endfor %}
