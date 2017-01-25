@@ -53,6 +53,24 @@ define([
 		});
 	});
 
+	$("body").on("click", "u", function(){
+		$.ajax({
+			url: '/phase5/view_vote_result/',
+			type: 'post',
+			data: {
+			},
+			success: function(xhr) {	
+				$("#explain-modal-content").html(xhr.vote_result_table);
+				$("#explain-modal").modal("show");
+			},
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			}
+		});
+	});
+
 	// $("body").on("click", ".upvote", function(){
 	// 	if ($(this).hasClass("teal")) {
 	// 		// not vote yet
