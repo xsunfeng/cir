@@ -3,7 +3,7 @@
     <h3>Citizens Statement discussion forum</h3>
 </div>
 <div class="ui threaded comments">
-    <div class="ui info message">Question: {{ question }}</div>
+    <div class="ui info message">Question: {{ question|safe }}</div>
     <form id="stmt-group-post-form" class="ui form">
         <div class="field">
             <textarea rows="3"></textarea>
