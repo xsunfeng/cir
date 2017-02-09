@@ -81,7 +81,7 @@ define([
                 var $vote_wrapper = $(xhr.voter_html).find('#opinion-board form');
                 $('#opinion-board form').replaceWith($vote_wrapper);
                 initVoter();
-                tinymce.activeEditor.setContent('');
+                initLayout();
             },
             error: function (xhr) {
                 if (xhr.status == 403) {

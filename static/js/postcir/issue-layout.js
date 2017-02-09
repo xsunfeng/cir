@@ -41,7 +41,7 @@ define([
     }
 
     function makePost(rawcontent) {
-        if (!module.vote) {
+        if (!module.hasOwnProperty('vote')) {
             return;
         }
         $('#issue-vote-form').addClass('loading');
