@@ -142,7 +142,7 @@ STATICFILES_DIRS = (
     os.path.join(PROJECT_PATH, 'static'),
 )
 
-STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
+STATICFILES_STORAGE = 'require.storage.OptimizedStaticFilesStorage'
 PIPELINE_EMBED_MAX_IMAGE_SIZE = 120000
 PIPELINE_EMBED_PATH = r'[/]?static/embed/'
 PIPELINE_CSS = {
@@ -196,6 +196,11 @@ PIPELINE_JS = {
         'output_filename': 'js/cir_dashboard.js',
     }
 }
+
+REQUIRE_BASE_URL = 'js'
+REQUIRE_JS = "require.js"
+REQUIRE_DEBUG = DEBUG
+REQUIRE_BUILD_PROFILE = 'app.build.js'
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -255,6 +260,7 @@ INSTALLED_APPS = (
     'postcir',
     'password_reset',
     'pipeline',
+    'require',
     'mptt',
     'south',
 )

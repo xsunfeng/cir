@@ -2,6 +2,7 @@
 {% load compressed %}
 <!DOCTYPE html>
 <html lang="en">
+    {% load require %}
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,33 +11,9 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" rel="stylesheet" class="ui" />
         <link rel="stylesheet" href="{% static 'css' %}/statement.css">
         <link rel="stylesheet" href="{% static 'css' %}/page_body.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.20/require.min.js"></script>
-        <script>
-            require.config({
-                baseUrl: "{% static 'js' %}",
-                paths: {
-                    'jquery': '//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min',
-                    'semantic-ui': '//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min',
-                    'socket.io': '//130.203.136.141:443/socket.io/socket.io',
-                	'tinymce': '//cdn.tinymce.com/4/tinymce.min',
-				},
-                shim: {
-                    'semantic-ui': ['jquery'],
-                },
-                waitSeconds: 200,
-            });
-            require([
-                'layout/header',
-                {% if active_phase == 'issue' %}'postcir/issue-layout',{% endif %}
-                {% if active_phase == 'statement' %}'postcir/statement-layout',{% endif %}
-                {% if active_phase == 'deliberation' %}'postcir/postcir-layout',{% endif %}
-
-            ], function(Header) {
-                Header.initHeader();
-            });
-        </script>
+        {% require_module 'postcir/main' %}
     </head>
-    <body{% if forum_id %} forum-id="{{ forum_id }}"{% endif %}>
+    <body{% if forum_id %} forum-id="{{ forum_id }}"{% endif %} data-phase="{{ active_phase }}">
     	{% include 'header/forum_postcir_header.html' %}
         {% if load_error %}
         <div class="ui two column centered grid">
