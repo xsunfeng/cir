@@ -10,15 +10,6 @@ from cir.utils import segment_text, pretty_date
 VISITOR_ROLE = 'visitor'
 
 def home(request, forum_url):
-    context = {
-        'forum_name': 'test',
-        'forum_url': 'test1',
-        'stmt_preamble': 'test2',
-        'statement_categories': [],
-        'active_phase': 'statement',
-        'forum_id': '001'
-    }
-    return render(request, 'index_statement.html', context)
     # no delegation on this forum
     if 'actual_user_id' in request.session:
         del request.session['actual_user_id']
