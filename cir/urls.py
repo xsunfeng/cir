@@ -73,6 +73,7 @@ urlpatterns = patterns('',
     url(r'^phase5/vote_issue/$', phase5.vote_issue),
     url(r'^phase5/render_support_bar/$', phase5.render_support_bar),
     url(r'^phase5/view_vote_result/$', phase5.view_vote_result),
+    url(r'^phase5/get_glossary/$', phase5.get_glossary),
 
     url(r'^phase1/get_nugget_list/$', phase1.get_nugget_list),
     url(r'^phase1/get_highlights/$', phase1.get_highlights),

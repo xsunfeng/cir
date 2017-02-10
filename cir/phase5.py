@@ -69,3 +69,153 @@ def view_vote_result(request):
     context["entries"] = ForumVote.objects.filter(forum = forum)
     response["vote_result_table"] = render_to_string('phase5/vote-result-table.html', context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
+
+
+
+from collections import defaultdict
+from xml.etree import cElementTree as ET
+
+def etree_to_dict(t):
+    d = {t.tag: {} if t.attrib else None}
+    children = list(t)
+    if children:
+        dd = defaultdict(list)
+        for dc in map(etree_to_dict, children):
+            for k, v in dc.items():
+                dd[k].append(v)
+        d = {t.tag: {k:v[0] if len(v) == 1 else v for k, v in dd.items()}}
+    if t.attrib:
+        d[t.tag].update(('@' + k, v) for k, v in t.attrib.items())
+    if t.text:
+        text = t.text.strip()
+        if children or t.attrib:
+            if text:
+              d[t.tag]['#text'] = text
+        else:
+            d[t.tag] = text
+    return d
+
+glossary = []
+e = ET.XML('''
+    <additionalinformation>
+            <nugget> 
+                <title>Municipal Cost Index (MCI)</title>
+                <description>Blank1</description>
+            </nugget>
+            <nugget> 
+                <title>Borough's sources of tax revenue are decreasing</title>
+                <description>Blank2</description>
+            </nugget>
+            <nugget> 
+                    <title>Expenses are increasing</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Budget Deficit</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>The real estate tax</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Borough Revenue</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Assessed-property tax base</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Surrounding townships</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Very little vacant land in the borough</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Borough's quality of life</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Public safety</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Public safety and security are already being impacted</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Personnel costs</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Borough's budget</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Borough's contributions to employees' health insurance has increased an average of nearly 10% per year</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Borough's pension contributions</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Demographic trends</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Earned income tax</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Real estate transfer taxes</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Real estate assessments</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Property tax levels have been increased</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>High quality of the Borough's services</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Natural revenue growth</title>
+            <description>Blank  <img src="url"></img> </description>
+                </nugget>
+            <nugget> 
+                    <title>Assessment values</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Fixed-income residents</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Low income</title>
+            <description>Blank</description>
+                </nugget>
+            <nugget> 
+                    <title>Long-term residents</title>
+            <description>Blank</description>
+        </nugget>
+    </additionalinformation>
+''')
+glossary = etree_to_dict(e)['additionalinformation']['nugget']
+
+def get_glossary(request):
+    key = request.REQUEST.get('key')
+    desc = "No description."
+    for item in glossary:
+        if (''.join(ch for ch in item["title"] if ch.isalnum())).lower() == (''.join(ch for ch in key if ch.isalnum())).lower():
+            desc = item["description"]
+    response = {}
+    response["desc"] = desc
+    return HttpResponse(json.dumps(response), mimetype='application/json')

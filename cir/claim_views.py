@@ -111,6 +111,9 @@ def api_draft_stmt(request):
                 slot.stmt_order += 1
                 slot.save()
         newSlot.stmt_order = order
+        theme = ClaimTheme(name = slot_title, forum = forum, description = slot_title)
+        theme.save()
+        newSlot.theme = theme
         newSlot.save()
         response["slot_id"] = newSlot.id
         response["slot_order"] = order

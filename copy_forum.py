@@ -1,8 +1,8 @@
 # open manage.py shell
 # then: from cir.models import *
 
-src_forum = Forum.objects.get(id=36)
-new_url = 'tax4'
+src_forum = Forum.objects.get(id=23)
+new_url = 'CHO20170209'
 
 new_forum = Forum(
     full_name=src_forum.full_name,
@@ -32,6 +32,7 @@ for old_folder in EntryCategory.objects.filter(forum=src_forum):
     )
     new_folder.save()
 
+# for docs with folder name
 for old_doc in Doc.objects.filter(forum=src_forum):
     new_doc = Doc(forum=new_forum,
         title=old_doc.title,
@@ -50,9 +51,27 @@ for old_doc in Doc.objects.filter(forum=src_forum):
             doc=new_doc
         )
 
-for theme in ClaimTheme.objects.filter(forum=src_forum):
-    ClaimTheme.objects.create(
-        forum=new_forum,
-        name=theme.name,
-        description=theme.description
-    )
+# for root docs
+# for old_doc in Doc.objects.filter(forum=src_forum, folder__isnull=True).order_by("order"):
+#     new_doc = Doc(forum=new_forum,
+#         title=old_doc.title,
+#         description=old_doc.description,
+#     )
+#     new_doc.save()
+#     for old_docsection in DocSection.objects.filter(doc=old_doc):
+#         DocSection.objects.create(
+#             forum=new_forum,
+#             author=User.objects.get(id=2),
+#             content=old_docsection.content,
+#             created_at=old_docsection.created_at,
+#             updated_at=old_docsection.updated_at,
+#             title=old_docsection.title,
+#             doc=new_doc
+#         )
+
+# for theme in ClaimTheme.objects.filter(forum=src_forum):
+#     ClaimTheme.objects.create(
+#         forum=new_forum,
+#         name=theme.name,
+#         description=theme.description
+#     )

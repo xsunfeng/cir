@@ -55,12 +55,13 @@ define([
 
 	$("body").on("click", "u", function(){
 		$.ajax({
-			url: '/phase5/view_vote_result/',
+			url: '/phase5/get_glossary/',
 			type: 'post',
 			data: {
+				key: $(this).html()
 			},
 			success: function(xhr) {	
-				$("#explain-modal-content").html(xhr.vote_result_table);
+				$("#explain-modal-content").html(xhr.desc);
 				$("#explain-modal").modal("show");
 			},
 			error: function(xhr) {

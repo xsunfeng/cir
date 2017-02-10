@@ -88,9 +88,11 @@ def api_highlight(request):
                 highlight = Highlight(start_pos=start, end_pos=end, context=context, author=request.user, text=text, created_at = now, is_nugget = False)
             else: # real nugget
                 highlight = Highlight(start_pos=start, end_pos=end, context=context, author=request.user, text=text, created_at = now, is_nugget = True)
-            if (request.REQUEST.get('theme_id')):
-                theme_id = request.REQUEST.get('theme_id')
-                highlight.theme = ClaimTheme.objects.get(id = theme_id)
+            # if (request.REQUEST.get('theme_id')):
+            #     theme_id = request.REQUEST.get('theme_id')
+            #     highlight.theme = ClaimTheme.objects.get(id = theme_id)
+            slot = Claim.objects.get(id=request.REQUEST['slot_id'])
+            highlight.theme = slot.theme
             highlight.save()
             response['highlight_id'] = highlight.id
             # then create the content
