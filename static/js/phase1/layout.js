@@ -394,6 +394,28 @@ define([
 				} 
 				$(this).hasClass("dragging")
 				sessionStorage.setItem("nugget-status", "new");
+				theme_id = xhr.theme_id;
+
+				// put the nugget into nuggetmap
+				$.ajax({
+					url: '/sankey/put_nuggetmap/',
+					type: 'post',
+					data: {
+						"upper_bound": 	module.Highlight.newHighlight.upper_bound,
+						"lower_bound": 	module.Highlight.newHighlight.lower_bound,
+						"doc_id": 		$(".workbench-doc-item").attr("data-id"),
+						"author_id": 	sessionStorage.getItem('user_id'),
+						"theme_id": 	theme_id
+					},
+					success: function(xhr) {
+					},
+					error: function(xhr) {
+						$('#doc-highlight-toolbar .button').removeClass('loading');
+						if (xhr.status == 403) {
+							Utils.notify('error', xhr.responseText);
+						}
+					}
+				});
 			},
 			error: function(xhr) {
 				$('#doc-highlight-toolbar .button').removeClass('loading');
