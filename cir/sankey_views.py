@@ -378,9 +378,10 @@ def get_doc_coverage(request):
 				response["author_activity_map"][author_id] = item
 	# nuggetmap
 	response["nuggetmaps"] = {}
-	nuggetmaps = NuggetMap.objects.filter(
-		created_at__lte = time_upper_bound, 
-		created_at__gte = time_lower_bound)
+	# nuggetmaps = NuggetMap.objects.filter(
+	# 	created_at__lte = time_upper_bound, 
+	# 	created_at__gte = time_lower_bound)
+	nuggetmaps = NuggetMap.objects.all()
 	if (nuggetmaps.count() != 0):
 		for doc_id in doc_ids:
 			length = get_doc_length(forum, doc_id)	# length is the numebr of chars

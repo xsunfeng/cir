@@ -53,6 +53,25 @@ define([
 		});
 	});
 
+	$("body").on("click", "u", function(){
+		$.ajax({
+			url: '/phase5/get_glossary/',
+			type: 'post',
+			data: {
+				key: $(this).html()
+			},
+			success: function(xhr) {	
+				$("#explain-modal-content").html(xhr.desc);
+				$("#explain-modal").modal("show");
+			},
+			error: function(xhr) {
+				if (xhr.status == 403) {
+					Utils.notify('error', xhr.responseText);
+				}
+			}
+		});
+	});
+
 	// $("body").on("click", ".upvote", function(){
 	// 	if ($(this).hasClass("teal")) {
 	// 		// not vote yet
