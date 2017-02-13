@@ -60,10 +60,6 @@ else:
             'PORT': '',  # Set to empty string for default.
         }
     }
-<<<<<<< HEAD
-
-=======
->>>>>>> f3b8196a39b9ec765969ed8df6bffe4c4bcdcf6f
 
 # dispatcher url
 if DEBUG:
