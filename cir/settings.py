@@ -16,12 +16,10 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-# server_ip = socket.gethostbyname(socket.gethostname())
-server_ip = ''
+server_ip = socket.gethostbyname(socket.gethostname())
 
 # determine if the IST DB can be connected. if not, use local db.
 if '130.203' in server_ip:
-# if True:
     SERVER_HOST = '130.203.136.141'
     DATABASES = {
         'default': {
@@ -62,7 +60,10 @@ else:
             'PORT': '',  # Set to empty string for default.
         }
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> f3b8196a39b9ec765969ed8df6bffe4c4bcdcf6f
 
 # dispatcher url
 if DEBUG:
