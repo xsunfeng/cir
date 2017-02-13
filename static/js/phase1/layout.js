@@ -690,8 +690,14 @@ define([
 						$('#claim-pane-fullscreen .claim.reword.editor').val('');
 						$('#claim-pane-fullscreen .reword.form').transition('slide down', '500ms');
 					}
-					// TODO realtime notify everyone
 					$(".activity-filter .statement-candidate").click();
+
+					$(".statement-post textarea").val("");
+					$("#use-nugget-labels .label .delete").click();
+					Utils.notify('success', 'Statement Suggested!');
+					$(".container").animate({scrollTop: 0}, 0);
+					var $feed = $("#claim-activity-feed .event");
+					$('.container').animate({scrollTop: $feed.offset().top - 200}, 0);
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {

@@ -20,8 +20,8 @@ MANAGERS = ADMINS
 server_ip = ''
 
 # determine if the IST DB can be connected. if not, use local db.
-if '130.203' in server_ip:
-# if True:
+# if '130.203' in server_ip:
+if True:
     SERVER_HOST = '130.203.136.141'
     DATABASES = {
         'default': {
