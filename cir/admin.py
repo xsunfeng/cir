@@ -47,6 +47,8 @@ class TagAdmin(admin.ModelAdmin):
 class DocSectionAdmin(admin.ModelAdmin):
     pass
 
+class GlossaryAdmin(admin.ModelAdmin):
+    list_display = ('forum', 'xml')
 
 class EntryCategoryAdmin(admin.ModelAdmin):
     pass
@@ -59,7 +61,6 @@ class ClaimThemeAdmin(admin.ModelAdmin):
 
 class ClaimVersionAdmin(admin.ModelAdmin):
     pass
-
 
 class ClaimAdmin(admin.ModelAdmin):
     def author_name(self):
@@ -142,3 +143,4 @@ admin.site.register(Post, PostAdmin)
 admin.site.register(ClaimVersion, ClaimVersionAdmin)
 admin.site.register(Highlight, HighlightAdmin)
 admin.site.register(Tag, TagAdmin)
+admin.site.register(Glossary, GlossaryAdmin)

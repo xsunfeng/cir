@@ -833,3 +833,10 @@ class ForumVote(models.Model):
     reason = models.CharField(max_length=2010, null=True, blank=True)
     forum = models.ForeignKey(Forum)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
+
+class Glossary(models.Model):
+    forum = models.OneToOneField(Forum, on_delete=models.CASCADE, primary_key=True)
+    xml = models.TextField(null=True, blank=True)
+    
+    def __unicode__(self):
+        return self.forum.full_name
