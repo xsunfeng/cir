@@ -251,3 +251,7 @@ def _get_active_phase(user):
     if recent_data['phase'] == 'issue':
         return 'statement'
     return 'deliberation'
+
+def api_questionnaire(request):
+    print request.REQUEST
+    return HttpResponse('working!', mimetype='application/json')
