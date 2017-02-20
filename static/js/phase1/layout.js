@@ -807,14 +807,14 @@ define([
 					$( ".src_claims" ).sortable();
 					// $("#nugget-bag").html(xhr.popup_nuggets);
 
-					$("textarea").focusin(function() {
-						Socket.editStatement({
+					$(".statement-post textarea").focusin(function() {
+						Socket.suggestingStatement({
 							'slot_id': slot_id,
 							'username': $("#header-user-name").text(),
 							'status': 'start'
 						});
 					}).focusout(function() {
-						Socket.editStatement({
+						Socket.suggestingStatement({
 							'slot_id': slot_id,
 							'username': $("#header-user-name").text(),
 							'status': 'end'

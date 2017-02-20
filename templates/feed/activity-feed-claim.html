@@ -72,6 +72,7 @@
 					</div>
 				</div>
 			{% elif entry.entry_type == 'claim version' %}
+				<div class="ui yellow message editing-status" style="display:none; padding:0; width:80%;"></div>
 				<div class="summary">
 					{% if entry.collective %}
 						The panel generated a statement <div class="ui label">S{{ entry.version_id }}</div> (written by <a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a>):

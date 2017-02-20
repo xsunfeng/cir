@@ -35,8 +35,11 @@ define([
 		suggestStatement: function(data) {
 			socket.emit('server:statement:suggest_statement', data);
 		},
-		editStatement: function(data) {
-			socket.emit('server:statement:edit_statement', data);
+		suggestingStatement: function(data) {
+			socket.emit('server:statement:suggesting_statement', data);
+		},
+		editingStatement: function(data) {
+			socket.emit('server:statement:editing_statement', data);
 		}
 	};
 
@@ -134,17 +137,26 @@ define([
 					$("#suggest-statement-refresh").text(text);
 					$("#suggest-statement-refresh").show();
 				}				
-			}).on('client:statement:edit_statement', function(data) {
+			}).on('client:statement:suggesting_statement', function(data) {
 				if ($("#slot-detail[slot-id=" + data.slot_id + "]").length > 0) {
 					// console.log(data.username + " is working on slot " + data.slot_id);
 					if (data.status == "start") {
-						var text = data.username + " is working on this statement";
+						var text = data.username + " is suggesting a statement";
 						$("#edit-statement-prompt").text(text);
 						$("#edit-statement-prompt").show();
 					} else if (data.status == "end") {
 						$("#edit-statement-prompt").hide();
 					}
-				}				
+				}
+			}).on('client:statement:editing_statement', function(data) {
+				if (data.status == "start") {
+					var text = data.username + " is editing this statement";
+					$(".event[data-id=" + data.statement_id + "] .editing-status").text(text);
+					$(".event[data-id=" + data.statement_id + "] .editing-status").show();
+				} else if (data.status == "end") {
+					$(".event[data-id=" + data.statement_id + "] .editing-status").hide();
+				}
+				console.log(data);			
 			});
 		}
 	}, function(err) {

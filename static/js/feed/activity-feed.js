@@ -1,11 +1,13 @@
 define([
 	'jquery',
 	'utils',
-	'claim-common/draft-stmt'
+	'claim-common/draft-stmt',
+	'realtime/socket',
 ], function(
 	$,
 	Utils,
-	DraftStmt
+	DraftStmt,
+	Socket
 ) {
 	jQuery.fn.feed = function(action, data, callback) {
 		var _this = this;
@@ -82,6 +84,22 @@ define([
 					}).on('input', function () {
 						this.style.height = 'auto';
 						this.style.height = (this.scrollHeight) + 'px';
+					});
+
+					$(".editing textarea").focusin(function() {
+						Socket.editingStatement({
+							'statement_id': $(this).closest(".event").attr("data-id"),
+							'username': $("#header-user-name").text(),
+							'status': 'start',
+							'edit': "yes"
+						});
+					}).focusout(function() {
+						Socket.editingStatement({
+							'statement_id': $(this).closest(".event").attr("data-id"),
+							'username': $("#header-user-name").text(),
+							'status': 'end',
+							'edit': "yes"
+						});
 					});
 
 				},

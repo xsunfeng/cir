@@ -70,9 +70,12 @@ io.on('connection', function(socket) {
 	}).on('server:statement:suggest_statement', function(data) {
 		// notify everyone except sender
 		socket.broadcast.emit('client:statement:suggest_statement', data);
-	}).on('server:statement:edit_statement', function(data) {
+	}).on('server:statement:suggesting_statement', function(data) {
 		// notify everyone except sender
-		socket.broadcast.emit('client:statement:edit_statement', data);
+		socket.broadcast.emit('client:statement:suggesting_statement', data);
+	}).on('server:statement:editing_statement', function(data) {
+		// notify everyone except sender
+		socket.broadcast.emit('client:statement:editing_statement', data);
 	});
 
 
