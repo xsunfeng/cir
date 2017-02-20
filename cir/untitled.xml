@@ -1,0 +1,26 @@
+	<municipalcostindexmci> 
+		<p>123</p><img src="http://www.flooringvillage.co.uk/ekmps/shops/flooringvillage/images/request-a-sample--547-p.jpg"></img><b>456</b> 
+	</municipalcostindexmci>
+
+<root>
+	<municipalcostindexmci>
+		123<img style="width:100%" src="http://www.flooringvillage.co.uk/ekmps/shops/flooringvillage/images/request-a-sample--547-p.jpg"></img>456
+	</municipalcostindexmci>
+	<budgetdeficit>
+		666<img style="width:100%"  src="http://www.flooringvillage.co.uk/ekmps/shops/flooringvillage/images/request-a-sample--547-p.jpg"></img>666
+	</budgetdeficit>
+</root>
+
+
+
+from collections import OrderedDict
+
+def flatten_dict(d):
+    def items():
+        for key, value in d.items():
+            if isinstance(value, dict):
+                for subkey, subvalue in flatten_dict(value).items():
+                    yield key + "." + subkey, subvalue
+            else:
+                yield key, value
+    return OrderedDict(items())

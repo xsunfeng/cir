@@ -60,7 +60,8 @@ define([
 			data: {
 				key: $(this).html()
 			},
-			success: function(xhr) {	
+			success: function(xhr) {
+				$("#explain-modal").modal("hide");
 				$("#explain-modal-content").html(xhr.desc);
 				$("#explain-modal").modal("show");
 			},

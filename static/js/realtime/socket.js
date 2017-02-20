@@ -31,6 +31,12 @@ define([
 		},
 		slotChange: function(data) {
 			socket.emit('server:claim:slot_change', data);
+		},
+		suggestStatement: function(data) {
+			socket.emit('server:statement:suggest_statement', data);
+		},
+		editStatement: function(data) {
+			socket.emit('server:statement:edit_statement', data);
 		}
 	};
 
@@ -120,6 +126,25 @@ define([
 						require('claim-common/draft-stmt').slotChanged(data);
 					}
 				}
+			}).on('client:statement:suggest_statement', function(data) {
+				if ($("#slot-detail[slot-id=" + data.slot_id + "]").length > 0) {
+					//console.log(data.username + " is working on slot " + data.slot_id);
+					var text = "Please refresh this page to receive new updates made by " + data.username;
+					$("#suggest-statement-refresh").attr("slot-id", data.slot_id);
+					$("#suggest-statement-refresh").text(text);
+					$("#suggest-statement-refresh").show();
+				}				
+			}).on('client:statement:edit_statement', function(data) {
+				if ($("#slot-detail[slot-id=" + data.slot_id + "]").length > 0) {
+					// console.log(data.username + " is working on slot " + data.slot_id);
+					if (data.status == "start") {
+						var text = data.username + " is working on this statement";
+						$("#edit-statement-prompt").text(text);
+						$("#edit-statement-prompt").show();
+					} else if (data.status == "end") {
+						$("#edit-statement-prompt").hide();
+					}
+				}				
 			});
 		}
 	}, function(err) {

@@ -666,6 +666,7 @@ class ChatMessage(models.Model):
         attr['user_name'] = self.source.get_full_name()
         attr['content'] = self.content
         attr['created_at'] = utils.pretty_date(self.created_at)
+        attr['timestamp'] = self.created_at.strftime("%s")
         return attr
 
 class HighlightClaim(models.Model):

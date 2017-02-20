@@ -46,14 +46,6 @@
 				</a>
 			</div>
 			<div id="document-toc-container" class="ui special popup" style="min-width:400px; max-height:500px; overflow:auto;"></div>
-<!-- 			<div class="right menu">
-				<div class="item" style="padding-right:0;">
-					<div class="ui transparent icon input">
-						<input type="text" placeholder="Search...">
-						<i class="search link icon"></i>
-					</div>
-				</div>
-			</div> -->
 			<div class="right menu">
 				<div class="ui text menu" style="margin:0;">
 					<div class="active item read-mode-new ui checked checkbox">
@@ -66,12 +58,9 @@
 					<a class="item read-mode" data-id="individual" style="display:none;">
 						Individual
 					</a>
-				<div class="ui text menu" style="margin:0;">
-					<a href='#' class="ui basic button" onclick='javascript:window.open("../vis", "_blank", "scrollbars=1,resizable=1,height=800,width=1200");' title='NuggetLens'>NuggetLens</a>	
-				</div>
-				</div>
-				<div class="ui text menu" style="margin:0;">
-					<a href='#' class="ui basic button" onclick='javascript:window.open("../vis", "_blank", "scrollbars=1,resizable=1,height=800,width=1200");' title='NuggetLens'>NuggetLens</a>	
+					<div class="ui text menu" style="margin:0;">
+						<a href='#' class="ui basic button" onclick='javascript:window.open("../vis", "_blank", "scrollbars=1,resizable=1,height=800,width=1200");' title='NuggetLens'>NuggetLens</a>	
+					</div>
 				</div>
 			</div>
 		</div>
@@ -127,6 +116,11 @@
 			<i class="left chevron icon" style="margin-right:0;"></i> List
 		</a>
   		<span id="statement-detail-header">Statement Detail<i id="show-statement-btn" class="large angle down icon"></i></span>
+		<div><a id="suggest-statement-refresh" href="#" style="font-size:0.8rem; display:none;">
+			Please refresh this page to receive new updates
+		</a></div>
+		<div><a id="edit-statement-prompt" href="#" style="font-size:0.8rem; display:none;">
+		</a></div>
 	</h3>
 	<div class="container ui attached segment" style="height: calc(100% - 40px); overflow:hidden; overflow-y:scroll; ">
 		<div class="ui massive active text loader">Loading...</div>

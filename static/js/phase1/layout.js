@@ -1,14 +1,15 @@
 define([
 	'doc/qa',
 	'utils',
-	'semantic-ui',
 	'realtime/socket',
+	'semantic-ui',
 	'ext/colorbrewer',
 	'feed/activity-feed',
 	'jquery.ui'
 ], function(
 	QA,
-	Utils
+	Utils,
+	Socket
 ) {
 	QA.updateQuestionList();
 
@@ -720,6 +721,12 @@ define([
 					$(".container").animate({scrollTop: 0}, 0);
 					var $feed = $("#claim-activity-feed .event");
 					$('.container').animate({scrollTop: $feed.offset().top - 200}, 0);
+
+					// notify group members of newly created nuggets
+					Socket.suggestStatement({
+						'slot_id': slot_id,
+						'username': $("#header-user-name").text()
+					});
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -799,6 +806,20 @@ define([
 
 					$( ".src_claims" ).sortable();
 					// $("#nugget-bag").html(xhr.popup_nuggets);
+
+					$("textarea").focusin(function() {
+						Socket.editStatement({
+							'slot_id': slot_id,
+							'username': $("#header-user-name").text(),
+							'status': 'start'
+						});
+					}).focusout(function() {
+						Socket.editStatement({
+							'slot_id': slot_id,
+							'username': $("#header-user-name").text(),
+							'status': 'end'
+						});
+					});
 				},
 				error: function(xhr) {
 					$('#claim-pane-fullscreen').html('');
@@ -807,7 +828,13 @@ define([
 					}
 				}
 			});		
+		}).on("click", "#suggest-statement-refresh", function(){
+			var slot_id = $(this).attr("slot-id");
+			$(".show-workspace[slot-id=" + slot_id + "]").click();
+			$(this).hide();
 		});
+
+
 
 		// var textarea = document.getElementsByClassName("reword editor")[0];
 		// var result   = document.getElementById("result");
@@ -824,7 +851,6 @@ define([
 
 
 		$('body').on('keydown', '.reword.editor', function(){
-			console.log("key");
 			var count = $(this).val().split(" ").length;
 			if ($(this).val() == "") count = 0;
 			$("#result").html(
@@ -1014,6 +1040,12 @@ define([
 			on: 'click',
 		    popup: '#document-toc-container', 
 		    position: 'bottom left',
+		});
+
+		$('#notification-button').popup({
+			on: 'click',
+		    popup: '#notification-container', 
+		    position: 'bottom right',
 		});
 		
 		$('.ui.rating').rating();
@@ -1219,6 +1251,18 @@ define([
 			});	
 		}
 
+		$("body").on("click", ".comment-to-statement-link", function(){
+			var statement_id = $(this).attr("statement-id");
+			var slot_id = $(this).attr("slot-id");
+			$(".show-workspace[slot-id=" + slot_id + "]").click();
+			setTimeout(function(){ 
+				$(".statement-comment-btn[data-id=" + statement_id + "]").click();
+				$(".container").animate({scrollTop: 0}, 0);
+				var $feed = $(".statement-comment-btn[data-id=" + statement_id + "]");
+				$('.container').animate({scrollTop: $feed.offset().top - 200}, 0);
+			}, 1000);
+		});
+
 		$("body").on("click", ".statement-comment-post", function(){
 			var textarea = $(this).closest(".input").find("input");
 			var text = textarea.val();
@@ -1233,9 +1277,21 @@ define([
 					'statement_id': statement_id,
 				},
 				success: function(xhr) {
+					console.log(text);
 					textarea.val("");
 					showStatementCommentList(statement_id);
 					// updateStatementCommentList();
+					var data = {
+						'user_id': sessionStorage['user_id'],
+						'user_name': sessionStorage['user_name'],
+						'role': sessionStorage['role'],
+						'content': text,
+						'created_at': nowString(),
+						'forum_id': $('body').attr('forum-id'),
+						'slot_id': $("#slot-detail").attr("slot-id"),
+						'statement_id': statement_id
+					};
+					sendCommentToChatroom(data);
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -1601,6 +1657,49 @@ define([
 			this.style.height = 'auto';
 			this.style.height = (this.scrollHeight) + 'px';
 		});
+	}
+
+
+	function sendCommentToChatroom(data) {
+		// var data = {
+		// 	'user_id': sessionStorage['user_id'],
+		// 	'user_name': sessionStorage['user_name'],
+		// 	'role': sessionStorage['role'],
+		// 	'content': content,
+		// 	'created_at': nowString(),
+		// 	'forum_id': $('body').attr('forum-id')
+		// };
+		Socket.emitChat(data);
+		$('#chatter-wrapper .comments.list').append(getMsgHtml(data));
+		scrollToBottom();
+	}
+	function getMsgHtml(msg) {
+		var html = '<div class="comment"><div class="content"><div class="author">'
+			+ msg.user_name + ' (' + msg.role + ')</div>'
+			+ '<div class="metadata"><span class="date">'
+			+ msg.created_at
+			+ '</span></div><div class="text">'
+			+ msg.content
+			+ '</div></div></div>';
+		if ("statement_id" in msg){
+			var text = "link to statement " + msg.statement_id;
+			html += '<a class="comment-to-statement-link" href="#" slot-id=' + msg.slot_id + ' statement-id=' + msg.statement_id +'>' + text + '</a>';
+		}
+		return html;
+	}
+	function nowString() {
+		var date = new Date();
+		var hours = date.getHours();
+		var minutes = date.getMinutes();
+		var ampm = hours >= 12 ? 'pm' : 'am';
+		hours = hours % 12;
+		hours = hours ? hours : 12; // the hour '0' should be '12'
+		minutes = minutes < 10 ? '0'+minutes : minutes;
+		var strTime = hours + ':' + minutes + ' ' + ampm;
+		return strTime;
+	}
+	function scrollToBottom() {
+		$('.comments.segment').scrollTop($('.comments.list').height());
 	}
 
 	module.initLayout();

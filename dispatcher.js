@@ -67,6 +67,12 @@ io.on('connection', function(socket) {
 	}).on('server:claim:slot_change', function(data) {
 		// notify everyone except sender
 		socket.broadcast.emit('client:claim:slot_change', data);
+	}).on('server:statement:suggest_statement', function(data) {
+		// notify everyone except sender
+		socket.broadcast.emit('client:statement:suggest_statement', data);
+	}).on('server:statement:edit_statement', function(data) {
+		// notify everyone except sender
+		socket.broadcast.emit('client:statement:edit_statement', data);
 	});
 
 
@@ -95,4 +101,4 @@ io.on('connection', function(socket) {
 	//// sending to individual socketid
 	//socket.broadcast.to(socketid).emit('message', 'for your eyes only');
 });
-server.listen(443);
+server.listen(8001);

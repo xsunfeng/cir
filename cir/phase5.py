@@ -71,42 +71,31 @@ def view_vote_result(request):
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 
-
-from collections import defaultdict
-from xml.etree import cElementTree as ET
-
-def etree_to_dict(t):
-    d = {t.tag: {} if t.attrib else None}
-    children = list(t)
-    if children:
-        dd = defaultdict(list)
-        for dc in map(etree_to_dict, children):
-            for k, v in dc.items():
-                dd[k].append(v)
-        d = {t.tag: {k:v[0] if len(v) == 1 else v for k, v in dd.items()}}
-    if t.attrib:
-        d[t.tag].update(('@' + k, v) for k, v in t.attrib.items())
-    if t.text:
-        text = t.text.strip()
-        if children or t.attrib:
-            if text:
-              d[t.tag]['#text'] = text
-        else:
-            d[t.tag] = text
-    return d
+from xml.etree import ElementTree as ET
+from xml.dom.minidom import parseString
 
 def get_glossary(request):
-    glossary = []
+    response = {}
     forum = Forum.objects.get(id = request.session['forum_id'])
+    key = request.REQUEST.get('key')
+    key = (''.join(ch for ch in key if ch.isalnum())).lower()
+    html = ""
     if (Glossary.objects.filter(forum = forum).exists()):
         xml = Glossary.objects.get(forum = forum).xml
-        e = ET.XML(xml)
-        glossary = etree_to_dict(e)['additionalinformation']['nugget']
-    key = request.REQUEST.get('key')
-    desc = "No description."
-    for item in glossary:
-        if (''.join(ch for ch in item["title"] if ch.isalnum())).lower() == (''.join(ch for ch in key if ch.isalnum())).lower():
-            desc = item["description"]
-    response = {}
-    response["desc"] = desc
+        # xml = '''
+        #     <root>
+        #         <municipalcostindexmci>
+        #             123<img src="http://www.flooringvillage.co.uk/ekmps/shops/flooringvillage/images/request-a-sample--547-p.jpg"></img>456
+        #         </municipalcostindexmci>
+        #         <budgetdeficit>
+        #             666<img src="http://www.flooringvillage.co.uk/ekmps/shops/flooringvillage/images/request-a-sample--547-p.jpg"></img>666
+        #         </budgetdeficit>
+        #     </root>
+        # '''
+        dom = parseString(xml)
+        if (dom.getElementsByTagName(key).length > 0):
+            tiny_xml = dom.getElementsByTagName("budgetdeficit")[0].toxml()
+            tag = ET.fromstring(tiny_xml)
+            html = tag.text + ''.join(ET.tostring(e) for e in tag)
+    response["desc"] = html
     return HttpResponse(json.dumps(response), mimetype='application/json')

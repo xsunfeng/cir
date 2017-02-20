@@ -45,6 +45,102 @@
 	{% else %}
 	<div class="right menu" style="display:flex">
 		<!-- <a id="show-messages" class="item"><i class="mail icon"></i>Tasks & Updates</a> -->
+		<a id="notification-button" class="ui item">
+			Notifications
+		</a>
+		<div id="notification-container" class="ui special popup" style="margin-top: 1rem; min-width:400px; max-height:500px; overflow:auto;">
+<div class="ui relaxed divided list">
+  <div class="item">
+    <i class="large github middle aligned icon"></i>
+    <div class="content">
+      <a class="header">Semantic-Org/Semantic-UI</a>
+      <div class="description">Updated 10 mins ago</div>
+    </div>
+  </div>
+  <div class="item">
+    <i class="large github middle aligned icon"></i>
+    <div class="content">
+      <a class="header">Semantic-Org/Semantic-UI-Docs</a>
+      <div class="description">Updated 22 mins ago</div>
+    </div>
+  </div>
+  <div class="item">
+    <i class="large github middle aligned icon"></i>
+    <div class="content">
+      <a class="header">Semantic-Org/Semantic-UI-Meteor</a>
+      <div class="description">Updated 34 mins ago</div>
+    </div>
+  </div>
+  <div class="item">
+    <i class="large github middle aligned icon"></i>
+    <div class="content">
+      <a class="header">Semantic-Org/Semantic-UI</a>
+      <div class="description">Updated 10 mins ago</div>
+    </div>
+  </div>
+  <div class="item">
+    <i class="large github middle aligned icon"></i>
+    <div class="content">
+      <a class="header">Semantic-Org/Semantic-UI-Docs</a>
+      <div class="description">Updated 22 mins ago</div>
+    </div>
+  </div>
+  <div class="item">
+    <i class="large github middle aligned icon"></i>
+    <div class="content">
+      <a class="header">Semantic-Org/Semantic-UI-Meteor</a>
+      <div class="description">Updated 34 mins ago</div>
+    </div>
+  </div>
+  <div class="item">
+    <i class="large github middle aligned icon"></i>
+    <div class="content">
+      <a class="header">Semantic-Org/Semantic-UI</a>
+      <div class="description">Updated 10 mins ago</div>
+    </div>
+  </div>
+  <div class="item">
+    <i class="large github middle aligned icon"></i>
+    <div class="content">
+      <a class="header">Semantic-Org/Semantic-UI-Docs</a>
+      <div class="description">Updated 22 mins ago</div>
+    </div>
+  </div>
+  <div class="item">
+    <i class="large github middle aligned icon"></i>
+    <div class="content">
+      <a class="header">Semantic-Org/Semantic-UI-Meteor</a>
+      <div class="description">Updated 34 mins ago</div>
+    </div>
+  </div>
+  <div class="item">
+    <i class="large github middle aligned icon"></i>
+    <div class="content">
+      <a class="header">Semantic-Org/Semantic-UI</a>
+      <div class="description">Updated 10 mins ago</div>
+    </div>
+  </div>
+  <div class="item">
+    <i class="large github middle aligned icon"></i>
+    <div class="content">
+      <a class="header">Semantic-Org/Semantic-UI-Docs</a>
+      <div class="description">Updated 22 mins ago</div>
+    </div>
+  </div>
+  <div class="item">
+    <i class="large github middle aligned icon"></i>
+    <div class="content">
+      <a class="header">Semantic-Org/Semantic-UI-Meteor</a>
+      <div class="description">Updated 34 mins ago</div>
+    </div>
+  </div>
+  <div class="item">
+  	<div class="content">
+    	<button class="ui red button" style="width:100%;">Clear All</button>
+    </div>
+  </div>
+</div>
+		</div>
 		<div class="ui dropdown item" tabindex="0">
 			<span id="header-user-name" data-id="{{ user_id }}"{% if role %} data-role="{{ role }}"{% endif %}>{{ user_name }}</span>
 			<i class="icon dropdown" tabindex="0"></i>
@@ -62,7 +158,6 @@
 			<i class="icon spy"></i>
 			<i class="icon dropdown" tabindex="0"></i>
 			<div class="switch user menu" tabindex="-1">
-
 			</div>
 		</div>
 		{% endif %}

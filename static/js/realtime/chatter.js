@@ -119,6 +119,10 @@ define([
 			+ '</span></div><div class="text">'
 			+ msg.content
 			+ '</div></div></div>';
+		if ("statement_id" in msg){
+			var text = "link to statement " + msg.statement_id;
+			html += '<a class="comment-to-statement-link" href="#" slot-id=' + msg.slot_id + ' statement-id=' + msg.statement_id +'>' + text + '</a>';
+		}
 		return html;
 	}
 
