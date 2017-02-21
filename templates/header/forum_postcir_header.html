@@ -2,34 +2,52 @@
     {% if load_error %}
         <div class="item">GeoDeliberator -- Error</div>
     {% else %}
-        <div class="item">{{ forum_name }}</div>
-        <div class="ui item small breadcrumb">
-            <div class="section {% if active_phase == 'issue' %}active{% endif %}" data-phase="issue-briefing">Issue Briefing</div>
-            <i class="right arrow icon divider"></i>
-            <div class="section {% if active_phase == 'statement' %}active{% endif %}" data-phase="citizens-statement">Citizens Statement</div>
-            <i class="right arrow icon divider"></i>
-            <div class="section {% if active_phase == 'deliberation' %}active{% endif %}" data-phase="deliberation">Community Deliberative Poll</div>
-        </div>
-        {% if user_id == '-1' %}
-        <div id="header-visitor-wrapper" class="right menu" style="display:flex">
-            <a class="item">
-                <div id="login-btn">Log in</div>
-            </a>
-            <a class="item">
-                <div id="signup-btn">Sign up</div>
-            </a>
-        </div>
+        {% if active_phase == 'pre_sign_up' %}
+            <div class="item">GeoDeliberation: {{ forum_name }}</div>
+            {% if user_id == '-1' %}
+                <div id="header-visitor-wrapper" class="right menu" style="display:flex">
+                    <a class="item">
+                        <div id="login-btn">Admin log in</div>
+                    </a>
+                </div>
+            {% else %}
+                <div class="right menu" style="display:flex">
+                    <div class="item">Append
+                        <pre>?show_forum=1</pre>
+                        to URL to skip
+                    </div>
+                </div>
+            {% endif %}
         {% else %}
-        <div class="right menu" style="display:flex">
-            <div class="ui dropdown item" tabindex="0">
-                <span id="header-user-name" data-id="{{ user_id }}">{{ user_name }}</span>
-                <i class="icon dropdown" tabindex="0"></i>
-                <div class="menu" tabindex="-1">
-                    <a href="#" id="edit-profile-btn" class="item"><i class="edit icon"></i>Edit Profile</a>
-                    <a href="#" id="sign-out-btn" class="item"><i class="sign out icon"></i>Sign out</a>
+            <div class="item">{{ forum_name }}</div>
+            <div class="ui item small breadcrumb">
+                <div class="section {% if active_phase == 'issue' %}active{% endif %}" data-phase="issue-briefing">Issue Briefing</div>
+                <i class="right arrow icon divider"></i>
+                <div class="section {% if active_phase == 'statement' %}active{% endif %}" data-phase="citizens-statement">Citizens Statement</div>
+                <i class="right arrow icon divider"></i>
+                <div class="section {% if active_phase == 'deliberation' %}active{% endif %}" data-phase="deliberation">Community Deliberative Poll</div>
+            </div>
+            {% if user_id == '-1' %}
+            <div id="header-visitor-wrapper" class="right menu" style="display:flex">
+                <a class="item">
+                    <div id="login-btn">Log in</div>
+                </a>
+                <a class="item">
+                    <div id="signup-btn">Sign up</div>
+                </a>
+            </div>
+            {% else %}
+            <div class="right menu" style="display:flex">
+                <div class="ui dropdown item" tabindex="0">
+                    <span id="header-user-name" data-id="{{ user_id }}">{{ user_name }}</span>
+                    <i class="icon dropdown" tabindex="0"></i>
+                    <div class="menu" tabindex="-1">
+                        <a href="#" id="edit-profile-btn" class="item"><i class="edit icon"></i>Edit Profile</a>
+                        <a href="#" id="sign-out-btn" class="item"><i class="sign out icon"></i>Sign out</a>
+                    </div>
                 </div>
             </div>
-        </div>
+            {% endif %}
         {% endif %}
 	{% endif %}
 </header>

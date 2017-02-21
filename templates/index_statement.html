@@ -18,13 +18,13 @@
         <div class="ui two column centered grid">
             <div class="column" style="top:50px">
                 <div class="ui error message">
-                    <div class="header">Forum does not exist; did you enter the correct address?</div>
-                    <p>Click <a href="/">here</a> to return to homepage.</p>
+                    <div class="header">Forum does not exist; did you enter the correct URL?</div>
                 </div>
             </div>
         </div>
         {% else %}
         <div id="popup-notification" class="ui message hidden"></div>
+            {% if active_phase == 'pre_sign_up' %}{% include 'postcir/pre_sign_up.html' %}{% endif %}
             {% if active_phase == 'issue' %}{% include 'postcir/issue-briefing.html' %}{% endif %}
             {% if active_phase == 'statement' %}{% include 'postcir/stmt-quiz.html' %}{% endif %}
             {% if active_phase == 'deliberation' %}{% include 'postcir/deliberation.html' %}{% endif %}

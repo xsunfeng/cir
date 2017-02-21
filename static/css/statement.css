@@ -1,5 +1,8 @@
 @import url(https://fonts.googleapis.com/css?family=Sahitya:400,700);
 
+body[data-phase="pre_sign_up"] {
+    overflow: hidden;
+}
 #issue-briefing {
     margin-top: 60px;
     padding-bottom: 2em;

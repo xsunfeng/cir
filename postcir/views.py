@@ -1,5 +1,6 @@
 # Create your views here.
 import json
+import datetime
 
 from django.shortcuts import render
 from django.template.loader import render_to_string
@@ -30,7 +31,8 @@ def home(request, forum_url):
         'statement_categories': []
     }
 
-    context['active_phase'] = _get_active_phase(request.user)
+    # get the active phase for user
+    context['active_phase'] = _get_active_phase(request.user, request.GET.get('show_forum'))
 
     # get user data
     if request.user.is_authenticated():
@@ -239,8 +241,20 @@ def api_stmt_question(request):
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 
-def _get_active_phase(user):
+def _get_active_phase(user, show_forum):
     """Load the user's current phase upon refresh"""
+
+    # before 3/25/2017, show sign up view (qualtrics)
+    now = datetime.datetime.now()
+    experiment_begin = datetime.datetime(2017, 3, 25, 2, 0)
+
+    if now < experiment_begin:
+        if user.is_authenticated() and show_forum:
+            pass
+        else:
+            return 'pre_sign_up'
+
+    # hit this point if either it's experiment time, or the user logged in and set `show_forum=1`
     if not user.is_authenticated():
         return 'issue'
     events = UserEvent.objects.filter(user=user, event='phase.complete')
