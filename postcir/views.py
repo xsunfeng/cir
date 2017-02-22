@@ -103,12 +103,15 @@ def api_postcir(request):
             content=content,
             content_type='comment',
             vote=vote,
-            context='issue'
+            context='issue',
+            title=json.dumps({
+                'ua': request.META.get('HTTP_USER_AGENT')
+            })
         )
         UserEvent.objects.create(
             user=request.user,
             event='phase.complete',
-            extra_data=json.dumps({'phase': 'issue'})
+            extra_data=json.dumps({'phase': 'issue', 'ua': request.META.get('HTTP_USER_AGENT')})
         )
     if action == 'new-post':
         if not request.user.is_authenticated():
@@ -122,7 +125,10 @@ def api_postcir(request):
                 content=content,
                 content_type='comment',  # TODO pass from front end
                 parent_id=parent_id,
-                context='deliberation'
+                context='deliberation',
+                title=json.dumps({
+                    'ua': request.META.get('HTTP_USER_AGENT')
+                })
             )
         else:
             # only non-reply posts can have citations and vote
@@ -145,7 +151,10 @@ def api_postcir(request):
                 highlight=highlight_object, # TODO very problematic -- only the last highlight counts.
                 content_type='comment', # TODO pass from front end
                 vote=vote,
-                context='deliberation'
+                context='deliberation',
+                title=json.dumps({
+                    'ua': request.META.get('HTTP_USER_AGENT')
+                })
             )
             post.save()
             response['voter_html'] = render_to_string("postcir/deliberation.html", {
@@ -177,12 +186,13 @@ def api_stmt_quiz(request):
                 content=answer,
                 content_type='comment',
                 context='stmt_group',
-                stmt_group=stmt_group
+                stmt_group=stmt_group,
+                title=json.dumps({'ua': request.META.get('HTTP_USER_AGENT')})
             )
     UserEvent.objects.create(
         user=request.user,
         event='phase.complete',
-        extra_data=json.dumps({'phase': 'statement'})
+        extra_data=json.dumps({'phase': 'statement', 'ua': request.META.get('HTTP_USER_AGENT')})
     )
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
@@ -197,7 +207,8 @@ def api_stmt_vote(request):
         content=content,
         content_type='comment',
         vote=vote,
-        context='statement'
+        context='statement',
+        title=json.dumps({'us': request.META.get('HTTP_USER_AGENT')})
     )
     post.save()
 
@@ -229,7 +240,8 @@ def api_stmt_question(request):
             content_type='comment',
             context='stmt_group',
             stmt_group=stmt_group,
-            parent_id=parent_id
+            parent_id=parent_id,
+            title=json.dumps({'ua': request.META.get('HTTP_USER_AGENT')})
         )
     if action == 'load-posts' or action == 'new-post':
         response['html'] = render_to_string("feed/activity-feed-stmt-group.html", {
