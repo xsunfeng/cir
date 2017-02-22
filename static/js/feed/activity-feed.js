@@ -13,13 +13,13 @@ define([
 		var _this = this;
 		this.update = function(callback) {
 
-			$('.feed-adopt-claim-version').hover(
-				function() {
-					$(this).text( "retract" );
-				}, function() {
-					$(this).text( "adopted" );
-				}
-			);
+			// $('.feed-adopt-claim-version').hover(
+			// 	function() {
+			// 		$(this).text( "retract" );
+			// 	}, function() {
+			// 		$(this).text( "adopted" );
+			// 	}
+			// );
 
 			if (_this.updater) {
 				_this.updater.abort();
@@ -84,22 +84,6 @@ define([
 					}).on('input', function () {
 						this.style.height = 'auto';
 						this.style.height = (this.scrollHeight) + 'px';
-					});
-
-					$(".editing textarea").focusin(function() {
-						Socket.editingStatement({
-							'statement_id': $(this).closest(".event").attr("data-id"),
-							'username': $("#header-user-name").text(),
-							'status': 'start',
-							'edit': "yes"
-						});
-					}).focusout(function() {
-						Socket.editingStatement({
-							'statement_id': $(this).closest(".event").attr("data-id"),
-							'username': $("#header-user-name").text(),
-							'status': 'end',
-							'edit': "yes"
-						});
 					});
 
 				},

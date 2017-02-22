@@ -341,7 +341,7 @@ a.claim-vote-btn.unready:hover {
 
 
 
-.feed-adopt-claim-version[data-action="deadopt"]{
+/*.feed-adopt-claim-version[data-action="deadopt"]{
     background: #2185D0!important;
     color: white!important;
 }
@@ -354,4 +354,4 @@ a.claim-vote-btn.unready:hover {
 }
 .feed-adopt-claim-version[data-action="deadopt"]:hover:after{
     content: 'Retract';
-}
+}*/

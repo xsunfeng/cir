@@ -72,7 +72,6 @@
 					</div>
 				</div>
 			{% elif entry.entry_type == 'claim version' %}
-				<div class="ui yellow message editing-status" style="display:none; padding:0; width:80%;"></div>
 				<div class="summary">
 					{% if entry.collective %}
 						The panel generated a statement <div class="ui label">S{{ entry.version_id }}</div> (written by <a class="user {{ entry.author_role }}" data-id="{{ entry.author_id }}">{{ entry.author_name }}</a>):
@@ -92,14 +91,14 @@
 						<div class="content" style="font-size: 1rem!important;">{{ entry.content | safe }}</div>
 					</div>
 
-					{% if not entry.collective %}
+<!-- 					{% if not entry.collective %}
 					<div class="ui red secondary improve small menu" data-id="{{ entry.version_id }}">
 						<div class="right menu">
 							<a class="item statement-comment-btn" data-id="{{ entry.version_id }}"><i class="wechat icon"></i>Comments({{ entry.num_comments }})</a>
 							
 							<a class="item feed-edit-claim" data-action="like"><i class="edit icon"></i>Edit<span></span></a>
 							<a class="item statement-history-btn"><i class="history icon"></i>History<span></span></a>
-							<!-- <a class="item feed-like-claim-version" data-action="like"><i class="thumbs outline up icon"></i>Like<span></span></a> -->
+							<a class="item feed-like-claim-version" data-action="like"><i class="thumbs outline up icon"></i>Like<span></span></a>
 
 							{% if entry.is_adopted %}
 								<a class="item feed-adopt-claim-version" data-action="deadopt"><span>Adopted</span></a>
@@ -108,10 +107,10 @@
 							{% endif %}
 						</div>
 					</div>
-					{% endif %}
+					{% endif %} -->
 				</div>
 				
-				<div class="editing" style="display:none;">
+<!-- 				<div class="editing" style="display:none;">
 					<div class="content" style="font-size: 1rem!important;">
 						<textarea style="width:100%;">{{ entry.content | safe }}</textarea>
 					</div>
@@ -134,7 +133,7 @@
 						</button>
 					</div>
 					<div class="content statement-comment-list" statement-id="{{ entry.version_id }}"></div>
-				</div>
+				</div> -->
 
 			{% elif entry.entry_type == 'slotassignment' %}
 				<div class="summary">

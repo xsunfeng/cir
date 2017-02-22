@@ -713,13 +713,14 @@ define([
 						$('#claim-pane-fullscreen .claim.reword.editor').val('');
 						$('#claim-pane-fullscreen .reword.form').transition('slide down', '500ms');
 					}
+					$(".show-workspace[slot-id=" + slot_id + "]").click();
 					$(".activity-filter .statement-candidate").click();
 
 					$(".statement-post textarea").val("");
 					$("#use-nugget-labels .label .delete").click();
 					Utils.notify('success', 'Statement Suggested!');
 					$(".container").animate({scrollTop: 0}, 0);
-					var $feed = $("#claim-activity-feed .event");
+					var $feed = $(".unadopted-statement");
 					$('.container').animate({scrollTop: $feed.offset().top - 200}, 0);
 
 					// notify group members of newly created nuggets
@@ -818,6 +819,22 @@ define([
 							'slot_id': slot_id,
 							'username': $("#header-user-name").text(),
 							'status': 'end'
+						});
+					});
+
+					$(".editing textarea").focusin(function() {
+						Socket.editingStatement({
+							'statement_id': $(this).closest(".statement-entry").attr("data-id"),
+							'username': $("#header-user-name").text(),
+							'status': 'start',
+							'edit': "yes"
+						});
+					}).focusout(function() {
+						Socket.editingStatement({
+							'statement_id': $(this).closest(".statement-entry").attr("data-id"),
+							'username': $("#header-user-name").text(),
+							'status': 'end',
+							'edit': "yes"
 						});
 					});
 				},
@@ -969,6 +986,27 @@ define([
 				},
 				success: function(xhr) {
 					$("#statement-history .content").html(xhr.html);
+				},
+				error: function(xhr) {
+					if (xhr.status == 403) {
+						Utils.notify('error', xhr.responseText);
+					}
+				}
+			});
+		}).on('click', '.statement-adopt-btn', function(){
+			var $container = $(this).closest(".statement-entry");
+			var id = $(this).closest(".statement-entry").attr('data-id');
+			var action = "adopt";
+			$.ajax({
+				url: '/api_claim_vote/',
+				type: 'post',
+				data: {
+					action: action,
+					version_id: id,
+				},
+				success: function(xhr) {
+					var slot_id = $(".slot").attr("data-id");
+					$(".show-workspace[slot-id=" + slot_id + "]").click();
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -1255,12 +1293,17 @@ define([
 			var statement_id = $(this).attr("statement-id");
 			var slot_id = $(this).attr("slot-id");
 			$(".show-workspace[slot-id=" + slot_id + "]").click();
-			setTimeout(function(){ 
-				$(".statement-comment-btn[data-id=" + statement_id + "]").click();
-				$(".container").animate({scrollTop: 0}, 0);
-				var $feed = $(".statement-comment-btn[data-id=" + statement_id + "]");
-				$('.container').animate({scrollTop: $feed.offset().top - 200}, 0);
-			}, 1000);
+			$('#claim-activity-feed').feed('update', {
+				'type': 'claim',
+				'id': slot_id,
+			}, function(){
+				setTimeout(function(){
+					$(".event .statement-comment-btn[data-id=" + statement_id + "]").click();
+					$(".container").animate({scrollTop: 0}, 0);
+					var $feed = $(".event .statement-comment-btn[data-id=" + statement_id + "]");
+					$('.container').animate({scrollTop: $feed.offset().top - 200}, 0);
+				}, 1000);
+			});
 		});
 
 		$("body").on("click", ".statement-comment-post", function(){
@@ -1354,7 +1397,8 @@ define([
 					version_id: id,
 				},
 				success: function(xhr) {
-					$container.remove();
+					var slot_id = $(".slot").attr("data-id");
+					$(".show-workspace[slot-id=" + slot_id + "]").click();
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {

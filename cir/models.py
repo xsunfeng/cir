@@ -374,6 +374,7 @@ class Claim(Entry):
         attr['stmt_order'] = self.stmt_order
         attr['num_comments'] = StatementQuestionComment.objects.filter(statement_question = self).count()
         attr['adopted_versions'] = []
+        attr['unadopted_versions'] = []
         count = 1
         for adopted_version in self.adopted_versions().all().order_by("order"):
             adopted_version.order = count
@@ -385,7 +386,13 @@ class Claim(Entry):
                 'author': adopted_version.author.get_full_name(),
                 'num_comments': StatementComment.objects.filter(claim_version = adopted_version).count()
             })
-
+        for unadopted_version in self.versions.filter(is_adopted=False).all().order_by("-created_at"):
+            attr['unadopted_versions'].append({
+                'id': unadopted_version.id,
+                'content': unadopted_version.content,
+                'author': unadopted_version.author.get_full_name(),
+                'num_comments': StatementComment.objects.filter(claim_version = unadopted_version).count()
+            })
         for claimref in self.older_versions.filter(refer_type='stmt'):
             attr['claims'].append({
                 'id': claimref.from_claim.id,

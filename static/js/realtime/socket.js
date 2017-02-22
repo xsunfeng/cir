@@ -151,10 +151,10 @@ define([
 			}).on('client:statement:editing_statement', function(data) {
 				if (data.status == "start") {
 					var text = data.username + " is editing this statement";
-					$(".event[data-id=" + data.statement_id + "] .editing-status").text(text);
-					$(".event[data-id=" + data.statement_id + "] .editing-status").show();
+					$(".statement-entry[data-id=" + data.statement_id + "] .editing-status").text(text);
+					$(".statement-entry[data-id=" + data.statement_id + "] .editing-status").show();
 				} else if (data.status == "end") {
-					$(".event[data-id=" + data.statement_id + "] .editing-status").hide();
+					$(".statement-entry[data-id=" + data.statement_id + "] .editing-status").hide();
 				}
 				console.log(data);			
 			});
