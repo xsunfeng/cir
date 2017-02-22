@@ -12,7 +12,7 @@
         <link rel="stylesheet" href="{% static 'css' %}/page_body.css">
         {% require_module 'postcir/main' %}
     </head>
-    <body{% if forum_id %} forum-id="{{ forum_id }}"{% endif %} data-phase="{{ active_phase }}">
+    <body{% if forum_id %} forum-id="{{ forum_id }}"{% endif %} data-phase="{{ active_phase }}" data-flavour="{{ flavour }}">
     	{% include 'header/forum_postcir_header.html' %}
         {% if load_error %}
         <div class="ui two column centered grid">

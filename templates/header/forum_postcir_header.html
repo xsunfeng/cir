@@ -3,23 +3,21 @@
         <div class="item">GeoDeliberator -- Error</div>
     {% else %}
         {% if active_phase == 'pre_sign_up' %}
-            <div class="item">GeoDeliberation: {{ forum_name }}</div>
+            <div class="item">{% if flavour != 'mobile' %}GeoDeliberation: {% endif %}{{ forum_name }}</div>
             {% if user_id == '-1' %}
                 <div id="header-visitor-wrapper" class="right menu" style="display:flex">
                     <a class="item">
                         <div id="login-btn">Admin log in</div>
                     </a>
                 </div>
-            {% else %}
+            {% elif flavour != 'mobile' %}
                 <div class="right menu" style="display:flex">
-                    <div class="item">Append
-                        <pre>?show_forum=1</pre>
-                        to URL to skip
-                    </div>
+                    <div class="item">Append ?show_forum=1 to URL to skip</div>
                 </div>
             {% endif %}
         {% else %}
             <div class="item">{{ forum_name }}</div>
+            {% if flavour != 'mobile' %}
             <div class="ui item small breadcrumb">
                 <div class="section {% if active_phase == 'issue' %}active{% endif %}" data-phase="issue-briefing">Issue Briefing</div>
                 <i class="right arrow icon divider"></i>
@@ -27,6 +25,7 @@
                 <i class="right arrow icon divider"></i>
                 <div class="section {% if active_phase == 'deliberation' %}active{% endif %}" data-phase="deliberation">Community Deliberative Poll</div>
             </div>
+            {% endif %}
             {% if user_id == '-1' %}
             <div id="header-visitor-wrapper" class="right menu" style="display:flex">
                 <a class="item">

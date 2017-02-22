@@ -30,7 +30,7 @@
         property tax increase would be based on the <u>Municipal Cost Index (MCI)</u>, a measure of the increase in the
         cost of goods and services typically procured by municipalities.
     </p>
-    <div class="ui container segment">
+    {% if flavour != 'mobile' %}<div class="ui container segment issue-vote-form-wrapper">{% endif %}
         <form id="issue-vote-form" class="ui form">
             <div class="ui info message">
                 Based on the above information and your own knowledge on this issue, please form an initial opinion on this policy proposal using the following slider bar.
@@ -58,5 +58,5 @@
             </div>
             <div id="issue-vote-btn" class="ui submit primary fluid small button">Submit and Proceed</div>
         </form>
-    </div>
+    {% if flavour != 'mobile' %}</div>{% endif %}
 </div>
