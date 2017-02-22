@@ -41,7 +41,10 @@ def home(request, forum_url):
         UserEvent.objects.create(
             user=request.user,
             event='phase.enter',
-            extra_data=json.dumps({'phase': context['active_phase']})
+            extra_data=json.dumps({
+                'phase': context['active_phase'],
+                'ua': request.META.get('HTTP_USER_AGENT')
+            })
         )
     else:
         context['user_id'] = '-1'
