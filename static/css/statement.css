@@ -168,7 +168,7 @@ body[data-flavour='mobile'] #deliberation #stmt {
     line-height: 1.4285em;
 }
 
-#deliberation #stmt .stmt-item {
+body:not([data-flavour='mobile']) #deliberation #stmt .stmt-item {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -231,7 +231,6 @@ body[data-flavour='mobile'] #stmt-question-board {
 
 body[data-flavour='mobile'] #stmt-question-board .header {
     width:100%;
-
 }
 
 #stmt-question-board .header h3 {

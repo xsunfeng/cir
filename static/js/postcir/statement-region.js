@@ -56,6 +56,10 @@ define([
     function initLayout() {
         $('.ui.accordion').accordion();
 
+        if ($('body').attr('data-flavour') == 'mobile') {
+            return;
+        }
+
         // information of the new highlight
         module.newHighlight = {};
         // whether the user is dragging

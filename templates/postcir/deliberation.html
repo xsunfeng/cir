@@ -66,6 +66,7 @@
                 {% endfor %}
             </section>
         {% endfor %}
+        {% if flavour != 'mobile' %}
         <div id="stmt-highlight-toolbar">
             <div class="ui blue segment labeled icon menu">
                 <a class="item stmt-cite-btn">
@@ -73,6 +74,7 @@
                 </a>
             </div>
         </div>
+        {% endif %}
     </div>
 
 

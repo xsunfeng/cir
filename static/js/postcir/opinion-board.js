@@ -14,31 +14,38 @@ define([
     initLayout();
 
     function initLayout() {
-        tinymce.init({
-            selector: '#opinion-textarea',
-            max_height: 600,
-            autoresize_max_height: 400,
-            autoresize_bottom_margin: 0,
-            menubar: false,
-            min_height: 100,
-            plugins: 'autoresize paste autolink link image noneditable',
-            noneditable_noneditable_class: 'cite-label',
-            browser_spellcheck: true,
-            statusbar: false,
-            paste_as_text: true,
-            toolbar: 'undo redo | bold italic | bullist numlist | link image',
-            content_css: '/static/css/postcir_editor.css',
-            forced_root_block: '',
-            setup: function (editor) {
-                editor.on('click', StatementRegion.handleClickCitationLabel);
-            }
-        });
-        $('#post-btn').click(function () {
-            var body = tinymce.activeEditor.getBody();
-            var $citations = $(body).find('.cite-label');
-            var rawcontent = tinymce.activeEditor.getContent();
-            makePost(rawcontent, $citations);
-        });
+        if ($('body').attr('data-flavour') == 'mobile') {
+            $('#post-btn').click(function () {
+                var rawcontent = $('#opinion-textarea').val();
+                makePost(rawcontent);
+            });
+        } else {
+            tinymce.init({
+                selector: '#opinion-textarea',
+                max_height: 600,
+                autoresize_max_height: 400,
+                autoresize_bottom_margin: 0,
+                menubar: false,
+                min_height: 100,
+                plugins: 'autoresize paste autolink link image noneditable',
+                noneditable_noneditable_class: 'cite-label',
+                browser_spellcheck: true,
+                statusbar: false,
+                paste_as_text: true,
+                toolbar: 'undo redo | bold italic | bullist numlist | link image',
+                content_css: '/static/css/postcir_editor.css',
+                forced_root_block: '',
+                setup: function (editor) {
+                    editor.on('click', StatementRegion.handleClickCitationLabel);
+                }
+            });
+            $('#post-btn').click(function () {
+                var body = tinymce.activeEditor.getBody();
+                var $citations = $(body).find('.cite-label');
+                var rawcontent = tinymce.activeEditor.getContent();
+                makePost(rawcontent, $citations);
+            });
+        }
 
         initVoter();
     }
