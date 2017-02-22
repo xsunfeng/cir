@@ -1,4 +1,38 @@
 <div id="deliberation">
+    <div id="opinion-board">
+        <h3>Issue Discussion Forum</h3>
+
+        <form class="ui form">
+            <div class="ui info message">
+                Your most recent vote on the policy
+                proposal is shown below. You can update your position at any time.
+            </div>
+            <div id="voter" class="grouped fields">
+                <div class="field">
+                    <strong>Statement</strong>: <i>the policy proposal on an annual automatic property tax
+                    increase should be implemented in the State College Borough.</i> (The vertical bar
+                    indicates your most recent vote)
+                    <div style="position:relative;margin:0 0.75rem">
+                        <input type="range" min="-100" max="100" value="{{ most_recent_vote.vote }}">
+                        <div class="last-time-indicator" style="left:{{ most_recent_vote.vote_percentage }}%"></div>
+                    </div>
+                    <div class="indicators" style="width:100%;position:relative;top:-10px">
+                        <span style="position:absolute;left:0">Strongly oppose</span>
+                        <span style="position:absolute;left:50%;transform:translate(-50%)">Neutral</span>
+                        <span style="position:absolute;right:0">Strongly support</span>
+                    </div>
+                </div>
+            </div>
+            <div id="voter-prompt" class="ui info top attached message">
+                If you have any question or comment and would like to discuss with your community, please post here.
+            </div>
+            <div class="field">
+                <textarea id="opinion-textarea"></textarea>
+            </div>
+            <div id="post-btn" class="ui submit primary fluid small button">Post</div>
+        </form>
+        <div id="posts-area" class="ui threaded comments"></div>
+    </div>
     <div id="stmt">
         <h2>Citizen's statement on {{ forum_name }}</h2>
         <div class="ui styled accordion" style="width:auto">
@@ -40,40 +74,7 @@
             </div>
         </div>
     </div>
-    <div id="opinion-board">
-        <h3>Issue Discussion Forum</h3>
 
-        <form class="ui form">
-            <div class="ui info message">
-                Your most recent vote on the policy
-                proposal is shown below. You can update your position at any time.
-            </div>
-            <div id="voter" class="grouped fields">
-                <div class="field">
-                    <strong>Statement</strong>: <i>the policy proposal on an annual automatic property tax
-                    increase should be implemented in the State College Borough.</i> (The vertical bar
-                    indicates your most recent vote)
-                    <div style="position:relative;margin:0 0.75rem">
-                        <input type="range" min="-100" max="100" value="{{ most_recent_vote.vote }}">
-                        <div class="last-time-indicator" style="left:{{ most_recent_vote.vote_percentage }}%"></div>
-                    </div>
-                    <div class="indicators" style="width:100%;position:relative;top:-10px">
-                        <span style="position:absolute;left:0">Strongly oppose</span>
-                        <span style="position:absolute;left:50%;transform:translate(-50%)">Neutral</span>
-                        <span style="position:absolute;right:0">Strongly support</span>
-                    </div>
-                </div>
-            </div>
-            <div id="voter-prompt" class="ui info top attached message">
-                If you have any question or comment and would like to discuss with your community, please post here.
-            </div>
-            <div class="field">
-                <textarea id="opinion-textarea"></textarea>
-            </div>
-            <div id="post-btn" class="ui submit primary fluid small button">Post</div>
-        </form>
-        <div id="posts-area" class="ui threaded comments"></div>
-    </div>
 
     <div id="stmt-question-board" class="ui segment"></div>
 </div>
