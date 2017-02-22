@@ -8,8 +8,6 @@ body[data-phase="pre_sign_up"] {
     padding-bottom: 2em;
 }
 
-/*@media only screen and (max-width: 600px) {  }*/
-
 #stmt-quiz {
     position: relative;
     padding-bottom: 3em;
@@ -20,6 +18,12 @@ body[data-phase="pre_sign_up"] {
     top: 40px;
     width: calc(60% - 0.5em);
     padding: 1em 1em 2em 3em;
+}
+
+body[data-flavour='mobile'] #stmt-quiz #stmt {
+    width: 100%;
+    padding: 1em;
+    font-size: 16px;
 }
 
 #stmt .stmt-question-wrapper {
@@ -34,7 +38,8 @@ body[data-phase="pre_sign_up"] {
     font-weight: 700;
     margin-top: 20px;
 }
-#stmt-quiz #quiz-area {
+
+#quiz-area {
     top: 40px;
     right: 0;
     bottom: 0;
@@ -44,6 +49,14 @@ body[data-phase="pre_sign_up"] {
     background-color: #f5f5f5;
 }
 
+body[data-flavour='mobile'] #stmt-quiz #quiz-area {
+    position: static;
+    padding: 1em;
+    background-color: #fff;
+    width: 100%;
+    margin: 20px 0 80px 0;
+}
+
 #quiz-area #my-vote {
     position: fixed;
     bottom: 73px;
@@ -51,6 +64,18 @@ body[data-phase="pre_sign_up"] {
     width: 40%;
     z-index: 1;
     padding-right: 2em;
+}
+
+body[data-flavour='mobile'] #quiz-area #my-vote {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    padding: 0;
+}
+
+body[data-flavour='mobile'] #quiz-area #my-vote .vote-change-instruction {
+    margin-bottom: 0;
 }
 
 #quiz-area #my-vote.loading {
@@ -86,6 +111,11 @@ body[data-phase="pre_sign_up"] {
     width: calc(100% - 2em);
     bottom: 3em;
     left: 1em;
+}
+
+body[data-flavour='mobile'] #stmt-quiz-submit-btn {
+    position: static;
+    width: 100%;
 }
 
 .stmt-quiz-answer {
