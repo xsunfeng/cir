@@ -47,6 +47,15 @@ def home(request, forum_url):
             })
         )
     else:
+        remote_ip = request.META.get('HTTP_X_FORWARDED_FOR', 'UNKNOWN')
+        UserEvent.objects.create(
+            event='phase.enter.visitor',
+            extra_data=json.dumps({
+                'phase': context['active_phase'],
+                'ip': remote_ip,
+                'ua': request.META.get('HTTP_USER_AGENT')
+            })
+        )
         context['user_id'] = '-1'
 
     if context['active_phase'] == 'deliberation' or context['active_phase'] == 'statement':

@@ -7,9 +7,10 @@ from cir.utils import pretty_date
 # Create your models here.
 
 class UserEvent(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, null=True, blank=True)
     EVENT_CHOICES = (
         ('phase.enter', 'User entered a phase'),
+        ('phase.enter.visitor', 'Visitor entered a phase'),
         ('phase.complete', 'User completed a phase'),
     )
     event = models.CharField(max_length=20, choices=EVENT_CHOICES)
