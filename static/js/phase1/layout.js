@@ -759,6 +759,8 @@ define([
 			$('#slot-detail').attr("slot-id","");
 			$('#slot-detail').hide();
 			sessionStorage.setItem('statement-view', 'list');
+		}).on("click", "#close-suggest-statement-window", function(){
+			$("#suggest-statement-window").hide();
 		}).on("click", ".show-workspace", function(){
 			var slot_id = $(this).attr("slot-id");
 			$('#slot-detail').attr("slot-id",slot_id);
@@ -911,6 +913,8 @@ define([
 		$('body').on('click', '.statement-question-comment-btn', function(){
 			var slot_id = $(this).attr("slot-id");
 			showSlotCommentList(slot_id);
+		}).on('click', '.suggest-statement-window-open', function(){
+			$("#suggest-statement-window").show();
 		});
 
 	$("body").on("click", ".comment-post", function(){

@@ -33,7 +33,8 @@ define([
 					}
 					html += '<div class="ui message">Above are recent messages</div>';
 					$('#chatter-wrapper .comments.list').prepend(html);
-					scrollToBottom();
+					// scrollToBottom();
+					$('.comments.segment').scrollTop($('.comments.list').height());
 				}
 			});
 		},
@@ -127,7 +128,7 @@ define([
 	}
 
 	function scrollToBottom() {
-		$('.comments.segment').scrollTop($('.comments.list').height());
+		// $('.comments.segment').scrollTop($('.comments.list').height());
 	}
 	function nowString() {
 		var date = new Date();
