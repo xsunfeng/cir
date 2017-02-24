@@ -151,10 +151,14 @@ define([
 			}).on('client:statement:editing_statement', function(data) {
 				if (data.status == "start") {
 					var text = data.username + " is editing this statement";
-					$(".statement-entry[data-id=" + data.statement_id + "] .editing-status").text(text);
+					$(".statement-entry[data-id=" + data.statement_id + "] .editing-status").html(text);
 					$(".statement-entry[data-id=" + data.statement_id + "] .editing-status").show();
 				} else if (data.status == "end") {
 					$(".statement-entry[data-id=" + data.statement_id + "] .editing-status").hide();
+				} else if (data.status == "edited") {
+					var text = data.username + " just edited this statement, <a href='#' class='refresh-workspace'>click to update</a>";
+					$(".statement-entry[data-id=" + data.statement_id + "] .edited-status").html(text);
+					$(".statement-entry[data-id=" + data.statement_id + "] .edited-status").show();
 				}
 				console.log(data);			
 			});

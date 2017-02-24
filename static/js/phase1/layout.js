@@ -614,6 +614,7 @@ define([
 			var content = $container.find(".improved.text .content").text();
 			$container.find("textarea").val(content);
 		}).on('click', '.feed-edit-claim-save-2', function(e) {
+			var statement_id = $(this).closest(".statement-entry").attr("data-id");
 			$container = $(this).closest('.statement-entry');
 			var content = $container.find("textarea").val();
 			var claim_version_id = $container.attr("data-id");
@@ -630,6 +631,11 @@ define([
 					claim_version_id: claim_version_id,
 				},
 				success: function(xhr) {
+					Socket.editingStatement({
+						'statement_id': statement_id,
+						'username': $("#header-user-name").text(),
+						'status': 'edited',
+					});
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -726,7 +732,7 @@ define([
 					// notify group members of newly created nuggets
 					Socket.suggestStatement({
 						'slot_id': slot_id,
-						'username': $("#header-user-name").text()
+						'username': $("#header-user-name").text(),
 					});
 				},
 				error: function(xhr) {
@@ -829,14 +835,12 @@ define([
 							'statement_id': $(this).closest(".statement-entry").attr("data-id"),
 							'username': $("#header-user-name").text(),
 							'status': 'start',
-							'edit': "yes"
 						});
 					}).focusout(function() {
 						Socket.editingStatement({
 							'statement_id': $(this).closest(".statement-entry").attr("data-id"),
 							'username': $("#header-user-name").text(),
 							'status': 'end',
-							'edit': "yes"
 						});
 					});
 				},
@@ -999,18 +1003,23 @@ define([
 			});
 		}).on('click', '.statement-adopt-btn', function(){
 			var $container = $(this).closest(".statement-entry");
-			var id = $(this).closest(".statement-entry").attr('data-id');
+			var statement_id = $container.attr('data-id');
 			var action = "adopt";
 			$.ajax({
 				url: '/api_claim_vote/',
 				type: 'post',
 				data: {
 					action: action,
-					version_id: id,
+					version_id: statement_id,
 				},
 				success: function(xhr) {
 					var slot_id = $(".slot").attr("data-id");
 					$(".show-workspace[slot-id=" + slot_id + "]").click();
+					Socket.editingStatement({
+						'statement_id': statement_id,
+						'username': $("#header-user-name").text(),
+						'status': 'edited',
+					});
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -1391,18 +1400,23 @@ define([
 			}
 		}).on("click", ".statement-retract", function(){
 			var $container = $(this).closest(".statement-entry")
-			var id = $(this).attr('data-id');
-			$(".event[data-id=" + id + "] .feed-adopt-claim-version[data-action=deadopt]").click();
+			var statement_id = $(this).attr('data-id');
+			$(".event[data-id=" + statement_id + "] .feed-adopt-claim-version[data-action=deadopt]").click();
 			$.ajax({
 				url: '/api_claim_vote/',
 				type: 'post',
 				data: {
 					action: "deadopt",
-					version_id: id,
+					version_id: statement_id,
 				},
 				success: function(xhr) {
 					var slot_id = $(".slot").attr("data-id");
 					$(".show-workspace[slot-id=" + slot_id + "]").click();
+					Socket.editingStatement({
+						'statement_id': statement_id,
+						'username': $("#header-user-name").text(),
+						'status': 'edited',
+					});
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -1412,7 +1426,12 @@ define([
 			});			
 		});
 
-
+		$("body").on("click", ".refresh-workspace", function(){
+			var slot_id = $(".slot").attr("data-id");
+			$(".show-workspace[slot-id=" + slot_id + "]").click();
+			$(".edited-status").hide();
+		});
+		
 		$("#nugget-comment-modal").on("click", ".nugget-comment-post", function(){
 			var text = $(this).closest("form").find("textarea").val();
 		 	var parent_id = "";

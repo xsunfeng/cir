@@ -2,11 +2,13 @@
 
 	<div class="ui raised pink segment">
 		<h3>{{ slot.category|title|slice:"1" }}Q{{slot.stmt_order}}: {{ slot.slot_title }}</h3>
-		
-		<a class="ui label statement-question-comment-btn" slot-id="{{ slot.id }}" style="margin-bottom: 1rem;">Discuss the question
-			<div class="detail">{{ slot.num_comments }}</div>
-		</a>
+	
 		<a class="ui teal label suggest-statement-window-open" slot-id="{{ slot.id }}" style="margin-bottom: 1rem;">Suggest a statement
+		</a>
+
+		<a class="ui label statement-question-comment-btn" slot-id="{{ slot.id }}" style="margin-bottom: 1rem; position: relative;">Discuss the question
+			<div class="detail">{{ slot.num_comments }}</div>
+			<!-- <div class="ui red circular label" style="position: absolute; right: -2rem; top: -1rem;">New</div> -->
 		</a>
 
 		<div class="ui secondary vertical segment" style="text-align: center; padding: 0.5rem; border:0;">
@@ -15,7 +17,8 @@
 
 		{% for entry in slot.adopted_versions %}
 			<div class="summary ui vertical segment statement-entry adopted-statement" style="padding-bottom:0;" data-id="{{ entry.id }}">
-				<div class="ui yellow message editing-status" style="display:none; padding:0; width:80%;"></div>
+				<div class="editing-status" style="display:none; padding:0; background: yellow; font-size: 0.8rem; text-align: center"></div>				
+				<div class="edited-status" style="display:none; padding:0; background: yellow; font-size: 0.8rem; text-align: center"></div>
 				<div class="edited">
 					<div class="extra improved text" style="max-width: 2000px;">
 						[ST{{ forloop.counter }}]
@@ -75,7 +78,8 @@
 
 		{% for entry in slot.unadopted_versions %}
 			<div class="summary ui vertical segment statement-entry unadopted-statement" style="padding-bottom:0;" data-id="{{ entry.id }}">
-				<div class="ui yellow message editing-status" style="display:none; padding:0; width:80%;"></div>
+				<div class="editing-status" style="display:none; padding:0; background: yellow; font-size: 0.8rem; text-align: center"></div>				
+				<div class="edited-status" style="display:none; padding:0; background: yellow; font-size: 0.8rem; text-align: center"></div>
 				<div class="edited">
 					<div class="extra improved text" style="max-width: 2000px;">
 						<div class="ui mini label">S{{ entry.id }}</div>
