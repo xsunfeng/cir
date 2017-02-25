@@ -47,7 +47,9 @@ def home(request, forum_url):
             })
         )
     else:
-        remote_ip = request.META.get('HTTP_X_FORWARDED_FOR', 'UNKNOWN')
+        remote_ip = request.META.get('REMOTE_ADDR', '')
+        if not remote_ip:
+            remote_ip = request.META.get('HTTP_X_FORWARDED_FOR', 'UNKNOWN')
         UserEvent.objects.create(
             event='phase.enter.visitor',
             extra_data=json.dumps({
