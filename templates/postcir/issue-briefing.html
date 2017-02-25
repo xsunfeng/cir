@@ -1,32 +1,46 @@
 <div id="issue-briefing" class="ui container">
-    <p>
-        Dear State College resident:
-    </p>
-    <p>
-        Thank you for joining us in this online Community Deliberative Polling system. Your vote in this system will create
-        impact on the decision-making on the inflation-based property tax increase issue. Your participation in this system
-        will involve three steps:
-    <ol>
-        <li>Initial opinion expression (current screen): after understanding the outline of the issue, we ask you to cast your initial vote.</li>
-        <li>Read Citizens Statement: a randomly assembled citizen panel has worked on this issue together with Borough officials and
-        policy experts. They compiled a document, Citizens Statement, that articulates the policy proposal and its pros-and-cons.</li>
-        <li>Community deliberation: in this stage you will join your fellow residents and property owners in a community-wide deliberation
-        and share your opinion and information on this issue.</li>
-    </ol>
-    </p>
-    <p>
-        Please keep in mind that you may update your vote any time in this system (in all three phases). Your vote as well as
-        the reason you give are important input to the decision-making body at the Borough.
-    </p>
-    <p>
-        To participate in the forum activities (voting and discussion), please first sign up. If you have participated in
-        the online section of Community Issue Review (CIR), you can use your CIR login credentials.
-    </p>
+    <div class="ui message" style="font-size: 1.3em;">
+        <p>
+            Dear State College resident:
+        </p>
+        <p>
+            Thank you for joining us in this online Community Deliberative Polling system. Your vote in this system will
+            create
+            direct impact on the decision-making on the inflation-based property tax index issue. Your participation in
+            this system
+            consists of three steps:
+        <ol>
+            <li><b>Initial opinion expression</b> (current screen): after understanding the outline of the issue, we ask
+                you to cast your initial vote.
+            </li>
+            <li><b>Read Citizens Statement</b>: a randomly assembled citizen panel has worked on this issue together
+                with Borough officials and
+                policy experts. They compiled a document, Citizens Statement, that articulates the policy proposal in
+                depth as well as its pros-and-cons.
+            </li>
+            <li><b>Community deliberation</b>: in this stage you will join your fellow residents and property owners in
+                a community-wide deliberation,
+                and share and discuss your opinion and information on this issue.
+            </li>
+        </ol>
+        </p>
+        <p>
+            Please keep in mind that you may update your vote any time in this system (in all three phases). Your vote
+            as well as
+            the reason you give are important input to the decision-making body at the Borough.
+        </p>
+        <p>
+            To participate in the forum activities (voting and discussion), please first sign up. If you have
+            participated in
+            the online section of Community Issue Review (CIR), you can use your CIR login credentials.
+        </p>
+    </div>
+    <div class="ui info message">Please read the introduction above before proceeding to the Issue Description.</div>
     <h2 class="ui large header serif dividing">Issue description</h2>
     <p class="serif large-text">
-        One goal of the borough is to maintain quality of life. A proposal to address quality of life is to
+        One goal of the Borough is to maintain quality of life. A proposal to address quality of life is to
         increase property taxes each year in line with inflation. Property tax affects everyone in the borough and is
-        one of the only two ways that the borough can generate revenue (one being property taxes, another being wage
+        one of the only two ways that the borough can generate revenue (the other being wage
         taxes).
     </p>
     <p class="serif large-text">
@@ -44,7 +58,7 @@
     {% if flavour != 'mobile' %}<div class="ui container segment issue-vote-form-wrapper">{% endif %}
         <form id="issue-vote-form" class="ui form">
             <div class="ui info message">
-                Based on the above information and your own knowledge on this issue, please form an initial opinion on this policy proposal using the following slider bar.
+                Based on the above introduction and your own knowledge on this issue, please take an initial position on this policy proposal using the following slider bar.
             </div>
 
             <div id="issue-voter" class="grouped fields">
@@ -61,7 +75,7 @@
                 </div>
             </div>
             <div class="ui info top attached message">
-                Please indicate why you make such judgment.
+                Please indicate why you take such position.
             </div>
             <div class="field">
                 <textarea id="issue-vote-textarea"></textarea>

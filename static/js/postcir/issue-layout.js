@@ -63,6 +63,7 @@ define([
             type: 'post',
             data: data,
             success: function (xhr) {
+                window.scrollTo(0, 0);
                 window.location.reload();
             },
             error: function (xhr) {
