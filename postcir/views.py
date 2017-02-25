@@ -35,28 +35,28 @@ def home(request, forum_url):
     context['active_phase'] = _get_active_phase(request.user, request.GET.get('show_forum'))
 
     # get user data
+    event_info = {
+        'phase': context['active_phase'],
+        'ua': request.META.get('HTTP_USER_AGENT', 'UNKNOWN')
+    }
+    remote_ip = request.META.get('REMOTE_ADDR', '')
+    if not remote_ip:
+        remote_ip = request.META.get('HTTP_X_FORWARDED_FOR', 'UNKNOWN')
+    event_info['ip'] = remote_ip
+
     if request.user.is_authenticated():
         context['user_id'] = request.user.id
         context['user_name'] = request.user.get_full_name()
         UserEvent.objects.create(
             user=request.user,
             event='phase.enter',
-            extra_data=json.dumps({
-                'phase': context['active_phase'],
-                'ua': request.META.get('HTTP_USER_AGENT')
-            })
+            extra_data=json.dumps(event_info)
         )
     else:
-        remote_ip = request.META.get('REMOTE_ADDR', '')
-        if not remote_ip:
-            remote_ip = request.META.get('HTTP_X_FORWARDED_FOR', 'UNKNOWN')
+
         UserEvent.objects.create(
             event='phase.enter.visitor',
-            extra_data=json.dumps({
-                'phase': context['active_phase'],
-                'ip': remote_ip,
-                'ua': request.META.get('HTTP_USER_AGENT')
-            })
+            extra_data=json.dumps(event_info)
         )
         context['user_id'] = '-1'
 
