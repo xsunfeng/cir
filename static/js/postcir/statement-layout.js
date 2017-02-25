@@ -36,6 +36,7 @@ define([
                 type: 'post',
                 data: {'answers': answers},
                 success: function (xhr) {
+                    window.scrollTo(0, 0);
                     window.location.reload();
                 },
                 error: function (xhr) {
