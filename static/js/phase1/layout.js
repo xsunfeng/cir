@@ -1343,9 +1343,11 @@ define([
 				'id': slot_id,
 			}, function(){
 				setTimeout(function(){
-					$(".event .statement-comment-btn[data-id=" + statement_id + "]").click();
+					if (!$(".statement-entry[data-id="+ statement_id +"] .statement-comments").is(":visible")){
+						$(".statement-entry[data-id="+ statement_id +"] .statement-comment-btn").click();
+					}
 					$(".container").animate({scrollTop: 0}, 0);
-					var $feed = $(".event .statement-comment-btn[data-id=" + statement_id + "]");
+					var $feed = $(".statement-entry[data-id="+ statement_id +"]");
 					$('.container').animate({scrollTop: $feed.offset().top - 200}, 0);
 				}, 1000);
 			});
