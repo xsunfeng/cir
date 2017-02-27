@@ -1,0 +1,38 @@
+	<div class="ui top attached tabular menu" style="margin: 0.3rem;">
+			{% for question in questions %}
+					<div class="item discussion-room-question-tab" slot-id={{ question.id }} style="padding: 0.5rem;">
+						<a class="ui red empty circular label update-label" style="padding: 0; margin:0; display:none;"></a>
+						{{ question.category|title|slice:"1" }}Q{{ question.stmt_order }}
+					</div>
+		  	{% endfor %}
+	  	<div class="right menu">
+			<a class="item">
+				<i class="refresh icon"></i>
+			</a>
+			<a class="item" style="padding-left:0;" id="discussion-room-close">
+				<i class="minimize icon"></i>
+			</a>
+	  	</div>
+	</div>
+	<div id="discussion-room-container" class="ui bottom attached segment" style="position:absolute; top:42px; overflow-y:auto; bottom:0;">
+		Latest 5 comments
+		<div class="ui cards">
+			{% for comment in latest_comments %}
+			<div class="card" style="width:100%;">
+				<div class="content">
+					<img class="right floated mini ui image" src="{{ STATIC_URL }}/static/pictures/{{ comment.user_id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
+					<div class="header">
+						{{ comment.user_name }}
+					</div>
+					<div class="meta">
+						{{ comment.question.id }}
+						{{ comment.created_at }} | Question {{ comment.question.category|title|slice:"1" }}Q{{ comment.question.stmt_order }}
+					</div>
+					<div class="description">
+						{{ comment.content }}
+					</div>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	</div>

@@ -40,6 +40,11 @@ def get_statement_comment_list(request):
     context['comments'] = thread_comments
     context['slot'] = this_slot
     response['statement_comment_list'] = render_to_string("phase0/statement-comment-list.html", context)
+    response['unread_comments'] = []
+    for r in IsReadStatementQuestionComment.objects.filter(question_id = slot_id, reader = request.user, is_read = False):
+        response['unread_comments'].append(r.comment.id)
+        r.is_read = True
+        r.save()
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def put_statement_comment(request):
@@ -57,4 +62,13 @@ def put_statement_comment(request):
         parent = StatementQuestionComment.objects.get(id = parent_id)
         newStatementQuestionComment = StatementQuestionComment(author = author, text = text, statement_question = slot, parent = parent, created_at = created_at)
     newStatementQuestionComment.save()
+    forum = Forum.objects.get(id = request.session['forum_id'])
+    for role in Role.objects.filter(forum = forum):
+        user = role.user
+        if (user != author):
+            IsReadStatementQuestionComment.objects.create(
+                comment = newStatementQuestionComment, 
+                reader = user,
+                question = slot,
+                is_read = False)
     return HttpResponse(json.dumps(response), mimetype='application/json')

@@ -419,6 +419,43 @@ def api_edit_claim(request):
     response = {}
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
+def init_discussion_room(request):
+    response = {}
+    context = {}
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    category_list = ['finding', 'pro', 'con']
+    context['questions'] = []
+    response['slots_cnt'] = {'finding': 0, 'pro': 0, 'con': 0}
+    response['unread_questions'] = []
+    for category in category_list:
+        for slot in Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False, claim_category=category).order_by('stmt_order'):
+            context['questions'].append(slot.getAttrSlot(forum))
+            if (IsReadStatementQuestionComment.objects.filter(question = slot, reader = request.user, is_read = False).count() > 0):
+                response['unread_questions'].append(slot.id)
+    latest_comments = []
+    for claim in Claim.objects.filter(forum = forum):
+        for comment in StatementQuestionComment.objects.filter(statement_question = claim):
+            latest_comments.append(comment)
+    latest_comments = sorted(latest_comments, key=lambda item: item.created_at, reverse=True)
+    latest_comments = latest_comments[:5]
+    context['latest_comments'] = []
+    for comment in latest_comments:
+        item = {}
+        user = comment.author
+        item["user_id"] = user.id
+        item["created_at"] = utils.pretty_date(comment.created_at)
+        item["content"] = comment.text
+        item["role"] = ""
+        if user.role.filter(forum = forum).exists():
+            item["role"] = user.role.filter(forum = forum)[0].role
+        item["user_name"] = user.last_name + " " + user.first_name
+        item["id"] = comment.id
+        item["timestamp"] = comment.created_at.strftime("%s")
+        item["question"] = comment.statement_question.getAttrSlot(forum)
+        context['latest_comments'].append(item)
+    response['discussion_room'] = render_to_string('phase1/discussion-room.html', context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
 def get_claim_list(request):
     forum = Forum.objects.get(id=request.session['forum_id'])
     response = {}

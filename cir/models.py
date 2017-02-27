@@ -745,10 +745,16 @@ class StatementQuestionComment(MPTTModel):
         order_insertion_by = ['-created_at']
 
     def get_author_name(self):
-        return self.author.first_name + " " + self.author.last_name
+        return self.author.first_name + self.author.last_name
 
     def get_datetime(self):
         return utils.pretty_date(self.created_at)
+
+class IsReadStatementQuestionComment(models.Model):
+    comment = models.ForeignKey(StatementQuestionComment)
+    reader = models.ForeignKey(User, on_delete=models.CASCADE)
+    question = models.ForeignKey(Claim)
+    is_read = models.BooleanField(default=False)
 
 class ClaimComment(MPTTModel):
     text = models.CharField(max_length=999)

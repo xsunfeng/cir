@@ -83,6 +83,7 @@ urlpatterns = patterns('',
     url(r'^phase1/put_statement_comment/$', phase1.put_statement_comment),
     url(r'^phase1/change_nugget_theme/$', phase1.change_nugget_theme),
     url(r'^phase1/get_statement_version/$', phase1.get_statement_version),
+    url(r'^phase1/init_discussion_room/$', phase1.init_discussion_room),
 
     url(r'^phase2/get_claim_list/$', phase2.get_claim_list),
     url(r'^phase2/get_nugget_list/$', phase2.get_nugget_list),
