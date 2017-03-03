@@ -745,7 +745,7 @@ class StatementQuestionComment(MPTTModel):
         order_insertion_by = ['-created_at']
 
     def get_author_name(self):
-        return self.author.first_name + self.author.last_name
+        return self.author.first_name + " " + self.author.last_name
 
     def get_datetime(self):
         return utils.pretty_date(self.created_at)

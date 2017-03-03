@@ -253,7 +253,16 @@ def api_draft_stmt(request):
     for category in category_list:
         context['categories'][category] = [slot.getAttrSlot(forum) for slot in slots.filter(claim_category=category).order_by('stmt_order')]
         response['slots_cnt'][category] += len(context['categories'][category])
-    
+    response['unread_questions'] = []
+    for category in category_list:
+        for slot in Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False, claim_category=category).order_by('stmt_order'):
+            count = IsReadStatementQuestionComment.objects.filter(question = slot, reader = request.user, is_read = False).count()
+            if (count > 0):
+                item = {
+                    "question_id": slot.id,
+                    "unread_count": count
+                }
+                response['unread_questions'].append(item)   
     # if request.user:
     #     actual_author = request.user
     #     context["my_statement"] = []

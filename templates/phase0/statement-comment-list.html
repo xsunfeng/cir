@@ -8,52 +8,83 @@
 	<h3>{{ slot_info.category|title|slice:"1" }}Q{{ slot_info.stmt_order }}: {{ slot_info.slot_title }}</h3>
 </div>
 
-<div class="ui threaded comments comment-container" style="width:100%; margin:auto; max-width: 960px;" slot-id="{{ slot.id }}">
-  	<h3 class="ui dividing header">Comments</h3>
+<div class="ui grid">
+	<div class="eight wide column">
+		<div class="ui threaded comments comment-container" style="width:100%; margin:auto; max-width: 960px;" slot-id="{{ slot.id }}">
+		  	<h3 class="ui dividing header">Discuss this question</h3>
 
-	<form class="ui form">
-		<div class="field" style="margin-bottom:0;">
-			<textarea rows="1"></textarea>
+			<form class="ui form">
+				<div class="field" style="margin-bottom:0;">
+					<textarea rows="1"></textarea>
+				</div>
+				<span class="actions">
+					<a href="#" class="reply comment-post">Comment</a>
+				</span>
+			</form>
+
+
+			{% load mptt_tags %}
+
+			{% recursetree comments %}
+				<div class="comment" comment-id="{{ node.id }}">
+					<a class="ui red empty circular label" style="float:right; display:none;"></a>
+					<a class="avatar">
+						<img style="width:40px;" src="{{ STATIC_URL }}/static/pictures/{{ node.author.id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
+					</a>
+					<div class="content">
+						<a class="author">{{ node.get_author_name }}</a>
+						<div class="metadata">
+							<span class="date">{{ node.get_datetime }}</span>
+						</div>
+						<div class="text">
+							<p>{{ node.text|safe }}</p>
+						</div>
+						<div class="actions">
+							<a class="reply comment-reply">Reply</a>
+						</div>
+						<form class="ui form" style="display:none;">
+							<div class="field" style="margin:0;">
+								<textarea rows="1" style="height:auto!important;"></textarea>
+							</div>
+							<a href="#" class="reply comment-reply-save">save</a><span> | </span><a href="#" class="reply comment-reply-cancel">cancel</a>
+						</form>
+					</div>	
+
+		            {% if not node.is_leaf_node %}
+		            	<div class="comments">
+		                {{ children }}
+		                </div>
+		            {% endif %}
+			    
+				</div>
+			{% endrecursetree %}
 		</div>
-		<span class="actions">
-			<a href="#" class="reply comment-post">Comment</a>
-		</span>
-	</form>
+	</div>
 
+	<div class="eight wide column">
+		<div class="ui comments statement-new-comment-container" style="width:100%; margin:auto; max-width: 960px;" slot-id="{{ slot.id }}">
+			<h3 class="ui dividing header">Latest comments on statements</h3>
 
-	{% load mptt_tags %}
-
-	{% recursetree comments %}
-		<div class="comment" comment-id="{{ node.id }}">
-			<a class="ui red empty circular label" style="float:right; display:none;"></a>
-			<a class="avatar">
-				<img style="width:40px;" src="{{ STATIC_URL }}/static/pictures/{{ node.author.id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
-			</a>
-			<div class="content">
-				<a class="author">{{ node.get_author_name }}</a>
-				<div class="metadata">
-					<span class="date">{{ node.get_datetime }}</span>
-				</div>
-				<div class="text">
-					<p>{{ node.text|safe }}</p>
-				</div>
-				<div class="actions">
-					<a class="reply comment-reply">Reply</a>
-				</div>
-				<form class="ui form" style="display:none;">
-					<div class="field" style="margin:0;">
-						<textarea rows="1" style="height:auto!important;"></textarea>
+			{% for comment in statement_comments %}
+			<div class="comment" comment-id="{{ node.id }}">
+				<a class="avatar">
+					<img style="width:40px;" src="{{ STATIC_URL }}/static/pictures/{{ comment.user_id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
+				</a>
+				<div class="content">
+					<a class="author">{{ comment.user_name }}</a>
+					<div class="metadata">
+						<span class="date">{{ comment.created_at }}</span>
 					</div>
-					<a href="#" class="reply comment-reply-save">save</a><span> | </span><a href="#" class="reply comment-reply-cancel">cancel</a>
-				</form>
-			</div>	
-
-            {% if not node.is_leaf_node %}
-            	<div class="comments">
-                {{ children }}
-                </div>
-            {% endif %}
-	    
+					<div class="text">
+						<p>{{ comment.content }}</p>
+					</div>
+					<div class="actions">
+						<a class="comment-to-statement-link" href="#" slot-id="{{ comment.slot_id }}" statement-id="{{ comment.statement_id }}">Link to statement S{{ comment.statement_id }}</a>
+					</div>
+				</div>	
+			</div>
+			{% endfor %}
 		</div>
-	{% endrecursetree %}
+	</div>
 </div>
+

@@ -59,7 +59,7 @@
 						Individual
 					</a>
 					<div class="ui text menu" style="margin:0;">
-						<a href='#' class="ui basic button" onclick='javascript:window.open("../vis", "_blank", "scrollbars=1,resizable=1,height=800,width=1200");' title='NuggetLens'>NuggetLens</a>	
+						<a href='#' class="ui item" onclick='javascript:window.open("../vis", "_blank", "scrollbars=1,resizable=1,height=800,width=1200");' title='NuggetLens'>NuggetLens</a>	
 					</div>
 				</div>
 			</div>
@@ -76,7 +76,7 @@
 
 <div id="slot-overview" style="font-size:1.2em; position:fixed; top:60px; bottom:0; left:50%; right:0;">
 	<h3 class="ui top attached center aligned header">
-		Statements
+		Statements 				
 	</h3>
 	<div class="ui attached segment" style="height: calc(100% - 38px);">
 		<div class="ui top attached tabular menu">
@@ -90,18 +90,11 @@
 				Cons
 			</a>
 			<div class="right menu">
-<!-- 				<div class="ui text menu" style="margin:0;">
-					<div class="header item">Sort By</div>
-					<a class="active item">
-						Date
+				<div class="ui text menu" style="margin:0;">
+					<a class="item" type="button" id="print-btn">
+						<i class="print icon"></i>Print
 					</a>
-					<a class="item">
-						#Comments
-					</a>
-					<a class="item">
-						#Votes
-					</a>
-				</div> -->
+				</div>
 			</div>
 		</div>
 		<div id="statement-container" class="ui bottom attached segment" style="height: calc(100% - 47px); overflow:hidden; overflow-y:scroll; ">
@@ -223,12 +216,12 @@
 	display:none;">
 </div>
 
-<div id="discussion-room-open" style="position:fixed; left:1.5rem; bottom:-2px; width:auto; height:3rem; background-color: #F3F3F3; -webkit-box-shadow: 0 0 5px 1px #d4d4d5; -moz-box-shadow: 0 0 5px 1px #d4d4d5; box-shadow: 0 0 5px 1px #d4d4d5; border: #bcbdbd 2px solid; padding:0.5rem">Discussion<div class="ui red circular label" style="margin-left: 0.5rem;">New</div></div>
+<div id="discussion-room-open" style="position:fixed; left:1.5rem; bottom:-2px; width:auto; height:3rem; background-color: #F3F3F3; -webkit-box-shadow: 0 0 5px 1px #d4d4d5; -moz-box-shadow: 0 0 5px 1px #d4d4d5; box-shadow: 0 0 5px 1px #d4d4d5; border: #bcbdbd 2px solid; padding:0.5rem">Discussion<div class="ui red circular label" style="margin-left: 0.5rem; display:none;">0</div></div>
 
 <div id="discussion-room" style="position:fixed; left:1.5rem; bottom:-2px; width:50%; min-width:300px; max-width:800px; height:75%; min-height:300px; max-height:800px; background-color: #F3F3F3; -webkit-box-shadow: 0 0 5px 1px #d4d4d5; -moz-box-shadow: 0 0 5px 1px #d4d4d5; box-shadow: 0 0 5px 1px #d4d4d5; border: #bcbdbd 2px solid; display:none;">
-
-
 </div>
+
+<div id="printableArea">test</div>
 
 {% include 'qa/qa-wrapper.html' %}
 

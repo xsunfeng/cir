@@ -1,13 +1,21 @@
 
 {% for slot_info in categories %}
 	<div class="ui red raised segment statement-entry" data-id="{{slot_info.id}}">
-		<h3>{{ slot_info.category|title|slice:"1" }}Q{{ slot_info.stmt_order }}: {{ slot_info.slot_title }}</h3>
-		<span> | </span>
-		<span style="float:right">
-			<!-- <a>8 Views</a> <span> | </span> -->
-			<a href="#" class="expand-info" >Expand</a> <span> | </span>
-			<a href="#" class="show-workspace" slot-id="{{ slot_info.id }}">Open Workspace</a>
-		</span>
+		<h3 style="margin-bottom: 0.5rem;">{{ slot_info.category|title|slice:"1" }}Q{{ slot_info.stmt_order }}: {{ slot_info.slot_title }}</h3>
+		<div class="ui text menu" style="margin: 0;">
+			<a class="item question-comment-2" style="padding-left: 0;">
+				<div class="ui large basic green label" style="margin-left: 0;">
+					<i class="wechat icon"></i>
+					Discuss
+  					<div class="detail">{{ slot_info.num_comments }}</div>
+				</div>
+				<div class="floating ui circular red label" style="display:none;">0</div>
+			</a>
+			<div class="right menu">
+				<a href="#" class="item expand-info" >Expand</a>
+				<a href="#" class="item show-workspace" slot-id="{{ slot_info.id }}">Open Workspace</a>
+			</div>
+		</div>
 		<div class="collapsed-info" style="display:none;">
 			<div class="ui divider" style="margin: 0.5rem 0;"></div>
 				{% if slot_info.adopted_versions %}

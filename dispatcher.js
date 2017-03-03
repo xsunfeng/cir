@@ -76,9 +76,10 @@ io.on('connection', function(socket) {
 	}).on('server:statement:editing_statement', function(data) {
 		// notify everyone except sender
 		socket.broadcast.emit('client:statement:editing_statement', data);
+	}).on('server:question:make_comment2question', function(data) {
+		// notify everyone except sender
+		socket.broadcast.emit('client:question:make_comment2question', data);
 	});
-
-
 
 	//// sending to sender-client only
 	//socket.emit('message', "this is a test");
@@ -104,4 +105,4 @@ io.on('connection', function(socket) {
 	//// sending to individual socketid
 	//socket.broadcast.to(socketid).emit('message', 'for your eyes only');
 });
-server.listen(443);
+server.listen(8001);

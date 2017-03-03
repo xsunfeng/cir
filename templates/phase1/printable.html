@@ -1,0 +1,15 @@
+{% for slot_info in questions %}
+	<div class="ui segment">
+		<h3>{{ slot_info.category|title|slice:"1" }}Q{{ slot_info.stmt_order }}: {{ slot_info.slot_title }}</h3>
+		
+		{% if slot_info.adopted_versions %}
+			{% for stmt in slot_info.adopted_versions %}
+				<div class="ui vertical segment">
+					<p>
+						[ST{{ forloop.counter }}] {{ stmt.content | safe }}
+					</p>
+				</div>
+			{% endfor %}
+		{% endif %}
+	</div>
+{% endfor %}

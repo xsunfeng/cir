@@ -123,6 +123,13 @@ define([
 				module.drag_drop_events();
 				var category = sessionStorage.getItem("category");
 				$('.category-tab[data-id=' + category + ']').click();
+				if (xhr.unread_questions.length > 0) {
+					for (var i = 0; i < xhr.unread_questions.length; i++) {
+						var count = xhr.unread_questions[i].unread_count;
+						$(".statement-entry[data-id=" + xhr.unread_questions[i].question_id + "] .question-comment-2 .red.label").text(count)
+						$(".statement-entry[data-id=" + xhr.unread_questions[i].question_id + "] .question-comment-2 .red.label").show();
+					}
+				}
 			},
 			error: function(xhr) {
 				$('#draft-stmt').css('opacity', '1.0');
@@ -310,6 +317,94 @@ define([
 		});		
 	};
 
+	DiscussionRoom = {
+		show: function(callback){
+			$("#discussion-room").show();
+			if ($.trim($("#discussion-room").html())=='') {
+				$("#discussion-room").html('<div class="ui massive active text loader">Loading Latest Comments...</div>');
+				$.ajax({
+					url: '/phase1/init_discussion_room/',
+					type: 'post',
+					data: {
+					},
+					success: function(xhr) {
+						$("#discussion-room").html(xhr.discussion_room);
+						// if directly opened in a workspace, no need to show latest 5 then 
+						if (callback && typeof(callback) == "function") {
+							callback(); // switch to the corresponding question tab
+						} else {
+							$("#discussion-room-container").html(xhr.latest5);
+						}
+						for (var i = 0; i < xhr.unread_questions.length; i++) {
+							var question_id = xhr.unread_questions[i].question_id;
+							var count = xhr.unread_questions[i].unread_count;
+							$(".discussion-room-question-tab[slot-id=" + question_id + "] .red.label").text(count);
+							$(".discussion-room-question-tab[slot-id=" + question_id + "] .red.label").show();
+						}
+					},
+					error: function(xhr) {
+						if (xhr.status == 403) {
+							Utils.notify('error', xhr.responseText);
+						}
+					}
+				});		
+			} else {
+				if (callback && typeof(callback) == "function") {
+					callback(); // switch to the corresponding question tab
+				}				
+			}
+		},
+		update: {
+			overall: function() {
+				$.ajax({
+					url: '/phase1/init_discussion_room/',
+					type: 'post',
+					data: {
+					},
+					success: function(xhr) {
+						if (xhr.unread_questions.length > 0) {
+							var count = 0;
+							for (var i = 0; i < xhr.unread_questions.length; i++) {
+								count += xhr.unread_questions[i].unread_count;
+							}
+							$("#discussion-room-open .red.label").text(count);
+							$("#discussion-room-open .red.label").show();
+						} else {
+							$("#discussion-room-open .red.label").hide();
+						}
+					},
+					error: function(xhr) {
+						if (xhr.status == 403) {
+							Utils.notify('error', xhr.responseText);
+						}
+					}
+				});
+			},			
+			question: function() {
+				$.ajax({
+					url: '/phase1/init_discussion_room/',
+					type: 'post',
+					data: {
+					},
+					success: function(xhr) {
+						if (xhr.unread_questions.length > 0) {
+							for (var i = 0; i < xhr.unread_questions.length; i++) {
+								var count = xhr.unread_questions[i].unread_count;
+								$(".statement-entry[data-id=" + xhr.unread_questions[i].question_id + "] .question-comment-2 .red.label").text(count)
+								$(".statement-entry[data-id=" + xhr.unread_questions[i].question_id + "] .question-comment-2 .red.label").show();
+							}
+						}
+					},
+					error: function(xhr) {
+						if (xhr.status == 403) {
+							Utils.notify('error', xhr.responseText);
+						}
+					}
+				});
+			}
+		}
+	};
+
 	module.get_nugget_list = function() {
 		var promise = $.ajax({
 			url: '/phase1/get_nugget_list/',
@@ -464,12 +559,48 @@ define([
 
 	module.initEvents = function() {
 
+		$("body").on("click", "#print-btn", function(){
+			$.ajax({
+				url: '/phase1/init_printable/',
+				data: {
+				},
+				success: function(xhr) {
+					$("#printableArea").html(xhr.printable)
+					var divName = "printableArea";
+					var printContents = document.getElementById(divName).innerHTML;
+					var originalContents = document.body.innerHTML;
+
+					document.body.innerHTML = printContents;
+					window.print();
+					document.body.innerHTML = originalContents;
+					$("#printableArea").empty("")
+				},
+			})	
+		});
+
 		$("body").on("click", ".discussion-room-question-tab", function(){
 			$(".discussion-room-question-tab").removeClass("active");
+			
+			var count = 1 * $(this).find(".red.label").text();
+			$(this).find(".red.label").text(0);
 			$(this).find(".red.label").hide();
+			var $label = $("#discussion-room-open .red.label");
+			var total = 1 * $label.text();
+			total = total - count;
+			if (total == 0) {
+				$label.hide();
+			}
+			$label.text(total);
+
 			$(this).addClass("active");
-			var slot_id = $(this).attr("slot-id");
-			showSlotCommentList(slot_id);
+			if ($(this)[0].hasAttribute("slot-id")) {
+				var slot_id = $(this).attr("slot-id");
+				showSlotCommentList(slot_id);
+				$(".show-workspace[slot-id=" + slot_id + "]").click();		
+			} else {
+				$("#discussion-room").html("");
+				DiscussionRoom.show();
+			}
 		});
 
 		$("body").on("click", ".temp-used.label", function(){
@@ -577,7 +708,9 @@ define([
 				 + '>N' + claim_id + '<i class="delete icon"></i></a>';
 			$("#use-nugget-labels").append(new_label);
 			var text = $(this).closest(".src_claim").find("span").text();
-			text = $("textarea.reword.editor").val() + text;
+			if ($("textarea.reword.editor").val().trim() != "") {
+				text = $("textarea.reword.editor").val() + "\n\n" + text;
+			}
 			$("textarea.reword.editor").val(text);
 			textarea_autoresize();
 		}).on('click', '#use-nugget-labels i.delete.icon', function(e) {
@@ -716,6 +849,7 @@ define([
 					collective: collective,
 				},
 				success: function(xhr) {
+					$("#statement-editor").hide();
 					if (collective == 'true') {
 						// the new version is adopted!
 						$(".show-workspace[data-id=" + slot_id + "]").click();
@@ -775,6 +909,7 @@ define([
 			sessionStorage.setItem('statement-view', 'list');
 		}).on("click", "#close-suggest-statement-window", function(){
 			$("#suggest-statement-window").hide();
+			$("#statement-editor").hide();
 		}).on("click", ".show-workspace", function(){
 			var slot_id = $(this).attr("slot-id");
 			$('#slot-detail').attr("slot-id",slot_id);
@@ -927,30 +1062,29 @@ define([
 			});	
 		}
 
+		$('body').on('click', '.question-comment-2', function(){
+			var slot_id = $(this).closest(".statement-entry").attr("data-id");
+			if ($("#discussion-room").is(":visible")) {
+				$(".discussion-room-question-tab[slot-id=" + slot_id + "]").click();
+			} else {
+				DiscussionRoom.show(function(){
+					$(".discussion-room-question-tab[slot-id=" + slot_id + "]").click();			
+				});
+			}
+		});
+
 		$('body').on('click', '.statement-question-comment-btn', function(){
 			var slot_id = $(this).attr("slot-id");
-			$("#discussion-room").show();
-			$.ajax({
-				url: '/phase1/init_discussion_room/',
-				type: 'post',
-				data: {
-				},
-				success: function(xhr) {
-					$("#discussion-room").html(xhr.discussion_room);
-					for (var i = 0; i < xhr.unread_questions.length; i++) {
-						var question_id = xhr.unread_questions[i];
-						$(".discussion-room-question-tab[slot-id=" + question_id + "] .red.label").show();
-					}
-					$(".discussion-room-question-tab[slot-id=" + slot_id + "]").click();
-				},
-				error: function(xhr) {
-					if (xhr.status == 403) {
-						Utils.notify('error', xhr.responseText);
-					}
-				}
-			});
+			if ($("#discussion-room").is(":visible")) {
+				$(".discussion-room-question-tab[slot-id=" + slot_id + "]").click();
+			} else {
+				DiscussionRoom.show(function(){
+					$(".discussion-room-question-tab[slot-id=" + slot_id + "]").click();			
+				});
+			}
 		}).on('click', '.suggest-statement-window-open', function(){
 			$("#suggest-statement-window").show();
+			$("#statement-editor").show();
 		});
 
 	$("body").on("click", ".comment-post", function(){
@@ -972,7 +1106,10 @@ define([
 				success: function(xhr) {
 					textarea.val("");
 					showSlotCommentList(slot_id);
-					// updateStatementCommentList();
+
+					Socket.makeComment2Question({
+						'question_id': slot_id
+					});
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -998,6 +1135,10 @@ define([
 				textarea.val("");
 				textarea.closest(".form").hide();
 				showSlotCommentList(slot_id);
+
+				Socket.makeComment2Question({
+					'question_id': slot_id
+				});
 			},
 			error: function(xhr) {
 				if (xhr.status == 403) {
@@ -1337,20 +1478,25 @@ define([
 		$("body").on("click", ".comment-to-statement-link", function(){
 			var statement_id = $(this).attr("statement-id");
 			var slot_id = $(this).attr("slot-id");
-			$(".show-workspace[slot-id=" + slot_id + "]").click();
-			$('#claim-activity-feed').feed('update', {
-				'type': 'claim',
-				'id': slot_id,
-			}, function(){
-				setTimeout(function(){
-					if (!$(".statement-entry[data-id="+ statement_id +"] .statement-comments").is(":visible")){
-						$(".statement-entry[data-id="+ statement_id +"] .statement-comment-btn").click();
-					}
-					$(".container").animate({scrollTop: 0}, 0);
-					var $feed = $(".statement-entry[data-id="+ statement_id +"]");
-					$('.container').animate({scrollTop: $feed.offset().top - 200}, 0);
-				}, 1000);
-			});
+			// $(".show-workspace[slot-id=" + slot_id + "]").click();
+			// $('#claim-activity-feed').feed('update', {
+			// 	'type': 'claim',
+			// 	'id': slot_id,
+			// }, function(){
+			// 	setTimeout(function(){
+			// 		if (!$(".statement-entry[data-id="+ statement_id +"] .statement-comments").is(":visible")){
+			// 			$(".statement-entry[data-id="+ statement_id +"] .statement-comment-btn").click();
+			// 		}
+			// 		$(".container").animate({scrollTop: 0}, 0);
+			// 		var $feed = $(".statement-entry[data-id="+ statement_id +"]");
+			// 		$('.container').animate({scrollTop: $feed.offset().top - 200}, 0);
+			// 	}, 1000);
+			// });
+			$(".statement-comments").hide();
+			$(".statement-entry[data-id="+ statement_id +"] .statement-comment-btn").click();
+			$(".container").animate({scrollTop: 0}, 0);
+			var $feed = $(".statement-entry[data-id="+ statement_id +"]");
+			$('.container').animate({scrollTop: $feed.offset().top - 200}, 0);
 		});
 
 		$("body").on("click", ".statement-comment-post", function(){
@@ -1467,25 +1613,7 @@ define([
 		});
 
 		$("body").on("click", "#discussion-room-open", function(){
-			$("#discussion-room").show();
-			$.ajax({
-				url: '/phase1/init_discussion_room/',
-				type: 'post',
-				data: {
-				},
-				success: function(xhr) {
-					$("#discussion-room").html(xhr.discussion_room);
-					for (var i = 0; i < xhr.unread_questions.length; i++) {
-						var question_id = xhr.unread_questions[i];
-						$(".discussion-room-question-tab[slot-id=" + question_id + "] .red.label").show();
-					}
-				},
-				error: function(xhr) {
-					if (xhr.status == 403) {
-						Utils.notify('error', xhr.responseText);
-					}
-				}
-			});
+			DiscussionRoom.show();
 		}).on("click", "#discussion-room-close", function(){
 			$("#discussion-room").hide();
 		});
@@ -1727,6 +1855,7 @@ define([
 	}
 
 	module.initLayout = function() {
+
 		$.when(module.get_theme_list()).done(function(promise1) {
 			$.when(module.get_nugget_list()).done(function(promise1) {
 				module.get_document_toc();
@@ -1772,7 +1901,8 @@ define([
 		})
 
 		module.update_statement();
-
+		DiscussionRoom.update.overall();
+		DiscussionRoom.update.question();
 	}
 
 	var textarea_autoresize = function(){

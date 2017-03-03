@@ -39,12 +39,30 @@ def get_statement_comment_list(request):
     thread_comments = StatementQuestionComment.objects.filter(statement_question = this_slot)
     context['comments'] = thread_comments
     context['slot'] = this_slot
-    response['statement_comment_list'] = render_to_string("phase0/statement-comment-list.html", context)
     response['unread_comments'] = []
     for r in IsReadStatementQuestionComment.objects.filter(question_id = slot_id, reader = request.user, is_read = False):
         response['unread_comments'].append(r.comment.id)
         r.is_read = True
         r.save()
+    statement_comments = []
+    for claim_version in this_slot.versions.all():
+        for comment in StatementComment.objects.filter(claim_version = claim_version):
+            item = {}
+            user = comment.author
+            item["user_id"] = user.id
+            item["created_at"] = utils.pretty_date(comment.created_at)
+            item["content"] = comment.text
+            item["role"] = ""
+            if user.role.filter(forum = forum).exists():
+                item["role"] = user.role.filter(forum = forum)[0].role
+            item["user_name"] = user.first_name + " " + user.last_name
+            item["id"] = comment.id
+            item["timestamp"] = comment.created_at.strftime("%s")
+            item["slot_id"] = claim_version.claim.id
+            item["statement_id"] = claim_version.id
+            statement_comments.append(item)
+    context["statement_comments"] = sorted(statement_comments, key=lambda item: item['timestamp'], reverse=True)
+    response['statement_comment_list'] = render_to_string("phase0/statement-comment-list.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def put_statement_comment(request):

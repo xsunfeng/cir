@@ -1,0 +1,19 @@
+		<div class="ui cards">
+			{% for comment in latest_comments %}
+			<div class="card" style="width:100%;">
+				<div class="content">
+					<img class="right floated mini ui image" src="{{ STATIC_URL }}/static/pictures/{{ comment.user_id }}.png" onerror="this.src = '{{ STATIC_URL }}/static/pictures/default-avatar.png';">
+					<div class="header">
+						{{ comment.user_name }}
+					</div>
+					<div class="meta">
+						{{ comment.question.id }}
+						{{ comment.created_at }} | Question {{ comment.question.category|title|slice:"1" }}Q{{ comment.question.stmt_order }}
+					</div>
+					<div class="description">
+						{{ comment.content }}
+					</div>
+				</div>
+			</div>
+			{% endfor %}
+		</div>

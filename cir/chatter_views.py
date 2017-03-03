@@ -30,24 +30,6 @@ def api_chatter(request):
         integrated_messages = []
         for message in messages:
             integrated_messages.append(message.getAttr())
-        for claim in Claim.objects.filter(forum = forum):
-            for claim_version in claim.versions.all():
-                for comment in StatementComment.objects.filter(claim_version = claim_version):
-                    item = {}
-                    user = comment.author
-                    item["user_id"] = user.id
-                    item["created_at"] = utils.pretty_date(comment.created_at)
-                    item["content"] = comment.text
-                    item["role"] = ""
-                    if user.role.filter(forum = forum).exists():
-                        item["role"] = user.role.filter(forum = forum)[0].role
-                    item["user_name"] = user.last_name + " " + user.first_name
-                    item["id"] = comment.id
-                    item["timestamp"] = comment.created_at.strftime("%s")
-                    item["slot_id"] = claim_version.claim.id
-                    item["statement_id"] = claim_version.id
-                    integrated_messages.append(item)
-        integrated_messages = sorted(integrated_messages, key=lambda item: item['timestamp'], reverse=False)
         response['messages'] = integrated_messages
         # if len(messages) > 25:
         #     for i in range(24, -1, -1):

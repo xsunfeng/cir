@@ -40,6 +40,9 @@ define([
 		},
 		editingStatement: function(data) {
 			socket.emit('server:statement:editing_statement', data);
+		},
+		makeComment2Question: function(data) {
+			socket.emit('server:question:make_comment2question', data);
 		}
 	};
 
@@ -161,6 +164,24 @@ define([
 					$(".statement-entry[data-id=" + data.statement_id + "] .edited-status").show();
 				}
 				console.log(data);			
+			}).on('client:question:make_comment2question', function(data) {
+				var question_id = data.question_id;
+				var $label1 = $(".statement-entry[data-id=" + question_id + "] .question-comment-2 .red.label");
+				var $label2 = $(".discussion-room-question-tab[slot-id=" + question_id + "] .red.label");
+				var count = 1 * $label1.text();
+				if (count == 0) {
+					$label1.show();
+					$label2.show();
+				}
+				$label1.text(1 + count);
+				$label2.text(1 + count);
+
+				var $label3 = $("#discussion-room-open .red.label");
+				count = 1 * $label3.text();
+				if (count == 0) {
+					$label3.show();
+				}
+				$label3.text(1 + count);
 			});
 		}
 	}, function(err) {

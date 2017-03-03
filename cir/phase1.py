@@ -419,6 +419,18 @@ def api_edit_claim(request):
     response = {}
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
+def init_printable(request):
+    response = {}
+    context = {}
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    category_list = ['finding', 'pro', 'con']
+    context['questions'] = []
+    for category in category_list:
+        for slot in Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False, claim_category=category).order_by('stmt_order'):
+            context['questions'].append(slot.getAttrSlot(forum))
+    response['printable'] = render_to_string('phase1/printable.html', context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
 def init_discussion_room(request):
     response = {}
     context = {}
@@ -430,8 +442,13 @@ def init_discussion_room(request):
     for category in category_list:
         for slot in Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False, claim_category=category).order_by('stmt_order'):
             context['questions'].append(slot.getAttrSlot(forum))
-            if (IsReadStatementQuestionComment.objects.filter(question = slot, reader = request.user, is_read = False).count() > 0):
-                response['unread_questions'].append(slot.id)
+            count = IsReadStatementQuestionComment.objects.filter(question = slot, reader = request.user, is_read = False).count()
+            if (count > 0):
+                item = {
+                    "question_id": slot.id,
+                    "unread_count": count
+                }
+                response['unread_questions'].append(item)
     latest_comments = []
     for claim in Claim.objects.filter(forum = forum):
         for comment in StatementQuestionComment.objects.filter(statement_question = claim):
@@ -448,12 +465,13 @@ def init_discussion_room(request):
         item["role"] = ""
         if user.role.filter(forum = forum).exists():
             item["role"] = user.role.filter(forum = forum)[0].role
-        item["user_name"] = user.last_name + " " + user.first_name
+        item["user_name"] = user.first_name + " " + user.last_name
         item["id"] = comment.id
         item["timestamp"] = comment.created_at.strftime("%s")
         item["question"] = comment.statement_question.getAttrSlot(forum)
         context['latest_comments'].append(item)
     response['discussion_room'] = render_to_string('phase1/discussion-room.html', context)
+    response['latest5'] = render_to_string('phase1/latest5.html', context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def get_claim_list(request):
