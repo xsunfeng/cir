@@ -18,6 +18,8 @@ MANAGERS = ADMINS
 
 server_ip = socket.gethostbyname(socket.gethostname())
 
+GEOS_LIBRARY_PATH = 'C:/OSGeo4W64/bin/geos_c.dll'
+
 # determine if the IST DB can be connected. if not, use local db.
 if '130.203' in server_ip:
     SERVER_HOST = '130.203.136.141'
