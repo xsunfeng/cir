@@ -7,7 +7,7 @@ if 'cai' in socket.getfqdn():
     DEBUG = True
 else:
     DEBUG = True
-
+GEOS_LIBRARY_PATH = 'C:/OSGeo4W64/bin/geos_c.dll'
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -16,7 +16,7 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-SERVER_HOST =  '130.203.136.141'
+SERVER_HOST =  '127.0.0.1'
 
 # dispatcher url
 # if DEBUG:

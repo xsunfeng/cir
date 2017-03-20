@@ -358,10 +358,14 @@ class Claim(Entry):
                 'author': adopted_version.author.get_full_name()
             })
         for claimref in self.older_versions.filter(refer_type='stmt'):
+            if claimref.from_claim.theme:
+                theme = claimref.from_claim.theme.name
+            else:
+                theme = ''
             attr['claims'].append({
                 'id': claimref.from_claim.id,
                 'content': claimref.from_claim.adopted_version().content,
-                'theme': claimref.from_claim.theme.name
+                'theme': theme
             })
         return attr
 
