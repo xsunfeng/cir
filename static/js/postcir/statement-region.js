@@ -56,8 +56,32 @@ define([
     function initLayout() {
         $('.ui.accordion').accordion();
 
+        $('.open-comments').click(function() {
+            module.active_stmt_group_id = this.getAttribute('data-id');
+            $('#opinion-board').dimmer('show');
+            $('#stmt-question-board').addClass('loading').show();
+            $.ajax({
+                url: urlPrefix + '/api_stmt_question/',
+                type: 'post',
+                data: {
+                    'action': 'load-posts',
+                    'stmt_group_id': module.active_stmt_group_id
+                },
+                success: function (xhr) {
+                    $('#stmt-question-board')
+                        .html(xhr.html)
+                        .removeClass('loading');
+                },
+                error: function (xhr) {
+                    if (xhr.status == 403) {
+                        Utils.notify('error', xhr.responseText);
+                    }
+                }
+            });
+        });
+
         if ($('body').attr('data-flavour') == 'mobile') {
-            return;
+            return; // skip highlighting function
         }
 
         // information of the new highlight
@@ -141,30 +165,6 @@ define([
                 highlight_id: null
             });
             module.newHighlight = {};
-        });
-
-        $('.open-comments').click(function() {
-            module.active_stmt_group_id = this.getAttribute('data-id');
-            $('#opinion-board').dimmer('show');
-            $('#stmt-question-board').addClass('loading').show();
-            $.ajax({
-                url: urlPrefix + '/api_stmt_question/',
-                type: 'post',
-                data: {
-                    'action': 'load-posts',
-                    'stmt_group_id': module.active_stmt_group_id
-                },
-                success: function (xhr) {
-                    $('#stmt-question-board')
-                        .html(xhr.html)
-                        .removeClass('loading');
-                },
-                error: function (xhr) {
-                    if (xhr.status == 403) {
-                        Utils.notify('error', xhr.responseText);
-                    }
-                }
-            });
         });
     }
 
