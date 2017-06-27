@@ -47,16 +47,16 @@ else:
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
             'NAME': 'cir_backup_20161125',  # Or path to database file if using sqlite3.
-            'USER': 'homestead',
-            'PASSWORD': 'secret',
+            'USER': 'yetia',
+            'PASSWORD': '',
             'HOST': SERVER_HOST,
             'PORT': '',  # Set to empty string for default.
         },
         'dev': {
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
             'NAME': 'cir_backup_20161125',  # Or path to database file if using sqlite3.
-            'USER': 'homestead',
-            'PASSWORD': 'secret',
+            'USER': 'yetia',
+            'PASSWORD': '',
             'HOST': SERVER_HOST,
             'PORT': '',  # Set to empty string for default.
         }
