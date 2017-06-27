@@ -142,7 +142,8 @@ def api_highlight(request):
                 entry=claim, created_at=now, slot=slot, event_type='add')
         response["slot_id"] = slot.id
         response["slot_order"] = slot.stmt_order
-        response['theme_id'] = slot.theme.id
+        if slot.theme:
+            response['theme_id'] = slot.theme.id
         return HttpResponse(json.dumps(response), mimetype='application/json')
     if action == 'load-doc':
         doc_id = request.REQUEST.get('doc_id')
