@@ -194,7 +194,6 @@ def _get_phases(forum, selected_phase):
         else:
             phase_info['status'] = 'disabled'
         results['phases'].append(phase_info)
-    print results
     return results
 
 

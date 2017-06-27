@@ -272,16 +272,15 @@ def api_draft_stmt(request):
     #     for slot_id in my_slot_ids:
     #         slot = Claim.objects.get(id = slot_id)
     #         if (slot.is_deleted == False): context["my_statement"].append(slot.getAttrSlot(forum))
-        # for slot in Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False).order_by('created_at'):
-        #     if (SlotAssignment.objects.filter(slot = slot, user = actual_author).count() > 0):
-        #         context["my_statement"].append(slot.getAttrSlot(forum))
-        # response['my_statement'] = render_to_string('phase3/my-statement.html', context)
+    #     for slot in Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False).order_by('created_at'):
+    #         if (SlotAssignment.objects.filter(slot = slot, user = actual_author).count() > 0):
+    #             context["my_statement"].append(slot.getAttrSlot(forum))
+    #     response['my_statement'] = render_to_string('phase3/my-statement.html', context)
 
-    # if request.session['selected_phase'] == 'categorize':
-    #     response['html'] = render_to_string('phase3/draft-stmt.html', context)
-    # else:
-    #     response['html'] = render_to_string('phase4/draft-stmt.html', context)
-    response['html'] = render_to_string('phase1/statement.html', context)
+    if request.session['selected_phase'] == 'categorize':
+        response['html'] = render_to_string('phase3/draft-stmt.html', context)
+    else:
+        response['html'] = render_to_string('phase4/draft-stmt.html', context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_claim(request):

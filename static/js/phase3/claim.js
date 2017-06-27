@@ -243,6 +243,6 @@ define([
 	Socket.activeClaimModule = module;
 	DraftStmt.update();
 	QA.updateQuestionList();
-	ClaimFilter.updateNavigator({'filter': true});
+	// ClaimFilter.updateNavigator({'filter': true});
 	return module;
 });
