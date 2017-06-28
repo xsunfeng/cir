@@ -1,35 +1,24 @@
 {% for slot_info in categories %}
-	<li class="item phase3 slot" data-id="{{ slot_info.id }}">
+	<div class="item phase3 slot" data-id="{{ slot_info.id }}" style="position:relative">
 		<div class="ui stacked segment">
-			<div>
+			<div style="display:flex">
 				<i class="reorder-handle vertical resize icon"></i>
 				<span class="slot-title{% if not slot_info.slot_title %} empty{% endif %}">
-					{% if slot_info.slot_title %}{{ slot_info.slot_title }}{% else %} (Click to name this slot){% endif %}
+                    {% if slot_info.slot_title %}<b>Question: </b>{{ slot_info.slot_title }}{% else %} (Click to name this slot){% endif %}
 				</span>
-				<button class="show-workspace" data-id="{{ slot_info.id }}">open workspace</button>
 			</div>
-			{% if slot_info.adopted_versions %}
-				<span class="description">The following statement(s) have been produced by the CIR panel from this slot.</span>
-				{% for stmt in slot_info.adopted_versions %}
-					<div class="src_claim ui secondary segment" data-id="{{ stmt.id }}"><div class="ui label">Statement</div>
-						{{ stmt.content | safe }}
-						<div class="claim-metainfo">Composed by {{ stmt.author }}</div>
-					</div>
-				{% endfor %}
-			{% else %}
-				<div class="ui secondary segment">
-					No statement has been produced from this slot.
-				</div>
-			{% endif %}
+            {% if slot_info.claims %}
 			{% for src_claim in slot_info.claims %}
-				<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}"><div class="ui label">C{{ src_claim.id }}</div>
+				<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}">
 					{{ src_claim.content | safe }}
-					<div class="ui destmt circular icon red button"><i class="trash icon"></i></div>
+					<div class="ui destmt circular icon red button"><i class="remove icon"></i></div>
 				</div>
-			{% endfor %}
+			{% endfor %}{% else %}
+                <div class="ui vertical segment">(Empty)</div>
+            {% endif %}
 		</div>
 		<div class = "slot-workspace" data-id="{{ slot_info.id }}">
 		</div>
-	</li>
+	</div>
 {% endfor %}
 <div class="droppable-edge"></div>

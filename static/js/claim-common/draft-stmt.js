@@ -118,9 +118,9 @@ define([
 			$('#claim-stmt-helper')
 				.css('left', e.clientX)
 				.css('top', e.clientY);
-			$('#draft-stmt .phase4.slot[data-id="' + module.activeSlotId + '"]').removeClass('active');
+			$('#draft-stmt .slot[data-id="' + module.activeSlotId + '"]').removeClass('active');
 
-			var slots = $('#draft-stmt .phase4.slot');
+			var slots = $('#draft-stmt .slot');
 			module.$slotOnHover = null;
 
 			for (var i = 0; i < slots.length; i ++) {
@@ -134,7 +134,7 @@ define([
 					break;
 				}
 			}
-			$('#draft-stmt .phase4.slot').removeClass('to-drop');
+			$('#draft-stmt .slot').removeClass('to-drop');
 			if (!module.$slotOnHover) {
 				return false;
 			}
@@ -162,7 +162,7 @@ define([
 					delete module.activeSlotId;
 				});
 			} else {
-				$('#draft-stmt .phase4.slot[data-id="' + module.activeSlotId + '"]').addClass('active');
+				$('#draft-stmt .slot[data-id="' + module.activeSlotId + '"]').addClass('active');
 				delete module.draggingClaimId;
 				delete module.activeSlotId;
 			}
@@ -379,10 +379,10 @@ define([
 				}
 
 				if (module.activeSlotId) {
-					$('#draft-stmt .phase4.slot[data-id="' + module.activeSlotId + '"]').addClass('active');
+					$('#draft-stmt .slot[data-id="' + module.activeSlotId + '"]').addClass('active');
 				}
 				initSortable();
-				updateProgressBars();
+				// updateProgressBars();
 				module.update_claim_usage();
 			},
 			error: function(xhr) {
@@ -417,7 +417,7 @@ define([
 			$(claim).find(".slot-assignment").empty();
 			var claim_id = $(claim).attr("data-id");
 			if (claim_id in claim_to_slot_hash) {
-				var html = '<i class="warning sign icon"></i>This claim has been categorized into: ';
+				var html = 'Nugget used in: ';
 				for (var j = 0; j < claim_to_slot_hash[claim_id].length; j++){
 					html += claim_to_slot_hash[claim_id][j];
 					if (j != claim_to_slot_hash[claim_id].length - 1) html += ", ";

@@ -1,30 +1,15 @@
-<div class="ui indicating finding stmt progress">
-	<div class="title">Key Findings</div>
-	<div class="bar"></div>
-	<div class="label"></div>
-</div>
-<ol class="ui list" data-list-type="finding">
+<h3 class="ui center aligned header">Statement: Key Findings</h3>
+<div class="ui list" data-list-type="finding">
 	<div class="ui warning message" style="display:none"></div>
 	{% include 'phase3/draft-stmt-list.html' with categories=categories.finding %}
-</ol>
-<div class="ui indicating pro stmt progress">
-	<div class="title">Pro Statements</div>
-	<div class="bar"></div>
-	<div class="label"></div>
-</div>`
-<ol class="ui list" data-list-type="pro">
+</div>
+<h3 class="ui center aligned header">Statement: Proponent Statements</h3>
+<div class="ui list" data-list-type="pro">
 	<div class="ui warning message" style="display:none"></div>
 	{% include 'phase3/draft-stmt-list.html' with categories=categories.pro %}
-</ol>
-<div class="ui indicating con stmt progress">
-	<div class="title">Con Statements</div>
-	<div class="bar"></div>
-	<div class="label"></div>
 </div>
-<ol class="ui list" data-list-type="con">
+<h3 class="ui center aligned header">Statement: Opponent Statements</h3>
+<div class="ui list" data-list-type="con">
 	<div class="ui warning message" style="display:none"></div>
 	{% include 'phase3/draft-stmt-list.html' with categories=categories.con %}
-</ol>
-
-<div style="height: 500px;">
 </div>
