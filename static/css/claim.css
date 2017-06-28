@@ -184,7 +184,6 @@ a.claim-vote-btn.unready:hover {
 }
 
 #draft-stmt .phase3.slot .src_claim {
-	max-height: 6em;
 	overflow: hidden;
 	color: #999999;
 	line-height: 1.4;
