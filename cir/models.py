@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.gis.db import models
 from django.contrib.auth.models import User
 
@@ -394,11 +396,18 @@ class Claim(Entry):
                 'num_comments': StatementComment.objects.filter(claim_version = unadopted_version).count()
             })
         for claimref in self.older_versions.filter(refer_type='stmt'):
+            # load claim content from "claim_version" under metadata if possible.
+            try:
+                claim_content = json.loads(claimref.metadata)['claim_version']
+                claim_theme = json.loads(claimref.metadata)['claim_tag']
+            except TypeError:
+                claim_content = claimref.from_claim.adopted_version().content
+                claim_theme = ''
             attr['claims'].append({
                 'id': claimref.from_claim.id,
-                'content': claimref.from_claim.adopted_version().content,
+                'content': claim_content,
                 # 'theme': claimref.from_claim.theme.name
-                'theme': "null",
+                'theme': claim_theme,
                 'statement_ids': StatementClaim.objects.filter(claim_id = claimref.from_claim.id).values_list("statement_id", flat = True),
                 'num_statements': StatementClaim.objects.filter(claim_id = claimref.from_claim.id).count() 
             })

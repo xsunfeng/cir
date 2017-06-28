@@ -11,9 +11,9 @@
 	{% if claim.collective %}
 		<a class="ui teal right ribbon label">Collective</a>
 	{% endif %}
-		<div class="claim-content">
+		<p class="claim-content">
 			{{ claim.content|safe }}
-		</div>
+		</p>
 		<div class="claim-metainfo ui horizontal bulleted link list">
 			<div class="item" data-id="{{ claim.author_id }}">{{ claim.author_name }}</div>
             <div class="item"><abbr title="{{ claim.updated_at_full }}">{{ claim.updated_at }}</abbr></div>

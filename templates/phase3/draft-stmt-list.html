@@ -1,7 +1,7 @@
 {% for slot_info in categories %}
 	<div class="item phase3 slot" data-id="{{ slot_info.id }}" style="position:relative">
 		<div class="ui stacked segment">
-			<div style="display:flex">
+			<div>
 				<span class="slot-title{% if not slot_info.slot_title %} empty{% endif %}">
                     {% if slot_info.slot_title %}<b>Question: </b>{{ slot_info.slot_title }}{% else %} (Click to name this slot){% endif %}
 				</span>
@@ -9,7 +9,8 @@
             {% if slot_info.claims %}
 			{% for src_claim in slot_info.claims %}
 				<div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}">
-					{{ src_claim.content | safe }}
+					{% if src_claim.theme %}<div class="ui label">{{ src_claim.theme }}</div>{% endif %}
+                    <div>{{ src_claim.content | safe }}</div>
 					<div class="ui destmt circular icon red button"><i class="remove icon"></i></div>
 				</div>
 			{% endfor %}{% else %}

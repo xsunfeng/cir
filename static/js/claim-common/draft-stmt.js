@@ -248,6 +248,7 @@ define([
 
 	function initSlotAssignmentModal() {
         $('#slot-assignment-options').modal({
+            closable: false,
             onApprove: function() {
                 _stmtUpdater({
                 	'action': 'add-to-slot',
@@ -268,6 +269,9 @@ define([
                 	// phase 3, open workspace after drop
                 	$(".show-workspace[data-id=" + xhr.slot_id + "]").click();
                 });
+            },
+            onDeny: function() {
+                clearDropStatus();
             }
         });
     }

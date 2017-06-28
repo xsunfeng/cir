@@ -228,20 +228,13 @@ def api_draft_stmt(request):
         claim = Claim.objects.get(id=request.REQUEST['claim_id'])
         slot = Claim.objects.get(id=request.REQUEST['slot_id'])
         ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=slot).delete()
-        if request.session['selected_phase'] == 'categorize' and ClaimReference.objects.filter(refer_type='stmt',
-                                                                                               to_claim=slot).count() == 0:
-            # the last reference is removed, when in categorize phase
-            slot.is_deleted = True
-            slot.stmt_order = None
-            slot.save()
+        if 'actual_user_id' in request.session:
+            actual_author = User.objects.get(id=request.session['actual_user_id'])
+            SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
+                                          entry=claim, created_at=now, slot=slot, event_type='remove')
         else:
-            if 'actual_user_id' in request.session:
-                actual_author = User.objects.get(id=request.session['actual_user_id'])
-                SlotAssignment.objects.create(forum=forum, user=actual_author, delegator=request.user,
-                                              entry=claim, created_at=now, slot=slot, event_type='remove')
-            else:
-                SlotAssignment.objects.create(forum=forum, user=request.user,
-                                              entry=claim, created_at=now, slot=slot, event_type='remove')
+            SlotAssignment.objects.create(forum=forum, user=request.user,
+                                          entry=claim, created_at=now, slot=slot, event_type='remove')
 
     if action == 'move-to-slot':
         now = timezone.now()
