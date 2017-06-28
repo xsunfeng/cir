@@ -17,6 +17,8 @@
 }
 abbr {
   cursor: pointer;
+  border-bottom: none!important;
+  text-decoration: underline dotted;
 }
 .hidden {
   display: none;

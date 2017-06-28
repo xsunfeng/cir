@@ -2,7 +2,6 @@
 	<div class="item phase3 slot" data-id="{{ slot_info.id }}" style="position:relative">
 		<div class="ui stacked segment">
 			<div style="display:flex">
-				<i class="reorder-handle vertical resize icon"></i>
 				<span class="slot-title{% if not slot_info.slot_title %} empty{% endif %}">
                     {% if slot_info.slot_title %}<b>Question: </b>{{ slot_info.slot_title }}{% else %} (Click to name this slot){% endif %}
 				</span>

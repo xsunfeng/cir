@@ -18,7 +18,8 @@ define([
 	var module = {};
 	module.initClaimView = function() {
 		$("body").on("click", ".toslot", function(){
-			$slot = $(".phase3.item.slot[data-id=" + $(this).attr("slot-id") + "]");
+			var $slot = $(".phase3.item.slot[data-id=" + $(this).attr("data-slot-id") + "]");
+			if (!$slot) return;
 			$slot.find(".segment").addClass("highlight-found");
 			$("#draft-stmt-container").scrollTop($slot.position().top - 30);
 			setTimeout(function() {
@@ -172,7 +173,9 @@ define([
 					$('#claim-container .facilitator-only').show();
 				}
 				$('#claim-filter-pane .ui.dropdown').removeClass('disabled');
-				DraftStmt.update_claim_usage();
+				if (DraftStmt.isLoaded) {
+                    DraftStmt.update_claim_usage();
+				}
 			},
 			error: function(xhr) {
 				$('#claim-pane-overview').removeClass('loading');
