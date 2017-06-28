@@ -2,7 +2,8 @@ define([
 	'jquery',
 	'utils',
 	'realtime/socket',
-	'jquery.ui'
+	'jquery.ui',
+    'semantic-ui'
 ], function(
 	$,
 	Utils,
@@ -102,6 +103,7 @@ define([
 	});
 
 	// initReorderHandler();
+    initSlotAssignmentModal();
 
 	module.initStmtHandles = function() {
 		$('#claim-pane-overview .claim-addstmt-handle').mousedown(function(event) {
@@ -216,25 +218,23 @@ define([
 				// phase 3, open workspace after drop
 				$(".show-workspace[data-id=" + xhr.slot_id + "]").click();
 			});
+            clearDropStatus();
 		} else if (module.action == 'merge') {
-			_stmtUpdater({
-				'action': 'add-to-slot',
-				'slot_id': module.target_id,
-				'claim_id': module.draggingClaimId,
-			}).done(function(xhr) {
-				// $claim = $('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId + '"]');
-				// $claim.addClass('stmt');
-				delete module.draggingClaimId;
-				Socket.slotChange({
-					'forum_id': $('body').attr('forum-id'),
-					'category': list_type,
-				});
-				module.update_claim_usage();
-				// phase 3, open workspace after drop
-				$(".show-workspace[data-id=" + xhr.slot_id + "]").click();
-			});
+            if (
+                !module['draggingClaimId'] || !module['target_id'] ||
+                // don't try adding if it's already there
+                $('#draft-stmt')
+                    .find('.slot[data-id="' + module.target_id + '"]')
+                    .find('.src_claim[data-id="' + module.draggingClaimId + '"]')
+                    .size() > 0
+            ) {
+                clearDropStatus();
+                return;
+            }
+		    var claim_content = $('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId +'"] .claim-content').text().trim();
+		    $('#slot-assignment-options #claim-trim-field').val(claim_content);
+            $('#slot-assignment-options').modal('show');
 		}
-		clearDropStatus();
 	}
 
 	function clearDropStatus() {
@@ -245,6 +245,33 @@ define([
 		delete module.target_id;
 		$('#droppable-edge').remove();
 	}
+
+	function initSlotAssignmentModal() {
+        $('#slot-assignment-options').modal({
+            onApprove: function() {
+                _stmtUpdater({
+                	'action': 'add-to-slot',
+                	'slot_id': module.target_id,
+                	'claim_id': module.draggingClaimId,
+                    'claim_version': $('#slot-assignment-options #claim-trim-field').val(),
+                    'claim_tag': $('#slot-assignment-options #claim-tag-field').val()
+                }).done(function(xhr) {
+                    var list_type = module.$listOnHover.attr('data-list-type');
+                	delete module.draggingClaimId;
+                	Socket.slotChange({
+                		'forum_id': $('body').attr('forum-id'),
+                		'category': list_type
+                	});
+                    $('#slot-assignment-options #claim-tag-field').val('');
+                    clearDropStatus();
+                	module.update_claim_usage();
+                	// phase 3, open workspace after drop
+                	$(".show-workspace[data-id=" + xhr.slot_id + "]").click();
+                });
+            }
+        });
+    }
+
 	function initSortable() {
 		if (!$('#draft-stmt ol.list').hasClass('ui-sortable')) { // only initialize once
 			$('#draft-stmt ol.list').sortable({

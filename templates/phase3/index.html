@@ -27,33 +27,33 @@
 
 	<div id="draft-stmt-container" class="eight wide column">
 		<div id="draft-stmt"></div>
-        <div id="slot-assignment-options" class="ui modal">
-            <i class="close icon"></i>
-            <div class="header">
-                Trim and Tag this Nugget
-            </div>
-            <div class="image content">
-                <div class="ui medium image">
-                    <img src="/images/avatar/large/chris.jpg">
+	</div>
+    <div id="slot-assignment-options" class="ui modal">
+        <i class="close icon"></i>
+        <div class="header">
+            Trim and Tag this Nugget
+        </div>
+        <div class="content">
+            <div class="ui form">
+                <div class="field">
+                    <label>Trim this Nugget if you think only part of it is relevant to this Question.</label>
+                    <textarea id="claim-trim-field" rows="4"></textarea>
                 </div>
-                <div class="description">
-                    <div class="ui header">We've auto-chosen a profile image for you.</div>
-                    <p>We've grabbed the following image from the <a href="https://www.gravatar.com" target="_blank">gravatar</a>
-                        image associated with your registered e-mail address.</p>
-                    <p>Is it okay to use this photo?</p>
-                </div>
-            </div>
-            <div class="actions">
-                <div class="ui black deny button">
-                    Nope
-                </div>
-                <div class="ui positive right labeled icon button">
-                    Yep, that's me
-                    <i class="checkmark icon"></i>
+                <div class="field">
+                    <label>Tag this Nugget (optional): What sub-question does it answer? What topic is it about?</label>
+                    <input type="text" id="claim-tag-field">
                 </div>
             </div>
         </div>
-	</div>
+        <div class="actions">
+            <div class="ui black cancel button">
+                Cancel
+            </div>
+            <div class="ui blue approve button">
+                Confirm
+            </div>
+        </div>
+    </div>
 </div>
 {% include 'qa/qa-wrapper.html' %}
 {% if role != 'visitor' %}
