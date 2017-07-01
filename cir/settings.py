@@ -119,7 +119,7 @@ MEDIA_URL = '/media/'
 if DEBUG:
     STATIC_ROOT = os.path.join(PROJECT_PATH, '../cir-static/')
 else:
-    STATIC_ROOT = os.path.join(PROJECT_PATH, '../static/geolab/')
+    STATIC_ROOT = os.path.join(PROJECT_PATH, '../static/postcir/')
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
