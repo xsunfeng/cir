@@ -269,32 +269,6 @@ def api_draft_stmt(request):
         context['categories'][category] = [slot.getAttrSlot(forum) for slot in
                                            slots.filter(claim_category=category).order_by('stmt_order')]
         response['slots_cnt'][category] += len(context['categories'][category])
-    response['unread_questions'] = []
-    for category in category_list:
-        for slot in Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False,
-                                         claim_category=category).order_by('stmt_order'):
-            count = IsReadStatementQuestionComment.objects.filter(question=slot, reader=request.user,
-                                                                  is_read=False).count()
-            if (count > 0):
-                item = {
-                    "question_id": slot.id,
-                    "unread_count": count
-                }
-                response['unread_questions'].append(item)
-                # if request.user:
-    # actual_author = request.user
-    #     context["my_statement"] = []
-    #     my_slot_ids = []
-    #     for slot_id in (SlotAssignment.objects.filter(user = actual_author, forum = forum).order_by('-created_at').values_list('slot', flat=True)):
-    #         if (slot_id not in my_slot_ids): my_slot_ids.append(slot_id)
-    #     for slot_id in my_slot_ids:
-    #         slot = Claim.objects.get(id = slot_id)
-    #         if (slot.is_deleted == False): context["my_statement"].append(slot.getAttrSlot(forum))
-    #     for slot in Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False).order_by('created_at'):
-    #         if (SlotAssignment.objects.filter(slot = slot, user = actual_author).count() > 0):
-    #             context["my_statement"].append(slot.getAttrSlot(forum))
-    #     response['my_statement'] = render_to_string('phase3/my-statement.html', context)
-
     if request.session['selected_phase'] == 'categorize':
         response['html'] = render_to_string('phase3/draft-stmt.html', context)
     else:
