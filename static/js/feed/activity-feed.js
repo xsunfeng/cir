@@ -200,12 +200,12 @@ define([
 			});
 		}
 
-		function submitComment(content, type) {
+		this.submitComment = function(content, type) {
 			if ($.trim(content).length == 0) {
 				Utils.notify('error', 'Content must not be empty.');
 				return;
 			}
-			var $form = $('#activity-' + type + '-form');
+			var $form = $(_this).find('.activity-' + type + '-form');
 			$form.find('.button').addClass('loading');
 
 			var data = $.extend({
@@ -270,7 +270,8 @@ define([
 					_this.find('.collective-wrapper').checkbox('uncheck');
 				}
 			});
-		}
+		};
+
 		function likeClaimVersion(button) {
 			var _that = button;
 			var $menu = $(button).parent().parent();
@@ -334,18 +335,18 @@ define([
 				var name = $(this).parents('.event').find('.user:eq(0)').text();
 				var entry_id = this.getAttribute('data-id');
 				if ($(this).hasClass('feed-reply-entry')) {
-					$('#activity-reply-form span')
+					_this.find('.activity-reply-form span')
 						.attr('data-reply-id', entry_id)
 						.attr('data-reply-type', 'entry')
 						.text('Reply to ' + name);
 				} else if ($(this).hasClass('feed-reply-event')) {
-					$('#activity-reply-form span')
+					_this.find('.activity-reply-form span')
 						.attr('data-reply-id', entry_id)
 						.attr('data-reply-type', 'event')
 						.text('Reply to ' + name);
 				}
-				$('#activity-reply-form').insertAfter($(this).parent().parent()).show();
-				$('#activity-reply-form textarea').focus();
+				_this.find('.activity-reply-form').insertAfter($(this).parent().parent()).show();
+				_this.find('.activity-reply-form textarea').focus();
 			}).on('click', '.feed-delete-entry', function() {
 				var entry_id = this.getAttribute('data-id');
 				deleteEntry(entry_id);
@@ -408,15 +409,14 @@ define([
 				}
 			}).on('click', '.feed-adopt-claim-version', function() {
 				adoptClaimVersion(this);
-			}).on('click', '#activity-comment-form div.submit', function(e) {
+			}).on('click', '.activity-comment-form div.submit', function(e) {
 				var $form = $(this).parents('form');
 				var content = $form.find('textarea').val();
-				submitComment(content, 'comment');
-				$(".activity-filter .statement-comment").click();
-			}).on('click', '#activity-reply-form div.submit', function(e) {
+				_this.submitComment(content, 'comment');
+			}).on('click', '.activity-reply-form div.submit', function(e) {
 				var $form = $(this).parents('form');
 				var content = $form.find('textarea').val();
-				submitComment(content, 'reply');
+				_this.submitComment(content, 'reply');
 			}).on('keydown', 'textarea', function(e) {
 				if ((e.ctrlKey || e.metaKey) && e.keyCode == 13) {
 					$(this).parent().next().trigger('click');

@@ -1,12 +1,10 @@
-<div class="ui top attached tabular menu">
-    <div class="ui secondary pointing fluid two item vertically fitted menu activity-filter">
-        <a class="item" data-event-type="comment|question">Comments &amp; Questions</a>
-        <a class="item" data-event-type="slotassignment">Nugget Activities</a>
-    </div>
+<div class="ui secondary pointing fluid two item vertically fitted menu activity-filter">
+    <a class="item" data-event-type="comment|question">Comments &amp; Questions</a>
+    <a class="item" data-event-type="slotassignment">Nugget Activities</a>
 </div>
-<form id="activity-comment-form" class="ui form" style="margin-top:1em;">
+<form class="ui form activity-comment-form" style="margin-top:1em;">
     <div class="field">
-        <textarea rows="2" placeholder="Type your comment"></textarea>
+        <textarea rows="2" placeholder="Type your comment or question"></textarea>
     </div>
     <div class="two fields">
         <div class="field">
@@ -24,12 +22,20 @@
     </div>
     <div class="ui primary submit button"><i class="send outline icon"></i>Post</div>
 </form>
-<form id="activity-reply-form" class="ui form" style="display:none">
+<form class="ui form activity-reply-form" style="display:none">
     <div class="field">
         <label><span></span></label>
         <textarea rows="2"></textarea>
     </div>
     <div class="ui primary submit button"><i class="send outline icon"></i>Post</div>
+</form>
+<form class="ui form slot-subquestion-form" style="display:none">
+    <div class="field">
+        <label>Raise a subquestion not covered by existing nuggets</label>
+        <input type="text">
+    </div>
+    <button class="ui primary button">Submit</button>
+    <button class="ui cancel button">Cancel</button>
 </form>
 {% if entries %}
 <div class="ui feed" style="margin-top: 1em">
