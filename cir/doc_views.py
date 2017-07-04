@@ -191,7 +191,8 @@ def api_annotation(request):
         if not request.user.is_authenticated():
             return HttpResponse("Please log in first.", status=403)
         now = timezone.now()
-        newPost = Post(forum_id=request.session['forum_id'], content_type='comment', created_at=now, updated_at=now)
+        content_type = request.REQUEST.get('content_type', 'comment')
+        newPost = Post(forum_id=request.session['forum_id'], content_type=content_type, created_at=now, updated_at=now)
         if 'actual_user_id' in request.session:
             newPost.author = User.objects.get(id=request.session['actual_user_id'])
             newPost.delegator = request.user

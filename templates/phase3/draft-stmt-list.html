@@ -17,21 +17,10 @@
                 <div class="ui vertical segment">(Empty)</div>
             {% endif %}
 		</div>
-        <div class="ui fluid two item attached menu" style="margin:0 -1px!important;width:calc(100% + 2px)!important">
-            <a class="item slot-discussion-btn">Discuss</a>
-            <a class="item slot-subquestion-btn">Add a Subquestion</a>
+        <div class="ui fluid one item attached menu" style="margin:0 -1px!important;width:calc(100% + 2px)!important">
+            <a class="item slot-discussion-btn">Expand Activities on this Question</a>
         </div>
-		<div class="slot-discussion ui attached segment" data-id="{{ slot_info.id }}" style="display:none;min-height:150px;"></div>
-        <div class="slot-subquestion ui bottom attached segment" data-id="{{ slot_info.id }}" style="display:none">
-            <div class="ui form">
-                <div class="field">
-                    <label>Suggest a subquestion</label>
-                    <input type="text">
-                </div>
-                <button class="ui primary button">Submit</button>
-                <button class="ui cancel button">Cancel</button>
-            </div>
-        </div>
+		<div class="slot-discussion ui bottom attached segment" data-id="{{ slot_info.id }}" style="display:none;min-height:150px;padding-top:0;"></div>
 	</div>
 {% endfor %}
 <div class="droppable-edge"></div>

@@ -115,15 +115,6 @@ define([
             $segment.hide();
             $(this).removeClass('active');
         }
-	}).on('click', '.slot-subquestion-btn', function() {
-        var $segment = $(this).parents('.slot').find('.slot-subquestion');
-        if (!$(this).hasClass('active')) {
-            $segment.show();
-            $(this).addClass('active');
-		} else {
-			$segment.hide();
-			$(this).removeClass('active');
-		}
 	});
 
 	// initReorderHandler();

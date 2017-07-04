@@ -60,6 +60,7 @@ define([
 					_this.html(xhr.html);
 
 					showDeleteButtons();
+					_this.initActivityFilter();
 
 					if (_this.data('type') == 'claim' && claimModule && claimModule.display_type == 'fullscreen') {
 						_this.find('.filter.buttons .button').removeClass('loading').removeClass('active');
@@ -73,19 +74,6 @@ define([
 						_this.find('.facilitator-only').show();
 					}
 					if (typeof callback == 'function') callback();
-
-
-					$(".activity-filter a").removeClass("active");
-					var activity_filter = sessionStorage.getItem("activity-filter");
-					$("." + activity_filter).click();
-
-					$('textarea').each(function () {
-						this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px; overflow-y:hidden; width:100%!important;');
-					}).on('input', function () {
-						this.style.height = 'auto';
-						this.style.height = (this.scrollHeight) + 'px';
-					});
-
 				},
 				error: function(xhr) {
 					if (xhr.status == 403) {
@@ -144,6 +132,29 @@ define([
 				}
 			});
 		}
+
+		this.initActivityFilter = function() {
+			// show comments and questions by default
+			var _this = this;
+			this.find('.activity-filter').on('click', '.item', function() {
+				$(this)
+					.siblings().removeClass('active').end()
+					.addClass('active');
+				var event_types = this.getAttribute('data-event-type').split('|');
+				_this.filterEvents(event_types);
+			});
+		};
+
+		this.filterEvents = function(event_types) {
+			this.find('.event').each(function() {
+				if (event_types.indexOf($(this).attr('data-type')) >= 0) {
+					$(this).show();
+				} else {
+					$(this).hide();
+				}
+			})
+		};
+
 		function loadAlternativeVersions() {
 			// load votes on alternative versions
 			$('#claim-activity-feed .improve.menu').each(function() {
@@ -222,6 +233,10 @@ define([
 				if ($form.find('.request-action.checkbox').length) {
 					data.request_action = $form.find('.request-action.checkbox').checkbox('is checked');
 				}
+                if ($form.find('.question-for-experts.checkbox').length &&
+                    $form.find('.question-for-experts.checkbox').checkbox('is checked')) {
+                    data.content_type = 'question';
+                }
 			}
 			$.ajax({
 				url: '/api_annotation/',
@@ -312,6 +327,7 @@ define([
 			});
 		}
 		if (action == 'init') {
+			if (this.data('initialized')) return this;
 			// listeners
 			this.on('click', '.feed-reply-entry, .feed-reply-event', function(e) {
 				e.preventDefault();
@@ -406,7 +422,7 @@ define([
 					$(this).parent().next().trigger('click');
 				}
 			});
-
+			this.data('initialized', true);
 		} else if (action == 'update') {
 			if (typeof data == 'object') {
 				this.data(data);

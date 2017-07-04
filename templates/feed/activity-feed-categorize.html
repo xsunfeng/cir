@@ -1,17 +1,36 @@
 <div class="ui top attached tabular menu">
-    <div class="ui text menu activity-filter" style="margin:0;">
-        <div class="header item">Activities</div>
-        <a class="active item statement-candidate">
-            Statements
-        </a>
-        <a class="active item statement-comment">
-            Comments
-        </a>
-        <a class="item all-activity">
-            All
-        </a>
+    <div class="ui secondary pointing fluid two item vertically fitted menu activity-filter">
+        <a class="item" data-event-type="comment|question">Comments &amp; Questions</a>
+        <a class="item" data-event-type="slotassignment">Nugget Activities</a>
     </div>
 </div>
+<form id="activity-comment-form" class="ui form" style="margin-top:1em;">
+    <div class="field">
+        <textarea rows="2" placeholder="Type your comment"></textarea>
+    </div>
+    <div class="two fields">
+        <div class="field">
+            <div class="ui question-for-experts checkbox item">
+                <input type="checkbox" name="question">
+                <label>This is a question for the Experts</label>
+            </div>
+        </div>
+        <div class="field">
+            <div class="ui collective checkbox facilitator-only" style="display:none">
+                <label>Collective</label>
+                <input type="checkbox" name="collective">
+            </div>
+        </div>
+    </div>
+    <div class="ui primary submit button"><i class="send outline icon"></i>Post</div>
+</form>
+<form id="activity-reply-form" class="ui form" style="display:none">
+    <div class="field">
+        <label><span></span></label>
+        <textarea rows="2"></textarea>
+    </div>
+    <div class="ui primary submit button"><i class="send outline icon"></i>Post</div>
+</form>
 {% if entries %}
 <div class="ui feed" style="margin-top: 1em">
 {% for entry in entries %}
@@ -48,7 +67,7 @@
             {% elif entry.entry_type == 'question' %}
                 <div class="summary">
                     <a class="user {{ entry.author_role }}"
-                       data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> raised a question.
+                       data-id="{{ entry.author_id }}">{{ entry.author_name }}</a> raised a question for the Experts.
                     <div class="date"><abbr
                             title="{{ entry.updated_at_full }}">{{ entry.updated_at }}</abbr></div>
                 </div>
@@ -56,9 +75,11 @@
                     {{ entry.content }}
                 </div>
                 <div class="ui red secondary post fitted menu">
-                    <a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
-                    <a class="item feed-delete-entry" data-id="{{ entry.id }}"
-                       style="display:none">Delete</a>
+                    <div class="right menu">
+                        <a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
+                        <a class="item feed-delete-entry" data-id="{{ entry.id }}"
+                           style="display:none">Delete</a>
+                    </div>
                 </div>
             {% elif entry.entry_type == 'comment' %}
                 <div class="summary">
@@ -74,18 +95,20 @@
                 <div class="extra text">
                     {{ entry.content }}
                 </div>
+                {% if not entry.collective %}
                 <div class="ui red secondary post small menu">
                     <div class="right menu">
                         <a class="item feed-reply-entry" data-id="{{ entry.id }}">Reply</a>
                         <a class="item feed-delete-entry" data-id="{{ entry.id }}" style="display:none">Delete</a>
                     </div>
                 </div>
+                {% endif %}
             {% elif entry.entry_type == 'slotassignment' %}
                 <div class="summary">
                     {% if entry.action == 'add' %}
                         <a class="user {{ entry.author_role }}"
                            data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> added nugget
-                        N{{ entry.claim_id }} into this slot.
+                        <div class="ui label">N{{ entry.claim_id }}</div> into this slot.
                     {% else %}
                         <a class="user {{ entry.author_role }}"
                            data-id="{{ entry.user_id }}">{{ entry.user_name }}</a> removed nugget
