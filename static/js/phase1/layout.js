@@ -123,7 +123,7 @@ define([
 				module.drag_drop_events();
 				var category = sessionStorage.getItem("category");
 				$('.category-tab[data-id=' + category + ']').click();
-				if (xhr.unread_questions.length > 0) {
+				if (xhr.unread_questions && xhr.unread_questions.length > 0) {
 					for (var i = 0; i < xhr.unread_questions.length; i++) {
 						var count = xhr.unread_questions[i].unread_count;
 						$(".statement-entry[data-id=" + xhr.unread_questions[i].question_id + "] .question-comment-2 .red.label").text(count)

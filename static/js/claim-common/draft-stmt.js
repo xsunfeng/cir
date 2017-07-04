@@ -12,6 +12,7 @@ define([
 	var module = {};
 	module.isLoaded = false;
 	module.activeClaimModule = null;
+	module.activeSlotId = null;
 	module.categories = ['finding', 'pro', 'con'];
 	module.stmtLimit = {
 		'finding': 10,
@@ -54,6 +55,7 @@ define([
 		$('#draft-stmt li.item').find('.fullscreen.item').removeClass('active');
 		$('#draft-stmt li.item[data-id="' + module.activeClaimModule.slot_id + '"]').find('.fullscreen.item').addClass('active');
 	}).on('click', '.slot-title', function() {
+		return false;
 		module.$slotTitleInput = $('<div class="slot-title-wrapper">')
 			.append('<input type="text" class="slot-title-input">')
 			.append('<button class="ui primary update-slot-title button">Update</button>')
@@ -100,6 +102,28 @@ define([
 			'action': 'get-list',
 			'category': $(this).parents('ol.list').attr('data-list-type'),
 		});
+	}).on('click', '.slot-discussion-btn', function() {
+		var slot_id = $(this).parents('.slot').attr('data-id');
+        var $segment = $(this).parents('.slot').find('.slot-discussion');
+        if (!$(this).hasClass('active')) {
+            $segment.addClass('loading').show();
+            $(this).addClass('active');
+            _updateSlotActivities(slot_id, $segment).always(function() {
+                $segment.removeClass('loading');
+			});
+        } else {
+            $segment.hide();
+            $(this).removeClass('active');
+        }
+	}).on('click', '.slot-subquestion-btn', function() {
+        var $segment = $(this).parents('.slot').find('.slot-subquestion');
+        if (!$(this).hasClass('active')) {
+            $segment.show();
+            $(this).addClass('active');
+		} else {
+			$segment.hide();
+			$(this).removeClass('active');
+		}
 	});
 
 	// initReorderHandler();
@@ -431,6 +455,14 @@ define([
 			}
 		});
 	}
+
+	function _updateSlotActivities(slot_id, $segment) {
+        $segment.feed('init');
+        return $segment.feed('update', { // async
+            'type': 'claim',
+            'id': slot_id
+        });
+    }
 
 	module.update_claim_usage = function() {
 		var claim_to_slot_hash = {};

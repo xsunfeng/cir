@@ -271,6 +271,8 @@ def api_draft_stmt(request):
         response['slots_cnt'][category] += len(context['categories'][category])
     if request.session['selected_phase'] == 'categorize':
         response['html'] = render_to_string('phase3/draft-stmt.html', context)
+    elif request.session['selected_phase'] == 'nugget':
+        response['html'] = render_to_string('phase1/statement.html', context)
     else:
         response['html'] = render_to_string('phase4/draft-stmt.html', context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
@@ -427,6 +429,7 @@ def api_claim_activities(request):
         else:
             slot = Claim.objects.get(id=request.REQUEST.get('slot_id'))
 
+        # load comments on the slot
         posts = slot.comments_of_entry.all()
         for post in posts:
             for comment in post.getTree(exclude_root=False):
@@ -447,7 +450,10 @@ def api_claim_activities(request):
             context['entries'].append(slotassignment.getAttr(forum))
 
         context['entries'] = sorted(context['entries'], key=lambda en: en['created_at_full'], reverse=True)
-        response['html'] = render_to_string('feed/activity-feed-claim.html', context)
+        if request.session['selected_phase'] == 'categorize':
+            response['html'] = render_to_string('feed/activity-feed-categorize.html', context)
+        else:
+            response['html'] = render_to_string('feed/activity-feed-claim.html', context)
         return HttpResponse(json.dumps(response), mimetype='application/json')
 
 
