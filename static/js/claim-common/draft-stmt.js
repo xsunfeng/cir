@@ -248,6 +248,18 @@ define([
             }
 		    var claim_content = $('#claim-pane-overview .claim.segment[data-id="' + module.draggingClaimId +'"] .claim-content').text().trim();
 		    $('#slot-assignment-options #claim-trim-field').val(claim_content);
+		    // populate theme options
+			var theme_html = '';
+            module.$listOnHover.find('.to-drop .theme').each(function() {
+            	var theme_id = this.getAttribute('data-theme-id');
+            	theme_html +=
+					'<option value="' + theme_id
+					+ '">'
+					+ (theme_id == '-1' ? '(No tag)' : $(this).text())
+					+ '</option>';
+			});
+
+		    $('#slot-assignment-options #nugget-theme-selector').html(theme_html);
             $('#slot-assignment-options').modal('show');
 		}
 	}
@@ -265,13 +277,21 @@ define([
         $('#slot-assignment-options').modal({
             closable: false,
             onApprove: function() {
-                _stmtUpdater({
-                	'action': 'add-to-slot',
-                	'slot_id': module.target_id,
-                	'claim_id': module.draggingClaimId,
+            	var update_data = {
+                    'action': 'add-to-slot',
+                    'slot_id': module.target_id,
+                    'claim_id': module.draggingClaimId,
                     'claim_version': $('#slot-assignment-options #claim-trim-field').val(),
-                    'theme_name': $('#slot-assignment-options #claim-tag-field').val()
-                }).done(function(xhr) {
+                };
+            	var theme_selection = $('#slot-assignment-options #nugget-theme-selector').val();
+            	if (theme_selection == '-1' || theme_selection.match('^\\d+$')) {
+					// add to existing theme
+					update_data.theme_id = theme_selection;
+				} else {
+					// create new theme
+					update_data.theme_name = theme_selection;
+				}
+                _stmtUpdater(update_data).done(function(xhr) {
                     var list_type = module.$listOnHover.attr('data-list-type');
                 	delete module.draggingClaimId;
                 	Socket.slotChange({
@@ -289,6 +309,9 @@ define([
                 clearDropStatus();
             }
         });
+        $('#slot-assignment-options #nugget-theme-selector').dropdown({
+			allowAdditions: true
+		});
     }
 
 	function initSortable() {

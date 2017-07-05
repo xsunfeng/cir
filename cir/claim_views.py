@@ -172,17 +172,24 @@ def api_draft_stmt(request):
         # modified claim version during slot assignment
         claim_version = request.REQUEST.get('claim_version', '')
         # subquestion (theme) of the nugget
-        try:
+        metadata_obj = {
+            'claim_version': claim_version
+        }
+        if request.REQUEST.get('theme_id') == '-1': # no theme assigned
+            pass
+        elif request.REQUEST.get('theme_id') is not None: # assign to theme
             claim_theme = ClaimTheme.objects.get(id=request.REQUEST.get('theme_id'))
-        except ClaimTheme.DoesNotExist:
+            metadata_obj['theme_id'] = claim_theme.id
+        else:
+            # create new theme given theme_name
             claim_theme = ClaimTheme(forum=forum, name=request.REQUEST.get('theme_name'), slot=slot)
             claim_theme.save()
-        metadata = json.dumps({'claim_version': claim_version, 'theme_id': claim_theme.id})
+            metadata_obj['theme_id'] = claim_theme.id
 
         # add ClaimReference entry -- used to track claim assignment
         if not ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=slot).exists():
             try:
-                ClaimReference.objects.create(refer_type='stmt', from_claim=claim, to_claim=slot, metadata=metadata)
+                ClaimReference.objects.create(refer_type='stmt', from_claim=claim, to_claim=slot, metadata=json.dumps(metadata_obj))
             except TypeError:
                 ClaimReference.objects.create(refer_type='stmt', from_claim=claim, to_claim=slot)
 
