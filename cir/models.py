@@ -220,6 +220,7 @@ class ClaimTheme(models.Model):
     forum = models.ForeignKey(Forum, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     description = models.TextField()
+    slot = models.ForeignKey('Claim', null=True, blank=True)
 
     def getAttr(self):
         attr = {}

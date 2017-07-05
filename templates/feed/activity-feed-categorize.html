@@ -2,7 +2,7 @@
     <a class="item" data-event-type="comment|question">Comments &amp; Questions</a>
     <a class="item" data-event-type="slotassignment">Nugget Activities</a>
 </div>
-<form class="ui form activity-comment-form" style="margin-top:1em;">
+<form class="ui form activity-comment-form" style="margin-top:1em;display:none;">
     <div class="field">
         <textarea rows="2" placeholder="Type your comment or question"></textarea>
     </div>
@@ -31,11 +31,10 @@
 </form>
 <form class="ui form slot-subquestion-form" style="display:none">
     <div class="field">
-        <label>Raise a subquestion not covered by existing nuggets</label>
+        <label>Raise a subquestion not addressed by existing nuggets</label>
         <input type="text">
     </div>
     <button class="ui primary button">Submit</button>
-    <button class="ui cancel button">Cancel</button>
 </form>
 {% if entries %}
 <div class="ui feed" style="margin-top: 1em">

@@ -142,7 +142,16 @@ define([
 					.addClass('active');
 				var event_types = this.getAttribute('data-event-type').split('|');
 				_this.filterEvents(event_types);
+				if (this.getAttribute('data-event-type') == 'comment|question') {
+					_this.find('.activity-comment-form').show();
+                    _this.find('.slot-subquestion-form').hide();
+				} else {
+                    _this.find('.activity-comment-form').hide();
+                    _this.find('.slot-subquestion-form').show();
+				}
 			});
+			// mimic click on the first tab
+            this.find('.activity-filter .item').first().trigger('click');
 		};
 
 		this.filterEvents = function(event_types) {
