@@ -189,7 +189,7 @@ a.claim-vote-btn.unready:hover {
 	line-height: 1.4;
 }
 
-#draft-stmt .phase3.slot .src_claim .label {
+#draft-stmt .phase3.slot .theme.label {
 	display: block;
 	margin-bottom: 5px;
 }

@@ -270,7 +270,7 @@ define([
                 	'slot_id': module.target_id,
                 	'claim_id': module.draggingClaimId,
                     'claim_version': $('#slot-assignment-options #claim-trim-field').val(),
-                    'claim_tag': $('#slot-assignment-options #claim-tag-field').val()
+                    'theme_name': $('#slot-assignment-options #claim-tag-field').val()
                 }).done(function(xhr) {
                     var list_type = module.$listOnHover.attr('data-list-type');
                 	delete module.draggingClaimId;

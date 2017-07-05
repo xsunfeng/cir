@@ -369,6 +369,41 @@ class Claim(Entry):
             })
         return attr
 
+    def getSlotNuggets(self, forum): # used in phase 3 to get subquestions and nuggets
+        attr = super(Claim, self).getAttr(forum)
+        attr['slot_title'] = self.title
+        # mapping from theme ID to claims
+        attr['themes'] = [
+            {'id': theme.id,
+             'name': theme.name,
+             'claims': []}
+            for theme in ClaimTheme.objects.filter(slot=self)
+        ]
+        attr['themes'].append({'id': -1, 'claims': []})
+        attr['stmt_order'] = self.stmt_order
+        for claimref in self.older_versions.filter(refer_type='stmt'):
+            # load claim content from "claim_version" under metadata if possible.
+            if claimref.metadata is None:
+                attr['themes'][-1]['claims'].append({
+                    'id': claimref.from_claim.id,
+                    'content': claimref.from_claim.adopted_version().content,
+                    'theme_id': -1
+                })
+            else:
+                try:
+                    theme_id = json.loads(claimref.metadata)['theme_id']
+                except KeyError:
+                    theme_id = -1
+                claim_info = {
+                    'id': claimref.from_claim.id,
+                    'content': json.loads(claimref.metadata)['claim_version'],
+                    'theme_id': theme_id
+                }
+                for theme in attr['themes']:
+                    if theme['id'] == theme_id:
+                        theme['claims'].append(claim_info)
+        return attr
+
     def getAttrSlot(self, forum):
         attr = super(Claim, self).getAttr(forum)
         attr['slot_title'] = self.title
@@ -398,19 +433,13 @@ class Claim(Entry):
             })
         for claimref in self.older_versions.filter(refer_type='stmt'):
             # load claim content from "claim_version" under metadata if possible.
-            try:
-                claim_content = json.loads(claimref.metadata)['claim_version']
-                claim_theme = json.loads(claimref.metadata)['claim_tag']
-            except TypeError:
-                claim_content = claimref.from_claim.adopted_version().content
-                claim_theme = ''
+            claim_content = claimref.from_claim.adopted_version().content
             attr['claims'].append({
                 'id': claimref.from_claim.id,
                 'content': claim_content,
-                # 'theme': claimref.from_claim.theme.name
-                'theme': claim_theme,
+                'theme': claimref.from_claim.theme.name,
                 'statement_ids': StatementClaim.objects.filter(claim_id = claimref.from_claim.id).values_list("statement_id", flat = True),
-                'num_statements': StatementClaim.objects.filter(claim_id = claimref.from_claim.id).count() 
+                'num_statements': StatementClaim.objects.filter(claim_id = claimref.from_claim.id).count()
             })
             attr['claims'] = sorted(attr['claims'], key=lambda k: k['num_statements'], reverse=True)
         return attr

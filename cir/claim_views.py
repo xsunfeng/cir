@@ -171,8 +171,13 @@ def api_draft_stmt(request):
         claim = Claim.objects.get(id=request.REQUEST['claim_id'])
         # modified claim version during slot assignment
         claim_version = request.REQUEST.get('claim_version', '')
-        claim_tag = request.REQUEST.get('claim_tag', '')
-        metadata = json.dumps({'claim_version': claim_version, 'claim_tag': claim_tag})
+        # subquestion (theme) of the nugget
+        try:
+            claim_theme = ClaimTheme.objects.get(id=request.REQUEST.get('theme_id'))
+        except ClaimTheme.DoesNotExist:
+            claim_theme = ClaimTheme(forum=forum, name=request.REQUEST.get('theme_name'), slot=slot)
+            claim_theme.save()
+        metadata = json.dumps({'claim_version': claim_version, 'theme_id': claim_theme.id})
 
         # add ClaimReference entry -- used to track claim assignment
         if not ClaimReference.objects.filter(refer_type='stmt', from_claim=claim, to_claim=slot).exists():
@@ -266,7 +271,7 @@ def api_draft_stmt(request):
     response['slots_cnt'] = {'finding': 0, 'pro': 0, 'con': 0}
     slots = Claim.objects.filter(forum=forum, is_deleted=False, stmt_order__isnull=False)
     for category in category_list:
-        context['categories'][category] = [slot.getAttrSlot(forum) for slot in
+        context['categories'][category] = [slot.getSlotNuggets(forum) for slot in
                                            slots.filter(claim_category=category).order_by('stmt_order')]
         response['slots_cnt'][category] += len(context['categories'][category])
     if request.session['selected_phase'] == 'categorize':
