@@ -434,10 +434,14 @@ class Claim(Entry):
         for claimref in self.older_versions.filter(refer_type='stmt'):
             # load claim content from "claim_version" under metadata if possible.
             claim_content = claimref.from_claim.adopted_version().content
+            if claimref.from_claim.theme:
+                theme_name = claimref.from_claim.theme.name
+            else:
+                theme_name = ''
             attr['claims'].append({
                 'id': claimref.from_claim.id,
                 'content': claim_content,
-                'theme': claimref.from_claim.theme.name,
+                'theme': theme_name,
                 'statement_ids': StatementClaim.objects.filter(claim_id = claimref.from_claim.id).values_list("statement_id", flat = True),
                 'num_statements': StatementClaim.objects.filter(claim_id = claimref.from_claim.id).count()
             })
