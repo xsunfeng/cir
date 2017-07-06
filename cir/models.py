@@ -102,7 +102,7 @@ class EntryCategory(models.Model):
     instructions = models.TextField(null=True, blank=True)
 
     def __str__(self):  # used for admin site
-        return self.name
+        return '%s (%s)' % (self.name, self.forum.url)
 
     def getAttr(self):
         attr = {}
@@ -172,7 +172,7 @@ class Doc(models.Model):
     order = models.TextField(null=True, blank=True)
 
     def __str__(self):  # used for admin site
-        return self.title
+        return '%s (%s)' % (self.title, self.forum.url)
 
     def getAttr(self):
         attr = {}

@@ -39,13 +39,15 @@ class HighlightAdmin(admin.ModelAdmin):
     list_filter = ('context__forum', )
 
 class DocAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('forum', 'title', 'folder')
+    list_filter = ('forum', )
 
 class TagAdmin(admin.ModelAdmin):
     list_display = ('content', 'author', 'claimTheme')
 
 class DocSectionAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('title', 'order', 'doc', 'content')
+    list_filter = ('forum', )
 
 class GlossaryAdmin(admin.ModelAdmin):
     list_display = ('forum', 'xml')
@@ -85,6 +87,9 @@ class ClaimAdmin(admin.ModelAdmin):
             object.id = None
             object.save()
 
+    def is_stmt(self):
+    	return self.stmt_order is not None
+
     duplicate.short_description = "Duplicate selected claim"
     actions = [duplicate]
 
@@ -92,7 +97,7 @@ class ClaimAdmin(admin.ModelAdmin):
     claim_content.short_description = 'Content of adopted version'
     claim_content.allow_tags = True
     version_author.short_description = 'Author of adopted version'
-    list_display = (author_name, delegator_name, version_author, claim_content, 'claim_category', 'theme', 'created_at', 'is_deleted')
+    list_display = (author_name, delegator_name, version_author, claim_content, 'title', is_stmt, 'claim_category', 'theme', 'created_at', 'is_deleted')
     list_filter = ('forum', 'claim_category', 'theme')
     ordering = ('-created_at', )
 
@@ -131,6 +136,10 @@ class PostAdmin(admin.ModelAdmin):
     list_filter = ('forum', 'content_type')
     ordering = ('-created_at', )
 
+class EntryCategoryAdmin(admin.ModelAdmin):
+    list_filter = ('forum', )
+    list_display = ('forum', 'name', 'category_type')
+
 admin.site.register(Forum, ForumAdmin)
 admin.site.register(Role, RoleAdmin)
 admin.site.unregister(User)
@@ -144,3 +153,4 @@ admin.site.register(ClaimVersion, ClaimVersionAdmin)
 admin.site.register(Highlight, HighlightAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Glossary, GlossaryAdmin)
+admin.site.register(EntryCategory, EntryCategoryAdmin)
