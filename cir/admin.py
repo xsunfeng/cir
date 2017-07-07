@@ -45,6 +45,9 @@ class DocAdmin(admin.ModelAdmin):
 class TagAdmin(admin.ModelAdmin):
     list_display = ('content', 'author', 'claimTheme')
 
+class ClaimReferenceAdmin(admin.ModelAdmin):
+    list_display = ('refer_type', 'from_claim', 'to_claim', 'metadata')
+
 class DocSectionAdmin(admin.ModelAdmin):
     list_display = ('title', 'order', 'doc', 'content')
     list_filter = ('forum', )
@@ -154,3 +157,5 @@ admin.site.register(Highlight, HighlightAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Glossary, GlossaryAdmin)
 admin.site.register(EntryCategory, EntryCategoryAdmin)
+admin.site.register(ClaimReference, ClaimReferenceAdmin)
+
