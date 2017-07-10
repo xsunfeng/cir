@@ -345,7 +345,18 @@ a.claim-vote-btn.unready:hover {
 	border: 5px #A9D5DE solid;	
 }
 
+#doc-context-panel {
+	position: absolute;
+	left: -999999px;
+	top: -999999px;
+	width: 450px;
+}
 
+#doc-context-panel .doc-content {
+	min-height: 300px;
+	max-height: 400px;
+	overflow: auto;
+}
 
 /*.feed-adopt-claim-version[data-action="deadopt"]{
     background: #2185D0!important;

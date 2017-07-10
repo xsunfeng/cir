@@ -65,6 +65,22 @@ def api_doc(request):
             return HttpResponse(json.dumps(response), mimetype='application/json')
         except:
             return HttpResponse('The document does not exist.', status=403)
+    if action == 'get-section-by-nugget':
+        nugget_id = request.REQUEST.get('nugget_id')
+        highlight = HighlightClaim.objects.get(claim_id=nugget_id).highlight
+        section = DocSection.objects.get(id=highlight.context.id)
+        response = {
+            'highlight_id': highlight.id,
+            'html': section.getAttr(forum)['segmented_text'],
+            'highlights': []
+        }
+        # load highlight info
+        highlights = section.highlights.all()
+        for highlight in highlights:
+            highlight_info = highlight.getAttr()
+            highlight_info["is_nugget"] = highlight.is_nugget
+            response['highlights'].append(highlight_info)
+        return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_highlight(request):
     response = {}

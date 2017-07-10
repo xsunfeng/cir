@@ -15,7 +15,7 @@ define([
 ) {
 	var module = {};
 	module.initClaimView = function() {
-		$("body").on("click", ".toslot", function(){
+		$('#claim-pane-overview').on("click", ".toslot", function(){
 			var $slot = $(".phase3.item.slot[data-id=" + $(this).attr("data-slot-id") + "]");
 			if (!$slot) return;
 			$slot.find(".segment").addClass("highlight-found");
@@ -23,6 +23,55 @@ define([
 			setTimeout(function() {
 				$slot.find(".segment").removeClass('highlight-found');
 			}, 1000);
+		}).on('click', '.show-doc-panel', function(e) {
+			var claim_id = $(this).parents('.claim.segment').attr('data-id');
+			$('#doc-context-panel')
+                .css('left', e.clientX)
+                .css('top', e.clientY)
+				.show()
+				.find('.doc-content')
+				.addClass('loading');
+			$.ajax({
+                url: '/api_doc/',
+                type: 'post',
+                data: {
+                    'action': 'get-section-by-nugget',
+                    'nugget_id': claim_id
+                },
+				success: function(xhr) {
+                	var $context = $('#doc-context-panel .doc-content');
+                    $context
+						.html(xhr.html)
+						.removeClass('loading');
+                    for (var j = 0; j < xhr.highlights.length; j++) {
+                        var highlight = xhr.highlights[j];
+                        for (var i = highlight.start; i <= highlight.end; i++) {
+                            var $token = $context.find('.tk[data-id="' + i + '"]');
+                            if (typeof $token.attr('data-hl-id') == 'undefined') { // new highlight for this word
+                                $token.addClass('c').attr('data-hl-id', highlight.id);
+                            } else {
+                                var curr_id = $token.attr('data-hl-id'); // append highlight for this word
+                                $token.addClass('c').attr('data-hl-id', curr_id + ' ' + highlight.id);
+                            }
+                        }
+                    }
+                    // jump to highlight
+                    var $target = $('u.tk[data-hl-id*="' + xhr.highlight_id + '"]');
+                    if ($target.length > 0) {
+                        var elOffset = $target.position().top;
+                        var windowHeight = $context.height();
+                        $context.scrollTop(elOffset - (windowHeight / 2));
+                        $target.addClass('highlight-found');
+                        setTimeout(function() {
+                            $target.removeClass('highlight-found');
+                        }, 2000);
+                    }
+                }
+			});
+		});
+
+		$('#doc-context-panel').on('click', '.close.button', function() {
+			$('#doc-context-panel').removeAttr('style');
 		});
 	};
 
