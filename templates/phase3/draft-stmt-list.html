@@ -1,9 +1,16 @@
 {% for slot_info in categories %}
 	<div class="item phase3 slot" data-id="{{ slot_info.id }}" style="position:relative">
-		<div class="ui stacked top attached segment">
+		<div class="ui top attached segment">
             <h3 class="slot-title{% if not slot_info.slot_title %} empty{% endif %}">
                 {% if slot_info.slot_title %}Question: {{ slot_info.slot_title }}{% else %} (No title for this slot){% endif %}
             </h3>
+		</div>
+        <div class="ui fluid one item attached menu" style="margin:0 -1px!important;width:calc(100% + 2px)!important">
+            <a class="item slot-discussion-btn">Expand Activities on this Question</a>
+        </div>
+		<div class="slot-discussion ui attached segment" data-id="{{ slot_info.id }}" style="display:none;min-height:150px;padding-top:0;"></div>
+        <div class="ui stacked bottom attached segment">
+        <b>Existing Nuggets</b>
             {% if slot_info.themes %}{% for theme in slot_info.themes %}
                 {% if theme.name %}
                     <div class="ui theme label" data-theme-id="{{ theme.id }}">{{ theme.name }}</div>
@@ -11,7 +18,8 @@
                     <div class="empty theme" style="display:none" data-theme-id="{{ theme.id }}"></div>
                 {% endif %}
                 {% if theme.claims %}{% for src_claim in theme.claims %}
-                    <div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}" {% if src_claim.theme_id != -1 %}style="margin-left: 50px"{% endif %}>
+                    <div class="src_claim ui vertical segment" data-id="{{ src_claim.id }}"
+                         {% if src_claim.theme_id != -1 %}style="margin-left: 50px"{% endif %}>
                         <div>{{ src_claim.content | safe }}</div>
                         <div class="ui destmt circular icon red button"><i class="remove icon"></i></div>
                     </div>
@@ -19,11 +27,7 @@
                     <div class="ui vertical segment">(Empty)</div>
                 {% endif %}
             {% endfor %}{% endif %}
-		</div>
-        <div class="ui fluid one item attached menu" style="margin:0 -1px!important;width:calc(100% + 2px)!important">
-            <a class="item slot-discussion-btn">Expand Activities on this Question</a>
         </div>
-		<div class="slot-discussion ui bottom attached segment" data-id="{{ slot_info.id }}" style="display:none;min-height:150px;padding-top:0;"></div>
 	</div>
 {% endfor %}
 <div class="droppable-edge"></div>

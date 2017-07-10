@@ -29,6 +29,10 @@ a.user {
 .ui.feed > .event {
   table-layout: fixed;
 }
+.ui.feed > .event[data-type="question"] {
+    background-color: #fde6ea;
+    border-radius: 5px;
+}
 .user-initial {
   display: table-cell;
   vertical-align: top;
