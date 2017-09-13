@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Current Fitness Attendance</title>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+    </head>
+
+    <body style="padding-top: 0px;">
+
+        <h1>Hepper Fitness Center</h1>
+        <div id="hfc">0/0</div>
+
+        <script type="text/javascript">
+        //all charts JSON
+        var chartData;
+        //all charts c3
+        var chartObjs = {};
+        //chart default poll timer in ms
+        var chartPollTimer = 5000;
+        //chart poll timer
+        var chartPollTimerObj;
+
+        //find all available charts
+        $(document).ready(function () {
+            $("#ChartMainContainer").empty();
+            updateChartsLoop();
+        })
+
+        //periodically query chart data
+        function updateChartsLoop() {
+            //get our chart data JSON
+            var apiUrl = 'https://studentaffairs.psu.edu/CurrentFitnessAttendance/api/CounterAPI';
+            $.getJSON(apiUrl)
+                .done(function (data) {
+                    chartData = data;
+                    if (chartData != null && chartData.length !== 0) {
+                        var textData = "";
+
+                        //loop through chart data JSON, match IDs with divs
+                        for (var i = 0; i < chartData.length; i++) {
+                            var counterActive = chartData[i].CounterActive;
+                            //text data
+                            textData += "Status for " + chartData[i].LocationDescription + ". ";
+
+                            if (!counterActive)
+                                textData += "Closed."
+                            else if (chartData[i].CurrentVal == chartData[i].MaxVal)
+                                textData += "Full. Estimated wait time is " + chartData[i].FullCapacityWaitTime + " minutes.";
+                            else
+                                textData += chartData[i].CurrentVal + " of " + chartData[i].MaxVal + " occupied.";
+
+                            // //div exist?
+                            // if ($('#chart' + chartData[i].GUID).length) {
+                            //     //update label
+                            //     chartObjs["chart" + chartData[i].GUID].internal.config.gauge_label_format = function (value, ratio) {
+                            //         if (!counterActive)
+                            //             return "CLOSED";
+                            //         else if (ratio == 1)
+                            //             return "FULL";
+                            //         else
+                            //             return Math.round(ratio * 100) + "%";
+                            //     };
+
+                            //     //chart data
+                            //     chartObjs["chart" + chartData[i].GUID].load({
+                            //         columns: [
+                            //             ['Current Value ', chartData[i].CurrentVal]
+                            //         ]
+                            //     });
+
+                            //     //this is how we get to the % labels in the middle of the arc..
+                            //     //alert($('#chart' + chartData[i].GUID).find('.c3-gauge-value').text());
+
+                            //     //chart footer container
+                            //     if (chartData[i].CurrentVal == chartData[i].MaxVal)
+                            //         //full, display estimated wait time
+                            //         $('#chartFooter' + chartData[i].GUID).text("Wait: " + chartData[i].FullCapacityWaitTime + " Minutes");
+                            //     else
+                            //         //not full, display count
+                            //         $('#chartFooter' + chartData[i].GUID).text(chartData[i].CurrentVal + "/" + chartData[i].MaxVal);
+                            // }
+                            // else {
+                            //     var footerContent;
+                            //     if (chartData[i].CurrentVal == chartData[i].MaxVal)
+                            //         footerContent = "Wait: " + chartData[i].FullCapacityWaitTime + " Minutes";
+                            //     else
+                            //         footerContent = chartData[i].CurrentVal + "/" + chartData[i].MaxVal;
+
+                            //     var graphicData = "<div class='ChartContainer' aria-hidden='true'><div class='chartTitleContainer' aria-hidden='true'><span class='chartTitle'>" + chartData[i].LocationDescription + "</span></div><div id='chart" + chartData[i].GUID + "'></div><span id='chartFooter" + chartData[i].GUID + "' class='chartFooter'>" + footerContent + "</span></div>";
+
+                            //     //JSON properties = GUID, LocationDescription, CurrentVal, MaxVal
+                            //     $("#ChartMainContainer").append(graphicData);
+                            //     //bind chart obj to div container
+                            //     chartObjs["chart" + chartData[i].GUID] = c3.generate({
+                            //         bindto: '#chart' + chartData[i].GUID,
+                            //         data: {
+                            //             columns: [
+                            //                 ['Current Value ', chartData[i].CurrentVal]
+                            //             ],
+                            //             type: 'gauge'
+                            //         },
+                            //         gauge: {
+                            //             label: {
+                            //                 format: function (value, ratio) {
+                            //                     if (!counterActive)
+                            //                         return "CLOSED";
+                            //                     else if (ratio == 1)
+                            //                         return "FULL";
+                            //                     else
+                            //                         return Math.round(ratio * 100) + "%";
+                            //                 }
+                            //             },
+                            //             min: 0,
+                            //             max: chartData[i].MaxVal,
+                            //             width: 25
+                            //         },
+                            //         interaction: {
+                            //             enabled: false
+                            //         }
+                            //     });
+                            // }
+                        }
+
+                        $("#hfc").html(textData);
+                        $('#textDataContainer').text(textData);
+                    }
+                    else
+                        $("#ChartMainContainer").replaceWith("<h3>Nothing is currently available. Please check back at a later time.</h3>")
+                })
+                .fail(function () {
+                    //failed show failure to div
+                    $("#ChartMainContainer").replaceWith("<h3>Error while loading charts, please try again later.</h3>")
+                })
+                .always(function () {
+                    //regardless of fail or success, query it again..
+                    chartPollTimerObj = setTimeout(updateChartsLoop, chartPollTimer);
+                });
+        }
+
+        function stopUpdate() {
+            try {
+                $('#chartUpdateStatus').html("The charts have stopped updating.");
+                clearTimeout(chartPollTimerObj);
+                chartPollTimerObj = null;
+                
+            }
+            catch (err) {
+                //ignore
+            }
+        }
+
+        function resumeUpdate() {
+            try {
+                $('#chartUpdateStatus').html("The charts are currently updating.");
+                if (chartPollTimerObj == null)
+                    chartPollTimerObj = setTimeout(updateChartsLoop, chartPollTimer);
+                
+            }
+            catch (err) {
+                //ignore
+            }
+        }
+
+        function reportStatus() {
+            //focus text container to get a report for screen reader
+            $('#textDataContainer').focus();
+        }
+        </script>
+    </body>
+</html>

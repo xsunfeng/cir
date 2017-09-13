@@ -13,10 +13,24 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="column">
+		<div class="ui four cards">
 			{% if forums %}
 				{% for forum in forums %}
-					<div class="ui top attached segment items">
+
+<div class="card">
+    <div class="content">
+      <div class="header">{{ forum.full_name }}</div>
+      <div class="meta">Friend</div>
+      <div class="description">
+        {{ forum.short_description }}
+      </div>
+    </div>
+	<div class="extra content">
+		<a class="ui button" href="/{{ forum.url }}/va">Enter</a>
+	</div>
+</div>
+
+<!-- 					<div class="ui top attached segment items">
 						<div class="item">
 							<div class="image"><img src="{{ forum.logo_url }}" alt="Default forum picture"></div>
 							<div class="content">
@@ -86,7 +100,7 @@
 									<div class="description">Citizens<br>Statement</div>
 								</div>
 							</a>
-					</div>
+					</div> -->
 				{% endfor %}
 			{% else %}
 			<div class="ui items">

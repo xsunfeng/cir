@@ -17,6 +17,7 @@ import phase0
 import phase1
 import phase2
 import phase5
+import va_views
 
 
 admin.autodiscover()
@@ -63,6 +64,11 @@ urlpatterns = patterns('',
     url(r'^workbench/api_get_doc_by_hl_id/$', workbench_views.api_get_doc_by_hl_id),
     url(r'^workbench/api_get_doc_by_doc_id/$', workbench_views.api_get_doc_by_doc_id),
     url(r'^workbench/api_get_init_doc/$', workbench_views.api_get_init_doc),
+
+    url(r'^api_va/get_statement_comment_list/$', va_views.get_statement_comment_list),
+    url(r'^api_va/put_statement_comment/$', va_views.put_statement_comment),
+    url(r'^api_va/put_visref/$', va_views.put_visref),
+    url(r'^api_va/get_visref/$', va_views.get_visref),
 
     url(r'^phase0/update_statement_questions/$', phase0.update_statement_questions),
     url(r'^phase0/get_statement_comment_list/$', phase0.get_statement_comment_list),
@@ -137,7 +143,8 @@ urlpatterns = patterns('',
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/workbench/?$', forum_views.enter_workbench),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/sankey/?$', forum_views.enter_sankey),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)(/dashboard/(?P<dashboard_tab>[a-zA-Z0-9_]+))?/?$', facilitator_views.enter_dashboard),
-    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/statement/?$', forum_views.enter_statement)
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/statement/?$', forum_views.enter_statement),
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/va/?$', forum_views.enter_va)
     
 )
     

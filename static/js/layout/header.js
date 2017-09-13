@@ -262,6 +262,9 @@ define([
 					data: $form.form('get values'),
 					type: 'post',
 					success: function(xhr) {
+						sessionStorage.setItem("user_name", xhr["user_name"]);
+						sessionStorage.setItem("role", xhr["role"]);
+						sessionStorage.setItem("user_id", xhr["user_id"]);
 						window.location.reload();
 					},
 					error: function(xhr) {

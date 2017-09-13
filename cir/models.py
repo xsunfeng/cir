@@ -854,3 +854,10 @@ class Glossary(models.Model):
     
     def __unicode__(self):
         return self.forum.full_name
+
+class VisRef(models.Model):
+    forum = models.ForeignKey(Forum)
+    created_at = models.DateTimeField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    parent = models.ForeignKey("self", related_name='children_of_visref', null=True, blank=True, on_delete=models.CASCADE)
+    config = models.TextField(null=True, blank=True)

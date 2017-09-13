@@ -16,7 +16,6 @@ def get_statement_comment_list(request):
     context = {}
     forum = Forum.objects.get(id = request.session['forum_id'])
     thread_comments = ForumComment.objects.filter(forum = forum)
-    print thread_comments
     context['comments'] = thread_comments
     response['forum_comment'] = render_to_string("phase5/forum-comment.html", context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
