@@ -186,6 +186,22 @@ def enter_va(request, forum_url):
     # get docs, themes, and authors
     return render(request, "va/index.html", context)
 
+def enter_petition(request, forum_url):
+    context = {}
+    # check for possible errors
+    try:
+        forum = Forum.objects.get(url=forum_url)
+        user_id = request.user.id
+        request.session['forum_id'] = forum.id
+    except:
+        context['load_error'] = '404'
+        context['error_msg'] = 'The requested forum is not valid: <b>' + forum_url + '</b>'
+        return render(request, 'error_index.html', context)
+    context["user_id"] = user_id
+    context["user_name"] = request.user.get_full_name()
+    # get docs, themes, and authors
+    return render(request, "petition/index.html", context)
+
 def _get_phases(forum, selected_phase):
     results = {}
     results['phase'] = forum.phase

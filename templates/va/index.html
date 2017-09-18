@@ -30,6 +30,8 @@
 <script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.js'></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.20/require.min.js"></script>
+<script type="text/javascript" src="http://public.tableau.com/javascripts/api/tableau-2.0.0.min.js"></script>
+
 
 		<style>
 
@@ -130,7 +132,7 @@ path {
 			.thread-container {
 				position: fixed;
 				max-height: 100%;
-				left: 1020px;
+				left: 1280px;
 				top: 0;
 				overflow-y: scroll;
 				overflow-x: hidden;
@@ -201,159 +203,13 @@ path {
 			}
 	</style>
 
-    	<div class="modal"></div>
-
-		<table id="filter-container" class="ui-widget ui-widget-content" style="width: 1008px; margin-bottom: 5px;">
-			<thead>
-				<tr class="ui-widget-header ">
-					<th colspan="2">Filters</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<td>
-						timepicker
-					</td>
-					<td>
-						<p id="basicExample">
-						    <input value="1/10/2014" type="text" class="date start" />
-						    <input value="6:00am" type="text" class="time start" /> to
-						    <input value="17:00am" type="text" class="time end" />
-						    <input value="1/15/2014" type="text" class="date end" />
-						    <button id="update-datetime" class="ui-button ui-widget ui-corner-all">update</button>
-						</p>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						employee
-					</td>
-					<td>
-						<select id='optgroup' multiple='multiple'>
-							<optgroup label='Information Technology'>
-								<option value='1'>Lucas Alcazar (IT Helpdesk)</option>
-								<option value='5'>Isak Baza (IT Technician)</option>
-								<option value='6'>Linnea Bergen (IT Group Manager)</option>
-								<option value='8'>Calixto Nils (IT Technician)</option>
-								<option value='17'>Sven Flecha (IT Technician)</option>
-							</optgroup>
-							<optgroup label='Engineering'>
-								<option value='2'>Lars Azada (Engineer)</option>
-								<option value='3'>Felix Balas (Engineer)</option>
-								<option value='7'>Isande Borrasca (Drill Technician)</option>
-								<option value='9'>Axel Calzas (Drill Technician)</option>
-								<option value='11'>Gustav Cazar (Hydraulic Technician)</option>
-								<option value='14'>Lidelse Dedos (Engineering Group Manager)</option>
-								<option value='18'>Birgitta Frente (Geologist)</option>
-								<option value='19'>Vira Frente (Hydraulic Technician)</option>
-								<option value='25'>Adra Nubarron (Geologist)</option>
-								<option value='26'>Marin Onda (Drill Site Manager)</option>
-								<option value='27'>Kare Orilla (Drill Technician)</option>
-								<option value='28'>Elsa Orilla (Drill Technician)</option>
-								<option value='33'>Brand Tempestad (Drill Technician)</option>
-							<optgroup label='Executive'>
-								<option value='4'>Ingrid Barranco (SVP/CFO)</option>
-								<option value='10'>Ada Campo-Corrente (SVP/CIO)</option>
-								<option value='31'>Sten Sanjorge Jr. (President/CEO)</option>
-								<option value='32'>Orhan Strum (SVP/COO)</option>
-								<option value='35'>Willem Vasco-Pais (Environmental Safety Advisor)</option>
-							</optgroup>
-							<optgroup label='Security'>
-								<option value='13'>Inga Ferro (Site Control)</option>
-								<option value='15'>Loreto Bodrogi (Site Control)</option>
-								<option value='16'>Isia Vann (Perimeter Control)</option>
-								<option value='20'>Stenig Fusil (Building Control)</option>
-								<option value='21'>Hennie Osvaldo (Perimeter Control)</option>
-								<option value='22'>Kanon Herrero (Badging Office)</option>
-								<option value='23'>Varja Lagos (Badging Office)</option>
-								<option value='24'>Minke Mies (Perimeter Control)</option>
-								<option value='30'>Felix Resumir (Security Group Manager)</option>
-								<option value='34'>Edvard Vann (Perimeter Control)</option>
-							</optgroup>
-							<optgroup label='Facilities'>
-								<option value='29'>Bertrand Ovan (Facilities Group Manager)</option>
-							</optgroup>
-						</select>
-					</td>
-				</tr>
-<!-- 				<tr class="ui-widget-header ">
-					<td colspan="2">
-						<div style="float:right;">
-							<button class="ui-button ui-widget ui-corner-all">reset</button>
-							<button class="ui-button ui-widget ui-corner-all">update</button>
-						</div>
-					</td>
-				</tr> -->
-			</tbody>
-		</table>
-
-		<div id="visualization-tabs" style="width:1000px;">
-			<ul>
-				<li><a href="#tabs-1">Trajectory</a></li>
-				<li><a href="#tabs-2">Timeline</a></li>
-				<li><a href="#tabs-3">Spending</a></li>
-			</ul>
-
-			<div id="tabs-1">
-				<div id="mapContainer">
-				  <div id="map"></div>
-				</div>
-				<div class="row">
-				    <div id="date-chart" class="dc-chart">
-				        <strong>Date</strong> (x: date, y: #gps points) | <span class="sdate"></span> - <span class="edate"></span>
-				        <div class="clearfix"></div>
-				    </div>
-				</div>
-				<div class="row">
-				    <div id="hour-chart" class="dc-chart">
-				        <strong>Time of Day</strong> (x: hour, y: #gps points) | <span class="shour"></span> - <span class="ehour"></span>
-				        <div class="clearfix"></div>
-				    </div>
-				</div>
-				<div class="row">
-				    <div id="car-chart" class="dc-chart">
-				        <strong>Car</strong> (x: Assigned Name, y: #gps points)
-				        <div class="clearfix"></div>
-				    </div>
-				</div>
-				<div class="row"></div>
-			</div>
-
-			<div id="tabs-2">
-				<div class="row">
-				    <div id="timeline-chart">
-				    </div>
-				</div>
-			</div>
-
-			<div id="tabs-3">
-				<h3>Spending</h3>
-				<div class="row">
-					<div>Number of rows: <span id="spending-size">0</span></div>
-					<input type="text" id="spending-lowerbound">
-					<input type="text" id="spending-upperbound">
-					<button class="ui-button ui-widget ui-corner-all" id="update">Update</button>
-					<button class="ui-button ui-widget ui-corner-all"id="reset">Reset</button>
-					<div id='spending-content'></div>
-					<h3>Selected</h3>
-					<div>
-						<table style="width:560px;" id="selected-spending">
-							<tr>
-								<th>Name</th>
-								<th>Shop</th>
-								<th>Type</th>
-								<th>Spending</th>
-							</tr>
-						</table>
-					</div>
-				</div>
-				<div class="row" id="spending-list">
-					<h3>Spending</h3>
-				</div>
-			</div>
-
+    	<div id="tableauViz" style="width:1280px;height:1000px;">
 		</div>
 
+<input type="button" value="Save View" onClick="saveCustomView();" /> 
+<input type="button" value="Load View" onClick="loadCustomView();" />
+
+		<button id="resetFilters">reset</button>
 		<header><span id="user_name">{{ user_name }}</span></header>
 		<div id="w" class="thread-container">
 
@@ -375,17 +231,6 @@ path {
 
 			<div id="forum-comment"></div>
 		</div>  
-<script>
-// data files
-ass_file = '{% static "data/car-assignments.csv" %}';
-mapfile = '{% static "data/Kronos_topo2.json" %}';
-imagemap_file = '{% static "data/MC2-tourist.jpg" %}';
-shoplocations_file = '{% static "data/shop_locations2.csv" %}';
-cc_data = '{% static "data/cc_data.csv" %}';
-shop_locations = '{% static "data/shop_locations.csv" %}';
-gps_data = '{% static "data/gps.csv" %}';
-
-</script>
 <script src='{% static "js/va/app.js" %}' ></script>
 
 <div id="dialog-message" title="Log in first" style="display:none;">

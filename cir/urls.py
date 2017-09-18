@@ -18,6 +18,7 @@ import phase1
 import phase2
 import phase5
 import va_views
+import petition_views
 
 
 admin.autodiscover()
@@ -69,6 +70,11 @@ urlpatterns = patterns('',
     url(r'^api_va/put_statement_comment/$', va_views.put_statement_comment),
     url(r'^api_va/put_visref/$', va_views.put_visref),
     url(r'^api_va/get_visref/$', va_views.get_visref),
+
+    url(r'^api_petition/get_statement_comment_list/$', petition_views.get_statement_comment_list),
+    url(r'^api_petition/put_statement_comment/$', petition_views.put_statement_comment),
+    url(r'^api_petition/put_visref/$', petition_views.put_visref),
+    url(r'^api_petition/get_visref/$', petition_views.get_visref),
 
     url(r'^phase0/update_statement_questions/$', phase0.update_statement_questions),
     url(r'^phase0/get_statement_comment_list/$', phase0.get_statement_comment_list),
@@ -144,7 +150,8 @@ urlpatterns = patterns('',
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/sankey/?$', forum_views.enter_sankey),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)(/dashboard/(?P<dashboard_tab>[a-zA-Z0-9_]+))?/?$', facilitator_views.enter_dashboard),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/statement/?$', forum_views.enter_statement),
-    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/va/?$', forum_views.enter_va)
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/va/?$', forum_views.enter_va),
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/petition/?$', forum_views.enter_petition)
     
 )
     

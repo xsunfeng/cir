@@ -1,66 +1,1 @@
-location,lat,long,type,color
-Brew've Been Served,36.05407582,24.90122153,coffee,brown
-Hallowed Grounds,36.0636650725,24.88591059,coffee,brown
-Coffee Cameleon,36.054667515,24.88980708,coffee,brown
-Abila Airport,36.050972645,24.825931275,work,blue
-Kronos Pipe and Irrigation,36.06529084,24.83310978,work,blue
-Nationwide Refinery,36.0584562625,24.8854983225,work,blue
-Maximum Iron and Steel,36.0640675725,24.8414314525,work,blue
-Stewart and Sons Fabrication,36.0541586325,24.9081221325,work,blue
-Carlyle Chemical Inc.,36.058547755,24.880893345,work,blue
-Coffee Shack,0,0,coffee,brown
-Bean There Done That,36.08177734,24.85091911,coffee,brown
-Brewed Awakenings,36.073341485,24.8641873675,coffee,brown
-Jack's Magical Beans,36.06752842,24.873339645,coffee,brown
-Katerina's Cafe,36.054478485,24.89992244,food,gray
-Hippokampos,36.07666142,24.857605285,food,gray
-Abila Zacharo,36.0634570575,24.8510002725,coffee,brown
-Gelatogalore,36.0597609575,24.858025505,food,gray
-Kalami Kafenion,36.065834515,24.85237837,coffee,brown
-Ouzeri Elian,36.051950315,24.87079253,food,gray
-Guy's Gyros,36.055779545,24.9025275125,food,gray
-U'Pump,36.06774866,24.87149411,shop,yellow
-Frydos Autosupply n' More,36.05497351,24.9018230175,shop,yellow
-Albert's Fine Clothing,36.075257695,24.856306405,shop,yellow
-Shoppers' Delight,36.052843925,24.868599775,shop,yellow
-Abila Scrapyard,36.0744012075,24.8459662,work,blue
-Frank's Fuel,36.0721434775,24.841331965,shop,yellow
-Chostus Hotel,36.0706769175,24.895226985,etc,red
-General Grocer,36.06038557,24.856525985,shop,yellow
-Kronos Mart,36.06585217,24.849815165,shop,yellow
-Octavio's Office Supplies,36.05856317,24.857934205,shop,yellow
-Roberts and Sons,36.063270675,24.8523029925,shop,yellow
-Ahaggo Museum,36.0771528225,24.876189275,etc,red
-Desafio Golf Course,36.0895808625,24.8607017675,etc,red
-Daily Dealz,0,0,shop,yellow
-Kronos Capitol,36.0529498275,24.84939249,etc,red
-Gastech,36.04802613,24.87957068,work,blue
-Marin Onda,36.072967115,24.88400521,home,green
-Isande Borrasca,36.08445429,24.864215205,home,green
-Axel Calzas,36.084301605,24.856429595,home,green
-Kare Orilla,36.069258745,24.88422014,home,green
-Elsa Orilla,36.07326282,24.87564186,home,green
-Lars Azada,36.085455315,24.860407195,home,green
-Felix Balas,36.086664225,24.85761958,home,green
-Gustav Cazar,36.08416831,24.859001295,home,green
-Vira Frente,36.0878927,24.856317255,home,green
-Willem Vasco'Pais,36.07623802,24.87468705,home,green
-Ingrid Barranco,36.07819846,24.87213338,home,green
-Ada Campo'Corrente,36.076835465,24.865884745,home,green
-Orhan Strum,36.072134065,24.874603255,home,green
-Lucas Alcazar,36.06645854,24.88261772,home,green
-Isak Baza,36.0673333,24.877916245,home,green
-Nils Calixto,36.067264175,24.8859095,home,green
-Stenig Fusil,36.06587158,24.90103281,home,green
-Edvard Vann,36.06769505,24.90249237,home,green
-Hideki Cocinaro,36.067813575,24.899129665,home,green
-Dedos/BFrente,36.0633825675,24.8961310675,home,green
-Nubarron/Ovan/Bergen,36.0594751967,24.8948076333,home,green
-Tempestad/Flecha/MMies,36.0624868533,24.8988211433,home,green
-Herrero/VLagos/Resumir,36.0584853117,24.90102666,home,green
-Osvaldo/IVann/Bodrogi/Ferro,36.0603933413,24.9056100888,home,green
-Location1,36.080632115,24.846857105,etc,red
-Location2,36.069490265,24.84151674,etc,red
-Location3,36.063229275,24.900137675,etc,red
-Location4,36.05895927,24.89279122,etc,red
-Location5,36.05015633,24.900436095,etc,red
+location,lat,long,type,colorBrew've Been Served,36.05407582,24.90122153,coffee,brownHallowed Grounds,36.06366507,24.88591059,coffee,brownCoffee Cameleon,36.05466752,24.88980708,coffee,brownAbila Airport,36.05097265,24.82593128,work,blueKronos Pipe and Irrigation,36.06529084,24.83310978,work,blueNationwide Refinery,36.05845626,24.88549832,work,blueMaximum Iron and Steel,36.06406757,24.84143145,work,blueStewart and Sons Fabrication,36.05415863,24.90812213,work,blueCarlyle Chemical Inc.,36.05854776,24.88089335,work,blueBean There Done That,36.08177734,24.85091911,coffee,brownBrewed Awakenings,36.07334149,24.86418737,coffee,brownJack's Magical Beans,36.06752842,24.87333965,coffee,brownKaterina's Cafe,36.05447849,24.89992244,food,grayHippokampos,36.07666142,24.85760529,food,grayAbila Zacharo,36.06345706,24.85100027,coffee,brownGelatogalore,36.05976096,24.85802551,food,grayKalami Kafenion,36.06583452,24.85237837,coffee,brownOuzeri Elian,36.05195032,24.87079253,food,grayGuy's Gyros,36.05577955,24.90252751,food,grayU'Pump,36.06774866,24.87149411,shop,yellowFrydos Autosupply n' More,36.05497351,24.90182302,shop,yellowAlbert's Fine Clothing,36.0752577,24.85630641,shop,yellowShoppers' Delight,36.05284393,24.86859978,shop,yellowAbila Scrapyard,36.07440121,24.8459662,work,blueFrank's Fuel,36.07214348,24.84133197,shop,yellowChostus Hotel,36.07067692,24.89522699,etc,redGeneral Grocer,36.06038557,24.85652599,shop,yellowKronos Mart,36.06585217,24.84981517,shop,yellowOctavio's Office Supplies,36.05856317,24.85793421,shop,yellowRoberts and Sons,36.06327068,24.85230299,shop,yellowAhaggo Museum,36.07715282,24.87618928,etc,redDesafio Golf Course,36.08958086,24.86070177,etc,redKronos Capitol,36.05294983,24.84939249,etc,redGastech,36.04802613,24.87957068,work,blueMarin Onda,36.07296712,24.88400521,home,greenIsande Borrasca,36.08445429,24.86421521,home,greenAxel Calzas,36.08430161,24.8564296,home,greenKare Orilla,36.06925875,24.88422014,home,greenElsa Orilla,36.07326282,24.87564186,home,greenLars Azada,36.08545532,24.8604072,home,greenFelix Balas,36.08666423,24.85761958,home,greenGustav Cazar,36.08416831,24.8590013,home,greenVira Frente,36.0878927,24.85631726,home,greenWillem Vasco'Pais,36.07623802,24.87468705,home,greenIngrid Barranco,36.07819846,24.87213338,home,greenAda Campo'Corrente,36.07683547,24.86588475,home,greenOrhan Strum,36.07213407,24.87460326,home,greenLucas Alcazar,36.06645854,24.88261772,home,greenIsak Baza,36.0673333,24.87791625,home,greenNils Calixto,36.06726418,24.8859095,home,greenStenig Fusil,36.06587158,24.90103281,home,greenEdvard Vann,36.06769505,24.90249237,home,greenHideki Cocinaro,36.06781358,24.89912967,home,greenDedos/BFrente,36.06338257,24.89613107,home,greenNubarron/Ovan/Bergen,36.0594752,24.89480763,home,greenTempestad/Flecha/MMies,36.06248685,24.89882114,home,greenHerrero/VLagos/Resumir,36.05848531,24.90102666,home,greenOsvaldo/IVann/Bodrogi/Ferro,36.06039334,24.90561009,home,greenLocation1,36.08063212,24.84685711,etc,redLocation2,36.06949027,24.84151674,etc,redLocation3,36.06322928,24.90013768,etc,redLocation4,36.05895927,24.89279122,etc,redLocation5,36.05015633,24.9004361,etc,red

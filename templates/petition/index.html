@@ -1,0 +1,119 @@
+
+{% load static %}
+
+<body class="loadding">
+<!-- "{% static "my_app/example.jpg" %}" -->
+
+<script src='{% static "js/va/lib/jquery-1.11.1.min.js" %}'></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"></link>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" rel="stylesheet" class="ui" />
+<script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.js'></script>
+
+<script type="text/javascript" src="http://public.tableau.com/javascripts/api/tableau-2.0.0.min.js"></script>
+
+
+		<style>
+
+			/*threaded comments*/
+			#container { 
+			  display: block; 
+			  width: 100%; 
+			  background: #fff; 
+			  padding: 0;
+			}
+
+			/* comments area */
+			#comments { 
+				display: block; 
+				padding-left: 0px;
+			}
+
+			#comments .cmmnt, ul .cmmnt, ul ul .cmmnt { display: block; position: relative; padding-left: 65px; border-top: 1px solid #ddd; }
+
+			#comments .cmmnt .avatar  { position: absolute; top: 8px; left: 0; }
+			#comments .cmmnt .avatar img { 
+			  -webkit-border-radius: 3px; 
+			  -moz-border-radius: 3px; 
+			  border-radius: 3px; 
+			  -webkit-transition: all 0.4s linear;
+			  -moz-transition: all 0.4s linear;
+			  -ms-transition: all 0.4s linear;
+			  -o-transition: all 0.4s linear;
+			  transition: all 0.4s linear;
+			}
+
+			#comments .cmmnt .avatar a:hover img { opacity: 0.77; }
+
+			#comments .cmmnt .cmmnt-content { padding: 0px 3px; padding-bottom: 12px; padding-top: 8px; }
+
+			#comments .cmmnt .cmmnt-content header { display: block; margin-bottom: 8px; }
+			#comments .cmmnt .cmmnt-content header .pubdate { color: #777; }
+			#comments .cmmnt .cmmnt-content header .userlink { font-weight: bold; } 
+
+			#comments .cmmnt .replies { 
+				margin-bottom: 7px; 
+				padding-left: 0;
+			}
+
+			.thread-container {
+				position: fixed;
+				max-height: 100%;
+				left: 1280px;
+				top: 0;
+				overflow-y: scroll;
+				overflow-x: hidden;
+				padding: 10px;
+				right: 0;
+			}
+
+			.thread-container .ui-wrapper {
+				width: 100% !important;
+				padding-bottom: 0 !important;
+			}
+	</style>
+
+    	<div id="tableauViz" style="width:1280px;height:1000px;">
+		</div>
+
+<input type="button" value="Save View" onClick="saveCustomView();" /> 
+<input type="button" value="Load View" onClick="loadCustomView();" />
+
+		<button id="resetFilters">reset</button>
+		<header><span id="user_name">{{ user_name }}</span></header>
+		<div id="w" class="thread-container">
+
+<!-- 		    <div style="display: block; position: relative; padding-left: 65px;">
+		      	<div class="avatar" style="position: absolute; top: 8px; left: 0;"><a href="javascript:void(0);">
+					<img src="{{ STATIC_URL }}/pictures/{{ user_id }}.png" width="55" height="55" alt="Image not found" onerror="this.onerror=null;this.src='{{ STATIC_URL }}/pictures/default-avatar.png';"/>
+		      	</div>
+		      	<div>
+			      	<header><span id="user_name">{{ user_name }}</span></header>
+			      	<textarea id="comment-textarea" rows="5" cols="20"></textarea>
+		      	</div>
+		    </div>
+
+			
+			<div style="margin-top:5px;">
+				<button class="ui-button ui-widget ui-corner-all">post</button>
+				<button class="ui-button ui-widget ui-corner-all">refer vis</button>
+			</div> -->
+
+			<div id="forum-comment"></div>
+		</div>  
+<script src='{% static "js/petition/app.js" %}' ></script>
+
+<div id="dialog-message" title="Log in first" style="display:none;">
+	Please <a href='/'>[log in]</a> first to interact with the visualization and post comments
+</div>
+
+</body>
+
+<!-- {% include 'qa/qa-wrapper.html' %}
+
+{% if role != 'visitor' %}
+	{% include 'chatter.html' %}
+{% endif %} -->
+
