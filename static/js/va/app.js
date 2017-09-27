@@ -108,10 +108,6 @@ define([
     $("body").on("click", ".visref_id", function(){
       // click button to retrive/restore the state
       var customViewName = $(this).attr("value");
-      workbook.showCustomViewAsync(customViewName).then(
-        function() { console.log('Showed custom view ' + customViewName);  excel_download(); },
-        function() { console.warn('Failed to show custom view ' + customViewName); }
-      );
       $.ajax({
         url: '/api_va/get_visref/',
         type: 'post',
@@ -122,6 +118,15 @@ define([
           var config = JSON.parse(xhr.config);
           var sheet_name = config["sheet_name"];
           $('#va-tabs .item:contains("' + sheet_name + '")').click();
+
+          workbook.activateSheetAsync(sheet_name)
+            .then(function (newSheet) {
+              activeSheet = newSheet;
+              workbook.showCustomViewAsync(customViewName).then(
+                function() { console.log('Showed custom view ' + customViewName);  excel_download(); },
+                function() { console.warn('Failed to show custom view ' + customViewName); }
+              );
+            });   
         },
         error: function(xhr) {
           if (xhr.status == 403) {
