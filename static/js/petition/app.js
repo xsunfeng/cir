@@ -160,6 +160,30 @@ var init_comment_events = function() {
         }
       }
     }); 
+  }).on("click", ".comment-reply-capture", function(){
+    var $textarea = $(this).closest(".form").find("textarea");
+    var config = JSON.stringify(fil);
+    var visref_parent = sessionStorage.getItem("visref_parent");
+    if (!visref_parent) visref_parent = "null";
+    $.ajax({
+      url: '/api_va/put_visref/',
+      type: 'post',
+      data: {
+        'config': config,
+        'visref_parent': visref_parent,
+      },
+      success: function(xhr) {
+        console.log(xhr);
+        var content = $textarea.val();
+        content = content + "{" + xhr.visref_id + "}";
+        $textarea.val(content);
+      },
+      error: function(xhr) {
+        if (xhr.status == 403) {
+          Utils.notify('error', xhr.responseText);
+        }
+      }
+    }); 
   }).on("click", ".comment-post", function(){
     var textarea = $(this).closest(".comment-container").find("textarea");
     var text = textarea.val();

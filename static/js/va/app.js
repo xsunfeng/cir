@@ -187,6 +187,39 @@ define([
           }
         });     
       }
+    }).on("click", ".comment-reply-capture", function(){
+      // click button to save curent state for reply comment
+      var $textarea = $(this).closest(".form").find("textarea");
+      var visref_parent = sessionStorage.getItem("visref_parent");
+      if (!visref_parent) visref_parent = "null";
+      var config = {
+        "sheet_name": $("#va-tabs .item.active").text()
+      };
+      config = JSON.stringify(config);
+      $.ajax({
+        url: '/api_va/put_visref/',
+        type: 'post',
+        data: {
+          'visref_parent': visref_parent,
+          'config': config
+        },
+        success: function(xhr) {
+          console.log(xhr);
+          var content = $textarea.val();
+          content = content + "{" + xhr.visref_id + "}";
+          $textarea.val(content);
+          var customViewName = xhr.visref_id.toString();
+          workbook.rememberCustomViewAsync(customViewName).then(
+            function() { console.log('Remembered custom view ' + customViewName);  excel_download(); },
+            function() { console.warn('Failed to remember custom view ' + customViewName); }
+          );
+        },
+        error: function(xhr) {
+          if (xhr.status == 403) {
+            Utils.notify('error', xhr.responseText);
+          }
+        }
+      }); 
     }).on("click", ".comment-reply-save", function(){
       var text = $(this).closest("form").find("textarea").val();
       var parent_id = $(this).closest(".comment").attr("comment-id");
