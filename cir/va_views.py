@@ -43,6 +43,8 @@ def put_visref(request):
     author = request.user
     visref_parent = request.REQUEST.get('visref_parent')
     config = request.REQUEST.get('config')
+    print "///////////////"
+    print config
     if (visref_parent == "null"):
         visref = VisRef.objects.create(author = request.user, forum = forum, created_at = created_at, config = config)
     else:

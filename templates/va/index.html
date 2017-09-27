@@ -1,35 +1,23 @@
-
+{% extends 'base.html' %}
 {% load static %}
+{% load compressed %}
+{% block extralib %}
+    <script>
+        require([
+            'va/app',
+            'realtime/socket'
+        ]);
+    </script>
+{% endblock %}
+{% block extracss %}
+	{% compressed_css 'cir_forum' %}
+{% endblock %}
+{% block header %}
+	{% include 'header/va_header.html' %}
+{% endblock %}
 
-<body class="loadding">
-<!-- "{% static "my_app/example.jpg" %}" -->
+{% block body %}
 
-<script src='{% static "js/va/lib/d3.v3.min.js" %}'></script>
-<script src='{% static "js/va/lib/topojson.v0.min.js" %}'></script>
-<script src='{% static "js/va/lib/jquery-1.11.1.min.js" %}'></script>
-<script src='{% static "js/va/lib/tooltipsy.min.js" %}'></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"></link>
-
-<script src="https://jonthornton.github.io/jquery-timepicker/jquery.timepicker.js"></script>
-<link rel="stylesheet" type="text/css" href="https://jonthornton.github.io/jquery-timepicker/jquery.timepicker.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/js/bootstrap-datepicker.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker.standalone.css" />
-<script type="text/javascript" src='{% static "js/va/lib/timepicker/datepair.min.js" %}'></script>
-
-<script src='{% static "js/va/lib/multiselect/jquery.multi-select.js" %}'></script>
-<link rel="stylesheet" type="text/css" href='{% static "js/va/lib/multiselect/multi-select.css" %}'/>
-
-<script src='{% static "js/va/lib/crossfilter.v1.min.js" %}'></script>
-<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.css"/>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.js"></script>
-<script type="text/javascript" src='{% static "js/va/gantt.js" %}'></script>
-
-<link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" rel="stylesheet" class="ui" />
-<script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.js'></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.20/require.min.js"></script>
 <script type="text/javascript" src="http://public.tableau.com/javascripts/api/tableau-2.0.0.min.js"></script>
 
 
@@ -132,8 +120,8 @@ path {
 			.thread-container {
 				position: fixed;
 				max-height: 100%;
-				left: 1280px;
-				top: 0;
+			    left: 1300px;
+			    top: 50px;
 				overflow-y: scroll;
 				overflow-x: hidden;
 				padding: 10px;
@@ -203,14 +191,12 @@ path {
 			}
 	</style>
 
-    	<div id="tableauViz" style="width:1280px;height:1000px;">
+		<div id="va-tabs" class="ui three item menu" style="width: 1280px;">
+			<a class="item active">Trajectory</a>
+			<a class="item">Spending</a>
+			<a class="item">Placeholder</a>
 		</div>
-
-<input type="button" value="Save View" onClick="saveCustomView();" /> 
-<input type="button" value="Load View" onClick="loadCustomView();" />
-
-		<button id="resetFilters">reset</button>
-		<header><span id="user_name">{{ user_name }}</span></header>
+    	<div id="tableauViz" style="width:1280px;height:1000px;"></div>
 		<div id="w" class="thread-container">
 
 <!-- 		    <div style="display: block; position: relative; padding-left: 65px;">
@@ -231,17 +217,12 @@ path {
 
 			<div id="forum-comment"></div>
 		</div>  
-<script src='{% static "js/va/app.js" %}' ></script>
 
 <div id="dialog-message" title="Log in first" style="display:none;">
 	Please <a href='/'>[log in]</a> first to interact with the visualization and post comments
 </div>
 
-</body>
+<!-- {% include 'chatter.html' %} -->
 
-<!-- {% include 'qa/qa-wrapper.html' %}
-
-{% if role != 'visitor' %}
-	{% include 'chatter.html' %}
-{% endif %} -->
+{% endblock %}
 

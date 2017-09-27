@@ -271,92 +271,93 @@ def api_annotation(request):
 
 def api_qa(request):
     response = {}
+    context = {}
     forum = Forum.objects.get(id=request.session['forum_id'])
     action = request.REQUEST.get('action')
-    if action == 'load-thread':
-        # given a question, load its discussions
-        question = ClaimComment.objects.get(id=request.REQUEST.get('question_id'))
-        context = {
-            'entries': [],
-            'source': 'qa'
-        }
-        comments = question.get_descendants(include_self=True)
-        context["comments"] = question.get_descendants(include_self=True)
-        response['html'] = render_to_string("qa/question-expand.html", context)
-    if action == 'raise-question':
-        author = request.user
-        forum = Forum.objects.get(id=request.session['forum_id'])
-        comment_type = "question"
-        text = request.REQUEST.get('text')
-        created_at = timezone.now()
-        nugget_id = request.REQUEST.get('nugget_id')
-        if (nugget_id == ""):
-            newClaimComment = ClaimComment(author = author, text = text, created_at = created_at, comment_type = comment_type, forum = forum)
-        else:
-            newClaimComment = ClaimComment(author = author, text = text, created_at = created_at, comment_type = comment_type, forum = forum, nugget_id = nugget_id)
-        newClaimComment.save()
-    if action == 'get-question-list'  or action == 'raise-question':
-        author = request.user
-        context = {
-            'questions': []
-        }
-        questions = ClaimComment.objects.filter(forum = forum, comment_type='question', parent__isnull = True)
-        context['questions'] = context['questions']
-        for question in questions:
-            entry = {}
-            entry["reply_count"] = question.get_descendant_count()
-            if (entry["reply_count"] > 0):
-                entry["last_reply_pretty"] = utils.pretty_date(question.get_descendants(include_self=True).order_by("-created_at")[0].created_at)
-            entry["text"] = question.text
-            entry["id"] = question.id
-            entry["is_answered"] = question.is_answered
-            entry["created_at"] = question.created_at
-            entry['comments'] = question.get_descendants(include_self=True)
-            entry["entry_type"] = "claim_" + str(question.comment_type)
-            entry["author_name"] = question.author.first_name + " " + question.author.last_name
-            entry["author_id"] = question.author.id
-            entry["is_author"] = (question.author == request.user)
-            if (Role.objects.filter(user_id = request.user.id, forum =forum).count == 0):
-                entry["is_facilitator"] = (Role.objects.get(user = request.user, forum =forum).role) == "facilitator"
-                entry["author_role"] = Role.objects.get(user = question.author, forum =forum).role
-            entry["author_intro"] = UserInfo.objects.get(user = question.author).description
-            entry["created_at_pretty"] = utils.pretty_date(question.created_at)
-            # vote for importance
-            entry["vote_count"] = ClaimQuestionVote.objects.filter(question_id = question.id).count()
-            if (entry["vote_count"] > 0):
-                tmp = []
-                for vote in ClaimQuestionVote.objects.filter(question_id = question.id):
-                    tmp.append(vote.voter.last_name + " " + vote.voter.first_name)
-                entry["voted_authors"] = ", ".join(tmp)
-            # vote for experts
-            entry["expert_vote_count"] = QuestionNeedExpertVote.objects.filter(question_id = question.id).count()
-            entry["has_facilitator_vote"] = False
-            if (entry["expert_vote_count"] > 0):
-                tmp = []
-                for vote in QuestionNeedExpertVote.objects.filter(question_id = question.id):
-                    tmp.append(vote.voter.last_name + " " + vote.voter.first_name)
-                    if (Role.objects.get(user = vote.voter, forum =forum).role == "facilitator"):
-                        entry["has_facilitator_vote"] = True
-                entry["expert_voted_authors"] = ", ".join(tmp)
-            if (ClaimQuestionVote.objects.filter(voter_id = author.id, question_id = question.id).count() > 0):
-                entry["voted"] = True
-            if (QuestionNeedExpertVote.objects.filter(voter_id = author.id, question_id = question.id).count() > 0):
-                entry["expert_voted"] = True
-            try:
-                claimVersion = ClaimVersion.objects.filter(claim = question.claim, is_adopted = True).order_by("-created_at")[0]
-                entry['claim_id'] = question.claim.id
-                entry['claim_content'] = claimVersion.content
-                entry['claim_author'] = question.claim.author.first_name + " " + question.claim.author.last_name
-                entry['claim_created_at'] = utils.pretty_date(question.claim.created_at)
-            except:
-                pass
-            if (question.nugget):
-                docsection = DocSection.objects.get(id=question.nugget.context.id)
-                entry['doc_id'] = docsection.doc.id
-                entry['nugget_id'] = question.nugget.id
-            context['questions'].append(entry)
-        context['questions'] = sorted(context['questions'], key=lambda en: (en['is_answered'], en['created_at']), reverse=True)
-        response['html'] = render_to_string('qa/question-list.html', context)
+    # if action == 'load-thread':
+    #     # given a question, load its discussions
+    #     question = ClaimComment.objects.get(id=request.REQUEST.get('question_id'))
+    #     context = {
+    #         'entries': [],
+    #         'source': 'qa'
+    #     }
+    #     comments = question.get_descendants(include_self=True)
+    #     context["comments"] = question.get_descendants(include_self=True)
+    #     response['html'] = render_to_string("qa/question-expand.html", context)
+    # if action == 'raise-question':
+    #     author = request.user
+    #     forum = Forum.objects.get(id=request.session['forum_id'])
+    #     comment_type = "question"
+    #     text = request.REQUEST.get('text')
+    #     created_at = timezone.now()
+    #     nugget_id = request.REQUEST.get('nugget_id')
+    #     if (nugget_id == ""):
+    #         newClaimComment = ClaimComment(author = author, text = text, created_at = created_at, comment_type = comment_type, forum = forum)
+    #     else:
+    #         newClaimComment = ClaimComment(author = author, text = text, created_at = created_at, comment_type = comment_type, forum = forum, nugget_id = nugget_id)
+    #     newClaimComment.save()
+    # if action == 'get-question-list'  or action == 'raise-question':
+    #     author = request.user
+    #     context = {
+    #         'questions': []
+    #     }
+    #     questions = ClaimComment.objects.filter(forum = forum, comment_type='question', parent__isnull = True)
+    #     context['questions'] = context['questions']
+    #     for question in questions:
+    #         entry = {}
+    #         entry["reply_count"] = question.get_descendant_count()
+    #         if (entry["reply_count"] > 0):
+    #             entry["last_reply_pretty"] = utils.pretty_date(question.get_descendants(include_self=True).order_by("-created_at")[0].created_at)
+    #         entry["text"] = question.text
+    #         entry["id"] = question.id
+    #         entry["is_answered"] = question.is_answered
+    #         entry["created_at"] = question.created_at
+    #         entry['comments'] = question.get_descendants(include_self=True)
+    #         entry["entry_type"] = "claim_" + str(question.comment_type)
+    #         entry["author_name"] = question.author.first_name + " " + question.author.last_name
+    #         entry["author_id"] = question.author.id
+    #         entry["is_author"] = (question.author == request.user)
+    #         if (Role.objects.filter(user_id = request.user.id, forum =forum).count == 0):
+    #             entry["is_facilitator"] = (Role.objects.get(user = request.user, forum =forum).role) == "facilitator"
+    #             entry["author_role"] = Role.objects.get(user = question.author, forum =forum).role
+    #         entry["author_intro"] = UserInfo.objects.get(user = question.author).description
+    #         entry["created_at_pretty"] = utils.pretty_date(question.created_at)
+    #         # vote for importance
+    #         entry["vote_count"] = ClaimQuestionVote.objects.filter(question_id = question.id).count()
+    #         if (entry["vote_count"] > 0):
+    #             tmp = []
+    #             for vote in ClaimQuestionVote.objects.filter(question_id = question.id):
+    #                 tmp.append(vote.voter.last_name + " " + vote.voter.first_name)
+    #             entry["voted_authors"] = ", ".join(tmp)
+    #         # vote for experts
+    #         entry["expert_vote_count"] = QuestionNeedExpertVote.objects.filter(question_id = question.id).count()
+    #         entry["has_facilitator_vote"] = False
+    #         if (entry["expert_vote_count"] > 0):
+    #             tmp = []
+    #             for vote in QuestionNeedExpertVote.objects.filter(question_id = question.id):
+    #                 tmp.append(vote.voter.last_name + " " + vote.voter.first_name)
+    #                 if (Role.objects.get(user = vote.voter, forum =forum).role == "facilitator"):
+    #                     entry["has_facilitator_vote"] = True
+    #             entry["expert_voted_authors"] = ", ".join(tmp)
+    #         if (ClaimQuestionVote.objects.filter(voter_id = author.id, question_id = question.id).count() > 0):
+    #             entry["voted"] = True
+    #         if (QuestionNeedExpertVote.objects.filter(voter_id = author.id, question_id = question.id).count() > 0):
+    #             entry["expert_voted"] = True
+    #         try:
+    #             claimVersion = ClaimVersion.objects.filter(claim = question.claim, is_adopted = True).order_by("-created_at")[0]
+    #             entry['claim_id'] = question.claim.id
+    #             entry['claim_content'] = claimVersion.content
+    #             entry['claim_author'] = question.claim.author.first_name + " " + question.claim.author.last_name
+    #             entry['claim_created_at'] = utils.pretty_date(question.claim.created_at)
+    #         except:
+    #             pass
+    #         if (question.nugget):
+    #             docsection = DocSection.objects.get(id=question.nugget.context.id)
+    #             entry['doc_id'] = docsection.doc.id
+    #             entry['nugget_id'] = question.nugget.id
+    #         context['questions'].append(entry)
+    #     context['questions'] = sorted(context['questions'], key=lambda en: (en['is_answered'], en['created_at']), reverse=True)
+    #    response['html'] = render_to_string('qa/question-list.html', context)
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 # def api_qa_backup(request):
