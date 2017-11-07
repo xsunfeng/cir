@@ -5,6 +5,7 @@
     <script>
         require([
             'phase1/layout',
+        	'phase1/d3v4-brush-lite',
             'realtime/socket'
         ]);
     </script>
@@ -17,6 +18,20 @@
 {% endblock %}
 
 {% block body %}
+
+<style>
+
+.links line {
+  stroke-opacity: 0.6;
+  fill: none;
+}
+
+.nodes circle {
+  stroke: #333;
+  stroke-width: 1.5px;
+}
+
+</style>
 
 <div style="font-size:1.2em; position:fixed; top:50px; left:0; right:0; height:40px;">
 	<div id="theme-top" style="margin:auto; width:1200px;">Themes:</div>
@@ -33,6 +48,7 @@
   				<i class="dropdown icon"></i>
   			</div>
 			<div id="document-toc-container" class="ui special popup" style="min-width:80%; max-height:500px; overflow:auto;"></div>
+			<a href='#' class="ui basic button" id="open-document-overview">Overview</a>	
 			<a href='#' class="ui basic button" onclick='javascript:window.open("../vis", "_blank", "scrollbars=1,resizable=1,height=800,width=1200");' title='NuggetLens'>NuggetLens</a>	
 		</div>
 	</div>
@@ -79,6 +95,80 @@
 <div id="document-container-modal" class="ui small modal">
     <i class="close icon"></i>
     <div class="content" id="document-container"></div>
+</div>
+
+<div id="document-overview-modal" class="ui fullscreen modal">
+	<div class="header">Header</div>
+	<div class="content" style="height: 960px;">
+		<div align='center' style="width: 960px; height: 400px; margin: auto; margin-bottom: 12px">
+		    <svg id="graph" width="960" height="400" style="border-radius: .28571429rem; box-shadow: 0 1px 3px 0 #D4D4D5, 0 0 0 1px #D4D4D5;"></svg>
+		</div>
+		<div align='center' class="ui grid" style="width: 960px; height: 400px; margin: auto;">
+		      	<div class="eight wide column" id="doc-preview">
+		      		<div class="ui card">
+						<div class="content">
+	<!-- 					<i class="right floated like icon"></i>
+						<i class="right floated star icon"></i> -->
+						<div class="header">document title</div>
+							<div class="description summarization" style="text-align: left;">
+								<p>summarizes the selected document, by extracting one or more important sentences from the text</p>
+							</div>
+						</div>
+						<div class="extra content keywords" style="text-align: left;">
+							keywords: extracted words that are important or seem representative of the entire text. 
+						</div>
+						<div class="extra content">
+							<span class="left floated like">
+								<span class="word-count"></span>
+								words
+							</span>
+							<span class="right floated like">
+								<i class="like icon"></i>
+								read by X people
+							</span>
+						</div>
+						<div class="ui bottom attached button">
+							<i class="add icon"></i>
+							work on this document 
+						</div>
+					</div>
+		      	</div>
+			  	<div class="eight wide column" id="nugget-preview">
+			      	<div class="ui card">
+						<div class="content">
+	<!-- 					<i class="right floated like icon"></i>
+						<i class="right floated star icon"></i> -->
+							<div class="header">Extracted nuggets summarization</div>
+							<div class="description summarization" style="text-align: left;">
+								<p>summarizes the selected document, by extracting one or more important sentences from the text</p>
+							</div>
+						</div>
+						<div class="extra content keywords" style="text-align: left;">
+							keywords: extracted words that are important or seem representative of the entire text. 
+						</div>
+						<div class="extra content" style="text-align: left;">
+							<div id="info-cov-prog" class="ui green small progress" data-percent="1">
+								<div class="bar"></div>
+								<div class="label">information coverage</div>
+							</div>	
+							<div id="info-red-prog" class="ui red small progress" data-percent="1">
+								<div class="bar"></div>
+								<div class="label">information redundancy</div>
+							</div>						
+						</div>
+						<div class="extra content">
+							<span class="left floated star">
+								<i class="star icon"></i>
+								X nuggets extracted
+							</span>
+						</div>
+					</div>
+			  	</div>
+		</div>
+	<p></p>
+	<p></p>
+	<p></p>
+	</div>
 </div>
 
 {% include 'qa/qa-wrapper.html' %}

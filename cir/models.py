@@ -38,6 +38,7 @@ class Forum(models.Model):
     contextmap = models.TextField(null=True, blank=True)
     forum_logo = models.ImageField(upload_to='forum_logos', null=True, blank=True, default='forum_logos/default.jpg')
     stmt_preamble = models.TextField(null=True, blank=True)
+    graph = models.TextField(null=True, blank=True)
 
     def __unicode__(self):  # used for admin site
         return self.full_name + '(' + self.url + ')'

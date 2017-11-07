@@ -1,0 +1,33 @@
+<!-- <div class="ui top attached segment">
+	<p>{{ num_recom_docs }} similar petitions returned</p>
+</div>
+<div class="ui attached segment">
+  	<div id="docList" class="ui list" style="height: 480px; overflow: scroll;">
+		{% for doc in recom_docs %}
+			<div class="item" style="margin: 0.5em 0;">
+				<a class="header" doc-idx="{{ doc.idx }}">{{ doc.title }}</a>
+				<div class="right floated content">{{ doc.score }}</div>
+			</div>
+		{% endfor %}
+	</div>
+</div> -->
+
+
+<table class="ui compact table">
+  <thead>
+    <tr>
+      <th colspan="3" style="text-align: center;">Ranked similar petitions returned</th>
+    </tr>
+  </thead>
+  <tbody>
+  	{% for doc in recom_docs %}
+    <tr class="_recom_doc" style="display:none;">
+		<td>{{ forloop.counter }}</td>
+      	<td><a class='recom_doc_title' doc-idx='{{ doc.idx }}'>{{ doc.title }}</a></td>
+      	<td>{{ doc.score }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div id="show-ten-more" class="ui button" style="width: 100%;">Show 10 more</div>

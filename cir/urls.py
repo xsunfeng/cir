@@ -12,6 +12,7 @@ import workbench_views
 import chatter_views
 import vis_views
 import sankey_views
+import recom_views
 
 import phase1
 import phase2
@@ -62,11 +63,18 @@ urlpatterns = patterns('',
     url(r'^workbench/api_get_doc_by_doc_id/$', workbench_views.api_get_doc_by_doc_id),
     url(r'^workbench/api_get_init_doc/$', workbench_views.api_get_init_doc),
 
+    url(r'^recom/?$', recom_views.enter_recom),
+    url(r'^api_recom/get_doc/$', recom_views.get_doc),
+    url(r'^api_recom/find_similar/$', recom_views.find_similar),
+
     url(r'^phase1/get_nugget_list/$', phase1.get_nugget_list),
     url(r'^phase1/get_highlights/$', phase1.get_highlights),
     url(r'^phase1/get_nugget_comment_list/$', phase1.get_nugget_comment_list),
     url(r'^phase1/put_nugget_comment/$', phase1.put_nugget_comment),
     url(r'^phase1/change_nugget_theme/$', phase1.change_nugget_theme),
+    url(r'^phase1/api_get_overview/$', phase1.api_get_overview),
+    url(r'^phase1/api_get_summarization/$', phase1.api_get_summarization),
+    url(r'^phase1/api_get_information_coverage/$', phase1.api_get_information_coverage),
 
     url(r'^phase2/get_claim_list/$', phase2.get_claim_list),
     url(r'^phase2/get_nugget_list/$', phase2.get_nugget_list),

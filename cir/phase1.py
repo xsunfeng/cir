@@ -7,9 +7,34 @@ from django.shortcuts import render_to_response
 
 from cir.models import *
 import claim_views
-
 from cir.phase_control import PHASE_CONTROL
 import utils
+
+from bs4 import BeautifulSoup
+
+from nltk.corpus import stopwords 
+from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.stem.porter import PorterStemmer
+
+import string
+import pprint
+
+import gensim
+from gensim import corpora, summarization
+import re, math
+import random
+from collections import Counter
+
+stop = set(stopwords.words('english'))
+exclude = set(string.punctuation) 
+wordnet_lemmatizer = WordNetLemmatizer()
+porter_stemmer = PorterStemmer()
+def clean(doc):
+    stop_free = " ".join([i for i in doc.lower().split() if i not in stop])
+    punc_free = ''.join(ch for ch in stop_free if ch not in exclude)
+    lemmatized = " ".join(wordnet_lemmatizer.lemmatize(word) for word in punc_free.split())
+    stemmed = " ".join(porter_stemmer.stem(word) for word in lemmatized.split())
+    return stemmed
 
 def get_nugget_comment_list(request):
     response = {}
@@ -40,13 +65,6 @@ def put_nugget_comment(request):
     newNuggetComment.save()
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
-class NuggetComment(MPTTModel):
-    text = models.CharField(max_length=50, unique=True)
-    parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    highlight = models.ForeignKey(Highlight)
-    created_at = models.DateTimeField()
-
 def api_load_all_documents(request):
     response = {}
     context = {}
@@ -67,6 +85,139 @@ def api_load_all_documents(request):
             doc_attr['sections'].append(section.getAttr(forum))
         context["docs"].append(doc_attr);
         response['workbench_document'] = render_to_string("workbench-documents.html", context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+# https://www.analyticsvidhya.com/blog/2016/08/beginners-guide-to-topic-modeling-in-python/
+def api_get_overview(request):
+    response = {}
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    if (forum.graph != None):
+        response['doc_graph'] = json.loads(forum.graph)
+        return HttpResponse(json.dumps(response), mimetype='application/json')
+    doc_dict = {}
+    for doc in Doc.objects.filter(forum = forum):
+        doc_dict[doc.id] = ""
+        for sec in DocSection.objects.filter(doc_id = doc.id):
+            raw_html = sec.content
+            cleantext = BeautifulSoup(raw_html).text
+            cleantext = " ".join(cleantext.split("\n"))
+            cleantext = " ".join(cleantext.split("\t"))
+            cleantext = cleantext.encode('ascii', 'ignore').decode('ascii')
+            doc_dict[doc.id] = doc_dict[doc.id] + " " + cleantext
+
+    _index2docid = []
+    doc_complete = []
+    for k,v in doc_dict.iteritems():
+        doc_complete.append(v)
+        _index2docid.append(k)
+
+    doc_clean = [clean(doc).split() for doc in doc_complete]   
+
+    # Creating the term dictionary of our courpus, where every unique term is assigned an index. 
+    dictionary = corpora.Dictionary(doc_clean)
+
+    # Converting list of documents (corpus) into Document Term Matrix using dictionary prepared above.
+    doc_term_matrix = [dictionary.doc2bow(doc) for doc in doc_clean]
+
+    # Creating the object for LDA model using gensim library
+    ldamodel = gensim.models.ldamodel.LdaModel(doc_term_matrix, id2word = dictionary, passes=50)
+
+    # print(ldamodel.print_topics(num_topics=8, num_words=10))
+
+    index = gensim.similarities.MatrixSimilarity(ldamodel[doc_term_matrix])
+
+    doc_graph = {}
+    doc_graph["nodes"] = []
+    doc_graph["links"] = []
+    num_docs = len(doc_complete)
+    for source_index in range(0, num_docs):
+        node = {}
+        node['id'] = _index2docid[source_index]
+        node['group'] = '0'
+        doc_graph["nodes"].append(node)
+        doc = doc_complete[source_index]
+        doc_clean = clean(doc)
+        vec_bow = dictionary.doc2bow(doc_clean.lower().split())
+        vec_lda = ldamodel[vec_bow]
+        sims = index[vec_lda]
+        sims = sorted(enumerate(sims), key=lambda item: -item[1])
+        for target_index, score in sims:
+            link = {}
+            link['source'] = _index2docid[source_index]
+            link['target'] = _index2docid[target_index]
+            link['value'] = str(score)
+            print link 
+            if (link['source'] < link['target']):
+                doc_graph["links"].append(link)
+    response['doc_graph'] = doc_graph
+    forum.graph = json.dumps(doc_graph)
+    forum.save()
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+# https://rare-technologies.com/text-summarization-with-gensim/
+def api_get_summarization(request):
+    response = {}
+    forum = Forum.objects.get(id=request.session['forum_id'])
+    doc_id = request.REQUEST.get("doc_id")
+    doc = Doc.objects.get(id = doc_id)
+    doc_text = ""
+    for sec in DocSection.objects.filter(doc_id = doc.id):
+        raw_html = sec.content
+        cleantext = BeautifulSoup(raw_html).text
+        cleantext = " ".join(cleantext.split("\n"))
+        cleantext = " ".join(cleantext.split("\t"))
+        cleantext = cleantext.encode('ascii', 'ignore').decode('ascii')
+        doc_text = doc_text + " " + cleantext
+    doc_text = re.sub(r'(?<=[.,])(?=[^\s])', r' ', doc_text)
+    response['doc_summarization'] = summarization.summarize(doc_text,  word_count=80)
+    response['doc_keywords'] = summarization.keywords(doc_text, ratio=0.08, lemmatize=True).split("\n");
+    response['doc_title'] = doc.title;
+    # get extracted nuggets text
+    nugget_text = ""
+    for section in doc.sections.all():
+        highlights = section.highlights.all()
+        for highlight in highlights:
+            nugget_text = nugget_text + " " + highlight.text
+    if len(nugget_text.split(" ")) > 50:
+        response['nugget_summarization'] = summarization.summarize(nugget_text,  word_count=80)
+        response['nugget_keywords'] = summarization.keywords(nugget_text, ratio=0.08, lemmatize=True).split("\n")
+    else:
+        response['nugget_summarization'] = "not enough nuggets extracted to generate content summarization"
+        response['nugget_keywords'] = []
+    # calculate est. read time
+    response['word_count'] = len(doc_text.split(" "))
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def api_get_information_coverage(request):
+    response = {}
+    doc_id = request.REQUEST.get("doc_id")
+    doc = Doc.objects.get(id = doc_id)
+    doc_text = ""
+    for sec in DocSection.objects.filter(doc_id = doc.id):
+        raw_html = sec.content
+        cleantext = BeautifulSoup(raw_html).text
+        cleantext = " ".join(cleantext.split("\n"))
+        cleantext = " ".join(cleantext.split("\t"))
+        cleantext = cleantext.encode('ascii', 'ignore').decode('ascii')
+        doc_text = doc_text + " " + cleantext
+
+    doc_text = re.sub(r'(?<=[.,])(?=[^\s])', r' ', doc_text)
+    nugget_text = ""
+    for section in doc.sections.all():
+        highlights = section.highlights.all()
+        for highlight in highlights:
+            nugget_text = nugget_text + " " + highlight.text
+
+    nugget_text = re.sub(r'(?<=[.,])(?=[^\s])', r' ', nugget_text)
+    # calculate information coverage and redundancy
+    stop = set(stopwords.words('english'))
+    exclude = set(string.punctuation) 
+    lemma = WordNetLemmatizer()
+    doc_clean = clean(doc_text).split()
+    nugget_clean = clean(nugget_text).split()
+    cov, red = calc_coverage(doc_clean, nugget_clean)
+    response['coverage'] = cov
+    response['redundancy'] = red
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def api_get_toc(request):
@@ -463,3 +614,72 @@ def api_others(request):
                     alltags.add(highlight_info['content'])
         response['html'] = render_to_string('doc-tag-area.html', {'mytags': mytags, 'alltags': alltags})
         return HttpResponse(json.dumps(response), mimetype='application/json')
+
+WORD = re.compile(r'\w+')
+def calc_coverage(D_source, D_target):
+    n = len(D_source)
+    m = len(D_target)
+    nv = [0] * m
+    # calcualte nv
+    for i, d_source in enumerate(D_source):
+        idx_max = 0
+        sim_max = 0
+        for j, d_target in enumerate(D_target):
+            sim_val = calc_sim(d_source, d_target)
+            if (sim_val > sim_max):
+                sim_max = sim_val
+        k_set = []
+        for j, d_target in enumerate(D_target):
+            sim_val = calc_sim(d_source, d_target)
+            if (sim_val == sim_max):
+                k_set.append(j)
+        k = random.choice(k_set)
+        nv[k] += sim_max
+    # calculate information content coverage
+    Cov_c = sum(nv) / n
+    print 'Cov_c', Cov_c
+    # calculate information structure coverage
+    if (m == 1):
+        Cov_s = 1
+    else:
+        Cov_s = calc_entropy(nv)
+    print 'Cov_s', Cov_s
+    # calculate overall coverage
+    Cov = Cov_c * Cov_s
+    # calculate redundancy
+    sum_outer = 0
+    for i, d_target1 in enumerate(D_target):
+        sum_inner = 0
+        for j, d_target2 in enumerate(D_target):
+            sum_inner += calc_sim(d_target1, d_target2)
+        if (sum_inner != 0):
+            sum_outer += (1 - 1.0 / sum_inner)
+    Red = sum_outer / m
+    return Cov, Red
+
+def calc_sim(text1, text2):
+    def get_cosine(vec1, vec2):
+         intersection = set(vec1.keys()) & set(vec2.keys())
+         numerator = sum([vec1[x] * vec2[x] for x in intersection])
+         sum1 = sum([vec1[x]**2 for x in vec1.keys()])
+         sum2 = sum([vec2[x]**2 for x in vec2.keys()])
+         denominator = math.sqrt(sum1) * math.sqrt(sum2)
+         if not denominator:
+            return 0.0
+         else:
+            return float(numerator) / denominator
+    def text_to_vector(text):
+         words = WORD.findall(text)
+         return Counter(words)
+    vector1 = text_to_vector(text1)
+    vector2 = text_to_vector(text2)
+    return get_cosine(vector1, vector2)
+
+def calc_entropy(_nv):
+    freqList = [x * 1.0 / sum(_nv) for x in _nv]
+    ent = 0.0
+    for freq in freqList:
+        if freq != 0:
+            ent = ent + freq * math.log(freq, 2)
+    ent = -ent / math.log(len(freqList), 2)
+    return ent
