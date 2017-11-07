@@ -73,12 +73,12 @@ issue_names = {
     '351'   :'Veterans & Military',
 }
 
-work_dir = 'lda'
+work_dir = os.path.join(PROJECT_PATH, 'lda/')
 doc_complete_name = 'doc_complete_50'
 model_name = 'lda_lda_t18_r135_l50'
 
 # pre-load documents
-_file = os.path.join(PROJECT_PATH, work_dir + '/' + doc_complete_name + '.pkl')
+_file = work_dir + doc_complete_name + '.pkl'
 with open(_file, 'rb') as f:
     doc_complete_ = pk.load(f) 
     doc_complete = []
@@ -90,12 +90,12 @@ with open(_file, 'rb') as f:
         doc_complete.append(doc)
 
 # pre-load model
-_model = os.path.join(PROJECT_PATH, work_dir + '/' + model_name + '.model')
+_model = work_dir + model_name + '.model'
 lda = models.LdaMulticore.load(_model)
-dictionary = cPickle.load(open(work_dir + '/' + doc_complete_name + '.pkl.dict'))
-corpus = corpora.MmCorpus(work_dir + '/' + doc_complete_name + '.pkl.mm')
+dictionary = cPickle.load(open(work_dir + doc_complete_name + '.pkl.dict'))
+corpus = corpora.MmCorpus(work_dir + doc_complete_name + '.pkl.mm')
 similar_index = similarities.MatrixSimilarity(lda[corpus])
-with open('lda/lda_lda_t18_r135_l50.topics') as topic_json:
+with open(work_dir + model_name + '.topics') as topic_json:
     topic_id2name = json.load(topic_json)
 
 topic_id2words = {}
