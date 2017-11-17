@@ -85,7 +85,6 @@ define([
         $doc_container.find('._signature_count').text(xhr.signature_count);
         $doc_container.find('._signature_threshold').text(xhr.signature_threshold);
         $doc_container.find('.q-topic').val(xhr.topic_accuracy);
-        $doc_container.find('.q-similarity').val(xhr.recom_relevancy);
         $doc_container.attr('doc-idx', doc_idx);
 
         if (xhr.petition_signed == 1) {
