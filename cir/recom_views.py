@@ -74,7 +74,9 @@ issue_names = {
 }
 
 work_dir = os.path.join(PROJECT_PATH, 'lda/')
+# replace this with a new document collection
 doc_complete_name = 'doc_complete_50'
+# replace this with a new trained lad model, also the .topics need to be updated
 model_name = 'lda_lda_t18_r135_l50'
 
 # pre-load documents
@@ -106,22 +108,8 @@ for topic_id in range(lda.num_topics):
     text = ", ".join(topic_words)
     topic_id2words[str(topic_id)] = text
 
-def enter_recom(request):
-    context = {}
-    context['docs'] = doc_complete
-    context['topics'] = []
-    lda.print_topics()
-    for topic_id in range(lda.num_topics):
-        item = {}
-        item['words'] = topic_id2words[str(topic_id)]
-        item['title'] = topic_id2name[str(topic_id)]
-        context['topics'].append(item)
-    return render(request, "recom/index.html", context)
-
-def get_doc(request):
-    response = {}
-    doc_idx = int(request.REQUEST.get("doc_idx"))
-    doc = doc_complete[doc_idx]
+# initiate doc_complete
+for doc in doc_complete:
     doc['created_pretty'] = datetime.datetime.fromtimestamp(int(doc['created'])).strftime('%Y-%m-%d')
     if doc['signature_count'] >= doc['signature_threshold']:
         doc['sig_percent'] = 100.0
@@ -136,21 +124,74 @@ def get_doc(request):
                 doc['issue_names'].append(issue_names[issue_id])
     # get generated topic names
     doc['topic_names'] = []
-    doc['topic_words'] = []
+    doc['topic_ids'] = []
     doc_text = doc['title'] + ' ' + doc['body']
     doc_clean = clean(doc_text)
     bow = dictionary.doc2bow(to_unicode(doc_clean).split())
     vec = lda[bow]
     vec = sorted(vec, key=lambda tup: -tup[1])
+    doc['vec'] = vec
     for topic_id, score in vec:
         doc['topic_names'].append(topic_id2name[str(topic_id)])
-        doc['topic_words'].append(topic_id2words[str(topic_id)])
-    response = doc
+        doc['topic_ids'].append(str(topic_id))
+    doc['topic_ids_str'] = ", ".join(doc['topic_ids'])
+
+def enter_recom(request, forum_url):
+    context = {}
+    # need user name anyway.
+    if request.user.is_authenticated():
+        context['user_id'] = request.user.id
+        context['user_name'] = request.user.get_full_name()
+    else:
+        context['user_id'] = '-1'
+    forum = Forum.objects.get(url=forum_url)
+    context['forum_id'] = forum.id
+    request.session['forum_id'] = context['forum_id']
+    request.session['user_id'] = context['user_id']
+    context['docs'] = doc_complete
+    context['topics'] = []
+    lda.print_topics()
+    for topic_id in range(lda.num_topics):
+        item = {}
+        item['words'] = topic_id2words[str(topic_id)]
+        item['title'] = topic_id2name[str(topic_id)]
+        item['id'] = str(topic_id)
+        context['topics'].append(item)
+    return render(request, "recom/index.html", context)
+
+def get_doc(request):
+    response = {}
+    target_id = int(request.REQUEST.get("doc_idx"))
+    response = doc_complete[target_id]
+    for q_category in ['topic_accuracy', 'petition_signed']:
+        response[q_category] = 0
+        forum_id = request.session['forum_id']
+        user_id = request.session['user_id']
+        petitionQuestions = PetitionQuestion.objects.filter(forum_id = forum_id, answerer_id = user_id, model_name = model_name,  
+            category = q_category, target_petition = target_id)
+        if (petitionQuestions.count() >= 1):
+            response[q_category] = petitionQuestions.order_by('-created_at')[0].score
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def get_recom_relevancy(request):
+    response = {}
+    target_id = int(request.REQUEST.get("target_id"))
+    source_id = int(request.REQUEST.get("source_id"))
+    response = doc_complete[target_id]
+    for q_category in ['recom_relevancy']:
+        response[q_category] = 0
+        forum_id = request.session['forum_id']
+        user_id = request.session['user_id']
+        petitionQuestions = PetitionQuestion.objects.filter(forum_id = forum_id, answerer_id = user_id, model_name = model_name,  
+            category = q_category, target_petition = target_id, source_petition = source_id)
+        if (petitionQuestions.count() >= 1):
+            response[q_category] = petitionQuestions.order_by('-created_at')[0].score
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def find_similar(request):
     response = {}
     context = {}
+    is_strict = request.REQUEST.get('is_strict')
     doc_text = request.REQUEST.get('doc_text')
     doc_clean = clean(doc_text)
     bow = dictionary.doc2bow(to_unicode(doc_clean).split())
@@ -160,9 +201,29 @@ def find_similar(request):
     context['recom_docs'] = []
     for idx, value in sims:
         if (value > 0.1):
-            item = doc_complete[idx]
+            item = doc_complete[idx] 
+            topics_origin = [int(i[0]) for i in vec]
+            topics_target = [int(i[0]) for i in item['vec']]
+            if is_strict == '3' and (topics_origin != topics_target):
+                continue
+            if is_strict == '2' and (set(topics_origin) != set(topics_target)):
+                continue
             item['score'] = str(value)
             item['idx'] = str(idx)
             context['recom_docs'].append(item)
     response['recom_doc_list'] = render_to_string("recom/recom_doc_list.html", context)
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+def answer_petition_question(request):
+    forum_id = request.session['forum_id']
+    user_id = request.session['user_id']
+    score = request.REQUEST.get('score')
+    category = request.REQUEST.get('category')
+    target_id = request.REQUEST.get('target_id')
+    source_id = request.REQUEST.get('source_id')
+    now = timezone.now()
+    newPetitionQuestion = PetitionQuestion(forum_id = forum_id, answerer_id = user_id, score = score, model_name = model_name,  
+        category = category, target_petition = target_id, source_petition = source_id, created_at = now)
+    newPetitionQuestion.save()
+    response = {}
     return HttpResponse(json.dumps(response), mimetype='application/json')

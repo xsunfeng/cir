@@ -13,17 +13,34 @@
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.css">
 {% endblock %}
 {% block header %}
+	{% include 'header/forum_list_header.html' %}
 {% endblock %}
 {% block body %}
 
-<div class="ui grid" style="margin: auto; width: 1200px;">
+<div class="ui grid" style="margin: auto; width: 1280px;">
 	
 	<div class="four wide column">
+
+		<div id="select-topics" style="margin-bottom: 1em;">
+			<div class="ui tiny buttons">
+				<button class="ui button check-all">
+				  Check All
+				</button>
+				<button class="ui button uncheck-all">
+				  UnCheck All
+				</button>
+			</div>
+			<button class="ui tiny button apply-topics" style="float:right; margin:0;">
+				Apply
+			</button>
+		</div>
+
 		<div class="ui styled fluid accordion">
 			{% for topic in topics %}
-			<div class="title {% if forloop.first %} active {% endif %}">
+			<div class="title {% if forloop.first %} active {% endif %}" topic-id="{{ topic.id }}">
 				<i class="dropdown icon"></i>
 				{{ topic.title }}
+				<input type="checkbox" checked class="topic-checkbox" style="float: right;">
 			</div>
 			<div class="content {% if forloop.first %} active {% endif %}">
 				<p class="transition visible" style="display: block !important;">{{ topic.words }}</p>
@@ -35,25 +52,37 @@
 	<div class="twelve wide column">
 
 		<div class="ui grid">
+
 		  	<div class="eight wide column">
-				<div class="ui fluid icon input">
-				  <input id="searchTerm" type="text" placeholder="Search...">
-				  <i id="searchMe" class="circular search link icon"></i>
+
+				<div class="ui grid">
+				  	<div class="ten wide column">
+						<div class="ui fluid icon input">
+						  	<input id="searchTerm" type="text" placeholder="Search...">
+						  	<i id="searchMe" class="circular search link icon"></i>
+						</div>
+					</div>
+					<div class="six wide column">
+						<div class="ui fluid action input">
+						  	<input id="sampleSize" type="text" placeholder="Size...">
+						  	<button id="searchRandom" class="ui button">Sample</button>
+						</div>
+					</div>
 				</div>
 				<div class="ui top attached segment">
 					<p><span id="numDocFound">0</span>/<span id="numDocTotal">0</span> petitions returned</p>
 				</div>
 				<div class="ui attached segment">
-				  	<div id="docList" class="ui list" style="height: 400px; overflow: scroll;">
+				  	<div id="docList" class="ui list" style="height: 500px; overflow: scroll;">
 						{% for doc in docs %}
-							<div class="item" style="margin: 0.5em 0;">
-								<a class="header" doc-idx="{{ doc.idx }}">{{ doc.title }}</a>
+						<div class="item" doc-idx="{{ doc.idx }}" style="margin: 0.5em 0;">
+								<a class="header" doc-idx="{{ doc.idx }}" topic-ids="{{ doc.topic_ids_str }}">{{ doc.title }}</a>
 							</div>
 						{% endfor %}
 					</div>
 				</div>
 		  	</div>
-			<div class="eight wide column" id="docDetail">
+			<div class="eight wide column doc-container" id="docDetail">
 				<div class="ui card">
 					<div class="content">
 					<div class="header _title" style="text-align: center;">Lorem Ipsum</div>
@@ -66,7 +95,21 @@
 						Issues: <span class="_issue_names">{{ issue_names }}</span>
 					</div>
 					<div class="extra content">
-						Topics: <span class="_topic_names">{{ topic_names }}</span>
+						<div>Topics: <span class="_topic_names">{{ topic_names }}</span></div>
+						<div>Do these topics accurately capture the petition content?
+							<select class="q-topic" category="topic_accuracy">
+								<option value="-1" disabled selected>Score</option>
+								<option value="1">1</option>
+								<option value="2">2</option>
+								<option value="3">3</option>
+								<option value="4">4</option>
+								<option value="5">5</option>
+							</select>
+						</div>
+					</div>
+					<div class="extra content">
+						<button class="_sign_btn fluid ui green button">Sign This Petition</button>
+						<button class="_unsign_btn fluid ui teal button">You Already Signed this Petition, Click Again to Unsign</button>
 					</div>
 					<div class="extra content">
 					    <span class="left floated">
@@ -80,10 +123,21 @@
 						<div class="bar"></div>
 					</div>
 				</div>
+				<div id="feel-lucky" class="ui primary button" style="margin: 1em 0; width: 100%;">Show Simialr Petitions (based on Topics)</div>
+				<div>
+					<form>
+						<input class="strict-mode" type="radio" name="gender" value="3"> exactly the same topics and order</br>
+						<input class="strict-mode" type="radio" name="gender" value="2" checked> exactly the same topics </br>
+						<input class="strict-mode" type="radio" name="gender" value="1"> commonly shared topics  
+					</form> 
+				</div>
 			</div>
 		</div>
 
-		<div id="feel-lucky" class="ui button" style="margin: 1em 0; width: 100%;">I'm Feeling Lucky</div>
+		<h4 class="ui horizontal divider header">
+			<i class="pointing down icon"></i>
+			Most Similar Petitions
+		</h4>
 
 		<div class="ui grid">
 			<div class="eight wide column" id="recom_doc_list">
@@ -102,7 +156,7 @@
 					</tbody>
 				</table>
 			</div>
-			<div class="eight wide column" id="recomDocDetail">
+			<div class="eight wide column doc-container" id="recomDocDetail">
 				<div class="ui card">
 					<div class="content">
 					<div class="header _title" style="text-align: center;">Lorem Ipsum</div>
@@ -116,6 +170,32 @@
 					</div>
 					<div class="extra content">
 						Topics: <span class="_topic_names">{{ topic_names }}</span>
+						<div>Do these topics accurately capture the petition content?
+							<select class="q-topic" category="topic_accuracy">
+								<option value="-1" disabled selected>Score</option>
+								<option value="1">1</option>
+								<option value="2">2</option>
+								<option value="3">3</option>
+								<option value="4">4</option>
+								<option value="5">5</option>
+							</select>
+						</div>
+					</div>
+					<div class="extra content">
+						<button class="_sign_btn fluid ui green button">Sign This Petition</button>
+						<button class="_unsign_btn fluid ui teal button">You Already Signed this Petition, Click Again to Unsign</button>
+					</div>
+					<div class="extra content">
+						<div>Is this petition relevant to the given one?
+							<select class="q-similarity" category="recom_relevancy">
+								<option value="-1" disabled selected>Score</option>
+								<option value="1">1</option>
+								<option value="2">2</option>
+								<option value="3">3</option>
+								<option value="4">4</option>
+								<option value="5">5</option>
+							</select>
+						</div>
 					</div>
 					<div class="extra content">
 					    <span class="left floated">

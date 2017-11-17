@@ -750,3 +750,19 @@ class PinMessage(models.Model):
     content = models.TextField(null=True, blank=True)
     phase = models.ForeignKey(ComplexPhase, related_name='pin_messages')
     is_show = models.BooleanField(default=False)
+
+class PetitionQuestion(models.Model):
+    forum = models.ForeignKey(Forum)
+    Q_TYPES = (
+        ('topic_accuracy', 'Do these topics accurately capture the petition content'),
+        ('recom_relevancy', 'Is this recommended petition relevant to the given one'),
+        ('petition_signed', 'Has the petition signed')
+    )    
+    category = models.CharField(max_length=20, choices=Q_TYPES)
+    score = models.PositiveSmallIntegerField(blank=True, null=True)
+    explanation = models.TextField(null=True, blank=True)
+    target_petition = models.IntegerField(blank=True, null=True)
+    source_petition = models.IntegerField(blank=True, null=True)
+    model_name = models.TextField(null=True, blank=True)
+    answerer = models.ForeignKey(User, related_name="petition_questions", on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(null=True, blank=True)

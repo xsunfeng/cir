@@ -1,12 +1,12 @@
 define([
   'd3',
-  'sankey',
+  'seedrandom',
   'jquery',
   'semantic-ui',
   'utils',
 ], function(
   d3,
-  sankey_module,
+  seedrandom,
   $,
   semantic,
   Utils,
@@ -25,127 +25,245 @@ define([
   $('.ui.accordion').accordion();
 
   $("#searchMe").on("click", function(){
-    var terms = $('#searchTerm').val();
-    if (terms.length === 0) {
-      $("#docList .item").show();
-      docCount = $("#docList .item").length;
-    } else {
-      termsSplited = terms.toLowerCase().split(' ');
-      for(var i=0; i < termsSplited.length; i++) {
-        termsSplited[i] = stemmer(termsSplited[i]);
+    applyFilter();
+  });
+
+  $("#searchRandom").on("click", function(){
+    applyFilter();
+    var size = Number($('#sampleSize').val());
+    if (size === 0) {
+      return;
+    }
+    var curDocCount = Number($("#numDocFound").text());
+    if (size > curDocCount) size = curDocCount;
+    var selected_docs = []
+    $("#docList .item:visible").each(function(){
+      selected_docs.push($(this).attr('doc-idx'));
+    });
+    Math.seedrandom('hello.');
+    subarray_docs = getRandomSubarray(selected_docs, size)
+    $("#docList .item:visible").each(function(){
+      var doc_id = $(this).attr('doc-idx');
+      if (!subarray_docs.includes(doc_id)) {
+        $(this).hide();
       }
-      docCount = 0;
-      $("#docList .item").each(function(index) {
+    });
+    var docCount = $("#docList .item:visible").length;
+    $("#numDocFound").text(docCount);
+  });
+
+  var get_recom_relevancy = function(source_id, target_id){
+    $.ajax({
+      url: '/api_recom/get_recom_relevancy/',
+      type: 'post',
+      data: {
+        'source_id': source_id,
+        'target_id': target_id,
+      },
+      success: function(xhr) {
+        $('#recomDocDetail .q-similarity').val(xhr.recom_relevancy);
+      },
+      error: function(xhr) {
+        if (xhr.status == 403) {
+          Utils.notify('error', xhr.responseText);
+        }
+      }
+    });
+  }
+
+  var get_doc = function($doc_container, doc_idx){
+    $.ajax({
+      url: '/api_recom/get_doc/',
+      type: 'post',
+      data: {
+        'doc_idx': doc_idx,
+      },
+      success: function(xhr) {
+        $doc_container.find('._title').text(xhr.title);
+        $doc_container.find('._body').text(xhr.body);
+        $doc_container.find('._created').text(xhr.created_pretty);
+        $doc_container.find('._signature_count').text(xhr.signature_count);
+        $doc_container.find('._signature_threshold').text(xhr.signature_threshold);
+        $doc_container.find('.q-topic').val(xhr.topic_accuracy);
+        $doc_container.find('.q-similarity').val(xhr.recom_relevancy);
+        $doc_container.attr('doc-idx', doc_idx);
+
+        if (xhr.petition_signed == 1) {
+          $doc_container.find('._sign_btn').hide();
+          $doc_container.find('._unsign_btn').show();        
+        } else {
+          $doc_container.find('._sign_btn').show();
+          $doc_container.find('._unsign_btn').hide();      
+        }
+
+        // add issue labels
+        $doc_container.find('._issue_names').empty();
+        xhr.issue_names.forEach(function(issue_name) {
+          var label = '<a class="ui basic label">' + issue_name + '</a>';
+          $doc_container.find('._issue_names').append(label);
+        });
+
+        // add topic names
+        $doc_container.find('._topic_names').empty();
+        for (var i = 0; i < xhr.topic_names.length; i++) {
+          var topic_name = xhr.topic_names[i];
+          var label = '<a class="ui basic label">' + topic_name + '</a>';
+          $doc_container.find('._topic_names').append(label);
+        }
+
+        // sig progress
+        $doc_container.find('.progress').progress({
+          percent: xhr.sig_percent
+        });
+      },
+      error: function(xhr) {
+        if (xhr.status == 403) {
+          Utils.notify('error', xhr.responseText);
+        }
+      }
+    });
+  }
+
+  $('#docList .item .header').on("click", function(){
+    $("#docList .item .header").css("border", "");
+    $(this).css("border", "1px solid");
+    var $doc_container = $('#docDetail');
+    var doc_idx = $(this).attr('doc-idx');
+    get_doc($doc_container, doc_idx);
+  });
+
+  $('body').on("click", "#recom_doc_list .recom_doc_title", function(){
+    $("#recom_doc_list .recom_doc_title").css("border", "");
+    $(this).css("border", "1px solid");
+    var $doc_container = $('#recomDocDetail');
+    var doc_idx = $(this).attr('doc-idx');
+    get_doc($doc_container, doc_idx);
+    var source_id = $("#docDetail").attr("doc-idx");
+    get_recom_relevancy(source_id, doc_idx);
+  });
+
+  // questions on topic accuracy
+  $('body').on("change", "#docDetail select", function(){
+    var category = $(this).attr("category");
+    var score = $(this).val();
+    var target_id = $("#docDetail").attr("doc-idx");
+    answerPetitionQuestion(target_id, -1, category, score);
+  });
+
+  // questions on recommended petitions
+  $('body').on("change", "#recomDocDetail select", function(){
+    var category = $(this).attr("category");
+    var score = $(this).val();
+    var source_id = $("#docDetail").attr("doc-idx");
+    var target_id = $("#recomDocDetail").attr("doc-idx");
+    answerPetitionQuestion(target_id, source_id, category, score);
+  });
+
+  // sign petition
+  $('body').on("click", "._sign_btn", function(){
+    var $doc_container = $(this).closest(".doc-container");
+    $doc_container.find('._sign_btn').hide();
+    $doc_container.find('._unsign_btn').show();
+    var category = "petition_signed";
+    var score = 1;
+    var target_id = $doc_container.attr("doc-idx");
+    answerPetitionQuestion(target_id, -1, category, score);
+  });
+
+  // unsign petition
+  $('body').on("click", "._unsign_btn", function(){
+    var $doc_container = $(this).closest(".doc-container");
+    $doc_container.find('._sign_btn').show();
+    $doc_container.find('._unsign_btn').hide();
+    var category = "petition_signed";
+    var score = 0;
+    var target_id = $doc_container.attr("doc-idx");
+    answerPetitionQuestion(target_id, -1, category, score);
+  });
+
+  var answerPetitionQuestion = function(target_id, source_id, category, score) {
+    $.ajax({
+      url: '/api_recom/answer_petition_question/',
+      type: 'post',
+      data: {
+        'category': category,
+        'score': score,
+        'target_id': target_id,
+        'source_id': source_id
+      },
+      success: function(xhr) {
+
+      },
+      error: function(xhr) {
+        if (xhr.status == 403) {
+          Utils.notify('error', xhr.responseText);
+        }
+      }
+    });
+  }
+
+  $('body').on("click", "#select-topics .check-all", function(){
+    $('.topic-checkbox').prop("checked", true);
+  }).on("click", "#select-topics .uncheck-all", function(){
+    $('.topic-checkbox').prop("checked", false);
+  }).on("click", "#select-topics .apply-topics", function(){
+    applyFilter();
+  });
+
+  var applyFilter = function(){
+    $("#docList .item .header").css("border", "");
+    $("#docList .item").show();
+
+    var selected_topics = []
+    var checkedBoxes = document.querySelectorAll('input[class=topic-checkbox]:checked');
+    for (var i = 0; i < checkedBoxes.length; i++) {
+      var $checkbox = $(checkedBoxes[i]);
+      var topic_id = Number($checkbox.closest('.title').attr('topic-id'));
+      selected_topics.push(topic_id);
+    }
+
+    var terms = $('#searchTerm').val();
+    termsSplited = terms.toLowerCase().split(' ');
+    for(var i=0; i < termsSplited.length; i++) {
+      termsSplited[i] = stemmer(termsSplited[i]);
+    }
+    $("#docList .item").each(function(index) {
+
+      var isSearched = true;
+      if (terms.length > 0) {
         var titleSplited = $(this).find('.header').text().replace(/[^\w\s]/gi, '').toLowerCase().split(' ');
         for(var i=0; i < titleSplited.length; i++) {
           titleSplited[i] = stemmer(titleSplited[i]);
         }
         isSearched = termsSplited.every(function(val) { return titleSplited.indexOf(val) >= 0; })
-        if (isSearched) {
-          $(this).show();
-          docCount++;
-        } else {
-          $(this).hide();
-        }
-      });
-    }
+      }
+
+      var topics = $(this).find('.header').attr("topic-ids").split(',').map(Number);
+      var isTopiced = topics.every(function(val) { return selected_topics.indexOf(val) >= 0; })
+      if (isSearched && isTopiced) {
+        $(this).show();
+      } else {
+        $(this).hide();
+      }
+    });
+
+    var docCount = $("#docList .item:visible").length;
     $("#numDocFound").text(docCount);
-  });
 
-  $('#docList .item .header').on("click", function(){
-    var doc_idx = $(this).attr('doc-idx');
+  }
 
-    $.ajax({
-      url: '/api_recom/get_doc/',
-      type: 'post',
-      data: {
-        'doc_idx': doc_idx
-      },
-      success: function(xhr) {
-        $('#docDetail ._title').text(xhr.title);
-        $('#docDetail ._body').text(xhr.body);
-        $('#docDetail ._created').text(xhr.created_pretty);
-        $('#docDetail ._signature_count').text(xhr.signature_count);
-        $('#docDetail ._signature_threshold').text(xhr.signature_threshold);
-        $('#docDetail').attr('doc-idx', doc_idx);
-
-        $('#docDetail ._issue_names').empty();
-        xhr.issue_names.forEach(function(issue_name) {
-          var label = '<a class="ui basic label">' + issue_name + '</a>';
-          $('#docDetail ._issue_names').append(label);
-        });
-
-        $('#docDetail ._topic_names').empty();
-        for (var i = 0; i < xhr.topic_names.length; i++) {
-          var topic_name = xhr.topic_names[i];
-          var tooltip = xhr.topic_words[i];
-          var label = '<a class="ui basic label">' + topic_name + '</a>';
-          $('#docDetail ._topic_names').append(label);
-        }
-
-        $('#docDetail .progress').progress({
-          percent: xhr.sig_percent
-        });
-      },
-      error: function(xhr) {
-        if (xhr.status == 403) {
-          Utils.notify('error', xhr.responseText);
-        }
-      }
-    });
-  });
-
-  $('body').on("click", "#recom_doc_list .recom_doc_title", function(){
-    var doc_idx = $(this).attr('doc-idx');
-
-    $.ajax({
-      url: '/api_recom/get_doc/',
-      type: 'post',
-      data: {
-        'doc_idx': doc_idx
-      },
-      success: function(xhr) {
-        $('#recomDocDetail ._title').text(xhr.title);
-        $('#recomDocDetail ._body').text(xhr.body);
-        $('#recomDocDetail ._created').text(xhr.created_pretty);
-        $('#recomDocDetail ._signature_count').text(xhr.signature_count);
-        $('#recomDocDetail ._signature_threshold').text(xhr.signature_threshold);
-        $('#recomDocDetail').attr('doc-idx', doc_idx);
-
-        $('#recomDocDetail ._issue_names').empty();
-        xhr.issue_names.forEach(function(issue_name) {
-          var label = '<a class="ui basic label">' + issue_name + '</a>';
-          $('#recomDocDetail ._issue_names').append(label);
-        });
-
-        $('#recomDocDetail ._topic_names').empty();
-        for (var i = 0; i < xhr.topic_names.length; i++) {
-          var topic_name = xhr.topic_names[i];
-          var tooltip = xhr.topic_words[i];
-          var label = '<a class="ui basic label">' + topic_name + '</a>';
-          $('#recomDocDetail ._topic_names').append(label);
-        }
-
-        $('#recomDocDetail .progress').progress({
-          percent: xhr.sig_percent
-        });
-      },
-      error: function(xhr) {
-        if (xhr.status == 403) {
-          Utils.notify('error', xhr.responseText);
-        }
-      }
-    });
-  });
+  document.querySelectorAll('input[class=topic-checkbox]:checked');
 
   $('#feel-lucky').on("click", function(){
     var doc_text = $('#docDetail ._title').text()
         + " " + $('#docDetail ._body').text();
+    var is_strict = $('input[class=strict-mode]:checked').val();
     $.ajax({
       url: '/api_recom/find_similar/',
       type: 'post',
       data: {
-        'doc_text': doc_text
+        'doc_text': doc_text,
+        'is_strict': is_strict
       },
       success: function(xhr) {
         $("#recom_doc_list").html(xhr.recom_doc_list);
@@ -177,6 +295,17 @@ define([
     var topic_title = $(this).text();
     $(".accordion .title:contains('" + topic_title + "')").click();
   });
+
+  function getRandomSubarray(arr, size) {
+      var shuffled = arr.slice(0), i = arr.length, min = i - size, temp, index;
+      while (i-- > min) {
+          index = Math.floor((i + 1) * Math.random());
+          temp = shuffled[index];
+          shuffled[index] = shuffled[i];
+          shuffled[i] = temp;
+      }
+      return shuffled.slice(min);
+  }
 
   // https://github.com/kristopolous/Porter-Stemmer
   // stemmed word = stemmer(<word to stem>)
