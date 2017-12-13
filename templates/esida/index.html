@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load compressed %}
+{% block extralib %}
+    <script>
+        require([
+        	"esida/layout",
+        ]);
+    </script>
+{% endblock %}
+{% block extracss %}
+	{% compressed_css 'cir_forum' %}
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.css">
+{% endblock %}
+{% block header %}
+	{% include 'header/forum_list_header.html' %}
+{% endblock %}
+{% block body %}
+
+<div class="ui warning message" style="margin: auto; width: 900px;">
+	<div class="header">
+		Split: check 1 topic and click "Split"; Merge: check 2 topics and click "Merge"; Move: move around terms and click "Apply".
+	</div>
+</div>
+
+<div class="ui grid" style="margin: auto; width: 1280px;">
+
+	<div class="sixteen wide column">
+		<div class="ui action input">
+		  	<input id="sampleSize" type="text" placeholder="#Topics...">
+		  	<button id="split" class="ui button">Split</button>
+		</div>
+		<button class="ui button" id="merge" >
+			Merge
+		</button>
+		<button class="ui button" id="reallocation" style="float:right; margin:0;">
+			Apply (After Re-Allocation)
+		</button>
+	</div>
+
+</div>
+
+<div class="ui grid" style="margin: auto; width: 1280px;" id="topics-container">
+
+	{% include 'esida/topics-container.html' %}
+
+</div>
+
+<!-- {% include 'qa/qa-wrapper.html' %}
+
+{% if role != 'visitor' %}
+	{% include 'chatter.html' %}
+{% endif %} -->
+
+{% endblock %}
+

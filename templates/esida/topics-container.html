@@ -1,0 +1,22 @@
+{% for topic in topics %}
+<div class="four wide column topic-container">
+  <div class="ui card">
+    <div class="content">
+      <div class="header">Topic {{ forloop.counter0 }}
+        <input type="checkbox" class="topic-checkbox" style="float: right;">
+      </div>
+    </div>
+    <div class="content" ondrop="drop(event)" ondragover="allowDrop(event)">
+      {% for word, weight, color in topic %}
+        {% if forloop.counter <= 10 %}
+        <div class="ui label" draggable="true" ondragstart="drag(event)" id="{{ word }}" style="margin: 0.1em;">
+          {{ word }}
+          <span style="font-size:10px; padding-left:{{ weight }}px; background:#{{ color }};">&nbsp;</span>
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endfor %}
+

@@ -1,0 +1,42 @@
+{'body': u'The elections of 1824, 1876, 1888, and 2000 produced an Electoral College winner who did not receive the plurality of the nationwide popular vote - that is, the American people did not get the President democracy should have selected.\r\n\r\nDue to the way electoral votes are allocated, candidates have a strong incentive to focus their campaigns on "swing" states with many voters, such as Florida, and neglect states such as Texas which do not swing.   Due to necessary rounding errors when allocating votes, members of a sparsely populated state effectively accrue more voting power than members of a well-populated state.  This increases the electoral power of members of certain states while reducing it for others on an ongoing basis.\r\n\r\nWe beg our leaders to dissolve this system and let us vote.', 'status': u'Reviewed', 'idx': 0, 'created': 1316698213, 'title': u'Grant voters the ability to vote for the President of the United States by dissolving the electoral college.', 'signature_count': 29311, 'signature_threshold': 5000, 'deadline': 30, 'petition_id': u'4e7b35898d8c37d975000000', 'sig_percent': 100.0, 'created_pretty': '2011-09-22', 'serial': 6, 'issue_names': ['Civil Rights & Equality', 'Government & Regulatory Reform'], 'issues': u'311, 336'}
+
+
+
+with open('petitions.csv', 'w') as csvfile:
+	fieldnames = ['PID', 'title', 'body', 'pcreated', 'serial', 'signature_count', 'signature_threshold', 'status']
+	writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+	writer.writeheader()
+	for doc in doc_complete:
+		writer.writerow({
+			'PID': doc['petition_id'],
+			'title': doc['title'].encode('utf-8'),
+			'body': doc['body'],
+			'pcreated': doc['created_pretty'],
+			'serial': doc['serial'],
+			'signature_count': doc['signature_count'],
+			'signature_threshold': doc['signature_threshold'],
+			'status': doc['status']
+		})
+
+
+d2l = [[]] * 10
+d2l[2] = ['d', 'e', 'f']
+
+# input: 2222
+# output: 1111, 112, 121, 13, 211, 22, 31
+
+def getCombs(nums):
+	res = []
+	helper(nums, 0, "", res)
+	return res
+
+def helper(nums, st, tmp, res):
+	if (st > len(nums)):
+		return
+	if (st == len(nums)): 
+		res.append(tmp)
+		return
+	for i in [0, 1, 2]:
+		tmp = tmp + d2l[2][i]
+		helper(nums, st + i + 1, tmp, res)
+		tmp = tmp[:-1]
