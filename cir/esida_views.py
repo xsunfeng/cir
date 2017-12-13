@@ -36,15 +36,17 @@ import scipy.sparse as ss
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import CountVectorizer
 
+work_dir = os.path.join(PROJECT_PATH, 'corex/')
+
 ### Preprocessing Begin ###
 print "preprocess begins."
 start = time.time()
 
 try:
-    train_texts = pickle.load(open("corex/train_texts.pickle", "rb"))
-    all_words = pickle.load(open("corex/all_words.pickle", "rb"))
-    doc_word = pickle.load(open("corex/doc_word.pickle", "rb"))
-    wv_model = pickle.load(open("corex/wv_model.pickle", "rb"))
+    train_texts = pickle.load(open(work_dir + "train_texts.pickle", "rb"))
+    all_words = pickle.load(open(work_dir + "all_words.pickle", "rb"))
+    doc_word = pickle.load(open(work_dir + "doc_word.pickle", "rb"))
+    wv_model = pickle.load(open(work_dir + "wv_model.pickle", "rb"))
 except (OSError, IOError) as e:
     print("No such file(s).")
 
@@ -144,7 +146,7 @@ def split_topics(request):
     toSplitId = int(request.REQUEST.get("topic_id"))
     json_topics = request.REQUEST.get("json_topics")
     _anchor_words = json.loads(json_topics)
-    
+
     def distance(word1, word2):
         return wv_model.wv.similarity(word1, word2)
      
