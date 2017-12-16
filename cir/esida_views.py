@@ -60,7 +60,8 @@ num_topics = 20
 anchor_words = []
 
 ct_model = ct.Corex(n_hidden=num_topics, words=all_words, max_iter=20, verbose=False, seed=seed)
-ct_model.fit(doc_word, words=all_words);
+ct_model.fit(doc_word, words=all_words)
+cur_ct_model = ct_model
 # Print all topics from the CorEx topic model
 topics = ct_model.get_topics()
 for n in range(num_topics):
@@ -73,6 +74,35 @@ from random import randint
 colors = [''] * 30
 for i in range(30):
     colors[i] = '%06X' % randint(0, 0xFFFFFF)
+colors[0] = '2471A3'
+colors[1] = '85C1E9'
+colors[2] = 'E67E22'
+
+def gen_json(request):
+    doc_vecs = []
+    for i in range(len(train_texts)):
+        doc_vec = list(cur_ct_model.p_y_given_x[i])
+        doc_vecs.append(doc_vec)
+    from sklearn.decomposition import PCA 
+    pca = PCA(n_components=2)
+    cords = pca.fit_transform([doc_vec for doc_vec in doc_vecs])
+    print(cords)
+    response = {}
+    lines = []
+    for i in range(len(cords)):
+        body = u' '.join([word.encode('ascii', 'ignore').decode('ascii') for word in train_texts[i]])
+        line = {'cord_x': str(cords[i][0]),
+                'cord_y': str(cords[i][1]),
+                'body': body}
+        color = 0;
+        for j in range(num_topics):
+            line['topic_' + str(j)] = doc_vecs[i][j]
+            if (doc_vecs[i][j] > doc_vecs[i][color]):
+                color = j
+        line['topic_id'] = color
+        lines.append(line)
+    response['pca'] = lines
+    return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def enter_esida(request, forum_url):
     context = {}
@@ -101,6 +131,7 @@ def update_topics(request):
     move_anchor_words = json.loads(json_topics)
     ct_model_move = ct.Corex(n_hidden=len(move_anchor_words), words=all_words, max_iter=20, verbose=False, seed=seed)
     ct_model_move.fit(doc_word, words=all_words, anchors=move_anchor_words, anchor_strength=6);
+    cur_ct_model = ct_model_move
     context['topics'] = []
     for n in range(len(ct_model_move.get_topics())):
         item = []
@@ -131,6 +162,7 @@ def merge_topics(request):
     anchor_words_merge = merge_topics(topic1_id, topic2_id, _anchor_words)
     ct_model_merge = ct.Corex(n_hidden=len(anchor_words_merge), words=all_words, max_iter=20, verbose=False, seed=seed)
     ct_model_merge.fit(doc_word, words=all_words, anchors=anchor_words_merge, anchor_strength=6);
+    cur_ct_model = ct_model_merge
     context['topics'] = []
     for n in range(len(ct_model_merge.get_topics())):
         item = []
@@ -177,6 +209,7 @@ def split_topics(request):
 
     ct_model_split = ct.Corex(n_hidden=(len(anchor_words_split)), words=all_words, max_iter=20, verbose=False, seed=seed)
     ct_model_split.fit(doc_word, words=all_words, anchors=anchor_words_split, anchor_strength=6);
+    cur_ct_model = ct_model_split
     context['topics'] = []
     for n in range(len(ct_model_split.get_topics())):
         item = []

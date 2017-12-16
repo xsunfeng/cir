@@ -72,6 +72,7 @@ urlpatterns = patterns('',
     url(r'^api_esida/update_topics/$', esida_views.update_topics),
     url(r'^api_esida/split_topics/$', esida_views.split_topics),
     url(r'^api_esida/merge_topics/$', esida_views.merge_topics),
+    url(r'^api_esida/gen_json/$', esida_views.gen_json),
 
     url(r'^phase1/get_nugget_list/$', phase1.get_nugget_list),
     url(r'^phase1/get_highlights/$', phase1.get_highlights),
