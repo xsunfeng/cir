@@ -89,13 +89,13 @@ def gen_cords(corex_model):
     # from tsne import bh_sne
     # _cords = bh_sne(np.array(doc_vecs), random_state=np.random.RandomState(random_state))
 ## sklearn TSNE
-    # from sklearn.manifold import TSNE
-    # tsne = TSNE(n_components=2, random_state=random_state)
-    # _cords = tsne.fit_transform(doc_vecs)
+    from sklearn.manifold import TSNE
+    tsne = TSNE(n_components=2, random_state=random_state)
+    _cords = tsne.fit_transform(doc_vecs)
 ## PCA
-    from sklearn.decomposition import PCA    
-    pca = PCA(n_components=2, random_state=random_state)
-    _cords = pca.fit_transform(doc_vecs)
+    # from sklearn.decomposition import PCA    
+    # pca = PCA(n_components=2, random_state=random_state)
+    # _cords = pca.fit_transform(doc_vecs)
     
     _lines = []
     for i in range(len(corex_model.p_y_given_x)):
