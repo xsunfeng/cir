@@ -17,39 +17,134 @@
 {% endblock %}
 {% block body %}
 
-<div class="ui warning message" style="margin: auto; width: 900px;">
-	<div class="header">
-		Split: check 1 topic and click "Split"; Merge: check 2 topics and click "Merge"; Move: move around terms and click "Apply".
+<style>
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.dot {
+}
+
+.lasso path {
+  stroke: rgb(80,80,80);
+  stroke-width:2px;
+}
+
+.lasso .drawn {
+  fill-opacity:.05 ;
+}
+
+.lasso .loop_close {
+  fill:none;
+  stroke-dasharray: 4,4;
+}
+
+.lasso .origin {
+  fill:#3399FF;
+  fill-opacity:.5;
+}
+
+.not_possible {
+  fill:rgb(200,200,200);
+}
+
+.possible {
+  fill:#EC888C;
+}
+
+
+</style>
+
+<div class="ui warning message" style="margin: auto; width: 300px;">
+	<div class="header" id="seconds-counter">
+		Updating...
 	</div>
 </div>
 
-<div class="ui grid" style="margin: auto; width: 1280px;">
+<div id="vis" style="margin: auto; width: 1600px;">
+</div>
 
-	<div class="twelve wide column">
-		<div class="ui action input">
-		  	<input id="sampleSize" type="text" placeholder="#Topics...">
-		  	<button id="split" class="ui button">Split</button>
+
+<div class="ui grid" style="margin: auto; width: 1600px;">
+
+	<div class="ten wide column">
+
+		<div style="margin-bottom: 1em;">
+			<button class="ui button" id="merge" >
+				<i class="icon clone"></i>
+				Merge
+			</button>
+			<button class="ui button" id="reallocation">
+				<i class="icon check"></i>
+				Apply
+			</button>
+			<button class="ui button" id="undo">
+				<i class="icon step backward"></i>
+				Undo
+			</button>
+
+			<button class="ui button" id="gen_json" style="float:right; margin:0; margin-left:0.5em;">
+				<i class="icon download"></i>
+				Export
+			</button>
+			<button class="ui button" id="restart" style="float:right; margin:0; margin-left:0.5em;">
+				<i class="icon undo"></i>
+				Restart
+			</button>
+
 		</div>
-		<button class="ui button" id="merge" >
-			Merge
-		</button>
-		<button class="ui button" id="reallocation">
-			Apply (After Re-Allocation)
-		</button>
 
-		<button class="ui button" id="gen_json" style="float:right; margin:0;">
-			Export
-		</button>
+		<div class="ui grid" style="float:right;" id="topics-container">
+			{% include 'esida/topics-container.html' %}
+		</div>
+
 	</div>
 
-	<div class="four wide column">
+	<div class="six wide column">
+
+		<div class="ui top attached segment">
+			<p><span id="numDocFound">{{ num_docs }}</span>/<span id="numDocTotal">{{ num_docs }}</span> petitions returned</p>
+		</div>
+		<div class="ui attached segment">
+		  	<div id="docList" class="ui list" style="height: 400px; overflow: scroll;">
+				{% for doc in docs %}
+				<div class="item" doc-idx="{{ doc.idx }}" style="margin: 0.5em 0;">
+						<a class="header" doc-idx="{{ doc.idx }}" topic-ids="{{ doc.topic_ids_str }}">{{ doc.title }}</a>
+					</div>
+				{% endfor %}
+			</div>
+		</div>
+
+			<div class="doc-container" id="docDetail" style="margin-top: 1em;">
+				<div class="ui card">
+					<div class="content">
+					<div class="header _title" style="text-align: center;">Lorem Ipsum</div>
+					<div class="description _body">
+						Lorem ipsum dolor sit amet, et sed iudico mediocrem, per etiam congue quando in, ex tale ullum delicatissimi eam. Munere lobortis ut mel. An quo dico nulla populo. At sea fugit vivendum intellegam, eos accusam insolens ut, vel vidit quaestio reformidans te.
+					</div>
+					</div>
+					<div class="extra content">
+						<div>Topics: <span class="_topic_names">{{ topic_names }}</span></div>
+					</div>
+					<div class="extra content">
+					    <span class="left floated">
+					     	<span class="_signature_count">{{ signature_count }} 0</span> Signed
+					    </span>
+					    <span class="right floated">
+					      	<span class="_signature_threshold">{{ signature_threshold }} 5000</span> Goals
+					    </span>
+					</div>
+					<div class="ui green bottom attached progress">
+						<div class="bar"></div>
+					</div>
+				</div>
+			</div>
+
 	</div>
-
-</div>
-
-<div class="ui grid" style="margin: auto; width: 1280px;" id="topics-container">
-
-	{% include 'esida/topics-container.html' %}
 
 </div>
 

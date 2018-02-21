@@ -14,6 +14,7 @@ import vis_views
 import sankey_views
 import recom_views
 import esida_views
+import dgo18_views
 
 import phase1
 import phase2
@@ -73,6 +74,14 @@ urlpatterns = patterns('',
     url(r'^api_esida/split_topics/$', esida_views.split_topics),
     url(r'^api_esida/merge_topics/$', esida_views.merge_topics),
     url(r'^api_esida/gen_json/$', esida_views.gen_json),
+    url(r'^api_esida/get_doc/$', esida_views.get_doc),
+    url(r'^api_esida/get_cords/$', esida_views.get_cords),
+    url(r'^api_esida/init_state/$', esida_views.init_state),
+    url(r'^api_esida/last_state/$', esida_views.last_state),
+
+    url(r'^api_dgo18/gen_json/$', dgo18_views.gen_json),
+    url(r'^api_dgo18/get_doc/$', dgo18_views.get_doc),
+    url(r'^api_dgo18/save_weight/$', dgo18_views.save_weight),
 
     url(r'^phase1/get_nugget_list/$', phase1.get_nugget_list),
     url(r'^phase1/get_highlights/$', phase1.get_highlights),
@@ -134,6 +143,7 @@ urlpatterns = patterns('',
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/workbench/?$', forum_views.enter_workbench),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/recom/?$', recom_views.enter_recom),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/esida/?$', esida_views.enter_esida),
+    url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/dgo18/?$', dgo18_views.enter_dgo18),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/sankey/?$', forum_views.enter_sankey),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)(/dashboard/(?P<dashboard_tab>[a-zA-Z0-9_]+))?/?$', facilitator_views.enter_dashboard),
     url(r'^(?P<forum_url>[a-zA-Z0-9_]+)/statement/?$', forum_views.enter_statement)

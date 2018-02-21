@@ -1,0 +1,36 @@
+{% for topic in topics %}
+<div class="four wide column topic-container">
+<table class="ui celled striped table" data-topic="{{ forloop.counter0 }}">
+  <thead>
+    <tr><th colspan="3">
+      Topic {{ forloop.counter0 }}
+    </th>
+  </tr></thead>
+  <tbody>
+    {% for word, weight, length, color in topic %}
+      {% if forloop.counter <= 10 %}
+      <tr>
+        <td class="collapsing">
+          {{ word }}
+        </td>
+        <td class="collapsing"><span style="font-size:10px; padding-left:{{ length }}px; background:#{{ color }};">&nbsp;</span></td>
+        <td class="collapsing word-weight">
+          <div class="ui visible edited">{{ weight }}</div>
+          <div class="hidden editing">
+            <input class="ui visible" style="width: 5em;" value="{{ weight }}">
+            </br>
+            <button class="save">save</button>
+            <button class="cancel">cancel</button>
+          </div>
+        </td>
+      </tr>
+      {% endif %}
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endfor %}
+
+
+
+

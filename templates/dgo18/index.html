@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load compressed %}
+{% block extralib %}
+    <script>
+        require([
+        	"dgo18/layout",
+        ]);
+    </script>
+{% endblock %}
+{% block extracss %}
+	{% compressed_css 'cir_forum' %}
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.css">
+{% endblock %}
+{% block header %}
+	{% include 'header/forum_list_header.html' %}
+{% endblock %}
+{% block body %}
+
+<div class="ui grid" style="margin: auto; width: 1280px;">
+
+	<div class="sixteen wide column">
+		<div class="ui fluid selection dropdown">
+		  <input type="hidden" name="user">
+		  <i class="dropdown icon"></i>
+		  <div class="default text">Select a Petition</div>
+		  <div class="menu">
+		  	{% for doc in docs %}
+		    <div class="item" data-value="{{ doc.id }}">
+		      {{ doc.id }}. {{ doc.title }}
+		    </div>
+		    {% endfor %}
+		  </div>
+		</div>
+		<div id="petition-body" class="ui segment">
+		  <p></p>
+		</div>
+		<div id="petition-topics" class="ui segment">
+		  <p></p>
+		</div>
+	</div>
+
+</div>
+
+<div class="ui grid" style="margin: auto; width: 1280px;" id="topics-container">
+
+	{% include 'dgo18/topics-container.html' %}
+
+</div>
+
+<!-- {% include 'qa/qa-wrapper.html' %}
+
+{% if role != 'visitor' %}
+	{% include 'chatter.html' %}
+{% endif %} -->
+
+{% endblock %}
+
