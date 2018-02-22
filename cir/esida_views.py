@@ -1,29 +1,19 @@
 from django.shortcuts import render, render_to_response, redirect
-from django.template import RequestContext
-from django.db.models import Q
-from django.utils import timezone
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 
 from cir.settings import PROJECT_PATH
 from cir.models import *
-from cir.phase_control import PHASE_CONTROL
-from cir.settings import DISPATCHER_URL
 
 import os
 import re
 import operator
 import warnings
-import gensim
 import time
 import numpy as np
 import simplejson as json
 
 from sklearn.cluster import SpectralClustering
-from gensim.models import CoherenceModel, LdaModel, LsiModel, HdpModel
-from gensim.models.wrappers import LdaMallet
-from gensim.corpora import Dictionary
-from pprint import pprint
 
 import logging
 import csv
@@ -31,7 +21,6 @@ import pickle
 
 import numpy as np
 import corex_topic as ct
-import scipy.sparse as ss
 
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import CountVectorizer
