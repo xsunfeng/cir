@@ -14,7 +14,18 @@ define([
   lasso
 ) {
 
-  get_cords();
+  $.ajax({
+    url: '/api_esida/get_init_cords/',
+    type: 'post',
+    success: function(xhr) {
+      get_cords(xhr['cords']);
+    },
+    error: function(xhr) {
+      if (xhr.status == 403) {
+        Utils.notify('error', xhr.responseText);
+      }
+    }
+  });
 
   allowDrop = function(ev) {
       ev.preventDefault();
@@ -89,7 +100,7 @@ function saveJSON(data, filename){
       },
       success: function(xhr) {
         $("#topics-container").html(xhr['topics-container']);
-        get_cords();
+        get_cords(xhr['cords']);
       },
       error: function(xhr) {
         if (xhr.status == 403) {
@@ -121,7 +132,7 @@ function saveJSON(data, filename){
         },
         success: function(xhr) {
           $("#topics-container").html(xhr['topics-container']);
-          get_cords();
+          get_cords(xhr['cords']);
         },
         error: function(xhr) {
           if (xhr.status == 403) {
@@ -130,7 +141,7 @@ function saveJSON(data, filename){
         }
       });
     } else {
-      (".warning .header").text('Invalid number of spliting a topic');
+      $(".warning .header").text('Invalid number of spliting a topic');
     }
   });
 
@@ -156,7 +167,7 @@ function saveJSON(data, filename){
         },
         success: function(xhr) {
           $("#topics-container").html(xhr['topics-container']);
-          get_cords();
+          get_cords(xhr['cords']);
         },
         error: function(xhr) {
           if (xhr.status == 403) {
@@ -211,7 +222,7 @@ function saveJSON(data, filename){
       },
       success: function(xhr) {
         $("#topics-container").html(xhr['topics-container']);
-        get_cords();
+        get_cords(xhr['cords']);
       },
       error: function(xhr) {
         if (xhr.status == 403) {
@@ -231,7 +242,7 @@ function saveJSON(data, filename){
       },
       success: function(xhr) {
         $("#topics-container").html(xhr['topics-container']);
-        get_cords();
+        get_cords(xhr['cords']);
       },
       error: function(xhr) {
         if (xhr.status == 403) {
@@ -341,170 +352,157 @@ function d3_rgbString (value) {
   return d3.rgb(value >> 16, value >> 8 & 0xff, value & 0xff);
 }
 
-  function get_cords(){
-    $.ajax({
-      url: '/api_esida/get_cords/',
-      type: 'post',
-      data: {
-      },
-      success: function(xhr) {
-        var margin = {top: 20, right: 20, bottom: 30, left: 40},
-            width = 1600 - margin.left - margin.right,
-            height = 800 - margin.top - margin.bottom;
+  function get_cords(cords){
+    var margin = {top: 20, right: 20, bottom: 30, left: 40},
+        width = 1600 - margin.left - margin.right,
+        height = 800 - margin.top - margin.bottom;
 
-        var x = d3.scale.linear()
-            .range([0, width]);
+    var x = d3.scale.linear()
+        .range([0, width]);
 
-        var y = d3.scale.linear()
-            .range([height, 0]);
+    var y = d3.scale.linear()
+        .range([height, 0]);
 
-        // var color = d3.scale.category20();
-        var color = d3.scale.ordinal() // D3 Version 4
-        .range(color_category30);
+    // var color = d3.scale.category20();
+    var color = d3.scale.ordinal() // D3 Version 4
+    .range(color_category30);
 
-        var xAxis = d3.svg.axis()
-            .scale(x)
-            .orient("bottom");
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom");
 
-        var yAxis = d3.svg.axis()
-            .scale(y)
-            .orient("left");
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left");
 
-        $("#vis").empty();
-        svg = d3.select("#vis").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-          .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    $("#vis").empty();
+    svg = d3.select("#vis").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        clearInterval(loading);
-        $(".warning .header").text('Update complete.');
+    clearInterval(loading);
+    $(".warning .header").text('Update complete.');
 
-        // Lasso functions to execute while lassoing
-        var lasso_start = function() {
-          lasso.items()
-            .attr("r",3.5) // reset size
-            .style("fill",null) // clear all of the fills
-            .classed({"not_possible":true,"selected":false}); // style as not possible
-        };
+    // Lasso functions to execute while lassoing
+    var lasso_start = function() {
+      lasso.items()
+        .attr("r",3.5) // reset size
+        .style("fill",null) // clear all of the fills
+        .classed({"not_possible":true,"selected":false}); // style as not possible
+    };
 
-        var lasso_draw = function() {
-          // Style the possible dots
-          lasso.items().filter(function(d) {return d.possible===true})
-            .classed({"not_possible":false,"possible":true});
+    var lasso_draw = function() {
+      // Style the possible dots
+      lasso.items().filter(function(d) {return d.possible===true})
+        .classed({"not_possible":false,"possible":true});
 
-          // Style the not possible dot
-          lasso.items().filter(function(d) {return d.possible===false})
-            .classed({"not_possible":true,"possible":false});
-        };
+      // Style the not possible dot
+      lasso.items().filter(function(d) {return d.possible===false})
+        .classed({"not_possible":true,"possible":false});
+    };
 
-        var lasso_end = function() {
-          var selected_doc_ids = []
-          // Reset the color of all dots
-          lasso.items()
-             .style("fill", function(d) { return color_category30[d.topic_id]; });
+    var lasso_end = function() {
+      var selected_doc_ids = []
+      // Reset the color of all dots
+      lasso.items()
+         .style("fill", function(d) { return color_category30[d.topic_id]; });
 
-          // Style the selected dots
-          lasso.items().filter(function(d) {
-              if (d.selected){
-                selected_doc_ids.push(d['doc_id'])
-              }
-              return d.selected===true
-            })
-            .classed({"not_possible":false,"possible":false})
-            .attr("r",7);
+      // Style the selected dots
+      lasso.items().filter(function(d) {
+          if (d.selected){
+            selected_doc_ids.push(d['doc_id'])
+          }
+          return d.selected===true
+        })
+        .classed({"not_possible":false,"possible":false})
+        .attr("r",7);
 
-          // Reset the style of the not selected dots
-          lasso.items().filter(function(d) {return d.selected===false})
-            .classed({"not_possible":false,"possible":false})
-            .attr("r",3.5);
+      // Reset the style of the not selected dots
+      lasso.items().filter(function(d) {return d.selected===false})
+        .classed({"not_possible":false,"possible":false})
+        .attr("r",3.5);
 
-          $("#docList .item").each(function(index) {
-            var doc_id = $(this).attr('doc-idx');
-            if (selected_doc_ids.length === 0 || selected_doc_ids.includes(doc_id)) {
-              $(this).show();
-            } else {
-              $(this).hide();
-            }
-          });
-
-          var docCount = $("#docList .item:visible").length;
-          $("#numDocFound").text(docCount);
-
-        };
-
-        // Create the area where the lasso event can be triggered
-        var lasso_area = svg.append("rect")
-                              .attr("width",width)
-                              .attr("height",height)
-                              .style("opacity",0);
-
-        // Define the lasso
-        var lasso = d3.lasso()
-              .closePathDistance(75) // max distance for the lasso loop to be closed
-              .closePathSelect(true) // can items be selected by closing the path?
-              .hoverSelect(true) // can items by selected by hovering over them?
-              .area(lasso_area) // area where the lasso can be started
-              .on("start",lasso_start) // lasso start function
-              .on("draw",lasso_draw) // lasso draw function
-              .on("end",lasso_end); // lasso end function
-
-        // Init the lasso on the svg:g that contains the dots
-        svg.call(lasso);
-
-        data = xhr['cords']
-
-          data.forEach(function(d) {
-            d.cord_x = +d.cord_x;
-            d.cord_y = +d.cord_y;
-          });
-
-          x.domain(d3.extent(data, function(d) { return d.cord_x; })).nice();
-          y.domain(d3.extent(data, function(d) { return d.cord_y; })).nice();
-
-          // svg.append("g")
-          //     .attr("class", "x axis")
-          //     .attr("transform", "translate(0," + height + ")")
-          //     .call(xAxis)
-          //   .append("text")
-          //     .attr("class", "label")
-          //     .attr("x", width)
-          //     .attr("y", -6)
-          //     .style("text-anchor", "end")
-          //     .text("Sepal Width (cm)");
-
-          // svg.append("g")
-          //     .attr("class", "y axis")
-          //     .call(yAxis)
-          //   .append("text")
-          //     .attr("class", "label")
-          //     .attr("transform", "rotate(-90)")
-          //     .attr("y", 6)
-          //     .attr("dy", ".71em")
-          //     .style("text-anchor", "end")
-          //     .text("Sepal Length (cm)")
-
-          svg.selectAll(".dot")
-              .data(data)
-            .enter().append("circle")
-              .attr("id",function(d,i) {
-                return "dot_" + i;}
-              ) // added
-              .attr("class", "dot")
-              .attr("r", 3.5)
-              .attr("cx", function(d) { return x(d.cord_x); })
-              .attr("cy", function(d) { return y(d.cord_y); })
-              .attr("topic-id", function(d) { return d.topic_id; })
-              .style("fill", function(d) { return color_category30[d.topic_id]; });
-
-          lasso.items(d3.selectAll(".dot"));
-      },
-      error: function(xhr) {
-        if (xhr.status == 403) {
-          Utils.notify('error', xhr.responseText);
+      $("#docList .item").each(function(index) {
+        var doc_id = $(this).attr('doc-idx');
+        if (selected_doc_ids.length === 0 || selected_doc_ids.includes(doc_id)) {
+          $(this).show();
+        } else {
+          $(this).hide();
         }
-      }
-    });    
+      });
+
+      var docCount = $("#docList .item:visible").length;
+      $("#numDocFound").text(docCount);
+
+    };
+
+    // Create the area where the lasso event can be triggered
+    var lasso_area = svg.append("rect")
+                          .attr("width",width)
+                          .attr("height",height)
+                          .style("opacity",0);
+
+    // Define the lasso
+    var lasso = d3.lasso()
+          .closePathDistance(75) // max distance for the lasso loop to be closed
+          .closePathSelect(true) // can items be selected by closing the path?
+          .hoverSelect(true) // can items by selected by hovering over them?
+          .area(lasso_area) // area where the lasso can be started
+          .on("start",lasso_start) // lasso start function
+          .on("draw",lasso_draw) // lasso draw function
+          .on("end",lasso_end); // lasso end function
+
+    // Init the lasso on the svg:g that contains the dots
+    svg.call(lasso);
+
+    data = cords
+
+    data.forEach(function(d) {
+      d.cord_x = +d.cord_x;
+      d.cord_y = +d.cord_y;
+    });
+
+    x.domain(d3.extent(data, function(d) { return d.cord_x; })).nice();
+    y.domain(d3.extent(data, function(d) { return d.cord_y; })).nice();
+
+    // svg.append("g")
+    //     .attr("class", "x axis")
+    //     .attr("transform", "translate(0," + height + ")")
+    //     .call(xAxis)
+    //   .append("text")
+    //     .attr("class", "label")
+    //     .attr("x", width)
+    //     .attr("y", -6)
+    //     .style("text-anchor", "end")
+    //     .text("Sepal Width (cm)");
+
+    // svg.append("g")
+    //     .attr("class", "y axis")
+    //     .call(yAxis)
+    //   .append("text")
+    //     .attr("class", "label")
+    //     .attr("transform", "rotate(-90)")
+    //     .attr("y", 6)
+    //     .attr("dy", ".71em")
+    //     .style("text-anchor", "end")
+    //     .text("Sepal Length (cm)")
+
+    svg.selectAll(".dot")
+        .data(data)
+      .enter().append("circle")
+        .attr("id",function(d,i) {
+          return "dot_" + i;}
+        ) // added
+        .attr("class", "dot")
+        .attr("r", 3.5)
+        .attr("cx", function(d) { return x(d.cord_x); })
+        .attr("cy", function(d) { return y(d.cord_y); })
+        .attr("topic-id", function(d) { return d.topic_id; })
+        .style("fill", function(d) { return color_category30[d.topic_id]; });
+
+    lasso.items(d3.selectAll(".dot")); 
   }
 
   // var seconds = 0;

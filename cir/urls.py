@@ -75,7 +75,7 @@ urlpatterns = patterns('',
     url(r'^api_esida/merge_topics/$', esida_views.merge_topics),
     url(r'^api_esida/gen_json/$', esida_views.gen_json),
     url(r'^api_esida/get_doc/$', esida_views.get_doc),
-    url(r'^api_esida/get_cords/$', esida_views.get_cords),
+    url(r'^api_esida/get_init_cords/$', esida_views.get_init_cords),
     url(r'^api_esida/init_state/$', esida_views.init_state),
     url(r'^api_esida/last_state/$', esida_views.last_state),
 

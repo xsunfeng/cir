@@ -36,89 +36,114 @@ import scipy.sparse as ss
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import CountVectorizer
 
-work_dir = os.path.join(PROJECT_PATH, 'corex/')
+WorkDir = os.path.join(PROJECT_PATH, 'corex/')
 
 ### Preprocessing Begin ###
-print "preprocess begins."
+print "Preprocess begins..."
 start = time.time()
 
 try:
-    train_texts = pickle.load(open(work_dir + "train_texts.pickle", "rb"))
-    all_words = pickle.load(open(work_dir + "all_words.pickle", "rb"))
-    doc_word = pickle.load(open(work_dir + "doc_word.pickle", "rb"))
-    wv_model = pickle.load(open(work_dir + "wv_model.pickle", "rb"))
+    TrainTexts = pickle.load(open(WorkDir + "train_texts.pickle", "rb"))
+    AllWords = pickle.load(open(WorkDir + "all_words.pickle", "rb"))
+    DocWord = pickle.load(open(WorkDir + "doc_word.pickle", "rb"))
+    WVModel = pickle.load(open(WorkDir + "wv_model.pickle", "rb"))
 except (OSError, IOError) as e:
     print("No such file(s).")
 
 # read complete docs
 
-print "it took ", time.time() - start, " seconds to preprocess."
+print "It took ", time.time() - start, " seconds to preprocess..."
 ### Preprocessing End ###
 
 # Train the Initial CorEx topic model with 20 topics (Takes about 3.74s)
-seed = 1989
-num_topics = 20
-max_iter = 30
-random_state = 1989
+NumTopics = 20
+MaxIter = 30
+RandomSeed = 1989
 
-ct_model = ct.Corex(n_hidden=num_topics, words=all_words, max_iter=max_iter, verbose=False, seed=seed)
-ct_model.fit(doc_word, words=all_words)
+print "Training init model..."
+start = time.time()
 
-complete_docs = []
-doc_count = 0
-with open(work_dir + 'petitions_complete.csv') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        doc = row.copy()
-        doc['idx'] = doc_count
-        indices = [i for i, x in enumerate(ct_model.labels[doc_count]) if x == True]
-        doc['topic_ids_str'] = ' '.join(str(x) for x in indices)
-        if float(row['signature_count']) >= float(row['signature_threshold']):
-            doc['sig_percent'] = 100.0
-        else:
-            doc['sig_percent'] = 100.0 * float(row['signature_count']) / float(row['signature_threshold'])
-        complete_docs.append(doc)
-        doc_count = doc_count + 1
+InitModel = ct.Corex(n_hidden=NumTopics, words=AllWords, max_iter=MaxIter, verbose=False, seed=RandomSeed)
+InitModel.fit(DocWord, words=AllWords)
+
+print "It took ", time.time() - start, " seconds to train the model..."
+
+def init_docs():
+    doc_count = 0
+    complete_docs = []
+    with open(WorkDir + 'petitions_complete.csv') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            doc = row.copy()
+            doc['idx'] = doc_count
+            indices = [i for i, x in enumerate(InitModel.labels[doc_count]) if x == True]
+            doc['topic_ids_str'] = ' '.join(str(x) for x in indices)
+            if float(row['signature_count']) >= float(row['signature_threshold']):
+                doc['sig_percent'] = 100.0
+            else:
+                doc['sig_percent'] = 100.0 * float(row['signature_count']) / float(row['signature_threshold'])
+            complete_docs.append(doc)
+            doc_count = doc_count + 1
+    return complete_docs
+
+print "Init docs..."
+start = time.time()
+
+CompleteDocs = init_docs()
+
+print "It took ", time.time() - start, " seconds to init docs..."
+
+def get_init_cords(request):
+    global CorexModels, CorexCords
+    response = {}
+    response['cords'] = CorexCords[-1]
+    return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def gen_cords(corex_model):
+    global CorexModels, CorexCords
     doc_vecs = []
-    for i in range(len(train_texts)):
+    for i in range(len(TrainTexts)):
         doc_vec = list(corex_model.p_y_given_x[i])
         doc_vecs.append(doc_vec)
 ## fast t-SNE
     # from tsne import bh_sne
-    # _cords = bh_sne(np.array(doc_vecs), random_state=np.random.RandomState(random_state))
+    # cords = bh_sne(np.array(doc_vecs), random_state=np.random.RandomState(RandomSeed))
 ## sklearn TSNE
-    from sklearn.manifold import TSNE
-    tsne = TSNE(n_components=2, random_state=random_state)
-    _cords = tsne.fit_transform(doc_vecs)
+    # from sklearn.manifold import TSNE
+    # tsne = TSNE(n_components=2, random_state=RandomSeed)
+    # cords = tsne.fit_transform(doc_vecs)
 ## PCA
-    # from sklearn.decomposition import PCA    
-    # pca = PCA(n_components=2, random_state=random_state)
-    # _cords = pca.fit_transform(doc_vecs)
-    
-    _lines = []
+    from sklearn.decomposition import PCA    
+    pca = PCA(n_components=2, random_state=RandomSeed)
+    cords = pca.fit_transform(doc_vecs)
+    lines = []
     for i in range(len(corex_model.p_y_given_x)):
-        _line = {'cord_x': str(_cords[i][0]),
-                'cord_y': str(_cords[i][1]),
-                'body': complete_docs[i]['body'],
-                'title': complete_docs[i]['title'],
+        line = {'cord_x': str(cords[i][0]),
+                'cord_y': str(cords[i][1]),
+                'body': CompleteDocs[i]['body'],
+                'title': CompleteDocs[i]['title'],
                 'doc_id': str(i)}
         topic_idx = 0;
         for j in range(corex_model.n_hidden):
-            _line['topic_' + str(j)] = doc_vecs[i][j]
+            line['topic_' + str(j)] = doc_vecs[i][j]
             if (doc_vecs[i][j] >= doc_vecs[i][topic_idx]):
                 topic_idx = j
-        _line['topic_id'] = topic_idx
-        _lines.append(_line)
-    return _lines
+        line['topic_id'] = topic_idx
+        lines.append(line)
+    return lines
+
+
+print "Init global variables..."
+start = time.time()
 
 # state storage for models
-corex_models = []
-corex_models.append(ct_model)
-corex_cords = []
-corex_cords.append(gen_cords(ct_model))
-# corex_docs = []
+CorexModels = []
+CorexModels.append(InitModel)
+CorexCords = []
+CorexCords.append(gen_cords(InitModel))
+# CorexDocs = []
+
+print "It took ", time.time() - start, " seconds to init global variables..."
 
 # Print all topics from the CorEx topic model
 # def gen_topic_words(corex_model):
@@ -162,15 +187,18 @@ color_category30 = [
 "a2aca6"
 ]
 
-count = 0
-
 def gen_json(request):
+    global CorexModels, CorexCords
     response = {}
-    response['cords'] = corex_cords[-1]
+    response['cords'] = CorexCords[-1]
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def enter_esida(request, forum_url):
-    print('There are currently ' + str(len(corex_models)) + ' CorEx models')
+    print "Enter esida..."
+    start = time.time()
+
+    global CorexModels, CorexCords
+    print('There are currently ' + str(len(CorexModels)) + ' CorEx models')
     context = {}
     # need user name anyway.
     if request.user.is_authenticated():
@@ -180,33 +208,32 @@ def enter_esida(request, forum_url):
         context['user_id'] = '-1'
     forum = Forum.objects.get(url=forum_url)
     context['forum_id'] = forum.id
-    context['docs'] = complete_docs
-    context['num_docs'] = corex_models[-1].p_y_given_x.shape[0]
+    context['docs'] = CompleteDocs
+    context['num_docs'] = CorexModels[-1].p_y_given_x.shape[0]
     context['topics'] = []
-    for n in range(corex_models[-1].n_hidden):
+    for n in range(CorexModels[-1].n_hidden):
         item = []
-        for word, weight in corex_models[-1].get_topics(topic=n, n_words=20):
+        for word, weight in CorexModels[-1].get_topics(topic=n, n_words=20):
             item.append(tuple((word, weight * 500, color_category30[n])))
         context['topics'].append(item)
     request.session['forum_id'] = context['forum_id']
     request.session['user_id'] = context['user_id']
+
+    print "It took ", time.time() - start, " seconds to enter esida..."
     return render(request, "esida/index.html", context)
 
-def get_cords(request):
-    response = {}
-    response['cords'] = corex_cords[-1]
-    # print("There are " + str(len(corex_cords)) + " cords.")
-    return HttpResponse(json.dumps(response), mimetype='application/json')
-
 def update_topics(request):
+    print('update topics')
+    global CorexModels, CorexCords
     response = {}
     context = {}
     json_topics = request.REQUEST.get("json_topics")
     move_anchor_words = json.loads(json_topics)
-    ct_model_move = ct.Corex(n_hidden=len(move_anchor_words), words=all_words, max_iter=max_iter, verbose=False, seed=seed)
-    ct_model_move.fit(doc_word, words=all_words, anchors=move_anchor_words, anchor_strength=6);
-    corex_models.append(ct_model_move)
-    corex_cords.append(gen_cords(ct_model_move))
+    ct_model_move = ct.Corex(n_hidden=len(move_anchor_words), words=AllWords, max_iter=MaxIter, verbose=False, seed=RandomSeed)
+    ct_model_move.fit(DocWord, words=AllWords, anchors=move_anchor_words, anchor_strength=6);
+    CorexModels.append(ct_model_move)
+    cords = gen_cords(ct_model_move)
+    CorexCords.append(cords)
     context['topics'] = []
     for n in range(len(ct_model_move.get_topics())):
         item = []
@@ -214,9 +241,12 @@ def update_topics(request):
             item.append(tuple((word, weight * 500, color_category30[n])))
         context['topics'].append(item)
     response['topics-container'] = render_to_string("esida/topics-container.html", context)
+    response['cords'] = cords
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def merge_topics(request):
+    print('merge topics')
+    global CorexModels, CorexCords
     response = {}
     context = {}
     topic1_id = int(request.REQUEST.get("topic1_id"))
@@ -235,10 +265,11 @@ def merge_topics(request):
         return res
 
     anchor_words_merge = merge_topics_helper(topic1_id, topic2_id, _anchor_words)
-    ct_model_merge = ct.Corex(n_hidden=len(anchor_words_merge), words=all_words, max_iter=max_iter, verbose=False, seed=seed)
-    ct_model_merge.fit(doc_word, words=all_words, anchors=anchor_words_merge, anchor_strength=6);
-    corex_models.append(ct_model_merge)
-    corex_cords.append(gen_cords(ct_model_merge))
+    ct_model_merge = ct.Corex(n_hidden=len(anchor_words_merge), words=AllWords, max_iter=MaxIter, verbose=False, seed=RandomSeed)
+    ct_model_merge.fit(DocWord, words=AllWords, anchors=anchor_words_merge, anchor_strength=6);
+    CorexModels.append(ct_model_merge)
+    cords = gen_cords(ct_model_merge)
+    CorexCords.append(cords)
     context['topics'] = []
     for n in range(len(ct_model_merge.get_topics())):
         item = []
@@ -246,21 +277,21 @@ def merge_topics(request):
             item.append(tuple((word, weight * 500, color_category30[n])))
         context['topics'].append(item)
     response['topics-container'] = render_to_string("esida/topics-container.html", context)
+    response['cords'] = cords
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def split_topics(request):
+    print('split topics')
+    global CorexModels, CorexCords
     response = {}
     context = {}
-    toSplitId = int(request.REQUEST.get("topic_id"))
-    json_topics = request.REQUEST.get("json_topics")
+    to_split_id = int(request.REQUEST.get("topic_id"))
     num_cluster = int(request.REQUEST.get("num_split"))
-
     json_topics = request.REQUEST.get("json_topics")
     anchor_words_split = json.loads(json_topics)
 
-    _anchor_words = anchor_words_split[toSplitId]
     def distance(word1, word2):
-        return wv_model.wv.similarity(word1, word2)
+        return WVModel.wv.similarity(word1, word2)
      
     def buildSimilarityMatrix(samples):
         numOfSamples = len(samples)
@@ -270,26 +301,25 @@ def split_topics(request):
                 matrix[i,j] = distance(samples[i], samples[j])
         return matrix
 
-    samples = _anchor_words
-    sim_mat = buildSimilarityMatrix(samples)
-
-    # num_cluster = 2 # categorize the words into 2 clusters; will allow config later
+    to_split_words = anchor_words_split[to_split_id]
+    sim_mat = buildSimilarityMatrix(to_split_words)
     mat = np.matrix(sim_mat)
     res = SpectralClustering(num_cluster).fit_predict(mat)
-    ll = [[] for _ in range(num_cluster)]
-    for i in range(len(samples)):
+    word_set = [[] for _ in range(num_cluster)]
+    for i in range(len(to_split_words)):
         idx = res[i]
-        word = samples[i]
-        ll[idx].append(word)
+        word = to_split_words[i]
+        word_set[idx].append(word)
     # create new anchor words
-    del anchor_words_split[toSplitId]
+    del anchor_words_split[to_split_id]
     for i in range(num_cluster):
-        anchor_words_split.append(ll[i])
+        anchor_words_split.append(word_set[i])
 
-    ct_model_split = ct.Corex(n_hidden=(len(anchor_words_split)), words=all_words, max_iter=max_iter, verbose=False, seed=seed)
-    ct_model_split.fit(doc_word, words=all_words, anchors=anchor_words_split, anchor_strength=6);
-    corex_models.append(ct_model_split)
-    corex_cords.append(gen_cords(ct_model_split))
+    ct_model_split = ct.Corex(n_hidden=(len(anchor_words_split)), words=AllWords, max_iter=MaxIter, verbose=False, seed=RandomSeed)
+    ct_model_split.fit(DocWord, words=AllWords, anchors=anchor_words_split, anchor_strength=6);
+    CorexModels.append(ct_model_split)
+    cords = gen_cords(ct_model_split)
+    CorexCords.append(cords)
     context['topics'] = []
     for n in range(len(ct_model_split.get_topics())):
         item = []
@@ -297,17 +327,19 @@ def split_topics(request):
             item.append(tuple((word, weight * 500, color_category30[n])))
         context['topics'].append(item)
     response['topics-container'] = render_to_string("esida/topics-container.html", context)
+    response['cords'] = cords
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def last_state(request):
-    global corex_models
-    global corex_cords
-    if (len(corex_models) > 1):
-        corex_models = corex_models[:-1]
-        corex_cords = corex_cords[:-1]
+    print('last state')
+    global CorexModels, CorexCords
+    if (len(CorexModels) > 1):
+        CorexModels = CorexModels[:-1]
+        CorexCords = CorexCords[:-1]
+    cur_model = CorexModels[-1]
+
     context = {}
     context['topics'] = []
-    cur_model = corex_models[-1]
     for n in range(len(cur_model.get_topics())):
         item = []
         for word, weight in cur_model.get_topics(topic=n, n_words=20):
@@ -315,17 +347,19 @@ def last_state(request):
         context['topics'].append(item)
     response = {}
     response['topics-container'] = render_to_string("esida/topics-container.html", context)
+    response['cords'] = CorexCords[-1]
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def init_state(request):
-    global corex_models
-    global corex_cords
-    if (len(corex_models) > 1):
-        corex_models = corex_models[:1]
-        corex_cords = corex_cords[:1]
+    print('init state')
+    global CorexModels, CorexCords
+    if (len(CorexModels) > 1):
+        CorexModels = CorexModels[:1]
+        CorexCords = CorexCords[:1]
+    cur_model = CorexModels[-1]
+
     context = {}
     context['topics'] = []
-    cur_model = corex_models[-1]
     for n in range(len(cur_model.get_topics())):
         item = []
         for word, weight in cur_model.get_topics(topic=n, n_words=20):
@@ -333,12 +367,13 @@ def init_state(request):
         context['topics'].append(item)
     response = {}
     response['topics-container'] = render_to_string("esida/topics-container.html", context)
+    response['cords'] = CorexCords[-1]
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def get_doc(request):
     response = {}
     doc_idx = int(request.REQUEST.get("doc_idx"))
-    response = complete_docs[doc_idx]
+    response = CompleteDocs[doc_idx]
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def fprint(topic_model):
