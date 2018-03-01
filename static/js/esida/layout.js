@@ -38,7 +38,8 @@ define([
   drop = function(ev) {
       ev.preventDefault();
       var data = ev.dataTransfer.getData("text");
-      ev.target.appendChild(document.getElementById(data));
+      ev.target.parentNode.insertBefore(document.getElementById(data),ev.target);
+      // ev.target.appendChild(document.getElementById(data));
   }
 
 function saveJSON(data, filename){
@@ -282,7 +283,8 @@ function saveJSON(data, filename){
       },
       success: function(xhr) {
         $doc_container.find('._title').text(xhr.title);
-        $doc_container.find('._body').text(xhr.body);
+        $doc_container.find('._body').empty();
+        $doc_container.find('._body').html(xhr.body);
         $doc_container.find('._signature_count').text(xhr.signature_count);
         $doc_container.find('._signature_threshold').text(xhr.signature_threshold);
         $doc_container.find('.q-topic').val(xhr.topic_accuracy);
@@ -290,11 +292,13 @@ function saveJSON(data, filename){
 
         // add topic names
         $doc_container.find('._topic_names').empty();
-        var topic_ids = $("#docList .header[doc-idx=" + doc_idx + "]").attr('topic-ids').split(' ');
-        for (var i = 0; i < topic_ids.length; i++) {
-          var topic_id = topic_ids[i];
-          var label = '<a class="ui basic label">' + 'Topic ' + topic_id + '</a>';
-          $doc_container.find('._topic_names').append(label);
+        if (xhr.topic_ids_str != "") {
+          var topic_ids = xhr.topic_ids_str.split(' ');
+          for (var i = 0; i < topic_ids.length; i++) {
+            var topic_id = topic_ids[i];
+            var label = '<a class="ui basic label">' + 'Topic ' + topic_id + '</a>';
+            $doc_container.find('._topic_names').append(label);
+          }
         }
 
         // sig progress

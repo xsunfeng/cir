@@ -6,10 +6,10 @@
         <input type="checkbox" class="topic-checkbox" style="float: right;">
       </div>
     </div>
-    <div class="content" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <div class="content">
       {% for word, weight, color in topic %}
         {% if forloop.counter <= 15 %}
-        <div class="ui label" draggable="true" ondragstart="drag(event)" id="{{ word }}" style="margin: 0.1em; padding:2px;">
+        <div class="ui label" draggable="true" ondragstart="drag(event)" id="{{ word }}" ondrop="drop(event)" ondragover="allowDrop(event)" style="margin: 0.1em; padding:2px;">
           {{ word }}
           <span style="font-size:10px; padding-left:{{ weight }}px; background:#{{ color }};">&nbsp;</span>
         </div>

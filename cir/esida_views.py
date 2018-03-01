@@ -22,8 +22,7 @@ import pickle
 import numpy as np
 import corex_topic as ct
 
-from sklearn.datasets import fetch_20newsgroups
-from sklearn.feature_extraction.text import CountVectorizer
+from gensim.utils import lemmatize
 
 WorkDir = os.path.join(PROJECT_PATH, 'corex/')
 
@@ -121,9 +120,22 @@ def gen_cords(corex_model):
         lines.append(line)
     return lines
 
+def get_word_topic(doc_word, corex_model, word):
+    try:
+        cleaned_word = lemmatize(word, allowed_tags=re.compile('(NN)'))[0].split('/')[0]
+        word_id = doc_word.index(cleaned_word)
+        return corex_model.clusters[word_id]
+    except:
+        return -1
 
 print "Init global variables..."
 start = time.time()
+
+if 'CorexModels' in locals():
+    print('local:::', len(CorexModels))
+
+if 'CorexModels' in globals():
+    print('global:::', len(CorexModels))
 
 # state storage for models
 CorexModels = []
@@ -173,7 +185,8 @@ color_category30 = [
 "b39da2", 
 "5bfce4", 
 "df4280", 
-"a2aca6"
+"a2aca6",
+"ffffff"
 ]
 
 def gen_json(request):
@@ -189,14 +202,6 @@ def enter_esida(request, forum_url):
     global CorexModels, CorexCords
     print('There are currently ' + str(len(CorexModels)) + ' CorEx models')
     context = {}
-    # need user name anyway.
-    if request.user.is_authenticated():
-        context['user_id'] = request.user.id
-        context['user_name'] = request.user.get_full_name()
-    else:
-        context['user_id'] = '-1'
-    forum = Forum.objects.get(url=forum_url)
-    context['forum_id'] = forum.id
     context['docs'] = CompleteDocs
     context['num_docs'] = CorexModels[-1].p_y_given_x.shape[0]
     context['topics'] = []
@@ -205,8 +210,6 @@ def enter_esida(request, forum_url):
         for word, weight in CorexModels[-1].get_topics(topic=n, n_words=20):
             item.append(tuple((word, weight * 500, color_category30[n])))
         context['topics'].append(item)
-    request.session['forum_id'] = context['forum_id']
-    request.session['user_id'] = context['user_id']
 
     print "It took ", time.time() - start, " seconds to enter esida..."
     return render(request, "esida/index.html", context)
@@ -360,9 +363,27 @@ def init_state(request):
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def get_doc(request):
+    global CorexModels, CorexCords
     response = {}
     doc_idx = int(request.REQUEST.get("doc_idx"))
-    response = CompleteDocs[doc_idx]
+    doc = CompleteDocs[doc_idx].copy()
+    # tokens = re.sub(r'([^\s\w]|_)+', '', doc['body']).split(' ')
+    tokens = doc['body'].split(' ')
+    html = ""
+    for token in tokens:
+        topic_id = get_word_topic(AllWords, CorexModels[-1], token)
+        if (topic_id == -1):
+            html = html + " " + token
+        else:
+            html = html + " " + "<span title='topic " + str(topic_id) + "' style='background: #" + color_category30[get_word_topic(AllWords, CorexModels[-1], token)] + ";'>" + token + "</span>"
+    # doc['body'] = " ".join(["<span style='background: #" + color_category30[get_word_topic(AllWords, CorexModels[-1], token)] + ";'>" + token + "</span>" for token in tokens])
+    doc['body'] = html
+    topic_weights = CorexModels[-1].p_y_given_x[doc_idx]
+    print(topic_weights)
+    indices = [i for i, x in enumerate(CorexModels[-1].labels[doc_idx]) if x == True]
+    indices = sorted(indices, key=lambda x: topic_weights[x], reverse=True)
+    doc['topic_ids_str'] = ' '.join(str(x) for x in indices)
+    response = doc
     return HttpResponse(json.dumps(response), mimetype='application/json')
 
 def fprint(topic_model):
